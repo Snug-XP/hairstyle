@@ -14,7 +14,7 @@ import java.util.List;
  */
 @Entity
 @Table(name = "hairstylist")
-@JsonIgnoreProperties(value = {"userOrderList"})
+@JsonIgnoreProperties(value = {"haircutOrderList","hairstylistImageUrlList","hairServiceList","recordToUserList"})
 public class Hairstylist {
 
     @Id
@@ -86,9 +86,15 @@ public class Hairstylist {
     @OneToMany(targetEntity = HairService.class, mappedBy = "hairstylist")
     public List<HairService> hairServiceList;
 
-    /**发型师拥有的订单列表； 定义该Hairstylist实体所有关联的UserOrder实体； 指定mappedBy属性表明该Hairstylist实体不控制关联关系*/
-    @OneToMany(targetEntity = UserOrder.class, mappedBy = "hairstylist")
-    public List<UserOrder> userOrderList;
+    /**发型师拥有的订单列表； 定义该Hairstylist实体所有关联的HaircutOrder实体； 指定mappedBy属性表明该Hairstylist实体不控制关联关系*/
+    @OneToMany(targetEntity = HaircutOrder.class, mappedBy = "hairstylist")
+    public List<HaircutOrder> haircutOrderList;
+
+    /**发型师提交的对顾客的备注列表； 定义该Hairstylist实体所有关联的RecordHairstylisToUser实体； 指定mappedBy属性表明该Hairstylist实体不控制关联关系*/
+    @OneToMany(targetEntity = RecordHairstylisToUser.class, mappedBy = "hairstylist")
+    public List<RecordHairstylisToUser> recordToUserList;
+
+
 
 //    public Hairstylist() {
 //        hairServiceList = new ArrayList<HairService>();
@@ -271,7 +277,15 @@ public class Hairstylist {
         this.personalPhone = personalPhone;
     }
 
-    public List<UserOrder> getUserOrderList() { return userOrderList;  }
+    public List<HaircutOrder> getHaircutOrderList() { return haircutOrderList;  }
 
-    public void setUserOrderList(List<UserOrder> userOrderList) { this.userOrderList = userOrderList;  }
+    public void setHaircutOrderList(List<HaircutOrder> haircutOrderList) { this.haircutOrderList = haircutOrderList;  }
+
+    public List<RecordHairstylisToUser> getRecordToUserList() {
+        return recordToUserList;
+    }
+
+    public void setRecordToUserList(List<RecordHairstylisToUser> recordToUserList) {
+        this.recordToUserList = recordToUserList;
+    }
 }

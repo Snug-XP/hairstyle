@@ -1,16 +1,16 @@
 package com.gaocimi.flashpig.repository;
 
-import com.gaocimi.flashpig.entity.UserOrder;
+import com.gaocimi.flashpig.entity.HaircutOrder;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface UserOrderRepository extends JpaRepository<UserOrder, Integer>{
+public interface HaircutOrderRepository extends JpaRepository<HaircutOrder, Integer>{
 
-    UserOrder findById(int id);
+    HaircutOrder findById(int id);
     
     void deleteById(int id);
 
     //分页
-    public Page<UserOrder> findAll(Pageable pageable);
+    public Page<HaircutOrder> findAll(Pageable pageable);
 }

@@ -1,7 +1,5 @@
 package com.gaocimi.flashpig.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-
 import javax.persistence.*;
 import java.util.Date;
 
@@ -13,8 +11,8 @@ import java.util.Date;
  * @date 2019-9-23 03:14:25
  */
 @Entity
-@Table(name = "user_order")
-public class UserOrder {
+@Table(name = "haircut_order")
+public class HaircutOrder {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -31,24 +29,15 @@ public class UserOrder {
     @JoinColumn(name = "hairstylist_id", nullable = false)
     public Hairstylist hairstylist;
 
-    public Integer articleId;
-
     /**该订单选取的服务； 定义名为service_id的外键列，该外键引用hair_service表的主键(id)列,采用懒加载*/
     @ManyToOne(targetEntity = HairService.class, fetch = FetchType.LAZY)
     @JoinColumn(name = "service_id", nullable = false)
-    public HairService HairService;
+    public HairService hairService;
 
 
     /**订单创建时间*/
     @Column(nullable = false)
     private Date createTime;
-
-    /**订单价格*/
-    @Column(nullable = false)
-    private Double orderPrice;
-
-    /**订单类型 1普通预约 2文章订阅*/
-    private Integer type;
 
     /**订单状态 “0”表示订单正在进行中，”1“表示已完成，”-1“表示订单已取消，”-2“表示订单被拒绝*/
     @Column(nullable = false)
@@ -82,20 +71,12 @@ public class UserOrder {
         this.hairstylist = hairstylist;
     }
 
-    public Integer getArticleId() {
-        return articleId;
-    }
-
-    public void setArticleId(Integer articleId) {
-        this.articleId = articleId;
-    }
-
     public HairService getHairService() {
-        return HairService;
+        return hairService;
     }
 
     public void setHairService(com.gaocimi.flashpig.entity.HairService hairService) {
-        HairService = hairService;
+        this.hairService = hairService;
     }
 
     public Date getCreateTime() {
@@ -104,22 +85,6 @@ public class UserOrder {
 
     public void setCreateTime(Date createTime) {
         this.createTime = createTime;
-    }
-
-    public Double getOrderPrice() {
-        return orderPrice;
-    }
-
-    public void setOrderPrice(Double orderPrice) {
-        this.orderPrice = orderPrice;
-    }
-
-    public Integer getType() {
-        return type;
-    }
-
-    public void setType(Integer type) {
-        this.type = type;
     }
 
     public Integer getState() {

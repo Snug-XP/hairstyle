@@ -12,7 +12,7 @@ import javax.persistence.*;
  */
 @Entity
 @Table(name = "hair_service")
-@JsonIgnoreProperties(value = {"hairstylist"})
+@JsonIgnoreProperties(value = {"hairstylist","handler","hibernateLazyInitializer"})
 public class HairService {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

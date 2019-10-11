@@ -14,7 +14,7 @@ import java.util.List;
  */
 @Entity
 @Table(name = "user")
-@JsonIgnoreProperties(value = {"userOrderList"})
+@JsonIgnoreProperties(value = {"haircutOrderList","handler","hibernateLazyInitializer"})
 public class User {
 
     @Id
@@ -39,9 +39,9 @@ public class User {
 
     private String collections;
 
-    /**用户提交过的订单列表； 定义该User实体所有关联的UserOrder实体； 指定mappedBy属性表明该User实体不控制关联关系*/
-    @OneToMany(targetEntity = UserOrder.class, mappedBy = "user")
-    public List<UserOrder> userOrderList;
+    /**用户提交过的订单列表； 定义该User实体所有关联的HaircutOrder实体； 指定mappedBy属性表明该User实体不控制关联关系*/
+    @OneToMany(targetEntity = HaircutOrder.class, mappedBy = "user")
+    public List<HaircutOrder> haircutOrderList;
 
 
 
@@ -123,7 +123,9 @@ public class User {
 
     public void setCollections(String collections) { this.collections = collections == null ? null : collections.trim();}
 
-    public List<UserOrder> getUserOrderList() { return userOrderList; }
+    public List<HaircutOrder> getHaircutOrderList() { return haircutOrderList; }
 
-    public void setUserOrderList(List<UserOrder> userOrderList) { this.userOrderList = userOrderList; }
+    public void setHaircutOrderList(List<HaircutOrder> haircutOrderList) { this.haircutOrderList = haircutOrderList; }
+
+
 }
