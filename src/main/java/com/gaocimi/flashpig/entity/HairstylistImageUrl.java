@@ -6,7 +6,7 @@ import javax.persistence.*;
 import java.util.Date;
 
 /**
- * HairstylistImageUrl - 发型师的作品图片类
+ * HairstylistImageUrl - 发型师的作品图片url类
  *
  * @author xp
  * @date 2019-9-24 01:07:10

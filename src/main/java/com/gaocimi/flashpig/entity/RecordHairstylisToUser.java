@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import javax.persistence.*;
 import java.util.Date;
+import java.util.List;
 
 /**
  * RecordHairstylisToUser - ‘发型师对顾客的备注’类
@@ -20,14 +21,6 @@ public class RecordHairstylisToUser {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    /**创建时间*/
-    private Date createTime;
-
-    /**备注内容*/
-    private String content;
-
-    /**图片列表*/
-    private String imageList;
 
     /**提交该备注的发型师； 定义名为createId的外键列，该外键引用hairstylist表的主键(id)列,采用懒加载*/
     @ManyToOne(targetEntity = Hairstylist.class, fetch = FetchType.LAZY)
@@ -39,36 +32,22 @@ public class RecordHairstylisToUser {
     @JoinColumn(name = "user_id", nullable = false)
     public User user;
 
+    /**创建时间*/
+    private Date createTime;
+
+    /**备注内容*/
+    private String content;
+
+    /**该备注中的图片url列表； 定义该RecordHairstylisToUser实体所有关联的RecordToUserImgUrl实体； 指定mappedBy属性表明该RecordHairstylisToUser实体不控制关联关系*/
+    @OneToMany(targetEntity = RecordToUserImgUrl.class, mappedBy = "recordToUser")
+    public List<RecordToUserImgUrl> ImageUrlList;
+
     public Integer getId() {
         return id;
     }
 
     public void setId(Integer id) {
         this.id = id;
-    }
-
-    public Date getCreateTime() {
-        return createTime;
-    }
-
-    public void setCreateTime(Date createTime) {
-        this.createTime = createTime;
-    }
-
-    public String getContent() {
-        return content;
-    }
-
-    public void setContent(String content) {
-        this.content = content == null ? null : content.trim();
-    }
-
-    public String getImageList() {
-        return imageList;
-    }
-
-    public void setImageList(String imageList) {
-        this.imageList = imageList == null ? null : imageList.trim();
     }
 
     public Hairstylist getHairstylist() {
@@ -85,5 +64,29 @@ public class RecordHairstylisToUser {
 
     public void setUser(User user) {
         this.user = user;
+    }
+
+    public Date getCreateTime() {
+        return createTime;
+    }
+
+    public void setCreateTime(Date createTime) {
+        this.createTime = createTime;
+    }
+
+    public String getContent() {
+        return content;
+    }
+
+    public void setContent(String content) {
+        this.content = content;
+    }
+
+    public List<RecordToUserImgUrl> getImageUrlList() {
+        return ImageUrlList;
+    }
+
+    public void setImageUrlList(List<RecordToUserImgUrl> imageUrlList) {
+        ImageUrlList = imageUrlList;
     }
 }

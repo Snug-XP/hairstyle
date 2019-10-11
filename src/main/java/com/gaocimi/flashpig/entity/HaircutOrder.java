@@ -39,13 +39,21 @@ public class HaircutOrder {
     @Column(nullable = false)
     private Date createTime;
 
+    /**预约时间*/
+    @Column(nullable = false)
+    private Date bookTime;
+
     /**订单状态 “0”表示订单正在进行中，”1“表示已完成，”-1“表示订单已取消，”-2“表示订单被拒绝*/
     @Column(nullable = false)
     private Integer state;
 
-    /**预约时间*/
-    @Column(nullable = false)
-    private Date bookTime;
+    /**订单完成后用户的评价*/
+    @Column(nullable = true)
+    private String comment;
+
+    /**订单完成后用户的评分*/
+    @Column(nullable = true)
+    private Double point;
 
     public Integer getId() {
         return id;
@@ -101,5 +109,21 @@ public class HaircutOrder {
 
     public void setBookTime(Date bookTime) {
         this.bookTime = bookTime;
+    }
+
+    public String getComment() {
+        return comment;
+    }
+
+    public void setComment(String comment) {
+        this.comment = comment;
+    }
+
+    public Double getPoint() {
+        return point;
+    }
+
+    public void setPoint(Double point) {
+        this.point = point;
     }
 }
