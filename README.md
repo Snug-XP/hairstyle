@@ -9,5 +9,11 @@
 oss配置可能过期，需要重新设置
 
 1. 接口文档路径 https://127.0.0.1:8080/swagger-ui.html#/
-2. 连接池路径 https://localhost:8080/druid/login.html (账号密码在yml里)
+2. 连接池路径 https://localhost:8080/druid/login.html (账号root密码toor)
+
+
+- 运行jar包（后台运行）：$ nohup java -jar hairstyle.jar >test.txt &
+- 查看某端口占用的线程的pid：netstat -nlp |grep :9181
+- 查看当前已运行的进程： ps -x
+- 根据pid终止进程：kill pid
 

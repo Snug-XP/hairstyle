@@ -18,6 +18,9 @@ public class HaircutOrder {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
+    /**该订单中用户提交的联系电话（考虑到用户自身没有绑定手机号码）*/
+    @Column(nullable = false)
+    private String userPhone;
 
     /**提交该订单的用户； 定义名为user_id的外键列，该外键引用user表的主键(id)列,采用懒加载*/
     @ManyToOne(targetEntity = User.class, fetch = FetchType.LAZY)
@@ -45,7 +48,7 @@ public class HaircutOrder {
 
     /**订单状态 “0”表示订单正在进行中，”1“表示已完成，”-1“表示订单已取消，”-2“表示订单被拒绝*/
     @Column(nullable = false)
-    private Integer state;
+    private Integer status;
 
     /**订单完成后用户的评价*/
     @Column(nullable = true)
@@ -95,12 +98,12 @@ public class HaircutOrder {
         this.createTime = createTime;
     }
 
-    public Integer getState() {
-        return state;
+    public Integer getStatus() {
+        return status;
     }
 
-    public void setState(Integer state) {
-        this.state = state;
+    public void setStatus(Integer status) {
+        this.status = status;
     }
 
     public Date getBookTime() {
@@ -125,5 +128,13 @@ public class HaircutOrder {
 
     public void setPoint(Double point) {
         this.point = point;
+    }
+
+    public String getUserPhone() {
+        return userPhone;
+    }
+
+    public void setUserPhone(String userPhone) {
+        this.userPhone = userPhone;
     }
 }

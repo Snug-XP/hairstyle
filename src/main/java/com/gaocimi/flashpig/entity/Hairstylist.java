@@ -14,7 +14,7 @@ import java.util.List;
  */
 @Entity
 @Table(name = "hairstylist")
-@JsonIgnoreProperties(value = {"haircutOrderList","hairstylistImageUrlList","hairServiceList","recordToUserList"})
+@JsonIgnoreProperties(value = {"haircutOrderList","hairstylistImageUrlList","hairServiceList","recordToUserList","handler","hibernateLazyInitializer"})
 public class Hairstylist {
 
     @Id
@@ -76,7 +76,7 @@ public class Hairstylist {
     private Double rankValue;
 
     /**发型师申请状态（0表示申请中，1表示申请通过, -1表示申请失败）*/
-    private Integer applyState;
+    private Integer applyStatus;
 
     /**发型师上传的图片列表； 定义该Hairstylist实体所有关联的HairstylistImageUrl实体； 指定mappedBy属性表明该Hairstylist实体不控制关联关系*/
     @OneToMany(targetEntity = HairstylistImageUrl.class, mappedBy = "hairstylist")
@@ -237,12 +237,12 @@ public class Hairstylist {
         this.rankValue = rankValue;
     }
 
-    public Integer getApplyState() {
-        return applyState;
+    public Integer getApplyStatus() {
+        return applyStatus;
     }
 
-    public void setApplyState(Integer applyState) {
-        this.applyState = applyState;
+    public void setApplyStatus(Integer applyStatus) {
+        this.applyStatus = applyStatus;
     }
 
     public List<HairstylistImageUrl> getHairstylistImageUrlList() {

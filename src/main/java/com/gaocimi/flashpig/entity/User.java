@@ -23,6 +23,8 @@ public class User {
 
     private String name;
 
+    private String pictureUrl;
+
     private Integer sex;
 
     private String openid;
@@ -60,6 +62,10 @@ public class User {
     public void setName(String name) {
         this.name = name == null ? null : name.trim();
     }
+
+    public String getPictureUrl() {  return pictureUrl;  }
+
+    public void setPictureUrl(String pictureUrl) { this.pictureUrl = pictureUrl; }
 
     public Integer getSex() {
         return sex;

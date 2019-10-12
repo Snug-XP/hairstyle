@@ -1,12 +1,19 @@
 package com.gaocimi.flashpig.controller;
 
+import com.gaocimi.flashpig.entity.Hairstylist;
 import com.gaocimi.flashpig.entity.RecordHairstylisToUser;
+import com.gaocimi.flashpig.entity.RecordToUserImgUrl;
+import com.gaocimi.flashpig.entity.User;
 import com.gaocimi.flashpig.result.ResponseResult;
+import com.gaocimi.flashpig.service.HairstylistService;
 import com.gaocimi.flashpig.service.RecordHairstylisToUserService;
+import com.gaocimi.flashpig.service.RecordToUserImgUrlService;
+import com.gaocimi.flashpig.service.UserService;
 import com.gaocimi.flashpig.utils.CustomDatePropertyEditor;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import org.hibernate.validator.constraints.NotBlank;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -18,7 +25,7 @@ import org.springframework.web.context.request.WebRequest;
 import java.beans.PropertyEditor;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.util.*;
 
 /**
  * @author liyutg
@@ -27,73 +34,111 @@ import java.util.Date;
  */
 @RestController
 @ResponseResult
-@Api(value = "管理端备注服务", description = "管理员操作备注相关业务")
+@Api(value = "发型师对顾客的备注服务", description = "备注操作相关业务")
 public class RecordHairstylisToUserController {
+    protected static final Logger logger = LoggerFactory.getLogger(HairstylistController.class);
+
     @Autowired
     RecordHairstylisToUserService recordHairstylisToUserService;
+    @Autowired
+    RecordToUserImgUrlService recordToUserImgUrlService;
+    @Autowired
+    HairstylistService hairstylistService;
+    @Autowired
+    UserService userService;
 
-    @ApiOperation(value = "添加备注", notes = "m1")
-    @PostMapping("/recordHairstylisToUser")
-    @ResponseStatus(HttpStatus.CREATED)
-    public int addRecordHairstylisToUser(@Validated RecordHairstylisToUser recordHairstylisToUsers) {
+
+    @ApiOperation(value = "发型师新增对顾客的备注 - 用于“发型师-预约列表-备注信息-新增备注”页面", notes = "m1")
+    @PostMapping("/hairstylist/addRecordToUser/{myOpenid}")
+    public Map addRecordToUser(@PathVariable("myOpenid") String openid, int userId, String content,
+                               @RequestParam(value = "imageList", required = false) List<String> imageList) {
+        Map map = new HashMap();
         try {
-            recordHairstylisToUserService.save(recordHairstylisToUsers);
+            if (hairstylistService.findHairstylistByOpenid(openid) == null || hairstylistService.findHairstylistByOpenid(openid).getApplyStatus() != 1) {
+                logger.info("非发型师用户操作！！");
+                map.put("error", "对不起，你还不是发型师用户，无权操作！！");
+                return map;
+            } else if (userService.findUserById(userId) == null) {
+                logger.info("备注对象（普通用户）不存在！！");
+                map.put("error", "对不起，备注对象（普通用户）不存在！！");
+                return map;
+            } else {
+                Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(openid);
+                User user = userService.findUserById(userId);
+                RecordHairstylisToUser recordToUser = new RecordHairstylisToUser();
+
+                recordToUser.setHairstylist(hairstylist);
+                recordToUser.setUser(user);
+                recordToUser.setContent(content);
+
+                //设置创建时间
+                Date date = new Date(System.currentTimeMillis());
+                recordToUser.setCreateTime(date);
+
+                recordHairstylisToUserService.save(recordToUser);//保存后会给recordToUser自动分配主键值
+
+                //保存备注对应的图片url
+                for (String image : imageList) {
+                    RecordToUserImgUrl recordToUserImgUrl = new RecordToUserImgUrl();
+                    recordToUserImgUrl.setImageUrl(image);
+                    recordToUserImgUrl.setRecordToUser(recordToUser);
+
+                    recordToUserImgUrlService.save(recordToUserImgUrl);
+                }
+                logger.info("备注添加成功！");
+                map.put("message","备注添加成功！");
+                return map;
+            }
+
         } catch (Exception e) {
             e.printStackTrace();
-            return 500;
+            map.put("error", "操作失败！！（后端发生某些错误，例如数据库连接失败）");
+            return map;
         }
-        return 200;
-    }
-
-    @ApiOperation(value = "删除备注", notes = "m1")
-    @DeleteMapping("/recordHairstylisToUser/{recordHairstylisToUserId}")
-    public int deleteRecordHairstylisToUser(@NotBlank @PathVariable("recordHairstylisToUserId") Integer recordHairstylisToUserId) {
-        try {
-            recordHairstylisToUserService.delete(recordHairstylisToUserId);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return 500;
-        }
-        return 200;
-    }
-
-    @ApiOperation(value = "修改备注", notes = "m1")
-    @PutMapping("/recordHairstylisToUser")
-    public int updateRecordHairstylisToUser(@Validated RecordHairstylisToUser recordHairstylisToUsers) {
-        try {
-            recordHairstylisToUserService.edit(recordHairstylisToUsers);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return 500;
-        }
-        return 200;
     }
 
 
-    @ApiOperation(value = "获取单个备注信息", notes = "m1", produces = "application/json")
-    @GetMapping("/recordHairstylisToUser/{recordHairstylisToUserId}")
-    public RecordHairstylisToUser getOne(@PathVariable("recordHairstylisToUserId") Integer recordHairstylisToUserId) {
-        return recordHairstylisToUserService.findRecordHairstylisToUserById(recordHairstylisToUserId);
-    }
+//    @ApiOperation(value = "删除备注", notes = "m1")
+//    @DeleteMapping("/recordHairstylisToUser/{recordHairstylisToUserId}")
+//    public int deleteRecordHairstylisToUser( @PathVariable("recordHairstylisToUserId") Integer
+//                                                    recordHairstylisToUserId) {
+//        try {
+//            recordHairstylisToUserService.delete(recordHairstylisToUserId);
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            return 500;
+//        }
+//        return 200;
+//    }
+//
+//    @ApiOperation(value = "修改备注", notes = "m1")
+//    @PutMapping("/recordHairstylisToUser")
+//    public int updateRecordHairstylisToUser(@Validated RecordHairstylisToUser recordHairstylisToUsers) {
+//        try {
+//            recordHairstylisToUserService.edit(recordHairstylisToUsers);
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            return 500;
+//        }
+//        return 200;
+//    }
+//
+//
+//    @ApiOperation(value = "获取单个备注信息", notes = "m1", produces = "application/json")
+//    @GetMapping("/recordHairstylisToUser/{recordHairstylisToUserId}")
+//    public RecordHairstylisToUser getOne(@PathVariable("recordHairstylisToUserId") Integer recordHairstylisToUserId) {
+//        return recordHairstylisToUserService.findRecordHairstylisToUserById(recordHairstylisToUserId);
+//    }
 
-    @ApiOperation(value = "获取所有备注列表", notes = "m1", produces = "application/json")
-    @GetMapping("/recordHairstylisToUsers")
-    public Page<RecordHairstylisToUser> getPage(@RequestParam(name = "pageNum", defaultValue = "1") int pageNum,
-                                                @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
-                                                @RequestParam(name = "orderBy", defaultValue = "id desc") String orderBy
-    ) {
-        Page<RecordHairstylisToUser> page = recordHairstylisToUserService.findAll(pageNum, pageSize);
-        return page;
-    }
+//    @ApiOperation(value = "获取所有备注列表", notes = "m1", produces = "application/json")
+//    @GetMapping("/recordHairstylisToUsers")
+//    public Page<RecordHairstylisToUser> getPage(@RequestParam(name = "pageNum", defaultValue = "1") int pageNum,
+//                                                @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
+//                                                @RequestParam(name = "orderBy", defaultValue = "id desc") String orderBy
+//    ) {
+//        Page<RecordHairstylisToUser> page = recordHairstylisToUserService.findAll(pageNum, pageSize);
+//        return page;
+//    }
 
 
-    @InitBinder
-    public void initBinder(WebDataBinder binder, WebRequest request) {
-        //转换日期
-        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        dateFormat.setLenient(false);
-        // CustomDatePropertyEditor 为自定义日期编辑器
-        PropertyEditor dateEditor = new CustomDatePropertyEditor(dateFormat, true, null);
-        binder.registerCustomEditor(Date.class, dateEditor);
-    }
 }
