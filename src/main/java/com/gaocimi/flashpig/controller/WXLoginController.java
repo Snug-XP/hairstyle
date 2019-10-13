@@ -71,7 +71,7 @@ public class WXLoginController {
                 user.setOpenid(wxModel.getOpenid());
                 userService.save(user);
             } else{
-                logger.info("用户 " + user.getName() + " 登录成功！！");
+                logger.info("用户 " + user.getName() + " 登录成功！");
             }
         }catch (Exception e){
             logger.info("登录临时凭证错误");

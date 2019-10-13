@@ -4,6 +4,7 @@ import com.gaocimi.flashpig.entity.Hairstylist;
 import com.gaocimi.flashpig.entity.RecordHairstylisToUser;
 import com.gaocimi.flashpig.entity.RecordToUserImgUrl;
 import com.gaocimi.flashpig.entity.User;
+import com.gaocimi.flashpig.model.NoteToOneUser;
 import com.gaocimi.flashpig.result.ResponseResult;
 import com.gaocimi.flashpig.service.HairstylistService;
 import com.gaocimi.flashpig.service.RecordHairstylisToUserService;
@@ -80,13 +81,14 @@ public class RecordHairstylisToUserController {
                 //保存备注对应的图片url
                 for (String image : imageList) {
                     RecordToUserImgUrl recordToUserImgUrl = new RecordToUserImgUrl();
-                    recordToUserImgUrl.setImageUrl(image);
+
                     recordToUserImgUrl.setRecordToUser(recordToUser);
+                    recordToUserImgUrl.setImageUrl(image);
 
                     recordToUserImgUrlService.save(recordToUserImgUrl);
                 }
-                logger.info(hairstylist.getHairstylistName()+"（"+hairstylist.getOpenid()+"） 添加一条对"+user.getName()+"的备注！");
-                map.put("message","备注添加成功！");
+                logger.info(hairstylist.getHairstylistName() + "（" + hairstylist.getOpenid() + "） 添加一条对" + user.getName() + "的备注！");
+                map.put("message", "备注添加成功！");
                 return map;
             }
 
@@ -98,27 +100,100 @@ public class RecordHairstylisToUserController {
     }
 
 
-    @ApiOperation(value = "发型师删除对顾客的备注 - 用于“发型师-预约列表-备注信息”页面的删除备注", notes = "m1")
-    @DeleteMapping("/hairstylist/deleteRecordToUser")
-    public Map deleteRecordToUser( String myOpenid, int recordId) {
+    @ApiOperation(value = "获取自己对某个顾客的备注记录(按时间倒序排序)-用于“发型师-预约列表-备注信息”页面", notes = "m1")
+    @GetMapping("/hairstylist/getNoteRecordToOneUser")
+    public Map getNoteRecordToOneUser(String myOpenid, int userId) {
         Map map = new HashMap();
         try {
             if (hairstylistService.findHairstylistByOpenid(myOpenid) == null || hairstylistService.findHairstylistByOpenid(myOpenid).getApplyStatus() != 1) {
                 logger.info("非发型师用户操作！！");
                 map.put("error", "对不起，你还不是发型师用户，无权操作！！");
                 return map;
-            } else if (recordHairstylisToUserService.findRecordHairstylisToUserById(recordId) == null) {
+            } else {
+                Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
+                List<RecordHairstylisToUser> tempRecordList = hairstylist.recordToUserList;
+                List<RecordHairstylisToUser> resultRecordList = new ArrayList<>();
+
+                //获取自己对某个顾客的备注类列表
+                for (RecordHairstylisToUser record : tempRecordList) {
+                    if (record.user.getId() == userId) {
+                        resultRecordList.add(record);
+                    }
+                }
+
+                //获取到自己对某个顾客的备注信息列表 即筛选出用于“发型师-预约列表-备注信息”页面的信息
+                if (resultRecordList.size() > 0) {
+                    List<NoteToOneUser> recordList = new ArrayList<>();
+                    for (RecordHairstylisToUser resultRecord : resultRecordList) {
+                        NoteToOneUser record = new NoteToOneUser();
+
+                        record.setRecordId(resultRecord.getId());//设置对应备注的id
+                        record.setCreateTime(resultRecord.getCreateTime());//设置备注的创建时间
+                        record.setContent(resultRecord.getContent());//设置备注的内容
+
+                        //取出对用户的备注类中的图片url列表
+                        List<String> imgUrlList = new ArrayList<>();
+                        for (RecordToUserImgUrl recordToUserImgUrl : resultRecord.getImageUrlList())
+                            imgUrlList.add(recordToUserImgUrl.getImageUrl());
+                        record.setImageUrlList(imgUrlList);
+
+                        recordList.add(record);
+                    }
+
+                    // 按时间倒序排序
+                    Collections.sort(recordList, (r1, r2) -> {
+                        if (r2.getCreateTime().after(r1.getCreateTime())) {
+                            return 1;
+                        } else if (r1.getCreateTime().after(r2.getCreateTime())) {
+                            return -1;
+                        }
+                        return 0; //相等为0
+                    });
+
+                    map.put("recordList", recordList);
+                } else
+                    map.put("message", "没有匹配的记录");
+                return map;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            map.put("error", "操作失败！！（后端发生某些错误，例如数据库连接失败）");
+            return map;
+        }
+    }
+
+
+    @ApiOperation(value = "根据备注id，发型师删除对顾客的备注 - 用于“发型师-预约列表-备注信息”页面的删除备注", notes = "m1")
+    @DeleteMapping("/hairstylist/deleteRecordToUser")
+    public Map deleteRecordToUser(String myOpenid, int recordId) {
+        Map map = new HashMap();
+        try {
+            if (hairstylistService.findHairstylistByOpenid(myOpenid) == null || hairstylistService.findHairstylistByOpenid(myOpenid).getApplyStatus() != 1) {
+                logger.info("非发型师用户操作！！");
+                map.put("error", "对不起，你还不是发型师用户，无权操作！！");
+                return map;
+            }
+
+            RecordHairstylisToUser recordToUser = recordHairstylisToUserService.findRecordHairstylisToUserById(recordId);
+            if (recordToUser == null) {
                 logger.info("备注不存在！！");
                 map.put("error", "备注不存在！！");
                 return map;
-            } else {
+            }
+            //判断该备注记录是不是该发型师用户的
+            if (myOpenid.equals(recordToUser.getHairstylist().getOpenid())) {
                 //执行删除操作
+
                 Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
-                RecordHairstylisToUser recordToUser = recordHairstylisToUserService.findRecordHairstylisToUserById(recordId);
+
                 recordHairstylisToUserService.delete(recordId);
 
-                logger.info(hairstylist.getHairstylistName()+"("+hairstylist.getOpenid()+") 删除一条对"+recordToUser.getUser().getName()+"的备注！");
-                map.put("message", "删除成功！！");
+                logger.info(hairstylist.getHairstylistName() + "(" + hairstylist.getOpenid() + ") 删除一条对" + recordToUser.getUser().getName() + "的备注！");
+                map.put("message", "删除成功！");
+                return map;
+            } else {
+                logger.info("没有删除备注的权限");
+                map.put("error", "无删除权限！");
                 return map;
             }
 
@@ -130,47 +205,60 @@ public class RecordHairstylisToUserController {
     }
 
 
-//    @ApiOperation(value = "删除备注", notes = "m1")
-//    @DeleteMapping("/recordHairstylisToUser/{recordHairstylisToUserId}")
-//    public int deleteRecordHairstylisToUser( @PathVariable("recordHairstylisToUserId") Integer
-//                                                    recordHairstylisToUserId) {
-//        try {
-//            recordHairstylisToUserService.delete(recordHairstylisToUserId);
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//            return 500;
-//        }
-//        return 200;
-//    }
-//
-//    @ApiOperation(value = "修改备注", notes = "m1")
-//    @PutMapping("/recordHairstylisToUser")
-//    public int updateRecordHairstylisToUser(@Validated RecordHairstylisToUser recordHairstylisToUsers) {
-//        try {
-//            recordHairstylisToUserService.edit(recordHairstylisToUsers);
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//            return 500;
-//        }
-//        return 200;
-//    }
-//
-//
-//    @ApiOperation(value = "获取单个备注信息", notes = "m1", produces = "application/json")
-//    @GetMapping("/recordHairstylisToUser/{recordHairstylisToUserId}")
-//    public RecordHairstylisToUser getOne(@PathVariable("recordHairstylisToUserId") Integer recordHairstylisToUserId) {
-//        return recordHairstylisToUserService.findRecordHairstylisToUserById(recordHairstylisToUserId);
-//    }
+    @ApiOperation(value = "根据备注id，发型师修改对顾客的备注 - 用于“发型师-预约列表-备注信息”页面的修改备注", notes = "m1")
+    @PutMapping("/hairstylist/editRecordToUser")
+    public Map editRecordToUser(String myOpenid, int recordId, String content,
+                                @RequestParam(value = "imageList", required = false) List<String> imageList) {
+        Map map = new HashMap();
+        try {
+            if (hairstylistService.findHairstylistByOpenid(myOpenid) == null || hairstylistService.findHairstylistByOpenid(myOpenid).getApplyStatus() != 1) {
+                logger.info("非发型师用户操作！！");
+                map.put("error", "对不起，你还不是发型师用户，无权操作！！");
+                return map;
+            }
 
-//    @ApiOperation(value = "获取所有备注列表", notes = "m1", produces = "application/json")
-//    @GetMapping("/recordHairstylisToUsers")
-//    public Page<RecordHairstylisToUser> getPage(@RequestParam(name = "pageNum", defaultValue = "1") int pageNum,
-//                                                @RequestParam(name = "pageSize", defaultValue = "10") int pageSize,
-//                                                @RequestParam(name = "orderBy", defaultValue = "id desc") String orderBy
-//    ) {
-//        Page<RecordHairstylisToUser> page = recordHairstylisToUserService.findAll(pageNum, pageSize);
-//        return page;
-//    }
+            RecordHairstylisToUser recordToUser = recordHairstylisToUserService.findRecordHairstylisToUserById(recordId);
+            if (recordToUser == null) {
+                logger.info("所要修改的备注不存在！！");
+                map.put("error", "所要修改的备注不存在！！");
+                return map;
+            }
+
+            //判断该备注记录是不是该发型师用户的
+            if (myOpenid.equals(recordToUser.getHairstylist().getOpenid())) {
+                //执行修改操作
+
+                recordToUser.setContent(content);
+                recordHairstylisToUserService.edit(recordToUser);
+
+                //保存备注对应的图片url
+                //先删除该备注原来对应的所有图片url
+                recordToUserImgUrlService.deleteAllByRecordId(recordId);
+                for (String image : imageList) {
+                    RecordToUserImgUrl recordToUserImgUrl = new RecordToUserImgUrl();
+
+                    recordToUserImgUrl.setRecordToUser(recordToUser);
+                    recordToUserImgUrl.setImageUrl(image);
+
+                    recordToUserImgUrlService.save(recordToUserImgUrl);
+                }
+
+                Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
+                logger.info(hairstylist.getHairstylistName() + "(" + hairstylist.getOpenid() + ") 修改了一条对" + recordToUser.getUser().getName() + "的备注！");
+                map.put("message", "修改成功！");
+                return map;
+            } else {
+                logger.info("没有删除备注的权限");
+                map.put("error", "无删除权限！");
+                return map;
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            map.put("error", "操作失败！！（后端发生某些错误，例如数据库连接失败）");
+            return map;
+        }
+    }
 
 
 }

@@ -22,5 +22,8 @@ public interface RecordToUserImgUrlService {
 
     public void delete(int id);
 
+    /**根据备注id，删除所有该备注里的图片*/
+    public void deleteAllByRecordId(int recordId);
+
     public Page<RecordToUserImgUrl> findAll(int pageNum, int pageSize);
 }

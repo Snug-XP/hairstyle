@@ -1,23 +1,30 @@
 package com.gaocimi.flashpig.model;
 
-import com.gaocimi.flashpig.entity.HairService;
-
 import java.util.Date;
 
 /**
  * 用于“发型师-预约列表-预约记录”页面
  */
 public class OrderRecordFromOneUser {
-    private Date data;
+    private int orderId;
+    private Date date;
     private String hairService;
     private Double point;
 
-    public Date getData() {
-        return data;
+    public int getOrderId() {
+        return orderId;
     }
 
-    public void setData(Date data) {
-        this.data = data;
+    public void setOrderId(int orderId) {
+        this.orderId = orderId;
+    }
+
+    public Date getDate() {
+        return date;
+    }
+
+    public void setDate(Date date) {
+        this.date = date;
     }
 
     public String getHairService() {

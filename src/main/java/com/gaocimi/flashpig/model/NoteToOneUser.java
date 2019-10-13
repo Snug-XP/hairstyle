@@ -10,6 +10,9 @@ import java.util.List;
  */
 public class NoteToOneUser {
 
+    /**对应的备注id*/
+    private int recordId;
+
     /**创建时间*/
     private Date createTime;
 
@@ -18,6 +21,14 @@ public class NoteToOneUser {
 
     /**该备注中的图片url列表*/
     private List<String> ImageUrlList;
+
+    public int getRecordId() {
+        return recordId;
+    }
+
+    public void setRecordId(int recordId) {
+        this.recordId = recordId;
+    }
 
     public Date getCreateTime() {
         return createTime;

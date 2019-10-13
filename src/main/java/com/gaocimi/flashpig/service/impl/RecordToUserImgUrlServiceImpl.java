@@ -1,6 +1,10 @@
 package com.gaocimi.flashpig.service.impl;
 
+import com.gaocimi.flashpig.entity.HairService;
+import com.gaocimi.flashpig.entity.Hairstylist;
+import com.gaocimi.flashpig.entity.RecordHairstylisToUser;
 import com.gaocimi.flashpig.entity.RecordToUserImgUrl;
+import com.gaocimi.flashpig.repository.RecordHairstylisToUserRepository;
 import com.gaocimi.flashpig.repository.RecordToUserImgUrlRepository;
 import com.gaocimi.flashpig.service.RecordToUserImgUrlService;
 import org.slf4j.Logger;
@@ -25,6 +29,8 @@ public class RecordToUserImgUrlServiceImpl implements RecordToUserImgUrlService 
 
     @Autowired
     public RecordToUserImgUrlRepository recordToUserImgUrlRepository;
+    @Autowired
+    public RecordHairstylisToUserRepository recordToUserRepository;
 
     @Override
     public List<RecordToUserImgUrl> getRecordToUserImgUrlList() {
@@ -49,6 +55,13 @@ public class RecordToUserImgUrlServiceImpl implements RecordToUserImgUrlService 
     @Override
     public void delete(int id) {
         recordToUserImgUrlRepository.deleteById(id);
+    }
+
+    public void deleteAllByRecordId(int recordId){
+        RecordHairstylisToUser record = recordToUserRepository.findById(recordId);
+        for(RecordToUserImgUrl recordToUserImgUrl : record.getImageUrlList()){
+            recordToUserImgUrlRepository.deleteById(recordToUserImgUrl.getId());
+        }
     }
 
 
