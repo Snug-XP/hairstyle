@@ -121,8 +121,8 @@ public class HairstylistController {
     }
 
     @ApiOperation(value = "根据发型师id，删除发型师", notes = "权限：发型师本人或管理员")
-    @DeleteMapping("/hairstylist/{myOpenid}/{hairstylistId}")
-    public Map deleteHairstylist(@PathVariable("myOpenid") String openid, @PathVariable("hairstylistId") Integer hairstylistId) {
+    @DeleteMapping("/hairstylist")
+    public Map deleteHairstylist( String myOpenid, Integer hairstylistId) {
         Map map = new HashMap();
         try {
             if (hairstylistService.findHairstylistById(hairstylistId) == null) {
@@ -131,7 +131,7 @@ public class HairstylistController {
                 return map;
             }
             Hairstylist hairstylist = hairstylistService.findHairstylistById(hairstylistId);
-            if (openid.equals(hairstylist.getOpenid()) || administratorService.isExist(openid)) {
+            if (myOpenid.equals(hairstylist.getOpenid()) || administratorService.isExist(myOpenid)) {
                 hairstylistService.delete(hairstylistId);
                 logger.info("删除用户" + hairstylist.getHairstylistName() + "成功！！");
                 map.put("message", "删除用户" + hairstylist.getHairstylistName() + "成功！！");
@@ -556,7 +556,7 @@ public class HairstylistController {
         }
     }
 
-    @ApiOperation(value = "根据id,删除个人作品图片url列表", notes = "m1")
+    @ApiOperation(value = "根据图片对应id,删除个人作品图片url列表", notes = "m1")
     @DeleteMapping("/hairstylist/deleteImageUrlList/{myOpenid}")
     public Map deleteImageUrlList(@PathVariable("myOpenid") String openid, int id) {
         Map map = new HashMap();
