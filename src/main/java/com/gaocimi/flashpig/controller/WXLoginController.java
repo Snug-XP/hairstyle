@@ -38,8 +38,9 @@ public class WXLoginController {
 
     @ApiOperation(value = "使用用户登录的临时凭证请求微信服务器换取得到对应的openid与session_key传回给用户")
     @PostMapping("/wxLogin")
-    public WXSessionModel wxLogin(String code) {
-        Logger log = LogUtils.getExceptionLogger();
+    public Map wxLogin(String code) {
+        Map map = new HashMap();
+        Logger exceptionLogger = LogUtils.getExceptionLogger();
         WXSessionModel wxModel = null;
         try {
 
@@ -47,8 +48,11 @@ public class WXLoginController {
             String url = "https://api.weixin.qq.com/sns/jscode2session";
 
             Map<String, String> param = new HashMap<>();
-            param.put("appid", "wx3b612db5165b11b6");//(小程序ID)
-            param.put("secret", "3f31f17374c5406f24cdf5657085da92");//(小程序密钥)
+//            xp的小程序
+//            param.put("appid", "wx3b612db5165b11b6");//(小程序ID)
+//            param.put("secret", "3f31f17374c5406f24cdf5657085da92");//(小程序密钥)
+            param.put("appid", "wx0eebc4a396708dee");//(小程序ID)
+            param.put("secret", "0355ddfe39dd854d911d0c19a99509d0");//(小程序密钥)
             param.put("js_code", code);//用户登录的临时凭证
             param.put("grant_type", "authorization_code");
 
@@ -56,9 +60,12 @@ public class WXLoginController {
             logger.info("wxResult的数据为"+wxResult);
 
             wxModel = JsonUtils. jsonToPojo(wxResult, WXSessionModel.class);
+            map.put("openid",wxModel.getOpenid());
+            map.put("sessionKey",wxModel.getSession_key());
+
             User user = userService.findUserByOpenid(wxModel.getOpenid());
             if (user == null) {
-                logger.info("该用户未登录过本平台！");
+                logger.info("该用户未登录过本平台！进行自动注册");
 
                 user = new User();
                 user.setOpenid(wxModel.getOpenid());
@@ -67,12 +74,11 @@ public class WXLoginController {
                 logger.info("用户 " + user.getName() + " 登录成功！！");
             }
         }catch (Exception e){
-            log.info(e.getMessage());
+            logger.info("登录临时凭证错误");
+            exceptionLogger.info(e.getMessage());
+            map.put("error","登录临时凭证错误");
         }
-
-
-
-        return wxModel;
+        return map;
     }
 
 //    @ApiOperation(value = "用户登录成功后输入用户数据")
