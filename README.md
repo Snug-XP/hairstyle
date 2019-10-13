@@ -12,8 +12,12 @@ oss配置可能过期，需要重新设置
 2. 连接池路径 https://localhost:8080/druid/login.html (账号root密码toor)
 
 
-- 运行jar包（后台运行）：$ nohup java -jar hairstyle.jar >test.txt &
+- 运行jar包（后台运行）：nohup java -jar hairstyle.jar >test.txt &
 - 查看某端口占用的线程的pid：netstat -nlp |grep :9181
 - 查看当前已运行的进程： ps -x
 - 根据pid终止进程：kill pid
+- 查看是否有tomcat运行：ps -ef|grep tomcat
+- 如果tomcat服务没有运行，结果如下 root      8522  6570  0 22:06 pts/1    00:00:00 grep --color=auto tomcat
+- 命令kill -9 （pid号）  可关闭对应pid的服务
+- 执行一下命令实时查看运行日志 tail -f catalina.out
 

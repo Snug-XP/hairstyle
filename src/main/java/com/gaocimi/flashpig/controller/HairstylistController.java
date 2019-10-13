@@ -240,6 +240,7 @@ public class HairstylistController {
                     if(day==0){
                         todayCount++;
                     }
+
                 }
                 map.put("todayCount", todayCount);
                 map.put("sumCount", haircutOrderList.size());

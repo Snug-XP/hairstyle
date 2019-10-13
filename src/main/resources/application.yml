@@ -4,11 +4,11 @@
 #      defaultZone: http://119.23.35.107:8761/eureka/
 server:
   port: 8080
-#  ssl:
-#    key-store: classpath:1998pic.cn.jks
-#    key-store-password: cr8nk77ak3224
-    #    key-store-type: PKCS12
-#    key-alias: 1998pic.cn
+  ssl:
+    key-store: classpath:1998pic.cn.jks
+    key-store-password: 8957l8t81v7xkb
+#        key-store-type: PKCS12
+    key-alias: xp.1998pic.cn
 #  port: 80
 #是否开启熔断器
 #feign:
