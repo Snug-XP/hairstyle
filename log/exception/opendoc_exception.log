@@ -1,8 +1,0 @@
-2019-10-14 12:12:39.232 -ERROR  [io-8080-exec-10] o.h.e.j.s.SqlExceptionHelper   : Column 'address' cannot be null
-2019-10-14 12:12:39.254 -ERROR  [io-8080-exec-10] c.g.f.c.HairstylistController  : org.springframework.dao.DataIntegrityViolationException: could not execute statement; SQL [n/a]; constraint [null]; nested exception is org.hibernate.exception.ConstraintViolationException: could not execute statement
-2019-10-14 12:13:08.718 -ERROR  [nio-8080-exec-2] o.h.e.j.s.SqlExceptionHelper   : Column 'address' cannot be null
-2019-10-14 12:13:08.719 -ERROR  [nio-8080-exec-2] c.g.f.c.HairstylistController  : org.springframework.dao.DataIntegrityViolationException: could not execute statement; SQL [n/a]; constraint [null]; nested exception is org.hibernate.exception.ConstraintViolationException: could not execute statement
-2019-10-14 12:16:33.252 -ERROR  [nio-8080-exec-9] o.h.e.j.s.SqlExceptionHelper   : Column 'address' cannot be null
-2019-10-14 12:16:33.255 -ERROR  [nio-8080-exec-9] c.g.f.c.HairstylistController  : org.springframework.dao.DataIntegrityViolationException: could not execute statement; SQL [n/a]; constraint [null]; nested exception is org.hibernate.exception.ConstraintViolationException: could not execute statement
-2019-10-14 12:27:38.781 -ERROR  [nio-8080-exec-8] o.h.e.j.s.SqlExceptionHelper   : Column 'address' cannot be null
-2019-10-14 12:27:38.784 -ERROR  [nio-8080-exec-8] c.g.f.c.HairstylistController  : org.springframework.dao.DataIntegrityViolationException: could not execute statement; SQL [n/a]; constraint [null]; nested exception is org.hibernate.exception.ConstraintViolationException: could not execute statement
