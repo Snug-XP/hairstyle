@@ -10,22 +10,12 @@ import com.gaocimi.flashpig.service.HairstylistService;
 import com.gaocimi.flashpig.service.RecordHairstylisToUserService;
 import com.gaocimi.flashpig.service.RecordToUserImgUrlService;
 import com.gaocimi.flashpig.service.UserService;
-import com.gaocimi.flashpig.utils.CustomDatePropertyEditor;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.http.HttpStatus;
-import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.context.request.WebRequest;
-
-import java.beans.PropertyEditor;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -94,8 +84,9 @@ public class RecordHairstylisToUserController {
 
         } catch (Exception e) {
             logger.error(String.valueOf(e));
-            e.printStackTrace();
+            logger.info("备注添加操作失败！！（后端发生某些错误，例如数据库连接失败）");
             map.put("error", "操作失败！！（后端发生某些错误，例如数据库连接失败）");
+            e.printStackTrace();
             return map;
         }
     }
@@ -158,8 +149,9 @@ public class RecordHairstylisToUserController {
             }
         } catch (Exception e) {
             logger.error(String.valueOf(e));
+            logger.info("获取自己对某个顾客的备注信息列表失败！！（后端发生某些错误，例如数据库连接失败）");
+            map.put("error", "获取备注列表操作失败！！（后端发生某些错误，例如数据库连接失败）");
             e.printStackTrace();
-            map.put("error", "操作失败！！（后端发生某些错误，例如数据库连接失败）");
             return map;
         }
     }
