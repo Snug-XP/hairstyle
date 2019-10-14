@@ -6,6 +6,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.gaocimi.flashpig.entity.User;
 import com.gaocimi.flashpig.model.WXSessionModel;
 import com.gaocimi.flashpig.result.ResponseResult;
+import com.gaocimi.flashpig.service.HairstylistService;
 import com.gaocimi.flashpig.service.UserService;
 import com.gaocimi.flashpig.utils.HttpClientUtil;
 import com.gaocimi.flashpig.utils.JsonUtils;
@@ -37,14 +38,18 @@ public class WXLoginController {
 
     @Autowired
     UserService userService;
+    @Autowired
+    HairstylistService hairstylistService;
 
     @Autowired
     private WxMaService wxService;
 
-    @ApiOperation(value = "使用用户登录的临时凭证请求微信服务器换取得到对应的openid与session_key传回给用户")
+    @ApiOperation(value = "使用用户登录的临时凭证请求微信服务器换取得到对应的openid与session_key传回给用户,并且导入（或修改）用户信息到数据库")
     @PostMapping("/wxLogin")
-    public Map wxLogin( String code) {
-        logger.info("\n\n\nwxlogin临时凭证  -  code:  " + code+"");
+    public Map wxLogin(String code, String name, int sex,
+                       @RequestParam(value = "pictureUrl", required = false) String pictureUrl,
+                       @RequestParam(value = "phoneNum", required = false) String phoneNum) {
+        logger.info("\n\n\nwxlogin临时凭证  -  code:  " + code + "");
         Map map = new HashMap();
 //        WXSessionModel wxModel;
         try {
@@ -64,19 +69,18 @@ public class WXLoginController {
 //            logger.info("wxResult的数据为"+wxResult);
 //            wxModel = JsonUtils. jsonToPojo(wxResult, WXSessionModel.class);
 
-            if(code == null)
-            {
+            if (code == null) {
                 logger.info("临时登录凭证获取失败\n\n\n\n");
-                map.put("error","临时登录凭证获取失败");
+                map.put("error", "临时登录凭证获取失败");
                 return map;
             }
 
             WxMaJscode2SessionResult session = wxService.getUserService().getSessionInfo(code);
-            map.put("openid",session.getOpenid());
-            map.put("sessionKey",session.getSessionKey());
+            map.put("openid", session.getOpenid());
+            map.put("sessionKey", session.getSessionKey());
 
-            logger.info("登录用户openid为  "+session.getOpenid());
-            logger.info("   sessionKey为  "+session.getSessionKey()+"\n");
+            logger.info("登录用户openid为  " + session.getOpenid());
+            logger.info("   sessionKey为  " + session.getSessionKey() + "\n");
 
             User user = userService.findUserByOpenid(session.getOpenid());
             if (user == null) {
@@ -84,15 +88,29 @@ public class WXLoginController {
 
                 user = new User();
                 user.setOpenid(session.getOpenid());
+                user.setName(name);
+                user.setSex(sex);
+                user.setPhoneNum(phoneNum);
+                user.setPictureUrl(pictureUrl);
                 userService.save(user);
-            } else{
+            } else {
+                //以前登录过，更新信息
+                user.setSex(sex);
+                user.setName(name);
+
+                if (phoneNum != null)
+                    user.setPhoneNum(phoneNum);
+                if (pictureUrl != null)
+                    user.setPictureUrl(pictureUrl);
+
+                userService.edit(user);
                 logger.info("用户 " + user.getName() + " 登录成功！\n\n\n\n");
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             logger.error(String.valueOf(e));
             logger.info("临时登录凭证错误-不对应\n\n\n\n");
             e.printStackTrace();
-            map.put("error","临时登录凭证错误");
+            map.put("error", "临时登录凭证错误");
         }
         return map;
     }
