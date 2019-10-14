@@ -39,7 +39,7 @@ public class RecordHairstylisToUserController {
     UserService userService;
 
 
-    @ApiOperation(value = "发型师新增对顾客的备注 - 用于“发型师-预约列表-备注信息”页面的新增备注", notes = "m1")
+    @ApiOperation(value = "发型师新增对顾客的备注 - 用于“发型师-预约列表-备注信息”页面的新增备注")
     @PostMapping("/hairstylist/addRecordToUser")
     public Map addRecordToUser(String myOpenid, int userId, String content,
                                @RequestParam(value = "imageList", required = false) List<String> imageList) {
@@ -92,7 +92,7 @@ public class RecordHairstylisToUserController {
     }
 
 
-    @ApiOperation(value = "获取自己对某个顾客的备注记录(按时间倒序排序)-用于“发型师-预约列表-备注信息”页面", notes = "m1")
+    @ApiOperation(value = "获取自己对某个顾客的备注记录(按时间倒序排序)-用于“发型师-预约列表-备注信息”页面")
     @GetMapping("/hairstylist/getNoteRecordToOneUser")
     public Map getNoteRecordToOneUser(String myOpenid, int userId) {
         Map map = new HashMap();
@@ -157,7 +157,7 @@ public class RecordHairstylisToUserController {
     }
 
 
-    @ApiOperation(value = "根据备注id，发型师删除对顾客的备注 - 用于“发型师-预约列表-备注信息”页面的删除备注", notes = "m1")
+    @ApiOperation(value = "根据备注id，发型师删除对顾客的备注 - 用于“发型师-预约列表-备注信息”页面的删除备注")
     @DeleteMapping("/hairstylist/deleteRecordToUser")
     public Map deleteRecordToUser(String myOpenid, int recordId) {
         Map map = new HashMap();
@@ -200,7 +200,7 @@ public class RecordHairstylisToUserController {
     }
 
 
-    @ApiOperation(value = "根据备注id，发型师修改对顾客的备注 - 用于“发型师-预约列表-备注信息”页面的修改备注", notes = "m1")
+    @ApiOperation(value = "根据备注id，发型师修改对顾客的备注 - 用于“发型师-预约列表-备注信息”页面的修改备注")
     @PutMapping("/hairstylist/editRecordToUser")
     public Map editRecordToUser(String myOpenid, int recordId, String content,
                                 @RequestParam(value = "imageList", required = false) List<String> imageList) {

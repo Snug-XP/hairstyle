@@ -32,7 +32,7 @@ public class HairServiceController {
     @Autowired
     HairstylistService hairstylistService;
 
-    @ApiOperation(value = "添加发型服务", notes = "m1")
+    @ApiOperation(value = "添加发型服务")
     @PostMapping("/hairstylist/addHairService")
     public Map addHairService(String myOpenid, String serviceName, String description, Double price) {
 
@@ -66,7 +66,7 @@ public class HairServiceController {
         }
     }
 
-    @ApiOperation(value = "根据服务项目id，修改个人的服务项目", notes = "m1")
+    @ApiOperation(value = "根据服务项目id，修改个人的服务项目")
     @PostMapping("/hairstylist/editHairService")
     public Map editHairService(String myOpenid, int serviceId, String serviceName, String description, Double price) {
 
@@ -111,7 +111,7 @@ public class HairServiceController {
         }
     }
 
-    @ApiOperation(value = "获取自己的服务列表", notes = "m1")
+    @ApiOperation(value = "获取自己的服务列表")
     @GetMapping("/hairstylist/getServiceList")
     public Map getServiceList(String myOpenid) {
         Map map = new HashMap();
@@ -134,7 +134,7 @@ public class HairServiceController {
         }
     }
 
-    @ApiOperation(value = "根据服务项目id,删除个人服务项目", notes = "m1")
+    @ApiOperation(value = "根据服务项目id,删除个人服务项目")
     @DeleteMapping("/hairstylist/deleteService")
     public Map deleteService(String myOpenid, int serviceId) {
         Map map = new HashMap();

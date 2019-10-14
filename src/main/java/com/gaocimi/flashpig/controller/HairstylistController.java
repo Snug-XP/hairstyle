@@ -41,7 +41,7 @@ public class HairstylistController {
     @Autowired
     RecordHairstylisToUserService recordHairstylisToUserService;
 
-    @ApiOperation(value = "发型师注册申请", notes = "m1")
+    @ApiOperation(value = "发型师注册申请")
     @PostMapping("/hairstylist/register/apply")
     public Map addHairstylist(@Validated Hairstylist hairstylist,
                               @RequestParam(value = "timeList", required = false) int[] timeList,
@@ -202,7 +202,7 @@ public class HairstylistController {
     }
 
 
-    @ApiOperation(value = "根据发型师openid,获取单个发型师信息（包括总预约人数和今日预约人数）- 用于发型师首页", notes = "m1", produces = "application/json")
+    @ApiOperation(value = "根据发型师openid,获取单个发型师信息（包括总预约人数和今日预约人数）- 用于发型师首页", produces = "application/json")
     @GetMapping("/hairstylist")
     public Map getOne(String myOpenid) {
         Map map = new HashMap();
@@ -224,7 +224,7 @@ public class HairstylistController {
         }
     }
 
-    @ApiOperation(value = "根据发型师id(不是openid),获取单个发型师信息（包括总预约人数和今日预约人数）", notes = "m1", produces = "application/json")
+    @ApiOperation(value = "根据发型师id(不是openid),获取单个发型师信息（包括总预约人数和今日预约人数）", produces = "application/json")
     @GetMapping("/getHairstylistById")
     public Map getOneById(int hairstylistId) {
         Map map = new HashMap();
@@ -280,7 +280,7 @@ public class HairstylistController {
         }
     }
 
-    @ApiOperation(value = "发型师设置可预约时间", notes = "m1")
+    @ApiOperation(value = "发型师设置可预约时间")
     @PostMapping("/hairstylist/setTime")
     public Map setTime(String myOpenid,
                        @RequestParam(value = "", required = false) int[] timeList) {
@@ -315,7 +315,7 @@ public class HairstylistController {
     }
 
 
-    @ApiOperation(value = "获取个人作品图片url列表", notes = "m1")
+    @ApiOperation(value = "获取个人作品图片url列表")
     @GetMapping("/hairstylist/getImageUrlList")
     public Map getImageUrlList(String myOpenid) {
         Map map = new HashMap();
@@ -338,7 +338,7 @@ public class HairstylistController {
         }
     }
 
-    @ApiOperation(value = "添加个人作品图片url列表", notes = "m1")
+    @ApiOperation(value = "添加个人作品图片url列表")
     @PostMapping("/hairstylist/addImageUrlList")
     public Map addImageUrlList(String myOpenid, @RequestParam(value = "imageList", required = false) List<String> imageList) {
         Map map = new HashMap();
@@ -374,7 +374,7 @@ public class HairstylistController {
         }
     }
 
-    @ApiOperation(value = "根据图片对应id,删除个人作品图片url", notes = "m1")
+    @ApiOperation(value = "根据图片对应id,删除个人作品图片url")
     @DeleteMapping("/hairstylist/deleteImageUrlList")
     public Map deleteImageUrlList(String myOpenid, int id) {
         Map map = new HashMap();
@@ -412,7 +412,7 @@ public class HairstylistController {
     }
 
 
-//    @ApiOperation(value = "获取某个顾客关于自己的预约记录", notes = "m1")
+//    @ApiOperation(value = "获取某个顾客关于自己的预约记录")
 //    @GetMapping("/hairstylist/getOrderListFromOneUser/{myOpenid}")
 //    public Map getOrderListFromOneUser( String openid,int user_id) {
 //        Map map = new HashMap();
@@ -436,7 +436,7 @@ public class HairstylistController {
 //    }
 //
 //
-//    @ApiOperation(value = "获取某个顾客关于自己的预约记录", notes = "m1")
+//    @ApiOperation(value = "获取某个顾客关于自己的预约记录")
 //    @GetMapping("/hairstylist/getOrderListFromOneUser/{myOpenid}")
 //    public Map getOrderListFromOneUser( String openid,int user_id) {
 //        Map map = new HashMap();

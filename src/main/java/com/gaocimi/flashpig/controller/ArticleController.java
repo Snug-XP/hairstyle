@@ -36,21 +36,21 @@ public class ArticleController {
     @Autowired
     UserService userService;
 
-    @ApiOperation(value = "添加文章", notes = "m1")
+    @ApiOperation(value = "添加文章")
     @PostMapping("/article")
     public int addArticle(@Validated Article articles) {
         articleService.save(articles);
         return 200;
     }
 
-    @ApiOperation(value = "删除文章", notes = "m1")
+    @ApiOperation(value = "删除文章")
     @DeleteMapping("/article/{articleId}")
     public int deleteArticle(@PathVariable("articleId") Integer articleId) {
         articleService.delete(articleId);
         return 200;
     }
 
-    @ApiOperation(value = "修改文章", notes = "m1")
+    @ApiOperation(value = "修改文章")
     @PutMapping("/article")
     public int updateArticle(@Validated Article articles) {
         articleService.edit(articles);
@@ -58,13 +58,13 @@ public class ArticleController {
     }
 
 
-    @ApiOperation(value = "获取单个文章信息", notes = "m1", produces = "application/json")
+    @ApiOperation(value = "获取单个文章信息", produces = "application/json")
     @GetMapping("/article/getOne/{articleId}")
     public Article getOne(@PathVariable("articleId") Integer articleId) {
         return articleService.findArticleById(articleId);
     }
 
-    @ApiOperation(value = "获取所有文章列表", notes = "m1")
+    @ApiOperation(value = "获取所有文章列表")
     @GetMapping("/articles/getAll")
     public Page<Article> getAllByPage(@RequestParam(name = "pageNum", defaultValue = "0") int pageNum,
                                  @RequestParam(name = "pageSize", defaultValue = "10") int pageSize
@@ -74,7 +74,7 @@ public class ArticleController {
     }
 
 
-    @ApiOperation(value = "普通用户分页获取自己收藏的文章列表", notes = "m1")
+    @ApiOperation(value = "普通用户分页获取自己收藏的文章列表")
     @GetMapping("/article/getMyCollection")
     public Map getMyCollectionByPage( String myOpenid,
                                     @RequestParam(name = "pageNum", defaultValue = "0") int pageNum,
