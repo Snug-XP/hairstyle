@@ -26,7 +26,7 @@ import java.util.*;
  */
 @RestController
 @ResponseResult
-@Api(value = "用户订单操作服务",description = "操作用户订单相关业务")
+@Api(value = "用户订单操作服务", description = "操作用户订单相关业务")
 public class HaircutOrderController {
     protected static final Logger logger = LoggerFactory.getLogger(HairstylistController.class);
 
@@ -108,7 +108,20 @@ public class HaircutOrderController {
         }
     }
 
-    @ApiOperation(value = "获取自己关于某个顾客的预约记录(按时间顺序排序)-用于“发型师-预约列表-预约记录”页面", notes = "m1")
+    @ApiOperation(value = "获取一个当前的排号列表(按时间顺序排序)-用于“发型师-排号系统”页面")
+    @GetMapping("/hairstylist/getWaitingOrder")
+    public Map getWaitingOrder(String myOpenid) {
+        Map map = new HashMap();
+        map = getOrderList(myOpenid, 0);//获取今天的所有订单
+        List<HairstylistReservation> hairstylistReservation = (List<HairstylistReservation>) map.get("recordList");
+        if (hairstylistReservation==null) {  return map; }
+
+
+        return map;
+    }
+
+
+    @ApiOperation(value = "获取自己关于某个顾客的预约记录(按时间顺序排序)-用于“发型师-预约列表-预约记录”页面")
     @GetMapping("/hairstylist/getOrderRecordFromOneUser")
     public Map getOrderRecordFromOneUser(String myOpenid, int userId) {
         Map map = new HashMap();
@@ -201,11 +214,11 @@ public class HaircutOrderController {
 //    public HaircutOrder getOne( @PathVariable("haircutOrderId") Integer haircutOrderId) {
 //        return haircutOrderService.findHaircutOrderById(haircutOrderId);
 //    }
-    @ApiOperation(value = "分页获取所有订单列表",notes = "仅管理员有权限",produces = "application/json")
+    @ApiOperation(value = "分页获取所有订单列表", notes = "仅管理员有权限", produces = "application/json")
     @GetMapping("/haircutOrders/all")
     public Map getHaircutOrdersPage(String myOpenid,
-                                    @RequestParam(name="pageNum",defaultValue="0") int pageNum,
-                                    @RequestParam(name="pageSize",defaultValue="10") int pageSize
+                                    @RequestParam(name = "pageNum", defaultValue = "0") int pageNum,
+                                    @RequestParam(name = "pageSize", defaultValue = "10") int pageSize
     ) {
         Map map = new HashMap();
         try {

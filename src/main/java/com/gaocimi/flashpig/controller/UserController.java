@@ -37,7 +37,7 @@
 //    @Autowired
 //    UserService userService;
 //
-//    @ApiOperation(value = "添加用户", notes = "m1")
+//    @ApiOperation(value = "添加用户")
 //    @PostMapping("/user")
 //    @ResponseStatus(HttpStatus.CREATED)
 //    public int addUser(@Validated User users) {
@@ -45,14 +45,14 @@
 //        return 200;
 //    }
 //
-//    @ApiOperation(value = "删除用户", notes = "m1")
+//    @ApiOperation(value = "删除用户")
 //    @DeleteMapping("/user/{userId}")
 //    public int deleteUser(@NotBlank @PathVariable("userId") Integer userId) {
 //        userService.delete(userId);
 //        return 200;
 //    }
 //
-//    @ApiOperation(value = "修改用户", notes = "m1")
+//    @ApiOperation(value = "修改用户")
 //    @PutMapping("/user")
 //    public int updateUser(@Validated User users) {
 //        userService.edit(users);
@@ -60,13 +60,13 @@
 //    }
 //
 //
-//    @ApiOperation(value = "获取单个用户信息", notes = "m1", produces = "application/json")
+//    @ApiOperation(value = "获取单个用户信息", produces = "application/json")
 //    @GetMapping("/user/{userId}")
 //    public User getOne(@PathVariable("userId") Integer userId) {
 //        return userService.findUserById(userId);
 //    }
 //
-//    @ApiOperation(value = "获取所有用户列表", notes = "m1", produces = "application/json")
+//    @ApiOperation(value = "获取所有用户列表", produces = "application/json")
 //    @GetMapping("/users")
 //    public Page<User> getPage(@RequestParam(name = "pageNum", defaultValue = "0") int pageNum,
 //                              @RequestParam(name = "pageSize", defaultValue = "10") int pageSize
