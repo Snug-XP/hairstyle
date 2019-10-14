@@ -58,8 +58,10 @@ public class HairServiceController {
                 return map;
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error(String.valueOf(e));
+            logger.info("添加发型服务失败！！（后端发生某些错误，例如数据库连接失败）");
             map.put("error", "添加发型服务失败！！（后端发生某些错误，例如数据库连接失败）");
+            e.printStackTrace();
             return map;
         }
     }
@@ -101,8 +103,10 @@ public class HairServiceController {
             }
 
         } catch (Exception e) {
+            logger.error(String.valueOf(e));
+            logger.info("修改发型服务失败！！（后端发生某些错误，例如数据库连接失败）");
+            map.put("error", "修改发型服务失败！！（后端发生某些错误，例如数据库连接失败）");
             e.printStackTrace();
-            map.put("error", "添加发型服务失败！！（后端发生某些错误，例如数据库连接失败）");
             return map;
         }
     }
@@ -122,8 +126,10 @@ public class HairServiceController {
                 return map;
             }
         } catch (Exception e) {
+            logger.error(String.valueOf(e));
+            logger.info("获取自己的服务列表失败！！（后端发生某些错误，例如数据库连接失败）");
+            map.put("error", "获取服务列表失败！！（后端发生某些错误，例如数据库连接失败）");
             e.printStackTrace();
-            map.put("error", "操作失败！！（后端发生某些错误，例如数据库连接失败）");
             return map;
         }
     }
@@ -157,8 +163,10 @@ public class HairServiceController {
                 return map;
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error(String.valueOf(e));
+            logger.info("删除个人服务项目操作失败！！（后端发生某些错误，例如数据库连接失败）");
             map.put("error", "操作失败！！（后端发生某些错误，例如数据库连接失败）");
+            e.printStackTrace();
             return map;
         }
     }

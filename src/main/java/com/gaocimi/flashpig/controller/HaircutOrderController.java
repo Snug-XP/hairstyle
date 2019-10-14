@@ -100,8 +100,10 @@ public class HaircutOrderController {
                 return map;
             }
         } catch (Exception e) {
+            logger.error(String.valueOf(e));
+            logger.info("获取预约列表失败！！（后端发生某些错误，例如数据库连接失败）");
+            map.put("error", "获取预约列表失败！！（后端发生某些错误，例如数据库连接失败）");
             e.printStackTrace();
-            map.put("error", "操作失败！！（后端发生某些错误，例如数据库连接失败）");
             return map;
         }
     }
@@ -124,7 +126,7 @@ public class HaircutOrderController {
                         resultOrderList.add(order);
                     }
                 }
-                //获取某个顾客关于自己的预约列表 即筛选用于“发型师-预约列表-预约记录”页面的信息
+                //获取某个顾客关于自己的预约列表（按时间倒序排序） 即筛选用于“发型师-预约列表-预约记录”页面的信息
                 if (resultOrderList.size() > 0) {
                     List<OrderRecordFromOneUser> recordList = new ArrayList<>();
                     for (HaircutOrder order : resultOrderList) {
@@ -137,12 +139,12 @@ public class HaircutOrderController {
                         recordList.add(record);
                     }
 
-                    // 按时间顺序排序
+                    // 按时间倒序排序
                     Collections.sort(recordList, (r1, r2) -> {
                         if (r1.getDate().after(r2.getDate())) {
-                            return 1;
-                        } else if (r2.getDate().after(r1.getDate())) {
                             return -1;
+                        } else if (r2.getDate().after(r1.getDate())) {
+                            return 1;
                         }
                         return 0; //相等为0
                     });
@@ -155,8 +157,10 @@ public class HaircutOrderController {
                 return map;
             }
         } catch (Exception e) {
+            logger.error(String.valueOf(e));
+            logger.info("获取预约记录列表失败！！（后端发生某些错误，例如数据库连接失败）");
+            map.put("error", "获取预约记录列表失败！！（后端发生某些错误，例如数据库连接失败）");
             e.printStackTrace();
-            map.put("error", "操作失败！！（后端发生某些错误，例如数据库连接失败）");
             return map;
         }
     }
@@ -172,6 +176,7 @@ public class HaircutOrderController {
 //            logger.info("添加用户订单成功！");
 //            map.put("message","添加用户订单成功！");
 //        } catch (Exception e) {
+//            logger.error(String.valueOf(e));
 //            e.printStackTrace();
 //            map.put("error", "操作失败！！（后端发生某些错误，例如数据库连接失败）");
 //        }
@@ -215,8 +220,10 @@ public class HaircutOrderController {
                 return map;
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error(String.valueOf(e));
+            logger.info("获取订单列表失败！！（后端发生某些错误，例如数据库连接失败）");
             map.put("error", "获取订单列表失败！！（后端发生某些错误，例如数据库连接失败）");
+            e.printStackTrace();
             return map;
         }
     }

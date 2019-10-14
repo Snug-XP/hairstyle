@@ -25,8 +25,9 @@ spring:
     name: hairstyle
 
   datasource:
-    loginUsername: root
-    loginPassword: toor
+    #下面两行用于连接池配置，但是好像没有用（在连接池已经设置初始用户root密码toor）
+    loginUsername: xp
+    loginPassword: 000000
     username: root
     password: Xiangp
     driver-class-name: com.mysql.jdbc.Driver
@@ -90,13 +91,15 @@ pagehelper:
 ###微信配置
 wechat:
   miniapp:
-    mchId: 1518642251
     msgDataFormat: JSON
+#    appid: wx3b612db5165b11b6
+#    secret: 3f31f17374c5406f24cdf5657085da92
     appid: wx0eebc4a396708dee
+    secret: ff3774682602c7c21040c09ce1bf9ea1
+    mchId: 1518642251
     keyPath: classpath:apiclient_cert.p12
-    aesKey: 0355ddfe39dd854d911d0c19a99509d0
     subMchId:
-    secret: 589d85dba1f512fb8965525b6e94f8ab
+    aesKey: 0355ddfe39dd854d911d0c19a99509d0
     mchKey: 0355ddfe39dd854d911d0c19a99509d1
     token: 1998
     subAppId:

@@ -26,7 +26,6 @@ import java.util.*;
 public class HairstylistController {
     protected static final Logger logger = LoggerFactory.getLogger(HairstylistController.class);
 
-
     @Autowired
     HairstylistService hairstylistService;
 
@@ -58,7 +57,7 @@ public class HairstylistController {
                 Hairstylist h = hairstylistService.findHairstylistByOpenid(hairstylist.getOpenid());
                 //之前申请失败了，删除记录
                 if (h.getApplyStatus() == -1) {
-                    logger.info("删除" + h.getHairstylistName() + "之前申请失败的记录,并重新申请");
+                    logger.info("删除" + h.getHairstylistName() + "之前申请失败的记录,并重新申请\n");
                     hairstylistService.delete(h.getId());
                 } else {
                     logger.info(h.getHairstylistName() + "重复申请！！你的申请正在审核中或者已通过，无需重复提交！！");
@@ -112,6 +111,7 @@ public class HairstylistController {
                 logger.info("imageList有" + imageSize + "个： " + imageList);
             }
         } catch (Exception e) {
+            logger.error(String.valueOf(e));
             e.printStackTrace();
             map.put("error", "发型师提交申请失败！请检查输入数据（也有可能后端发生错误）");
             return map;
@@ -126,7 +126,7 @@ public class HairstylistController {
         Map map = new HashMap();
         try {
             if (hairstylistService.findHairstylistById(hairstylistId) == null) {
-                logger.info("该用户不存在！！");
+                logger.info("要删除的发型师用户不存在！！");
                 map.put("error", "该用户不存在！！");
                 return map;
             }
@@ -142,8 +142,10 @@ public class HairstylistController {
                 return map;
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error(String.valueOf(e));
+            logger.info("删除发型师失败！（后端发生某些错误，例如数据库连接失败）");
             map.put("error", "删除发型师失败！（后端发生某些错误，例如数据库连接失败）");
+            e.printStackTrace();
             return map;
         }
 
@@ -182,7 +184,7 @@ public class HairstylistController {
                 }
                 hairstylistService.edit(hairstylist);
 
-                logger.info("发型师信息修改成功！");
+                logger.info("发型师用户 "+hairstylist.getHairstylistName()+"（"+myOpenid+"）重新修改了基本信息");
                 map.put("message", "发型师信息修改成功！");
                 return map;
             } else {
@@ -191,8 +193,10 @@ public class HairstylistController {
                 return map;
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error(String.valueOf(e));
+            logger.info("发型师信息修改失败！！（后端发生某些错误）");
             map.put("error", "发型师信息修改失败！！（后端发生某些错误）");
+            e.printStackTrace();
             return map;
         }
     }
@@ -218,7 +222,6 @@ public class HairstylistController {
                     if (day == 0) {
                         todayCount++;
                     }
-
                 }
                 map.put("todayCount", todayCount);
                 map.put("sumCount", haircutOrderList.size());
@@ -230,8 +233,10 @@ public class HairstylistController {
                 return map;
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error(String.valueOf(e));
+            logger.info("获取发型师信息失败！！（后端发生某些错误，例如数据库连接失败）");
             map.put("error", "获取发型师信息失败！！（后端发生某些错误，例如数据库连接失败）");
+            e.printStackTrace();
             return map;
         }
 
@@ -256,8 +261,10 @@ public class HairstylistController {
                 return map;
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error(String.valueOf(e));
+            logger.info("获取发型师列表信息失败！！（后端发生某些错误，例如数据库连接失败）");
             map.put("error", "获取发型师列表信息失败！！（后端发生某些错误，例如数据库连接失败）");
+            e.printStackTrace();
             return map;
         }
     }
@@ -283,13 +290,15 @@ public class HairstylistController {
                 }
                 hairstylist.setAvailableTime(str);
                 hairstylistService.edit(hairstylist);
-                logger.info("可预约时间设置成功");
+                logger.info("发型师用户 "+hairstylist.getHairstylistName()+"（"+myOpenid+"）重新设置了可预约时间");
                 map.put("message", "可预约时间设置成功");
                 return map;
             }
         } catch (Exception e) {
+            logger.error(String.valueOf(e));
+            logger.info("设置可预约时间操作失败！！（后端发生某些错误，例如数据库连接失败）");
+            map.put("error", "设置可预约时间操作失败！！（后端发生某些错误，例如数据库连接失败）");
             e.printStackTrace();
-            map.put("error", "操作失败！！（后端发生某些错误，例如数据库连接失败）");
             return map;
         }
     }
@@ -312,8 +321,10 @@ public class HairstylistController {
                 return map;
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error(String.valueOf(e));
+            logger.info("获取个人作品图片操作失败！！（后端发生某些错误，例如数据库连接失败）\n\n");
             map.put("error", "操作失败！！（后端发生某些错误，例如数据库连接失败）");
+            e.printStackTrace();
             return map;
         }
     }
@@ -337,22 +348,24 @@ public class HairstylistController {
                         hairstylistImageUrl.setHairstylist(hairstylist);
                         hairstylistImageUrl.setImageUrl(imageList.get(i));
                         hairstylistImageUrlService.save(hairstylistImageUrl);
-                        map.put("error", "保存成功！");
                     }
-                    logger.info("imageList有" + imageSize + "个： " + imageList);
+                    logger.info("发型师用户 "+hairstylist.getHairstylistName()+"（"+myOpenid+"）保存了"+imageSize+"张个人照片图片： " + imageList);
+                    map.put("messgae", "保存成功！");
                 } else {
                     map.put("error", "请选择图片！！");
                 }
                 return map;
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error(String.valueOf(e));
+            logger.info("添加个人作品图片url列表操作失败！！（后端发生某些错误，例如数据库连接失败）");
             map.put("error", "操作失败！！（后端发生某些错误，例如数据库连接失败）");
+            e.printStackTrace();
             return map;
         }
     }
 
-    @ApiOperation(value = "根据图片对应id,删除个人作品图片url列表", notes = "m1")
+    @ApiOperation(value = "根据图片对应id,删除个人作品图片url", notes = "m1")
     @DeleteMapping("/hairstylist/deleteImageUrlList")
     public Map deleteImageUrlList(String myOpenid, int id) {
         Map map = new HashMap();
@@ -364,24 +377,27 @@ public class HairstylistController {
             } else {
                 HairstylistImageUrl imageUrl = hairstylistImageUrlService.findHairstylistImageUrlById(id);
                 if (imageUrl == null) {
-                    logger.info("图片不存在！");
+                    logger.info("要删除的图片不存在！");
                     map.put("error", "图片不存在！");
                     return map;
                 }
                 //判断该图片是不是该用户的
                 if (myOpenid.equals(imageUrl.getHairstylist().getOpenid())) {
                     hairstylistImageUrlService.delete(id);
+                    logger.info("发型师用户 "+imageUrl.getHairstylist().getHairstylistName()+"（"+myOpenid+"）删除图片 \""+imageUrl.getImageUrl()+"\"");
                     map.put("message", "删除成功！");
                     return map;
                 } else {
-                    logger.info("没有权限");
+                    logger.info("删除个人作品图片url失败 - 没有权限");
                     map.put("error", "对不起，删除失败(没有权限)");
                     return map;
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error(String.valueOf(e));
+            logger.info("删除个人作品图片url操作失败！！（后端发生某些错误，例如数据库连接失败）");
             map.put("error", "操作失败！！（后端发生某些错误，例如数据库连接失败）");
+            e.printStackTrace();
             return map;
         }
     }
@@ -403,6 +419,7 @@ public class HairstylistController {
 //                return map;
 //            }
 //        }catch (Exception e) {
+//            logger.error(String.valueOf(e));
 //            e.printStackTrace();
 //            map.put("error", "操作失败！！（后端发生某些错误，例如数据库连接失败）");
 //            return map;
@@ -426,6 +443,7 @@ public class HairstylistController {
 //                return map;
 //            }
 //        }catch (Exception e) {
+//            logger.error(String.valueOf(e));
 //            e.printStackTrace();
 //            map.put("error", "操作失败！！（后端发生某些错误，例如数据库连接失败）");
 //            return map;

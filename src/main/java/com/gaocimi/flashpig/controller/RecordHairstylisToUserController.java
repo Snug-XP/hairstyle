@@ -93,6 +93,7 @@ public class RecordHairstylisToUserController {
             }
 
         } catch (Exception e) {
+            logger.error(String.valueOf(e));
             e.printStackTrace();
             map.put("error", "操作失败！！（后端发生某些错误，例如数据库连接失败）");
             return map;
@@ -156,6 +157,7 @@ public class RecordHairstylisToUserController {
                 return map;
             }
         } catch (Exception e) {
+            logger.error(String.valueOf(e));
             e.printStackTrace();
             map.put("error", "操作失败！！（后端发生某些错误，例如数据库连接失败）");
             return map;
@@ -198,6 +200,7 @@ public class RecordHairstylisToUserController {
             }
 
         } catch (Exception e) {
+            logger.error(String.valueOf(e));
             e.printStackTrace();
             map.put("error", "操作失败！！（后端发生某些错误，例如数据库连接失败）");
             return map;
@@ -254,6 +257,7 @@ public class RecordHairstylisToUserController {
             }
 
         } catch (Exception e) {
+            logger.error(String.valueOf(e));
             e.printStackTrace();
             map.put("error", "操作失败！！（后端发生某些错误，例如数据库连接失败）");
             return map;
