@@ -72,7 +72,7 @@ public class HairstylistController {
             hairstylist.setApplyStatus(0);//设置申请状态为申请中
             hairstylistService.save(hairstylist);
             hairstylist = hairstylistService.findHairstylistByOpenid(hairstylist.getOpenid());//重新从数据库获取刚进去的数据（主要为了取得id）
-            setTime(hairstylist.getOpenid(), timeList);//设置可预约时间
+            setTime(hairstylist.getOpenid(), timeList);//跳转方法 设置可预约时间
 
 
             //下面保存该理发师的服务项目

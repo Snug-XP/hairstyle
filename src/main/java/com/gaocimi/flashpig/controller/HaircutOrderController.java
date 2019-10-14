@@ -202,14 +202,14 @@ public class HaircutOrderController {
 //        return haircutOrderService.findHaircutOrderById(haircutOrderId);
 //    }
     @ApiOperation(value = "分页获取所有订单列表",notes = "仅管理员有权限",produces = "application/json")
-    @GetMapping("/haircutOrders/all/{myOpenid}")
-    public Map getHaircutOrdersPage(@PathVariable("myOpenid") String openid,
+    @GetMapping("/haircutOrders/all")
+    public Map getHaircutOrdersPage(String myOpenid,
                                     @RequestParam(name="pageNum",defaultValue="0") int pageNum,
                                     @RequestParam(name="pageSize",defaultValue="10") int pageSize
     ) {
         Map map = new HashMap();
         try {
-            if (administratorService.isExist(openid)) {
+            if (administratorService.isExist(myOpenid)) {
                 Page<HaircutOrder> page = haircutOrderService.findAll(pageNum, pageSize);
                 map.put("page", page);
                 logger.info("获取订单列表成功！");

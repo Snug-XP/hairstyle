@@ -1,7 +1,11 @@
 package com.gaocimi.flashpig.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import javax.persistence.*;
 import java.util.Date;
+import java.util.List;
+
 /**
  * Article - 文章类
  *
@@ -10,6 +14,7 @@ import java.util.Date;
  */
 @Entity
 @Table(name = "article")
+@JsonIgnoreProperties(value = {"userList"})
 public class Article {
 
     @Id
@@ -20,9 +25,17 @@ public class Article {
 
     private Date createTime;
 
+    /**技巧*/
     private String skill;
 
     private String imageList;
+
+    /**收藏该文章的用户*/
+    @JoinTable(name="user_to_article",
+            joinColumns={@JoinColumn(name="article_id", referencedColumnName="id")},
+            inverseJoinColumns={@JoinColumn(name="user_id", referencedColumnName="id")})
+    @ManyToMany(fetch = FetchType.LAZY)
+    public List<User> userList;
 
     public Article(Integer id, String introduction, Date createTime, String skill, String imageList) {
         this.id = id;
