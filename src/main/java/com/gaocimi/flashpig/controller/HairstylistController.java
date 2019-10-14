@@ -158,7 +158,7 @@ public class HairstylistController {
                                  String province, String city, String district, String address,
                                  @RequestParam(value = "longitude", required = false) Double longitude,
                                  @RequestParam(value = "latitude", required = false) Double latitude
-                                 ) {
+    ) {
         Map map = new HashMap();
         try {
             if (hairstylistService.findHairstylistById(hairstylistId) == null) {
@@ -184,7 +184,7 @@ public class HairstylistController {
                 }
                 hairstylistService.edit(hairstylist);
 
-                logger.info("发型师用户 "+hairstylist.getHairstylistName()+"（"+myOpenid+"）重新修改了基本信息");
+                logger.info("发型师用户 " + hairstylist.getHairstylistName() + "（" + myOpenid + "）重新修改了基本信息");
                 map.put("message", "发型师信息修改成功！");
                 return map;
             } else {
@@ -202,36 +202,47 @@ public class HairstylistController {
     }
 
 
-    @ApiOperation(value = "获取单个发型师信息（包括总预约人数和今日预约人数）", notes = "权限：发型师本人或管理员", produces = "application/json")
+    @ApiOperation(value = "根据发型师openid,获取单个发型师信息（包括总预约人数和今日预约人数）- 用于发型师首页", notes = "m1", produces = "application/json")
     @GetMapping("/hairstylist")
-    public Map getOne(String myOpenid, Integer hairstylistId) {
+    public Map getOne(String myOpenid) {
         Map map = new HashMap();
         try {
-            if (hairstylistService.findHairstylistById(hairstylistId) == null) {
-                logger.info("该发型师用户不存在！！");
-                map.put("error", "该发型师用户不存在！！");
+            Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
+            if (hairstylist == null) {
+                logger.info("未找到该发型师用户");
+                map.put("error", "未找到该发型师用户！！");
                 return map;
             }
-            Hairstylist hairstylist = hairstylistService.findHairstylistById(hairstylistId);
-            if (myOpenid.equals(hairstylist.getOpenid()) || administratorService.isExist(myOpenid)) {
-                List<HaircutOrder> haircutOrderList = hairstylist.getHaircutOrderList();
-                int todayCount = 0;
+            map = getOneById(hairstylist.getId());
+            return map;
+        } catch (Exception e) {
+            logger.error(String.valueOf(e));
+            logger.info("获取发型师信息失败！！（后端发生某些错误，例如数据库连接失败）");
+            map.put("error", "获取发型师信息失败！！（后端发生某些错误，例如数据库连接失败）");
+            e.printStackTrace();
+            return map;
+        }
+    }
 
-                for (HaircutOrder haircutOrder : haircutOrderList) {
-                    Long day = MyUtils.getDifferenceToday(haircutOrder.getBookTime());//取得预约时间与今天23点59分相差的天数
-                    if (day == 0) {
-                        todayCount++;
-                    }
+    @ApiOperation(value = "根据发型师id(不是openid),获取单个发型师信息（包括总预约人数和今日预约人数）", notes = "m1", produces = "application/json")
+    @GetMapping("/getHairstylistById")
+    public Map getOneById(int hairstylistId) {
+        Map map = new HashMap();
+        try {
+            Hairstylist hairstylist = hairstylistService.findHairstylistById(hairstylistId);
+            List<HaircutOrder> haircutOrderList = hairstylist.getHaircutOrderList();
+            int todayOrderCount = 0;//今日预约人数
+
+            for (HaircutOrder haircutOrder : haircutOrderList) {
+                Long day = MyUtils.getDifferenceToday(haircutOrder.getBookTime());//取得预约时间与今天23点59分相差的天数
+                if (day == 0) {
+                    todayOrderCount++;
                 }
-                map.put("todayCount", todayCount);
-                map.put("sumCount", haircutOrderList.size());
-                map.put("hairstylist", hairstylist);
-                return map;
-            } else {
-                logger.info("获取发型师信息失败！！（没有权限！！）");
-                map.put("error", "获取发型师信息失败！！（没有权限！！）");
-                return map;
             }
+            map.put("sumOrderCount", haircutOrderList.size());//总预约人数
+            map.put("todayOrderCount", todayOrderCount);//今日预约人数
+            map.put("hairstylist", hairstylist);
+            return map;
         } catch (Exception e) {
             logger.error(String.valueOf(e));
             logger.info("获取发型师信息失败！！（后端发生某些错误，例如数据库连接失败）");
@@ -290,7 +301,7 @@ public class HairstylistController {
                 }
                 hairstylist.setAvailableTime(str);
                 hairstylistService.edit(hairstylist);
-                logger.info("发型师用户 "+hairstylist.getHairstylistName()+"（"+myOpenid+"）重新设置了可预约时间");
+                logger.info("发型师用户 " + hairstylist.getHairstylistName() + "（" + myOpenid + "）重新设置了可预约时间");
                 map.put("message", "可预约时间设置成功");
                 return map;
             }
@@ -302,8 +313,6 @@ public class HairstylistController {
             return map;
         }
     }
-
-
 
 
     @ApiOperation(value = "获取个人作品图片url列表", notes = "m1")
@@ -349,7 +358,7 @@ public class HairstylistController {
                         hairstylistImageUrl.setImageUrl(imageList.get(i));
                         hairstylistImageUrlService.save(hairstylistImageUrl);
                     }
-                    logger.info("发型师用户 "+hairstylist.getHairstylistName()+"（"+myOpenid+"）保存了"+imageSize+"张个人照片图片： " + imageList);
+                    logger.info("发型师用户 " + hairstylist.getHairstylistName() + "（" + myOpenid + "）保存了" + imageSize + "张个人照片图片： " + imageList);
                     map.put("messgae", "保存成功！");
                 } else {
                     map.put("error", "请选择图片！！");
@@ -384,7 +393,7 @@ public class HairstylistController {
                 //判断该图片是不是该用户的
                 if (myOpenid.equals(imageUrl.getHairstylist().getOpenid())) {
                     hairstylistImageUrlService.delete(id);
-                    logger.info("发型师用户 "+imageUrl.getHairstylist().getHairstylistName()+"（"+myOpenid+"）删除图片 \""+imageUrl.getImageUrl()+"\"");
+                    logger.info("发型师用户 " + imageUrl.getHairstylist().getHairstylistName() + "（" + myOpenid + "）删除图片 \"" + imageUrl.getImageUrl() + "\"");
                     map.put("message", "删除成功！");
                     return map;
                 } else {
