@@ -7,8 +7,8 @@ import java.util.Date;
  */
 public class HairstylistReservation {
 
-    /**预约单id*/
-    private Integer reservationId;
+    /**预约订单id*/
+    private Integer orderId;
 
     /**提交预约的用户id*/
     private Integer userId;
@@ -19,25 +19,28 @@ public class HairstylistReservation {
     /**提交预约的用户姓名*/
     private String userName;
 
-    /**预约单中留的电话号码*/
+    /**预约订单中留的电话号码*/
     private String userPhone;
 
-    /**预约时间（不是创建的时间）*/
-    private Date time;
+    /**创建的时间*/
+    private Date creatTime;
 
-    /**预约单中状态*/
+    /**预约时间*/
+    private Date bookTime;
+
+    /**预约订单状态 “0”表示订单正在进行中，”1“表示已完成，”-1“表示订单已取消，”-2“表示订单被拒绝*/
     private int status;
 
 
     /**预约项目*/
     private String hairService;
 
-    public Integer getReservationId() {
-        return reservationId;
+    public Integer getOrderId() {
+        return orderId;
     }
 
-    public void setReservationId(Integer reservationId) {
-        this.reservationId = reservationId;
+    public void setOrderId(Integer orderId) {
+        this.orderId = orderId;
     }
 
     public Integer getUserId() {
@@ -64,12 +67,20 @@ public class HairstylistReservation {
         this.userName = userName;
     }
 
-    public Date getTime() {
-        return time;
+    public Date getCreatTime() {
+        return creatTime;
     }
 
-    public void setTime(Date time) {
-        this.time = time;
+    public void setCreatTime(Date creatTime) {
+        this.creatTime = creatTime;
+    }
+
+    public Date getBookTime() {
+        return bookTime;
+    }
+
+    public void setBookTime(Date bookTime) {
+        this.bookTime = bookTime;
     }
 
     public String getHairService() {
