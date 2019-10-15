@@ -48,7 +48,7 @@ public class HairstylistReservation {
         setUserPhone(order.getUserPhone());
         setUserId(order.user.getId());
         setImgUrl(order.user.getPictureUrl());
-        setUserName(order.user.getName());
+        setUserName(order.getUserName());
         setCreatTime(order.getCreateTime());
         setBookTime(order.getBookTime());
         setServiceName(order.getServiceName());

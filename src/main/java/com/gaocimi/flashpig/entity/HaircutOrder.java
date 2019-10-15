@@ -5,7 +5,7 @@ import java.util.Date;
 
 
 /**
- * User - 用户订单类
+ * HaircutOrder - 用户的理发订单类
  *
  *@author xp
  * @date 2019-9-23 03:14:25
@@ -21,6 +21,10 @@ public class HaircutOrder {
     /**该订单中用户提交的联系电话（考虑到用户自身没有绑定手机号码）*/
     @Column(nullable = false)
     private String userPhone;
+
+    /**该订单中预约用户姓名 （不是用户账户中的名字，要求自己再输一遍，可以提示用户输入自己的称呼，不一定输入真名）*/
+    @Column(nullable = false)
+    private String userName;
 
     /**提交该订单的用户； 定义名为user_id的外键列，该外键引用user表的主键(id)列,采用懒加载*/
     @ManyToOne(targetEntity = User.class, fetch = FetchType.LAZY)
@@ -158,5 +162,13 @@ public class HaircutOrder {
 
     public void setPrice(Double price) {
         this.price = price;
+    }
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
     }
 }
