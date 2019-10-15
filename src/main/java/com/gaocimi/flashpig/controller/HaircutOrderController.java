@@ -15,6 +15,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
@@ -119,7 +121,60 @@ public class HaircutOrderController {
         }
     }
 
-    @ApiOperation(value = "获取当前的排号列表(按预约时间顺序排序，若预约时间一致，按创建时间顺序) - 用于“发型师-排号系统”页面")
+    /**
+     * 对今天的订单,进行订单区分统计，并返回未完成的有效订单信息列表
+     *
+     * @param reservationList 今天的所有订单
+     * @return 正在进行和将要进行的订单信息列表以及订单区分的数据
+     */
+    public Map doSth(List<HairstylistReservation> reservationList) {
+        Map map = new HashMap();
+
+        int todayOrderNum;  //今天有效的的订单数
+        int completedOrderNum = 0;  //已完成订单数
+        int canceledOrderNum = 0;   //已被取消的订单数
+        int remainingOrderNum; //未完成的有效订单数
+
+        todayOrderNum = reservationList.size(); //先将有效订单数等于今日订单总数，统计时再减去无效的的订单数
+
+        //订单状态，“-1”表示待完成，“0”表示已通知用户准备，“1”表示订单正在进行中，“2”表示订单已完成，“-2”表示订单已取消
+        List<HairstylistReservation> resultList = new ArrayList<>();//要返回的排号订单列表
+        for (HairstylistReservation reservation : reservationList) {
+            switch (reservation.getStatus()) {
+                case -1:
+                    //待完成的订单,加入排号订单列表中
+                case 0:
+                    //已通知用户准备的订单,加入排号订单列表中
+                case 1:
+                    //当前正在进行中的订单,加入排号订单列表中
+                    resultList.add(reservation); //加入排号订单列表
+                    break;
+                case 2:
+                    completedOrderNum++; //已完成订单数+1
+                    break;
+                case -2:
+                    canceledOrderNum++;  //已被取消的订单数+1
+                    todayOrderNum--;  //有效订单-1
+                    break;
+                default:
+                    logger.info("id为" + reservation.getOrderId() + "的订单状态异常！！");
+                    todayOrderNum--;  //有效订单-1
+                    break;
+            }
+        }
+
+        remainingOrderNum = todayOrderNum - completedOrderNum;//剩余订单数=有效订单数-已完成订单数
+
+        map.put("todayOrderNum", todayOrderNum);//今天有效的的订单数
+        map.put("completedOrderNum", completedOrderNum);//已完成订单数
+        map.put("canceledOrderNum", canceledOrderNum);//已被取消的订单数
+        map.put("remainingOrderNum", remainingOrderNum);//未完成的有效订单数
+        map.put("resultList", resultList);//排号订单列表（未完成的有效订单信息列表）
+
+        return map;
+    }
+
+    @ApiOperation(value = "获取当前的排号列表(按预约时间顺序排序，若预约时间一致，按订单创建时间顺序) - 用于“发型师-排号系统”页面")
     @GetMapping("/hairstylist/getWaitingOrder")
     public Map getWaitingOrder(String myOpenid) {
         Map map = new HashMap();
@@ -138,43 +193,127 @@ public class HaircutOrderController {
         return map;
     }
 
-    /**对今天的订单,进行订单区分统计*/
-    public Map doSth(List<HairstylistReservation> reservationList) {
+    @ApiOperation(value = "如果有进行的订单，将进行中的订单状态设为已完成；通知下一位前来美发，并通知再后2位准备前往 - 用于“发型师-排号系统”页面的通知的“下一位”操作")
+    @GetMapping("/hairstylist/nextWaitingOrder")
+    public Map nextWaitingOrder(String myOpenid) {
         Map map = new HashMap();
 
-        int todayOrderNum = reservationList.size(); //今天有效的的订单数
-        int completedOrderNum = 0;//已完成订单数
-        int canceledOrderNum = 0;//已被取消的订单数
-        int remainingOrderNum = 0;//未完成的有效订单数
-
-        List<HairstylistReservation> resultList = new ArrayList<>();
-
-        for (HairstylistReservation reservation : reservationList) {
-            switch (reservation.getStatus()) {
-                case 0:
-                    resultList.add(reservation); //将要进行的订单
-                    break;
-                case 1:
-                    completedOrderNum++; //已完成订单数+1
-                    break;
-                case -1:
-                    canceledOrderNum++;  //已被取消的订单数+1
-                    todayOrderNum--;  //有效订单-1
-                    break;
-                default:
-                    logger.info("id为" + reservation.getOrderId() + "的订单状态异常！！");
-                    todayOrderNum--;  //有效订单-1
-                    break;
-            }
+        map = getWaitingOrder(myOpenid);  //获取当前的排号列表
+        List<HairstylistReservation> reservationList = (List<HairstylistReservation>) map.get("resultList");
+        //今天没订单或出错了
+        if (reservationList == null||reservationList.size()==0) {
+//            logger.info(map.toString());
+            return map; //提示信息都在map里面
         }
 
-        remainingOrderNum = todayOrderNum - completedOrderNum;//剩余订单数=有效订单数-已完成订单数
+        /**预约订单状态，“-1”表示待完成，“0”表示已通知用户准备， “1”表示订单正在进行中，“2”表示订单已完成，“-2”表示订单已取消*/
 
-        map.put("todayOrderNum", todayOrderNum);//今天有效的的订单数
-        map.put("completedOrderNum", completedOrderNum);//已完成订单数
-        map.put("canceledOrderNum", canceledOrderNum);//已被取消的订单数
-        map.put("remainingOrderNum", remainingOrderNum);//未完成的有效订单数
-        map.put("resultList", resultList);//未完成的有效订单信息列表
+        //获取排队列表的第一个订单
+        HairstylistReservation reservation = reservationList.get(0);
+        HaircutOrder order = haircutOrderService.findHaircutOrderById(reservation.getOrderId());
+
+        //通知排队列表下一顾客（排队列表中的第一个或第二个顾客）前来美发
+        if (order.getStatus() == -1||order.getStatus() == 0) {
+            //如果排队列表的第一个订单为“待完成”或“已通知”
+            //将该订单状态改为“进行中”，并通知用户前来美发
+            reservation.setStatus(1);
+            map = notifyUser(order.getId(),0);//通知用户可以前来美发了
+            if(map.get("error")!=null) return map;
+            
+        } else if (order.getStatus() == 1) {
+            //如果排队列表的第一个订单正在进行
+            //将进行中的订单状态改为“已完成”
+            reservation.setStatus(2);
+            map = notifyUser(order.getId(),-1);//发送订单已完成，请评价的通知
+            if(map.get("error")!=null) return map;
+
+            //如果排队列表有第二个订单,通知该订单顾客前来美发
+            if(reservationList.size()>1){
+
+                //获取排队列表的第二个订单信息
+                reservation = reservationList.get(1);
+                order = haircutOrderService.findHaircutOrderById(reservation.getOrderId());
+
+                if (order.getStatus() == -1||order.getStatus() == 0){
+                    //如果该订单为“待完成”或“已通知”
+                    //将该订单状态改为“进行中”，并通知用户前来美发
+                    reservation.setStatus(1);
+                    map = notifyUser(order.getId(),0);//通知用户可以前来美发了
+                    if(map.get("error")!=null) return map;
+                }else{
+                    logger.info("逻辑错误，排队列表的第二个订单状态异常！状态为"+order.getStatus()
+                            +"\n<“-1”表示待完成，“0”表示已通知用户准备， “1”表示订单正在进行中，“2”表示订单已完成，“-2”表示订单已取消>\n");
+                    map.put("error","逻辑错误，排队列表的第二个订单异常！状态为"+order.getStatus()
+                            +"\n<“-1”表示待完成，“0”表示已通知用户准备， “1”表示订单正在进行中，“2”表示订单已完成，“-2”表示订单已取消>");
+                    return map;
+                }
+            }
+        }else{
+            logger.info("逻辑错误，排队列表的第一个订单状态异常！状态为"+order.getStatus()
+                    +"\n<“-1”表示待完成，“0”表示已通知用户准备， “1”表示订单正在进行中，“2”表示订单已完成，“-2”表示订单已取消>\n");
+            map.put("error","逻辑错误，排队列表的第一个订单状态异常！状态为"+order.getStatus()
+                    +"\n<“-1”表示待完成，“0”表示已通知用户准备， “1”表示订单正在进行中，“2”表示订单已完成，“-2”表示订单已取消>");
+            return map;
+        }//通知排队列表下一顾客前来美发结束
+
+        //下面通知后两位顾客进行准备
+        int count=0;
+        for(HairstylistReservation r : reservationList){
+            if(r.getStatus()!=1&&r.getStatus()!=2){//找到前两个状态不是进行中或已完成的预约订单进行通知（本排号列表只可能存在已完成、进行中、已通知、待完成的订单，不会出现已取消和状态异常的订单）
+                notifyUser(r.getOrderId(),++count);
+            }
+            if(count==2) break;
+        }
+
+        map = getWaitingOrder(myOpenid);
+        //重新获取当前的排号列表并返回
+        return map;
+    }
+
+
+    /**
+     *
+     * @param orderId 要通知的订单id
+     * @param flag 通知用户前面还有几个人，当flag=-1时，通知订单已完成
+     * @return
+     */
+    public Map notifyUser(int orderId , int flag){
+        Map map = new HashMap();
+
+        HaircutOrder order = haircutOrderService.findHaircutOrderById(orderId);
+        switch (flag){
+            case 0:
+                //...发送前往美发的通知
+                order.setStatus(1);
+                haircutOrderService.edit(order);//将订单状态设为进行中
+                logger.info("id为"+order.getId()+"的订单进行中\n");
+                logger.info("通知订单号id为"+order.getId()+"的顾客“"+order.user.getName()+"”前往美发");
+                map.put("flag",1);
+                break;
+            case 1:
+                //...发送等待前一位的通知
+                order.setStatus(0);//将订单状态设为已通知
+                haircutOrderService.edit(order);
+                logger.info("通知订单号id为"+order.getId()+"的顾客“"+order.user.getName()+"”前面只剩1位顾客了");
+                break;
+            case 2:
+                //...发送等待前两位的通知
+                order.setStatus(0);//将订单状态设为已通知
+                haircutOrderService.edit(order);
+                logger.info("通知订单号id为"+order.getId()+"的顾客“"+order.user.getName()+"”前面只剩2位顾客了");
+                break;
+            case -1:
+                //...发送订单已完成，请评价一下的通知
+                order.setStatus(2);
+                haircutOrderService.edit(order);
+                logger.info("id为"+order.getId()+"的订单已完成\n");
+                break;
+            default:
+                //错误flag
+                logger.info("通知flag错误！！请检查代码！！");
+                break;
+        }
+
 
         return map;
     }
@@ -238,22 +377,21 @@ public class HaircutOrderController {
     }
 
 
-    //    @ApiOperation(value = "添加用户订单",notes = "m1")
-//    @PostMapping("/haircutOrder")
-//    @ResponseStatus(HttpStatus.CREATED)
-//    public Map addHaircutOrder(@Validated HaircutOrder haircutOrders) {
-//        Map map = new HashMap();
-//        try{
-//            haircutOrderService.save(haircutOrders);
-//            logger.info("添加用户订单成功！");
-//            map.put("message","添加用户订单成功！");
-//        } catch (Exception e) {
-//            logger.error(String.valueOf(e));
-//            e.printStackTrace();
-//            map.put("error", "操作失败！！（后端发生某些错误，例如数据库连接失败）");
-//        }
-//        return map;
-//    }
+    @ApiOperation(value = "添加用户订单",notes = "m1")
+    @PostMapping("/haircutOrder")
+    public Map addHaircutOrder(@Validated HaircutOrder haircutOrders) {
+        Map map = new HashMap();
+        try{
+            haircutOrderService.save(haircutOrders);
+            logger.info("添加用户订单成功！");
+            map.put("message","添加用户订单成功！");
+        } catch (Exception e) {
+            logger.error(String.valueOf(e));
+            e.printStackTrace();
+            map.put("error", "操作失败！！（后端发生某些错误，例如数据库连接失败）");
+        }
+        return map;
+    }
 //
 //    @ApiOperation(value = "删除用户订单",notes = "m1")
 //    @DeleteMapping("/haircutOrder/{haircutOrderId}")
@@ -268,11 +406,11 @@ public class HaircutOrderController {
 //    }
 //
 //
-//    @ApiOperation(value = "获取单个用户订单信息",notes = "m1",produces = "application/json")
-//    @GetMapping("/haircutOrder/{haircutOrderId}")
-//    public HaircutOrder getOne( @PathVariable("haircutOrderId") Integer haircutOrderId) {
-//        return haircutOrderService.findHaircutOrderById(haircutOrderId);
-//    }
+    @ApiOperation(value = "获取单个用户订单信息",notes = "m1",produces = "application/json")
+    @GetMapping("/haircutOrder")
+    public HaircutOrder getOne( int haircutOrderId) {
+        return haircutOrderService.findHaircutOrderById(haircutOrderId);
+    }
     @ApiOperation(value = "分页获取所有订单列表", notes = "仅管理员有权限", produces = "application/json")
     @GetMapping("/haircutOrders/all")
     public Map getHaircutOrdersPage(String myOpenid,

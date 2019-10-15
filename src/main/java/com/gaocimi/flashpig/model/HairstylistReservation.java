@@ -28,7 +28,7 @@ public class HairstylistReservation {
     /**预约时间*/
     private Date bookTime;
 
-    /**预约订单状态 “0”表示订单正在进行中，”1“表示已完成，”-1“表示订单已取消，”-2“表示订单被拒绝*/
+    /**预约订单状态，“-1”表示待完成，“0”表示已通知用户准备， “1”表示订单正在进行中，“2”表示订单已完成，“-2”表示订单已取消*/
     private int status;
 
 
