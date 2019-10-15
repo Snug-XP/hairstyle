@@ -255,7 +255,7 @@ public class HairstylistController {
     }
 
     @ApiOperation(value = "分页获取所有发型师列表", notes = "仅管理员有权限", produces = "application/json")
-    @GetMapping("/hairstylists/all")
+    @GetMapping("/hairstylists/getAll")
     public Map getairstylistsPage(String myOpenid,
                                   @RequestParam(name = "pageNum", defaultValue = "0") int pageNum,
                                   @RequestParam(name = "pageSize", defaultValue = "10") int pageSize
