@@ -13,6 +13,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.text.DateFormat;
 import java.util.*;
 
 /**
@@ -316,25 +317,26 @@ public class HairstylistController {
     }
 
 
-    @ApiOperation(value = "发型师获取可预约时间")
+    @ApiOperation(value = "根据openid，获取发型师的可预约时间")
     @GetMapping("/hairstylist/getTime")
     public Map getTime(String myOpenid){
         Map map = new HashMap();
         try {
             if (hairstylistService.findHairstylistByOpenid(myOpenid) == null || hairstylistService.findHairstylistByOpenid(myOpenid).getApplyStatus() != 1) {
-                logger.info("非发型师用户操作！！");
-                map.put("error", "对不起，你还不是发型师用户，无权操作！！");
+                logger.info("所查询的发型师不存在！！");
+                map.put("error", "该发型师不存在！");
                 return map;
             }
 
+            DateFormat df3 = DateFormat.getTimeInstance();//只显示出时时分秒（12:43:37）的格式
             Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
-            List<Date> timeList = new ArrayList<>();
+            List<String> timeList = new ArrayList<>();
             String[] availableTime = hairstylist.getAvailableTime().split(",");
             for( String str : availableTime){
                 int hour;
                 try{
                     hour = Integer.parseInt(str);
-                    timeList.add( MyUtils.getTime(hour) );
+                    timeList.add( df3.format(MyUtils.getTime(hour) ));
                 } catch (Exception e){
                     logger.info("可预约时间转换失败（数据为："+str+"）");
                     map.put("error", "获取可预约时间失败！---可预约时间转换失败（数据为："+str+"）");
