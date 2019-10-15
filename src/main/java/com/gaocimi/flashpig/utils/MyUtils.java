@@ -26,6 +26,20 @@ public class MyUtils {
     }
 
     /**
+     * @return 返回数字对应的整点时间Data
+     */
+    public static Date getTime(int hourTime) {
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(new Date());
+        calendar.set(Calendar.HOUR_OF_DAY, hourTime);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        Date time = calendar.getTime();
+        return time;
+    }
+
+    /**
      * @return 返回与今天相差的天数（例：明天为-1，今天为0，昨天为1）
      */
     public static Long getDifferenceToday(Date date) {

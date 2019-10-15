@@ -44,7 +44,7 @@ public class HairstylistController {
     @ApiOperation(value = "发型师注册申请")
     @PostMapping("/hairstylist/register/apply")
     public Map addHairstylist(@Validated Hairstylist hairstylist,
-                              @RequestParam(value = "timeList", required = false) int[] timeList,
+                              @RequestParam(value = "timeList", required = false) List<String> timeList,
                               @RequestParam(value = "hairService", required = false) List<String> hairService,
                               @RequestParam(value = "description", required = false) List<String> description,
                               @RequestParam(value = "price", required = false) List<Double> price,
@@ -72,6 +72,7 @@ public class HairstylistController {
             hairstylist.setApplyStatus(0);//设置申请状态为申请中
             hairstylistService.save(hairstylist);
             hairstylist = hairstylistService.findHairstylistByOpenid(hairstylist.getOpenid());//重新从数据库获取刚进去的数据（主要为了取得id）
+
             setTime(hairstylist.getOpenid(), timeList);//跳转方法 设置可预约时间
 
 
@@ -283,7 +284,7 @@ public class HairstylistController {
     @ApiOperation(value = "发型师设置可预约时间")
     @PostMapping("/hairstylist/setTime")
     public Map setTime(String myOpenid,
-                       @RequestParam(value = "", required = false) int[] timeList) {
+                       @RequestParam(value = "timeList", required = false) List<String> timeList) {
         Map map = new HashMap();
         try {
             if (hairstylistService.findHairstylistByOpenid(myOpenid) == null || hairstylistService.findHairstylistByOpenid(myOpenid).getApplyStatus() != 1) {
@@ -293,7 +294,7 @@ public class HairstylistController {
             } else {
                 Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
                 String str = "";
-                for (int time : timeList) {
+                for (String time : timeList) {
                     if (str.length() > 0)
                         str = str + "," + time;
                     else
@@ -301,7 +302,7 @@ public class HairstylistController {
                 }
                 hairstylist.setAvailableTime(str);
                 hairstylistService.edit(hairstylist);
-                logger.info("发型师用户 " + hairstylist.getHairstylistName() + "（" + myOpenid + "）重新设置了可预约时间");
+                logger.info("发型师用户 " + hairstylist.getHairstylistName() + "（" + myOpenid + "）重新设置了可预约时间:"+timeList.toString());
                 map.put("message", "可预约时间设置成功");
                 return map;
             }
@@ -314,6 +315,42 @@ public class HairstylistController {
         }
     }
 
+
+    @ApiOperation(value = "发型师获取可预约时间")
+    @GetMapping("/hairstylist/getTime")
+    public Map getTime(String myOpenid){
+        Map map = new HashMap();
+        try {
+            if (hairstylistService.findHairstylistByOpenid(myOpenid) == null || hairstylistService.findHairstylistByOpenid(myOpenid).getApplyStatus() != 1) {
+                logger.info("非发型师用户操作！！");
+                map.put("error", "对不起，你还不是发型师用户，无权操作！！");
+                return map;
+            }
+
+            Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
+            List<Date> timeList = new ArrayList<>();
+            String[] availableTime = hairstylist.getAvailableTime().split(",");
+            for( String str : availableTime){
+                int hour;
+                try{
+                    hour = Integer.parseInt(str);
+                    timeList.add( MyUtils.getTime(hour) );
+                } catch (Exception e){
+                    logger.info("可预约时间转换失败（数据为："+str+"）");
+                    map.put("error", "获取可预约时间失败！---可预约时间转换失败（数据为："+str+"）");
+                    return map;
+                }
+            }
+            map.put("availableTimeList",timeList);
+            return map;
+        } catch (Exception e) {
+            logger.error(String.valueOf(e));
+            logger.info("获取可预约时间操作失败！！（后端发生某些错误）");
+            map.put("error", "获取可预约时间失败！！（后端发生某些错误）");
+            e.printStackTrace();
+            return map;
+        }
+    }
 
     @ApiOperation(value = "获取个人作品图片url列表")
     @GetMapping("/hairstylist/getImageUrlList")

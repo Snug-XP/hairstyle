@@ -1,13 +1,13 @@
 package com.gaocimi.flashpig.controller;
 
+import com.gaocimi.flashpig.entity.HairService;
 import com.gaocimi.flashpig.entity.HaircutOrder;
 import com.gaocimi.flashpig.entity.Hairstylist;
+import com.gaocimi.flashpig.entity.User;
 import com.gaocimi.flashpig.model.HairstylistReservation;
 import com.gaocimi.flashpig.model.OrderRecordFromOneUser;
 import com.gaocimi.flashpig.result.ResponseResult;
-import com.gaocimi.flashpig.service.AdministratorService;
-import com.gaocimi.flashpig.service.HaircutOrderService;
-import com.gaocimi.flashpig.service.HairstylistService;
+import com.gaocimi.flashpig.service.*;
 import com.gaocimi.flashpig.utils.MyUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -15,9 +15,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -37,6 +41,10 @@ public class HaircutOrderController {
     AdministratorService administratorService;
     @Autowired
     HairstylistService hairstylistService;
+    @Autowired
+    UserService userService;
+    @Autowired
+    HairServiceService hairServiceService;
 
     @ApiOperation(value = "获取一个时间段的预约列表(按预约时间顺序排序，若预约时间一致，按创建时间顺序)-用于“发型师-预约列表”页面", notes = "days的值表示获取几天前到现在的数据，days默认为0，表示只获取今天的订单,days=1表示获取昨天和今天的所有订单,days=-1表示获取今天之后的所有订单")
     @GetMapping("/hairstylist/getOrderList")
@@ -365,18 +373,57 @@ public class HaircutOrderController {
     }
 
 
-    @ApiOperation(value = "添加用户订单",notes = "m1")
-    @PostMapping("/haircutOrder")
-    public Map addHaircutOrder(@Validated HaircutOrder haircutOrders) {
+    @ApiOperation(value = "普通用户提交预约订单",notes = "m1")
+    @PostMapping("/user/addHaircutOrder")
+    public Map addHaircutOrder( String myOpenid, String userName,String userPhone,int hairstylistId, String bookTime,int serviceId ) {
         Map map = new HashMap();
         try{
-            haircutOrderService.save(haircutOrders);
-            logger.info("添加用户订单成功！");
-            map.put("message","添加用户订单成功！");
+
+            HaircutOrder order = new HaircutOrder();
+
+            User user = userService.findUserByOpenid(myOpenid);
+            Hairstylist hairstylist = hairstylistService.findHairstylistById(hairstylistId);
+            HairService hairService = hairServiceService.findHairServiceById(serviceId);
+
+            order.setUser(user);//设置提交该订单的用户
+            order.setHairstylist(hairstylist);//设置该订单对应的发型师
+            order.setServiceName(hairService.getServiceName());//设置选取的服务项目名称
+            order.setDescription(hairService.getDescription());//设置选取的服务项目描述
+            order.setPrice(hairService.getPrice());//设置选取的服务项目大致价格
+
+            order.setUserName(userName);//设置用户的称呼（不是用户账户中的名字，要求自己再输一遍，可以提示用户输入自己的称呼，不一定输入真名）
+            order.setUserPhone(userPhone);//设置联系方式
+            order.setStatus(-1);//设置订单状态为"待完成"
+
+            Date date = new Date(System.currentTimeMillis());
+            order.setCreateTime(date);
+
+
+            try {
+                //...处理预约时间
+                date = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(bookTime);
+                order.setBookTime(date);
+                if(date==null){
+                    logger.info("时间转换失败，请检查时间格式（传入数据："+bookTime+"）");
+                    map.put("error", "时间转换失败，请检查预约的时间格式");
+                    return map;
+                }
+            }catch (Exception e){
+                logger.error(String.valueOf(e));
+                logger.info("时间转换失败，请检查时间格式（传入数据："+bookTime+"）");
+                map.put("error", "时间转换失败，请检查预约的时间格式");
+                e.printStackTrace();
+                return map;
+            }
+
+            haircutOrderService.save(order);
+            logger.info("id为"+user.getId()+"的用户“"+userName+"”提交了一个对发型师（id="+hairstylist.getOpenid()+"）“"+hairstylist.getHairstylistName()+"”的订单");
+            map.put("message","订单提交成功！");
         } catch (Exception e) {
             logger.error(String.valueOf(e));
+            logger.info("用户提交预约订单失败！！（后端发生某些错误）");
+            map.put("error", "操作失败！！（后端发生某些错误）");
             e.printStackTrace();
-            map.put("error", "操作失败！！（后端发生某些错误，例如数据库连接失败）");
         }
         return map;
     }
@@ -424,6 +471,13 @@ public class HaircutOrderController {
             e.printStackTrace();
             return map;
         }
+    }
+
+    @ApiOperation(value = "****************时间传输测试*************************",notes = "m1")
+    @PostMapping("/test")
+    public Date getHaircutOrdersPage(String time) throws ParseException {
+        Date date = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(time);
+        return date;
     }
 
 }
