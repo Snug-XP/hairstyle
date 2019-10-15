@@ -15,7 +15,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.http.HttpStatus;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -70,18 +69,7 @@ public class HaircutOrderController {
                 if (resultOrderList.size() > 0) {
                     List<HairstylistReservation> recordList = new ArrayList<>();
                     for (HaircutOrder order : resultOrderList) {
-                        HairstylistReservation record = new HairstylistReservation();
-
-                        record.setOrderId(order.getId());
-                        record.setUserPhone(order.getUserPhone());
-                        record.setUserId(order.user.getId());
-                        record.setImgUrl(order.user.getPictureUrl());
-                        record.setUserName(order.user.getName());
-                        record.setCreatTime(order.getCreateTime());
-                        record.setBookTime(order.getBookTime());
-                        record.setHairService(order.getHairService().getServiceName());
-                        record.setStatus(order.getStatus());
-
+                        HairstylistReservation record = new HairstylistReservation(order);
                         recordList.add(record);
                     }
 
@@ -345,7 +333,7 @@ public class HaircutOrderController {
 
                         record.setOrderId(order.getId());
                         record.setDate(order.getBookTime());
-                        record.setHairService(order.getHairService().getServiceName());
+                        record.setHairService(order.getServiceName());
                         record.setPoint(order.getPoint());
                         recordList.add(record);
                     }

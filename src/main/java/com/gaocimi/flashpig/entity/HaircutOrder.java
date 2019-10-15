@@ -32,11 +32,17 @@ public class HaircutOrder {
     @JoinColumn(name = "hairstylist_id", nullable = false)
     public Hairstylist hairstylist;
 
-    /**该订单选取的服务； 定义名为service_id的外键列，该外键引用hair_service表的主键(id)列,采用懒加载*/
-    @ManyToOne(targetEntity = HairService.class, fetch = FetchType.LAZY)
-    @JoinColumn(name = "service_id", nullable = false)
-    public HairService hairService;
+    /**该订单选取的服务项目名称*/
+    @Column(nullable = false)
+    private String serviceName;
 
+    /**该订单选取的服务项目描述*/
+    @Column(nullable = false)
+    private String description;
+
+    /**该订单选取的服务项目大致价格*/
+    @Column(nullable = false)
+    private Double price;
 
     /**订单创建时间*/
     @Column(nullable = false)
@@ -80,14 +86,6 @@ public class HaircutOrder {
 
     public void setHairstylist(Hairstylist hairstylist) {
         this.hairstylist = hairstylist;
-    }
-
-    public HairService getHairService() {
-        return hairService;
-    }
-
-    public void setHairService(com.gaocimi.flashpig.entity.HairService hairService) {
-        this.hairService = hairService;
     }
 
     public Date getCreateTime() {
@@ -136,5 +134,29 @@ public class HaircutOrder {
 
     public void setUserPhone(String userPhone) {
         this.userPhone = userPhone;
+    }
+
+    public String getServiceName() {
+        return serviceName;
+    }
+
+    public void setServiceName(String serviceName) {
+        this.serviceName = serviceName;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public Double getPrice() {
+        return price;
+    }
+
+    public void setPrice(Double price) {
+        this.price = price;
     }
 }
