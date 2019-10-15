@@ -1,14 +1,16 @@
 package com.gaocimi.flashpig.model;
 
+import com.gaocimi.flashpig.entity.HaircutOrder;
+
 import java.util.Date;
 
 /**
- * 用于“发型师-预约列表”页面的信息
+ * 用于“发型师-预约列表”页面的信息（该类给发型师那边用的）
  */
 public class HairstylistReservation {
 
-    /**预约单id*/
-    private Integer reservationId;
+    /**预约订单id*/
+    private Integer orderId;
 
     /**提交预约的用户id*/
     private Integer userId;
@@ -19,25 +21,48 @@ public class HairstylistReservation {
     /**提交预约的用户姓名*/
     private String userName;
 
-    /**预约单中留的电话号码*/
+    /**预约订单中留的电话号码*/
     private String userPhone;
 
-    /**预约时间（不是创建的时间）*/
-    private Date time;
+    /**创建的时间*/
+    private Date creatTime;
 
-    /**预约单中状态*/
+    /**预约时间*/
+    private Date bookTime;
+
+    /**预约订单状态，“-1”表示待完成，“0”表示已通知用户准备， “1”表示订单正在进行中，“2”表示订单已完成，“-2”表示订单已取消*/
     private int status;
 
+    /**预约的服务项目名称*/
+    private String serviceName;
 
-    /**预约项目*/
-    private String hairService;
+    /**该订单选取的服务项目描述*/
+    public String description;
 
-    public Integer getReservationId() {
-        return reservationId;
+    /**该订单选取的服务项目大致价格*/
+    public Double price;
+
+
+    public HairstylistReservation(HaircutOrder order) {
+        setOrderId(order.getId());
+        setUserPhone(order.getUserPhone());
+        setUserId(order.user.getId());
+        setImgUrl(order.user.getPictureUrl());
+        setUserName(order.user.getName());
+        setCreatTime(order.getCreateTime());
+        setBookTime(order.getBookTime());
+        setServiceName(order.getServiceName());
+        setDescription(order.getDescription());
+        setPrice(order.getPrice());
+        setStatus(order.getStatus());
     }
 
-    public void setReservationId(Integer reservationId) {
-        this.reservationId = reservationId;
+    public Integer getOrderId() {
+        return orderId;
+    }
+
+    public void setOrderId(Integer orderId) {
+        this.orderId = orderId;
     }
 
     public Integer getUserId() {
@@ -64,20 +89,28 @@ public class HairstylistReservation {
         this.userName = userName;
     }
 
-    public Date getTime() {
-        return time;
+    public Date getCreatTime() {
+        return creatTime;
     }
 
-    public void setTime(Date time) {
-        this.time = time;
+    public void setCreatTime(Date creatTime) {
+        this.creatTime = creatTime;
     }
 
-    public String getHairService() {
-        return hairService;
+    public Date getBookTime() {
+        return bookTime;
     }
 
-    public void setHairService(String hairService) {
-        this.hairService = hairService;
+    public void setBookTime(Date bookTime) {
+        this.bookTime = bookTime;
+    }
+
+    public String getServiceName() {
+        return serviceName;
+    }
+
+    public void setServiceName(String serviceName) {
+        this.serviceName = serviceName;
     }
 
     public String getUserPhone() {
@@ -94,5 +127,21 @@ public class HairstylistReservation {
 
     public void setStatus(int status) {
         this.status = status;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public Double getPrice() {
+        return price;
+    }
+
+    public void setPrice(Double price) {
+        this.price = price;
     }
 }
