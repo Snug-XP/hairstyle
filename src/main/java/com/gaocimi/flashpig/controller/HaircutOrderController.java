@@ -52,12 +52,12 @@ public class HaircutOrderController {
                             @RequestParam(defaultValue = "0", required = true) int days) {
         Map map = new HashMap();
         try {
-            if (hairstylistService.findHairstylistByOpenid(myOpenid) == null || hairstylistService.findHairstylistByOpenid(myOpenid).getApplyStatus() != 1) {
+            Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
+            if ( hairstylist == null || hairstylist.getApplyStatus() != 1) {
                 logger.info("非发型师用户操作！！");
                 map.put("error", "对不起，你还不是发型师用户，无权操作！！");
                 return map;
             } else {
-                Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
                 List<HaircutOrder> tempOrderList = hairstylist.haircutOrderList;
                 List<HaircutOrder> resultOrderList = new ArrayList<HaircutOrder>();
                 Date orderBookTime;
@@ -309,8 +309,6 @@ public class HaircutOrderController {
                 logger.info("通知flag错误！！请检查代码！！");
                 break;
         }
-
-
         return map;
     }
 
@@ -320,12 +318,12 @@ public class HaircutOrderController {
     public Map getOrderRecordFromOneUser(String myOpenid, int userId) {
         Map map = new HashMap();
         try {
-            if (hairstylistService.findHairstylistByOpenid(myOpenid) == null || hairstylistService.findHairstylistByOpenid(myOpenid).getApplyStatus() != 1) {
+            Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
+            if ( hairstylist == null || hairstylist.getApplyStatus() != 1) {
                 logger.info("非发型师用户操作！！");
                 map.put("error", "对不起，你还不是发型师用户，无权操作！！");
                 return map;
             } else {
-                Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
                 List<HaircutOrder> tempOrderList = hairstylist.haircutOrderList;
                 List<HaircutOrder> resultOrderList = new ArrayList<HaircutOrder>();
                 for (HaircutOrder order : tempOrderList) {

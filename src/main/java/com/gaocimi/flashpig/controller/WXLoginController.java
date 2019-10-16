@@ -51,7 +51,7 @@ public class WXLoginController {
                        @RequestParam(value = "sex", required = false,defaultValue = "0")int sex,
                        @RequestParam(value = "pictureUrl", required = false) String pictureUrl,
                        @RequestParam(value = "phoneNum", required = false) String phoneNum) {
-        logger.info("\n\n\nwxlogin临时凭证  -  code:  " + code + "");
+        logger.info("wxlogin临时凭证  -  code:  " + code + "");
         Map map = new HashMap();
 //        WXSessionModel wxModel;
         try {

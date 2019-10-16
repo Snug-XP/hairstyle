@@ -45,17 +45,18 @@ public class RecordHairstylisToUserController {
                                @RequestParam(value = "imageList", required = false) List<String> imageList) {
         Map map = new HashMap();
         try {
-            if (hairstylistService.findHairstylistByOpenid(myOpenid) == null || hairstylistService.findHairstylistByOpenid(myOpenid).getApplyStatus() != 1) {
+            Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
+            User user = userService.findUserById(userId);
+            if ( hairstylist == null || hairstylist.getApplyStatus() != 1) {
                 logger.info("非发型师用户操作！！");
                 map.put("error", "对不起，你还不是发型师用户，无权操作！！");
                 return map;
-            } else if (userService.findUserById(userId) == null) {
+            } else if (user == null) {
                 logger.info("备注对象（普通用户）不存在！！");
                 map.put("error", "对不起，备注对象（普通用户）不存在！！");
                 return map;
             } else {
-                Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
-                User user = userService.findUserById(userId);
+
                 RecordHairstylisToUser recordToUser = new RecordHairstylisToUser();
 
                 recordToUser.setHairstylist(hairstylist);
@@ -97,12 +98,12 @@ public class RecordHairstylisToUserController {
     public Map getNoteRecordToOneUser(String myOpenid, int userId) {
         Map map = new HashMap();
         try {
-            if (hairstylistService.findHairstylistByOpenid(myOpenid) == null || hairstylistService.findHairstylistByOpenid(myOpenid).getApplyStatus() != 1) {
+            Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
+            if ( hairstylist == null || hairstylist.getApplyStatus() != 1) {
                 logger.info("非发型师用户操作！！");
                 map.put("error", "对不起，你还不是发型师用户，无权操作！！");
                 return map;
             } else {
-                Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
                 List<RecordHairstylisToUser> tempRecordList = hairstylist.recordToUserList;
                 List<RecordHairstylisToUser> resultRecordList = new ArrayList<>();
 
@@ -162,7 +163,8 @@ public class RecordHairstylisToUserController {
     public Map deleteRecordToUser(String myOpenid, int recordId) {
         Map map = new HashMap();
         try {
-            if (hairstylistService.findHairstylistByOpenid(myOpenid) == null || hairstylistService.findHairstylistByOpenid(myOpenid).getApplyStatus() != 1) {
+            Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
+            if ( hairstylist == null || hairstylist.getApplyStatus() != 1) {
                 logger.info("非发型师用户操作！！");
                 map.put("error", "对不起，你还不是发型师用户，无权操作！！");
                 return map;
@@ -177,8 +179,6 @@ public class RecordHairstylisToUserController {
             //判断该备注记录是不是该发型师用户的
             if (myOpenid.equals(recordToUser.getHairstylist().getOpenid())) {
                 //执行删除操作
-
-                Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
 
                 recordHairstylisToUserService.delete(recordId);
 
@@ -206,7 +206,8 @@ public class RecordHairstylisToUserController {
                                 @RequestParam(value = "imageList", required = false) List<String> imageList) {
         Map map = new HashMap();
         try {
-            if (hairstylistService.findHairstylistByOpenid(myOpenid) == null || hairstylistService.findHairstylistByOpenid(myOpenid).getApplyStatus() != 1) {
+            Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
+            if ( hairstylist == null || hairstylist.getApplyStatus() != 1) {
                 logger.info("非发型师用户操作！！");
                 map.put("error", "对不起，你还不是发型师用户，无权操作！！");
                 return map;
@@ -238,7 +239,6 @@ public class RecordHairstylisToUserController {
                     recordToUserImgUrlService.save(recordToUserImgUrl);
                 }
 
-                Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
                 logger.info(hairstylist.getHairstylistName() + "(" + hairstylist.getOpenid() + ") 修改了一条对" + recordToUser.getUser().getName() + "的备注！");
                 map.put("message", "修改成功！");
                 return map;

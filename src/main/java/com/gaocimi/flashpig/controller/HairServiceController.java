@@ -38,13 +38,13 @@ public class HairServiceController {
 
         Map map = new HashMap();
         try {
-            if (hairstylistService.findHairstylistByOpenid(myOpenid) == null || hairstylistService.findHairstylistByOpenid(myOpenid).getApplyStatus() != 1) {
+            Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
+            if ( hairstylist == null || hairstylist.getApplyStatus() != 1) {
                 logger.info("非发型师用户操作！！");
                 map.put("error", "对不起，你还不是发型师用户，无权操作！！");
                 return map;
             } else {
                 HairService hairService = new HairService();
-                Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
 
                 hairService.setHairstylist(hairstylist);
                 hairService.setServiceName(serviceName);
@@ -72,7 +72,8 @@ public class HairServiceController {
 
         Map map = new HashMap();
         try {
-            if (hairstylistService.findHairstylistByOpenid(myOpenid) == null || hairstylistService.findHairstylistByOpenid(myOpenid).getApplyStatus() != 1) {
+            Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
+            if ( hairstylist == null || hairstylist.getApplyStatus() != 1) {
                 logger.info("非发型师用户操作！！");
                 map.put("error", "对不起，你还不是发型师用户，无权操作！！");
                 return map;
@@ -85,7 +86,6 @@ public class HairServiceController {
             }
             //判断该服务是不是该用户的
             if (myOpenid.equals(hairService.getHairstylist().getOpenid())) {
-                Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
                 logger.info("发型师(" + hairstylist.getHairstylistName() + ")修改服务项目：" + hairService.getServiceName() + " -> " + serviceName + "  " + description + "  " + price);
 
                 hairService.setServiceName(serviceName);
@@ -138,12 +138,12 @@ public class HairServiceController {
     public Map getServiceList(String myOpenid) {
         Map map = new HashMap();
         try {
-            if (hairstylistService.findHairstylistByOpenid(myOpenid) == null || hairstylistService.findHairstylistByOpenid(myOpenid).getApplyStatus() != 1) {
+            Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
+            if ( hairstylist == null || hairstylist.getApplyStatus() != 1) {
                 logger.info("非发型师用户操作！！");
                 map.put("error", "对不起，你还不是发型师用户，无权操作！！");
                 return map;
             } else {
-                Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
                 map.put("serviceList", hairstylist.hairServiceList);
                 return map;
             }
@@ -161,7 +161,8 @@ public class HairServiceController {
     public Map deleteService(String myOpenid, int serviceId) {
         Map map = new HashMap();
         try {
-            if (hairstylistService.findHairstylistByOpenid(myOpenid) == null || hairstylistService.findHairstylistByOpenid(myOpenid).getApplyStatus() != 1) {
+            Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
+            if ( hairstylist == null || hairstylist.getApplyStatus() != 1) {
                 logger.info("非发型师用户操作！！");
                 map.put("error", "非发型师用户操作！！");
                 return map;
@@ -175,7 +176,6 @@ public class HairServiceController {
             //判断该服务是不是该发型师用户的
             if (myOpenid.equals(hairService.getHairstylist().getOpenid())) {
                 hairServiceService.delete(serviceId);
-                Hairstylist hairstylist = hairService.hairstylist;
                 logger.info(hairstylist.getHairstylistName() + "(" + hairstylist.getOpenid() + ")删除服务项目：" + hairService.getServiceName());
                 map.put("message", "删除成功！");
                 return map;
