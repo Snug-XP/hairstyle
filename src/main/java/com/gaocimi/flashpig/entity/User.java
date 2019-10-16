@@ -1,7 +1,9 @@
 package com.gaocimi.flashpig.entity;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import lombok.Data;
 
 import javax.persistence.*;
 import java.util.List;
@@ -14,7 +16,7 @@ import java.util.List;
  */
 @Entity
 @Table(name = "user")
-@JsonIgnoreProperties(value = {"haircutOrderList","articleList","handler","hibernateLazyInitializer"})
+@JsonIgnoreProperties(value = {"haircutOrderList","articleList","hairstylistList","handler","hibernateLazyInitializer","fieldHandler"})
 public class User {
 
     @Id
@@ -40,9 +42,21 @@ public class User {
     @OneToMany(targetEntity = HaircutOrder.class, mappedBy = "user",fetch = FetchType.LAZY)
     public List<HaircutOrder> haircutOrderList;
 
-    /**用户收藏的文章*/
-    @ManyToMany(mappedBy="userList",fetch = FetchType.LAZY)
+    /**用户收藏的文章列表,关系由对方维持*/
+    @ManyToMany(targetEntity = Article.class,mappedBy="userList",fetch = FetchType.LAZY)
     public List<Article> articleList;
+
+    /**用户收藏的发型师列表*/
+    // 映射连接表(即中间表)为user_to_hairstylist
+    @JoinTable(name = "user_to_hairstylist",
+            // 定义连接表中名为user_id的外键列，该外键列参照当前实体对应表(user)的主键列(id)
+            joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"),
+            // 定义连接表中名为hairstylist_id的外键列，该外键列参照当前实体的关联实体(Hairstylist)对应表(hairstylist)的主键列(id)
+            inverseJoinColumns = @JoinColumn(name = "hairstylist_id", referencedColumnName = "id"))
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JsonIgnore
+    public List<Hairstylist> hairstylistList;
+
 
     public Integer getId() {
         return id;
@@ -106,5 +120,13 @@ public class User {
 
     public void setArticleList(List<Article> articleList) {
         this.articleList = articleList;
+    }
+
+    public List<Hairstylist> getHairstylistList() {
+        return hairstylistList;
+    }
+
+    public void setHairstylistList(List<Hairstylist> hairstylistList) {
+        this.hairstylistList = hairstylistList;
     }
 }

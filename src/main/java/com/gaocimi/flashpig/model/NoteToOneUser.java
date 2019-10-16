@@ -6,7 +6,7 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * 用于“发型师-预约列表-备注信息”页面
+ * 用于“发型师-预约列表-备注信息”页面的数据存储
  */
 public class NoteToOneUser {
 

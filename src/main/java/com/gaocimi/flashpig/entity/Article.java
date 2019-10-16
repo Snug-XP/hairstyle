@@ -30,11 +30,11 @@ public class Article {
 
     private String imageList;
 
-    /**收藏该文章的用户*/
+    /**收藏该文章的用户列表*/
     @JoinTable(name="user_to_article",
             joinColumns={@JoinColumn(name="article_id", referencedColumnName="id")},
             inverseJoinColumns={@JoinColumn(name="user_id", referencedColumnName="id")})
-    @ManyToMany(fetch = FetchType.LAZY)
+    @ManyToMany(targetEntity = User.class,fetch = FetchType.LAZY)
     public List<User> userList;
 
     public Article(Integer id, String introduction, Date createTime, String skill, String imageList) {
@@ -83,5 +83,9 @@ public class Article {
 
     public void setImageList(String imageList) {
         this.imageList = imageList == null ? null : imageList.trim();
+    }
+
+    public String getSkill() {
+        return skill;
     }
 }

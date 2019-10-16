@@ -1,7 +1,15 @@
 package com.gaocimi.flashpig.utils;
 
+import com.gaocimi.flashpig.controller.HairstylistController;
+import com.gaocimi.flashpig.entity.Hairstylist;
+import com.gaocimi.flashpig.entity.User;
+import com.gaocimi.flashpig.service.UserService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 
 /**
  * 自己的工具类
@@ -10,7 +18,7 @@ import java.util.Date;
  * @date 2019-10-12 20:59:43
  */
 public class MyUtils {
-
+    protected static final Logger logger = LoggerFactory.getLogger(HairstylistController.class);
     /**
      * @return 返回今天23点59分59秒的时间Data
      */
@@ -46,6 +54,19 @@ public class MyUtils {
         Date todayLastTime = getTodayLastTime();
         Long days = todayLastTime.getTime() / 86400000 - date.getTime() / 86400000;//与今天23点59分相差天数
         return days;
+    }
+
+
+    public static boolean isUserLoyalToHairstylist(User user, Hairstylist hairstylist){
+        List<Hairstylist> hairstylists = user.getHairstylistList();
+        if(hairstylists==null||hairstylists.size()==0) {
+            return false;
+        }
+        for(Hairstylist h: hairstylists){
+            if(h.getId()==hairstylist.getId())
+                return true;
+        }
+        return false;
     }
 
 }
