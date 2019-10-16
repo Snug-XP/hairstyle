@@ -111,6 +111,28 @@ public class HairServiceController {
         }
     }
 
+    @ApiOperation(value = "根据发型师id，获取发型师的服务列表")
+    @GetMapping("/getHairstylistServiceList")
+    public Map getHairstylistServiceList(int hairstylistId) {
+        Map map = new HashMap();
+        try {
+            Hairstylist hairstylist = hairstylistService.findHairstylistById(hairstylistId);
+            if (hairstylist == null) {
+                logger.info("未找到该发型师用户");
+                map.put("error", "未找到该发型师用户！！·");
+                return map;
+            }
+            map = getServiceList(hairstylist.getOpenid());
+            return map;
+        } catch (Exception e) {
+            logger.error(String.valueOf(e));
+            logger.info("获取发型师信息失败！！（后端发生某些错误，例如数据库连接失败）");
+            map.put("error", "获取发型师信息失败！！（后端发生某些错误，例如数据库连接失败）");
+            e.printStackTrace();
+            return map;
+        }
+    }
+
     @ApiOperation(value = "获取自己的服务列表")
     @GetMapping("/hairstylist/getServiceList")
     public Map getServiceList(String myOpenid) {
