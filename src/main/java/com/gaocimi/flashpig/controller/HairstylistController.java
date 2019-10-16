@@ -18,8 +18,8 @@ import java.text.DateFormat;
 import java.util.*;
 
 /**
- * @author liyutg
- * @date 2019/6/12 2:14
+ * @author xp
+ * @date 2019-09-16 17:53:16
  * @description
  */
 @RestController
@@ -30,18 +30,16 @@ public class HairstylistController {
 
     @Autowired
     HairstylistService hairstylistService;
-
     @Autowired
     HairServiceService hairServiceService;
-
     @Autowired
     HairstylistImageUrlService hairstylistImageUrlService;
-
     @Autowired
     AdministratorService administratorService;
-
     @Autowired
     RecordHairstylisToUserService recordHairstylisToUserService;
+    @Autowired
+    UserService userService;
 
     @ApiOperation(value = "发型师注册申请")
     @PostMapping("/hairstylist/register/apply")
@@ -471,7 +469,7 @@ public class HairstylistController {
         }
     }
 
-    @ApiOperation(value = "获取个人的普通顾客预约数情况列表  -  用于“发型师-数据中心-顾客列表”")
+    @ApiOperation(value = "获取个人的普通顾客预约数情况列表（降序排序） -  用于“发型师-数据中心-顾客列表”")
     @GetMapping("/hairstylist/getOrdinaryCustomerList")
     public Map getOrdinaryCustomerList(String myOpenid) {
         Map map = new HashMap();
@@ -482,22 +480,44 @@ public class HairstylistController {
                 return map;
             }
 
+            Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
 
-            //...
+            //先获取所有的顾客预约数情况列表
+            map = getCustomerList(myOpenid);
+            List<CountUser> resultList = (List<CountUser>) map.get("resultList");
 
+            if (resultList == null || resultList.size() == 0) {
+                //发生错误，或者目前没有被预约过，直接返回
+                return map;
+            }
+            map.clear();
 
+            for (int i = 0; i < resultList.size(); ) {
+                CountUser countUser = resultList.get(i);
+                User user = userService.findUserById(countUser.getUserId());
+
+                //如果用户收藏了该发型师
+                if (MyUtils.isUserLoyalToHairstylist(user, hairstylist)) {
+                    resultList.remove(countUser);
+                } else {
+                    i++;
+                }
+            }
+
+            map.put("resultList", resultList);
+            if (resultList.size() == 0)
+                map.put("message", "你目前没有普通顾客!");
+            return map;
         } catch (Exception e) {
             logger.error(String.valueOf(e));
-            logger.info("获取个人作品图片操作失败！！（后端发生某些错误，例如数据库连接失败）\n\n");
+            logger.info("个人的普通顾客预约数情况列表失败！！（后端发生某些错误，例如数据库连接失败）\n\n");
             map.put("error", "操作失败！！（后端发生某些错误，例如数据库连接失败）");
             e.printStackTrace();
             return map;
         }
-
-        return getCustomerList(myOpenid);
     }
 
-    @ApiOperation(value = "获取个人的忠实顾客预约数情况列表  -  用于“发型师-数据中心-顾客列表”")
+    @ApiOperation(value = "获取个人的忠实顾客预约数情况列表（降序排序）  -  用于“发型师-数据中心-顾客列表”页面")
     @GetMapping("/hairstylist/getLoyalCustomerList")
     public Map getLoyalCustomerList(String myOpenid) {
         Map map = new HashMap();
@@ -508,24 +528,43 @@ public class HairstylistController {
                 return map;
             }
 
-            map = getCustomerList(myOpenid);
+            Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
 
+            //先获取所有的顾客预约数情况列表
+            map = getCustomerList(myOpenid);
             List<CountUser> resultList = (List<CountUser>) map.get("resultList");
+
             if (resultList == null || resultList.size() == 0) {
+                //发生错误，或者目前没有被预约过，直接返回
                 return map;
             }
+            map.clear();
 
+            for (int i = 0; i < resultList.size(); ) {
+                CountUser countUser = resultList.get(i);
+                User user = userService.findUserById(countUser.getUserId());
+
+                //如果用户没有收藏该发型师
+                if (!MyUtils.isUserLoyalToHairstylist(user, hairstylist)) {
+                    resultList.remove(countUser);
+                } else {
+                    i++;
+                }
+            }
+            map.put("resultList", resultList);
+            if (resultList.size() == 0)
+                map.put("message", "你目前没有忠实顾客!");
             return map;
         } catch (Exception e) {
             logger.error(String.valueOf(e));
-            logger.info("获取个人作品图片操作失败！！（后端发生某些错误，例如数据库连接失败）\n\n");
+            logger.info("个人的忠实顾客预约数情况列表失败！！（后端发生某些错误，例如数据库连接失败）\n\n");
             map.put("error", "操作失败！！（后端发生某些错误，例如数据库连接失败）");
             e.printStackTrace();
             return map;
         }
     }
 
-    @ApiOperation(value = "获取个人的所有顾客预约数情况列表  -  用于“发型师-数据中心-顾客列表”")
+    @ApiOperation(value = "获取个人的所有顾客预约数情况列表（降序排序）  -  用于“发型师-数据中心-顾客列表”")
     @GetMapping("/hairstylist/getCustomerList")
     public Map getCustomerList(String myOpenid) {
         Map map = new HashMap();
@@ -575,11 +614,13 @@ public class HairstylistController {
             });
 
             map.put("resultList", resultList);
+            if (resultList.size() == 0)
+                map.put("message", "你目前没有顾客!");
             return map;
 
         } catch (Exception e) {
             logger.error(String.valueOf(e));
-            logger.info("获取个人作品图片操作失败！！（后端发生某些错误，例如数据库连接失败）\n\n");
+            logger.info("获取个人的顾客预约数情况列表失败！！（后端发生某些错误，例如数据库连接失败）\n\n");
             map.put("error", "操作失败！！（后端发生某些错误，例如数据库连接失败）");
             e.printStackTrace();
             return map;

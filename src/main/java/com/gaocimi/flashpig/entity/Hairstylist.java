@@ -1,6 +1,8 @@
 package com.gaocimi.flashpig.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import lombok.Data;
 
 import javax.persistence.*;
 import java.util.Date;
@@ -14,7 +16,7 @@ import java.util.List;
  */
 @Entity
 @Table(name = "hairstylist")
-@JsonIgnoreProperties(value = {"haircutOrderList","hairstylistImageUrlList","hairServiceList","recordToUserList","userList","handler","hibernateLazyInitializer"})
+@JsonIgnoreProperties(value = {"haircutOrderList","hairstylistImageUrlList","hairServiceList","recordToUserList","userList","handler","hibernateLazyInitializer","fieldHandler"})
 public class Hairstylist {
 
     @Id
@@ -96,6 +98,7 @@ public class Hairstylist {
 
     /**收藏该发型师的用户列表*/
     @ManyToMany(targetEntity = User.class,mappedBy="hairstylistList",fetch = FetchType.LAZY)
+    @JsonIgnore
     public List<User> userList;
 
     public Integer getId() {
@@ -122,6 +125,14 @@ public class Hairstylist {
         this.hairstylistName = hairstylistName;
     }
 
+    public String getPersonalPhone() {
+        return personalPhone;
+    }
+
+    public void setPersonalPhone(String personalPhone) {
+        this.personalPhone = personalPhone;
+    }
+
     public String getPersonalPhotoUrl() {
         return personalPhotoUrl;
     }
@@ -144,6 +155,14 @@ public class Hairstylist {
 
     public void setShopName(String shopName) {
         this.shopName = shopName;
+    }
+
+    public String getProvince() {
+        return province;
+    }
+
+    public void setProvince(String province) {
+        this.province = province;
     }
 
     public String getCity() {
@@ -258,25 +277,13 @@ public class Hairstylist {
         this.hairServiceList = hairServiceList;
     }
 
-    public String getProvince() {
-        return province;
+    public List<HaircutOrder> getHaircutOrderList() {
+        return haircutOrderList;
     }
 
-    public void setProvince(String province) {
-        this.province = province;
+    public void setHaircutOrderList(List<HaircutOrder> haircutOrderList) {
+        this.haircutOrderList = haircutOrderList;
     }
-
-    public String getPersonalPhone() {
-        return personalPhone;
-    }
-
-    public void setPersonalPhone(String personalPhone) {
-        this.personalPhone = personalPhone;
-    }
-
-    public List<HaircutOrder> getHaircutOrderList() { return haircutOrderList;  }
-
-    public void setHaircutOrderList(List<HaircutOrder> haircutOrderList) { this.haircutOrderList = haircutOrderList;  }
 
     public List<RecordHairstylisToUser> getRecordToUserList() {
         return recordToUserList;
@@ -286,6 +293,10 @@ public class Hairstylist {
         this.recordToUserList = recordToUserList;
     }
 
+
+//    public List<User> getUserList() {
+//        return userList;
+//    }
     public void setUserList(List<User> userList) {
         this.userList = userList;
     }

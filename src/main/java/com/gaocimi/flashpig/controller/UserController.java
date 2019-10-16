@@ -1,42 +1,35 @@
-//package com.gaocimi.flashpig.controller;
-//
-//import com.gaocimi.flashpig.entity.User;
-//import com.gaocimi.flashpig.result.ResponseResult;
-//import com.gaocimi.flashpig.service.UserService;
-//import com.gaocimi.flashpig.utils.CustomDatePropertyEditor;
-//import com.gaocimi.flashpig.utils.LogUtils;
-//import io.swagger.annotations.Api;
-//import io.swagger.annotations.ApiOperation;
-//import org.hibernate.validator.constraints.NotBlank;
-//import org.slf4j.Logger;
-//import org.slf4j.LoggerFactory;
-//import org.springframework.beans.factory.annotation.Autowired;
-//import org.springframework.data.domain.Page;
-//import org.springframework.http.HttpStatus;
-//import org.springframework.validation.annotation.Validated;
-//import org.springframework.web.bind.WebDataBinder;
-//import org.springframework.web.bind.annotation.*;
-//import org.springframework.web.context.request.WebRequest;
-//
-//import java.beans.PropertyEditor;
-//import java.text.DateFormat;
-//import java.text.SimpleDateFormat;
-//import java.util.Date;
-//
-///**
-// * @author liyutg
-// * @date 2019/6/12 2:15
-// * @description
-// */
-//@RestController
-//@ResponseResult
-//@Api(value = "管理端用户服务", description = "管理员操作用户相关业务")
-//public class UserController {
-//    protected static final Logger logger = LoggerFactory.getLogger(UserController.class);
-//
-//    @Autowired
-//    UserService userService;
-//
+package com.gaocimi.flashpig.controller;
+
+import com.gaocimi.flashpig.entity.User;
+import com.gaocimi.flashpig.result.ResponseResult;
+import com.gaocimi.flashpig.service.UserService;
+import com.gaocimi.flashpig.utils.LogUtils;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
+import java.util.HashMap;
+import java.util.Map;
+
+/**
+ * @author xp
+ * @date 2019-10-16 19:37:30
+ * @description
+ */
+@RestController
+@ResponseResult
+@Api(value = "管理端用户服务", description = "管理员操作用户相关业务")
+public class UserController {
+    protected static final Logger logger = LoggerFactory.getLogger(UserController.class);
+
+    @Autowired
+    UserService userService;
+
 //    @ApiOperation(value = "添加用户")
 //    @PostMapping("/user")
 //    @ResponseStatus(HttpStatus.CREATED)
@@ -47,7 +40,7 @@
 //
 //    @ApiOperation(value = "删除用户")
 //    @DeleteMapping("/user/{userId}")
-//    public int deleteUser(@NotBlank @PathVariable("userId") Integer userId) {
+//    public int deleteUser( @PathVariable("userId") Integer userId) {
 //        userService.delete(userId);
 //        return 200;
 //    }
@@ -79,15 +72,17 @@
 //
 //        return page;
 //    }
-//
-//
-//    @InitBinder
-//    public void initBinder(WebDataBinder binder, WebRequest request) {
-//        //转换日期
-//        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-//        dateFormat.setLenient(false);
-//        // CustomDatePropertyEditor 为自定义日期编辑器
-//        PropertyEditor dateEditor = new CustomDatePropertyEditor(dateFormat, true, null);
-//        binder.registerCustomEditor(Date.class, dateEditor);
-//    }
-//}
+
+    @ApiOperation(value = "测试", produces = "application/json")
+    @GetMapping("/test")
+    public Map Test(int userId ) {
+
+        Map map = new HashMap();
+        User user = userService.findUserById(userId);
+        map.put("hairstylistList",user.hairstylistList);
+
+        return map;
+    }
+
+
+}

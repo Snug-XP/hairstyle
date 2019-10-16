@@ -400,7 +400,7 @@ public class HaircutOrderController {
 
 
             try {
-                //...处理预约时间
+                //处理用户提交的预约时间
                 date = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(bookTime);
                 order.setBookTime(date);
                 if(date==null){

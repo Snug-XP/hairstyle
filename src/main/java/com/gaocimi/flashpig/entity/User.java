@@ -1,7 +1,9 @@
 package com.gaocimi.flashpig.entity;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import lombok.Data;
 
 import javax.persistence.*;
 import java.util.List;
@@ -14,7 +16,7 @@ import java.util.List;
  */
 @Entity
 @Table(name = "user")
-@JsonIgnoreProperties(value = {"haircutOrderList","articleList","hairstylistList","handler","hibernateLazyInitializer"})
+@JsonIgnoreProperties(value = {"haircutOrderList","articleList","hairstylistList","handler","hibernateLazyInitializer","fieldHandler"})
 public class User {
 
     @Id
@@ -52,7 +54,9 @@ public class User {
             // 定义连接表中名为hairstylist_id的外键列，该外键列参照当前实体的关联实体(Hairstylist)对应表(hairstylist)的主键列(id)
             inverseJoinColumns = @JoinColumn(name = "hairstylist_id", referencedColumnName = "id"))
     @ManyToMany(fetch = FetchType.LAZY)
+    @JsonIgnore
     public List<Hairstylist> hairstylistList;
+
 
     public Integer getId() {
         return id;
@@ -118,4 +122,11 @@ public class User {
         this.articleList = articleList;
     }
 
+    public List<Hairstylist> getHairstylistList() {
+        return hairstylistList;
+    }
+
+    public void setHairstylistList(List<Hairstylist> hairstylistList) {
+        this.hairstylistList = hairstylistList;
+    }
 }
