@@ -46,7 +46,9 @@ public class WXLoginController {
 
     @ApiOperation(value = "使用用户登录的临时凭证请求微信服务器换取得到对应的openid与session_key传回给用户,并且导入（或修改）用户信息到数据库")
     @PostMapping("/wxLogin")
-    public Map wxLogin(String code, String name, int sex,
+    public Map wxLogin(String code,
+                       @RequestParam(value = "name", required = false,defaultValue = "未知姓名")String name,
+                       @RequestParam(value = "sex", required = false,defaultValue = "0")int sex,
                        @RequestParam(value = "pictureUrl", required = false) String pictureUrl,
                        @RequestParam(value = "phoneNum", required = false) String phoneNum) {
         logger.info("\n\n\nwxlogin临时凭证  -  code:  " + code + "");
