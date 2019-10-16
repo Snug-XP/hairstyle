@@ -3,7 +3,7 @@ package com.gaocimi.flashpig.model;
 import java.util.Date;
 
 /**
- * 用于“发型师-预约列表-预约记录”页面
+ * 用于“发型师-预约列表-预约记录”页面的数据存储
  */
 public class OrderRecordFromOneUser {
     private int orderId;

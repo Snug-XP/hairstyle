@@ -439,19 +439,19 @@ public class HaircutOrderController {
 //    public void updateHaircutOrder(@Validated HaircutOrder haircutOrders) {
 //        haircutOrderService.edit(haircutOrders);
 //    }
-//
-//
+
     @ApiOperation(value = "获取单个用户订单信息",notes = "m1",produces = "application/json")
     @GetMapping("/haircutOrder")
     public HaircutOrder getOne( int haircutOrderId) {
         return haircutOrderService.findHaircutOrderById(haircutOrderId);
     }
+
+
     @ApiOperation(value = "分页获取所有订单列表", notes = "仅管理员有权限", produces = "application/json")
     @GetMapping("/haircutOrders/getAll")
     public Map getHaircutOrdersPage(String myOpenid,
                                     @RequestParam(name = "pageNum", defaultValue = "0") int pageNum,
-                                    @RequestParam(name = "pageSize", defaultValue = "10") int pageSize
-    ) {
+                                    @RequestParam(name = "pageSize", defaultValue = "10") int pageSize) {
         Map map = new HashMap();
         try {
             if (administratorService.isExist(myOpenid)) {

@@ -5,7 +5,7 @@ import com.gaocimi.flashpig.entity.HaircutOrder;
 import java.util.Date;
 
 /**
- * 用于“发型师-预约列表”页面的信息（该类给发型师那边用的）
+ * 用于“发型师-预约列表”页面的数据存储（该类给发型师那边用的）
  */
 public class HairstylistReservation {
 
