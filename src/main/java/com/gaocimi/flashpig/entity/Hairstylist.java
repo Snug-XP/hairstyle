@@ -14,7 +14,7 @@ import java.util.List;
  */
 @Entity
 @Table(name = "hairstylist")
-@JsonIgnoreProperties(value = {"haircutOrderList","hairstylistImageUrlList","hairServiceList","recordToUserList","handler","hibernateLazyInitializer"})
+@JsonIgnoreProperties(value = {"haircutOrderList","hairstylistImageUrlList","hairServiceList","recordToUserList","userList","handler","hibernateLazyInitializer"})
 public class Hairstylist {
 
     @Id
@@ -94,12 +94,9 @@ public class Hairstylist {
     @OneToMany(targetEntity = RecordHairstylisToUser.class, mappedBy = "hairstylist")
     public List<RecordHairstylisToUser> recordToUserList;
 
-
-
-//    public Hairstylist() {
-//        hairServiceList = new ArrayList<HairService>();
-//        hairstylistImageUrlList = new ArrayList<HairstylistImageUrl>();
-//    }
+    /**收藏该发型师的用户列表*/
+    @ManyToMany(targetEntity = User.class,mappedBy="hairstylistList",fetch = FetchType.LAZY)
+    public List<User> userList;
 
     public Integer getId() {
         return id;
@@ -287,5 +284,9 @@ public class Hairstylist {
 
     public void setRecordToUserList(List<RecordHairstylisToUser> recordToUserList) {
         this.recordToUserList = recordToUserList;
+    }
+
+    public void setUserList(List<User> userList) {
+        this.userList = userList;
     }
 }
