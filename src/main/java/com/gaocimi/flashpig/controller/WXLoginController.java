@@ -2,6 +2,7 @@ package com.gaocimi.flashpig.controller;
 
 import cn.binarywang.wx.miniapp.api.WxMaService;
 import cn.binarywang.wx.miniapp.bean.WxMaJscode2SessionResult;
+import cn.binarywang.wx.miniapp.bean.WxMaUserInfo;
 import com.alibaba.fastjson.JSONObject;
 import com.gaocimi.flashpig.entity.User;
 import com.gaocimi.flashpig.model.WXSessionModel;
@@ -14,15 +15,19 @@ import com.gaocimi.flashpig.utils.LogUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import me.chanjar.weixin.common.error.WxErrorException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * @author xp
@@ -47,14 +52,24 @@ public class WXLoginController {
     @ApiOperation(value = "使用用户登录的临时凭证请求微信服务器换取得到对应的openid与session_key传回给用户,并且导入（或修改）用户信息到数据库")
     @PostMapping("/wxLogin")
     public Map wxLogin(String code,
+                       @RequestParam(value = "rawData", required = false) String rawData,
                        @RequestParam(value = "name", required = false,defaultValue = "未知姓名")String name,
                        @RequestParam(value = "sex", required = false,defaultValue = "0")int sex,
                        @RequestParam(value = "pictureUrl", required = false) String pictureUrl,
-                       @RequestParam(value = "phoneNum", required = false) String phoneNum) {
+                       @RequestParam(value = "phoneNum", required = false) String phoneNum) throws WxErrorException {
+
+        Map<String, String> rawDataMap = new HashMap<>();
+        if(rawData!=null){
+            rawDataMap = JsonUtils.jsonToPojo(rawData,rawDataMap.getClass());
+        }
         logger.info("wxlogin临时凭证  -  code:  " + code + "");
+        logger.info("获取的rawData数据为： "+rawData);
+        logger.info("获取的rawDataMap数据为： "+rawDataMap.toString());
+
+        name = rawDataMap.get("nickName");
         Map map = new HashMap();
 //        WXSessionModel wxModel;
-        try {
+//        try {
 
 //            String url = "https://api.weixin.qq.com/sns/jscode2session";
 //
@@ -108,12 +123,12 @@ public class WXLoginController {
                 userService.edit(user);
                 logger.info("用户 " + user.getName() + " 登录成功！\n\n\n\n");
             }
-        } catch (Exception e) {
-            logger.error(String.valueOf(e));
-            logger.info("临时登录凭证错误-不对应\n\n\n\n");
-            e.printStackTrace();
-            map.put("error", "临时登录凭证错误");
-        }
+//        } catch (Exception e) {
+//            logger.error(String.valueOf(e));
+//            logger.info("临时登录凭证错误-不对应\n\n\n\n");
+//            e.printStackTrace();
+//            map.put("error", "临时登录凭证错误");
+//        }
         return map;
     }
 
@@ -125,6 +140,34 @@ public class WXLoginController {
 //        return "helllooooooooooo！";
 //    }
 
+    @ApiOperation(value = "测试方法")
+    @GetMapping("/login_status")
+    public String getLoginStatus(@RequestParam(value = "code") String code,
+                                 @RequestParam(value = "signature") String signature,
+                                 @RequestParam(value = "rawData") String rawData,
+                                 @RequestParam(value = "encryptedData") String encryptedData,
+                                 @RequestParam(value = "iv") String iv) throws WxErrorException {
+        if (code == null || code.length() < 10) {
+            return "无效的code";
+        } else {
+            //存在有效的 code
+            System.out.println("这里请求了一次code==========" + code);
+            WxMaJscode2SessionResult session = this.wxService.getUserService().getSessionInfo(code);
+            String sessionKey = session.getSessionKey();
+            //通过openId sessionKey 生成3rd session 返回给客户端小程序
+            String accessToken = UUID.randomUUID().toString();
+            // 用户信息校验
+            if (!this.wxService.getUserService().checkUserInfo(sessionKey, rawData, signature)) {
+                return "用户信息校验失败";
+            }
+            // 解密用户信息
+            WxMaUserInfo userInfo = this.wxService.getUserService().getUserInfo(sessionKey, encryptedData, iv);
+            System.out.println(userInfo);
+            System.out.println("accessToken : " + accessToken);
+//            redisUtil.set("asdfKevin", accessToken, 180L);
+            return accessToken;
+        }
+    }
 
 }
 

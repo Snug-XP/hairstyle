@@ -183,4 +183,8 @@ public class HaircutOrder {
     public void setUserName(String userName) {
         this.userName = userName;
     }
+
+    public String getAddress() {
+        return hairstylist.getCity()+hairstylist.getDistrict()+hairstylist.getAddress();
+    }
 }

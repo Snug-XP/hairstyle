@@ -1,13 +1,10 @@
 package com.gaocimi.flashpig.entity;
 
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import io.swagger.models.auth.In;
 
 import javax.persistence.*;
 import java.util.Date;
-import java.util.List;
 
 /**
  * UserFormid - 用户Formid实体类
@@ -17,7 +14,7 @@ import java.util.List;
  */
 @Entity
 @Table(name = "user_formid")
-@JsonIgnoreProperties(value = {"hairstylistList","handler","hibernateLazyInitializer","fieldHandler"})
+@JsonIgnoreProperties(value = {"user","hairstylistList","handler","hibernateLazyInitializer","fieldHandler"})
 public class UserFormid {
 
     @Id

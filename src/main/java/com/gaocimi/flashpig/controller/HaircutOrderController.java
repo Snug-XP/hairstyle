@@ -313,7 +313,7 @@ public class HaircutOrderController {
     }
 
 
-    @ApiOperation(value = "获取自己关于某个顾客的预约记录(按时间顺序排序)-用于“发型师-预约列表-预约记录”页面")
+    @ApiOperation(value = "获取自己关于某个顾客的预约记录(按时间倒序排序)-用于“发型师-预约列表-预约记录”页面")
     @GetMapping("/hairstylist/getOrderRecordFromOneUser")
     public Map getOrderRecordFromOneUser(String myOpenid, int userId) {
         Map map = new HashMap();
@@ -373,7 +373,8 @@ public class HaircutOrderController {
 
     @ApiOperation(value = "普通用户提交预约订单",notes = "m1")
     @PostMapping("/user/addHaircutOrder")
-    public Map addHaircutOrder( String myOpenid, String userName,String userPhone,int hairstylistId, String bookTime,int serviceId ) {
+    public Map addHaircutOrder( String myOpenid, String userName,String userPhone,
+                                int hairstylistId, String bookTime,int serviceId ) {
         Map map = new HashMap();
         try{
 

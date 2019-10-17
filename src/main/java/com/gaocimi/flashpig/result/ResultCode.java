@@ -54,8 +54,7 @@ public enum ResultCode {
 
 
     /* 系统错误：40001-49999 */
-//    SYSTEM_INNER_ERROR(40001, "系统繁忙，请稍后重试"),
-    SYSTEM_INNER_ERROR(40001, "接收数据失败，请检查传输的数据类型"),
+    SYSTEM_INNER_ERROR(40001, "系统繁忙，请稍后重试"),
 
     /* 数据错误：50001-599999 */
     RESULE_DATA_NONE(51000, "数据未找到"),

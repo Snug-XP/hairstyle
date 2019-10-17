@@ -20,13 +20,8 @@ import java.util.List;
  */
 @Entity
 @Table(name = "user")
-@JsonIgnoreProperties(value = {"haircutOrderList","articleList","hairstylistList","handler","hibernateLazyInitializer","fieldHandler"})
+@JsonIgnoreProperties(value = { "userFormidList","haircutOrderList","articleList","hairstylistList","handler","hibernateLazyInitializer","fieldHandler"})
 public class User {
-
-    @Transient
-    @Autowired
-    UserFormidService userFormidService;
-
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -66,7 +61,7 @@ public class User {
     public List<Hairstylist> hairstylistList;
 
     /**用户提交过的Formid列表； 定义该User实体所有关联的UserFormid实体； 指定mappedBy属性表明该User实体不控制关联关系*/
-    @OneToMany(targetEntity = HaircutOrder.class, mappedBy = "user",fetch = FetchType.LAZY)
+    @OneToMany(targetEntity = UserFormid.class, mappedBy = "user",fetch = FetchType.LAZY)
     public List<UserFormid> userFormidList;
 
 
@@ -143,36 +138,4 @@ public class User {
     public List<UserFormid> getUserFormidList() { return userFormidList; }
 
     public void setUserFormidList(List<UserFormid> userFormidList) { this.userFormidList = userFormidList; }
-
-    public UserFormid getOneUserFormid() {
-        UserFormid userFormid;
-
-        // 将Formid列表按提交的时间顺序排序
-        Collections.sort(userFormidList, (o1, o2) -> {
-            if (o1.getCreatTime().after(o2.getCreatTime())) {
-                return 1;
-            } else if (o2.getCreatTime().after(o1.getCreatTime())) {
-                return -1;
-            }
-            return 0; //相等为0
-        });
-
-        //选择7天内的Formid，并删除7天以上的
-        while(userFormidList.size() > 0 ){
-            userFormid = userFormidList.get(0);//获取最早提交的Formid
-
-            System.out.println(userFormidList);
-
-            Long day = MyUtils.getDifferenceNow(userFormid.getCreatTime());//取得提交Formid的时间与当前时刻相差的天数
-            if (day<7) {
-                userFormidService.delete(userFormid.getId());
-                return userFormid;
-            }else{
-                userFormidService.delete(userFormid.getId());
-            }
-        }
-        return null;
-    }
-
-
 }
