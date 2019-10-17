@@ -45,6 +45,8 @@ public class HaircutOrderController {
     UserService userService;
     @Autowired
     HairServiceService hairServiceService;
+    @Autowired
+    PushTemplateMessageController messageController;
 
     @ApiOperation(value = "获取一个时间段的预约列表(按预约时间顺序排序，若预约时间一致，按创建时间顺序)-用于“发型师-预约列表”页面", notes = "days的值表示获取几天前到现在的数据，days默认为0，表示只获取今天的订单,days=1表示获取昨天和今天的所有订单,days=-1表示获取今天之后的所有订单")
     @GetMapping("/hairstylist/getOrderList")
@@ -189,7 +191,7 @@ public class HaircutOrderController {
         return map;
     }
 
-    @ApiOperation(value = "如果有进行的订单，将进行中的订单状态设为已完成；通知下一位前来美发，并通知再后2位准备前往 - 用于“发型师-排号系统”页面的通知的“下一位”操作")
+    @ApiOperation(value = "下一位操作，如果有进行的订单，将进行中的订单状态设为已完成；通知下一位前来美发，并通知再后2位准备前往 - 用于“发型师-排号系统”页面的通知的“下一位”操作")
     @GetMapping("/hairstylist/nextWaitingOrder")
     public Map nextWaitingOrder(String myOpenid) {
         Map map = new HashMap();
@@ -279,29 +281,33 @@ public class HaircutOrderController {
         HaircutOrder order = haircutOrderService.findHaircutOrderById(orderId);
         switch (flag){
             case 0:
-                //...发送前往美发的通知
+                //发送前往美发的通知
                 order.setStatus(1);
                 haircutOrderService.edit(order);//将订单状态设为进行中
                 logger.info("id为"+order.getId()+"的订单进行中\n");
+                messageController.pushComingMessage(orderId,0);
                 logger.info("通知订单号id为"+order.getId()+"的顾客“"+order.user.getName()+"”前往美发");
                 map.put("flag",1);
                 break;
             case 1:
-                //...发送等待前一位的通知
+                //发送等待前一位的通知
                 order.setStatus(0);//将订单状态设为已通知
                 haircutOrderService.edit(order);
+                messageController.pushComingMessage(orderId,1);
                 logger.info("通知订单号id为"+order.getId()+"的顾客“"+order.user.getName()+"”前面只剩1位顾客了");
                 break;
             case 2:
-                //...发送等待前两位的通知
+                //发送等待前两位的通知
                 order.setStatus(0);//将订单状态设为已通知
                 haircutOrderService.edit(order);
+                messageController.pushComingMessage(orderId,2);
                 logger.info("通知订单号id为"+order.getId()+"的顾客“"+order.user.getName()+"”前面只剩2位顾客了");
                 break;
             case -1:
-                //...发送订单已完成，请评价一下的通知
+                //发送订单已完成，请评价一下的通知
                 order.setStatus(2);
                 haircutOrderService.edit(order);
+                messageController.pushCompleteMessage(orderId);
                 logger.info("id为"+order.getId()+"的订单已完成\n");
                 break;
             default:
