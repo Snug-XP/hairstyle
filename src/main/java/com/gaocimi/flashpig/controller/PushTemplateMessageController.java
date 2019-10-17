@@ -1,7 +1,6 @@
 package com.gaocimi.flashpig.controller;
 
 import com.gaocimi.flashpig.entity.HaircutOrder;
-import com.gaocimi.flashpig.entity.User;
 import com.gaocimi.flashpig.entity.UserFormid;
 import com.gaocimi.flashpig.result.ResponseResult;
 import com.gaocimi.flashpig.service.HaircutOrderService;
@@ -14,7 +13,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.*;
@@ -32,7 +30,7 @@ import me.chanjar.weixin.common.error.WxErrorException;
  */
 @RestController
 @ResponseResult
-@Api(value = "微信用户登录服务", description = "微信小程序获取用户微信号信息进行登录")
+@Api(value = "模版消息的服务", description = "微信小程序获推送模版消息给用户")
 public class PushTemplateMessageController {
     protected static final Logger logger = LoggerFactory.getLogger(WXLoginController.class);
 
@@ -41,54 +39,27 @@ public class PushTemplateMessageController {
     @Autowired
     private HaircutOrderService haircutOrderService;
     @Autowired
-    UserFormidService userFormidService;
+    private UserFormidService userFormidService;
+    @Autowired
+    private UserFormidController userFormidController;
 
 
-    public UserFormid getOneUserFormid(List<UserFormid> formidList) {
-
-        UserFormid userFormid;
-
-        // ...将Formid列表按提交的时间顺序排序
-        Collections.sort(formidList, (r1, r2) -> {
-            if (r1.getCreatTime().after(r2.getCreatTime())) {
-                return 1;
-            } else if (r2.getCreatTime().after(r1.getCreatTime())) {
-                return -1;
-            }
-            return 0; //相等为0
-        });
-
-        //选择7天内的Formid，并删除7天以上的
-        while(formidList.size() > 0 ){
-
-            userFormid = formidList.get(0);//获取最早提交的Formid
-            Long day = MyUtils.getDifferenceNow(userFormid.getCreatTime());//取得提交Formid的时间与当前时刻相差的天数
-
-            if (day<7) {
-                formidList.remove(userFormid);
-                userFormidService.delete(userFormid.getId());
-                return userFormid;
-            }else{
-                formidList.remove(userFormid);
-                userFormidService.delete(userFormid.getId());
-            }
-        }
-        return null;
-    }
-
-
-    @ApiOperation(value = "根据订单id，推送消息测试-预约成功通知")
+    @ApiOperation(value = "根据订单id，推送消息测试-预约成功的通知")
     @PostMapping("/pushSuccessMessage")
 //    public String pushSuccessMessage(@RequestParam String openid, @RequestParam String formid) {
-    public String pushSuccessMessage(int orderId) {
+    public Map pushSuccessMessage(int orderId) {
 
+        Map map = new HashMap();
         List<WxMaTemplateData> templateDataList = getSuccessTemplateDataList(orderId);
 
         HaircutOrder order = haircutOrderService.findHaircutOrderById(orderId);
-        UserFormid userFormid = getOneUserFormid(order.user.getUserFormidList());
+        UserFormid userFormid = userFormidController.getOneUserFormid(order.user.getUserFormidList());
 
-        if(userFormid==null)
-            return "该用户没有合适的Formid";
+        if (userFormid == null) {
+            logger.info("该用户没有合适的Formid用于发送模版消息，记得想办法获取用户的Formid哦");
+            map.put("message", "该用户没有合适的Formid用于发送模版消息，记得想办法获取用户的Formid哦");
+            return map;
+        }
         //设置推送消息
         WxMaTemplateMessage templateMessage = WxMaTemplateMessage.builder()
                 .toUser(userFormid.getOpenid())//要推送的用户openid
@@ -102,10 +73,11 @@ public class PushTemplateMessageController {
             wxService.getMsgService().sendTemplateMsg(templateMessage);
         } catch (WxErrorException e) {
             logger.info("推送失败：" + e.getMessage());
-            return e.getMessage();
+            map.put("error", "推送失败，模版消息的设置错误（例如小程序id不对应）");
+            return map;
         }
         logger.info("推送消息发送成功：", templateDataList);
-        return "推送成功";
+        return map;
     }
 
 
@@ -150,15 +122,14 @@ public class PushTemplateMessageController {
         Map map = new HashMap();
         List<UserFormid> formidList = haircutOrderService.findHaircutOrderById(orderId).user.getUserFormidList();
 
-        if(formidList==null){
+        if (formidList == null) {
             System.out.println("为空");
-            map.put("formidList",formidList);
+            map.put("formidList", formidList);
             return map;
         }
-        if(formidList.size()==0)
-        {
+        if (formidList.size() == 0) {
             System.out.println("为0");
-            map.put("formidList",formidList);
+            map.put("formidList", formidList);
             return map;
         }
         // ...将Formid列表按提交的时间顺序排序
@@ -171,7 +142,7 @@ public class PushTemplateMessageController {
             return 0; //相等为0
         });
 
-        map.put("formidList",formidList);
+        map.put("formidList", formidList);
         return map;
     }
 }
