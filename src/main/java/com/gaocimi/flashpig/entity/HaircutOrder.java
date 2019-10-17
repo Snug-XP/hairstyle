@@ -18,6 +18,10 @@ public class HaircutOrder {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
+    /**该订单中按照一些参数生成的预约号*/
+    @Column(nullable = false)
+    private String reservationNum;
+
     /**该订单中用户提交的联系电话（考虑到用户自身没有绑定手机号码）*/
     @Column(nullable = false)
     private String userPhone;
@@ -74,6 +78,14 @@ public class HaircutOrder {
 
     public void setId(Integer id) {
         this.id = id;
+    }
+
+    public String getReservationNum() {
+        return reservationNum;
+    }
+
+    public void setReservationNum(String reservationNum) {
+        this.reservationNum = reservationNum;
     }
 
     public User getUser() {

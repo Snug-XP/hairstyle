@@ -393,9 +393,13 @@ public class HaircutOrderController {
             order.setUserPhone(userPhone);//设置联系方式
             order.setStatus(-1);//设置订单状态为"待完成"
 
+
             Date date = new Date(System.currentTimeMillis());
             order.setCreateTime(date);
 
+            //...设计订单的预约号
+            String reservationNum = "000"+order.user.getId()+date.getYear()+date.getDay()+date.getHours();
+            order.setReservationNum(reservationNum);
 
             try {
                 //处理用户提交的预约时间
