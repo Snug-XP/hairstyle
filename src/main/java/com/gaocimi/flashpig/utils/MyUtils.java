@@ -56,6 +56,15 @@ public class MyUtils {
         return days;
     }
 
+    /**
+     * @return 返回与当前时间相差的天数（例：明天为-1，今天为0，昨天为1）
+     */
+    public static Long getDifferenceNow(Date date) {
+        Date nowTime = new Date(System.currentTimeMillis());
+        Long days = nowTime.getTime() / 86400000 - date.getTime() / 86400000;//与当前时刻相差的天数
+        return days;
+    }
+
 
     public static boolean isUserLoyalToHairstylist(User user, Hairstylist hairstylist){
         List<Hairstylist> hairstylists = user.getHairstylistList();
@@ -68,5 +77,6 @@ public class MyUtils {
         }
         return false;
     }
+
 
 }
