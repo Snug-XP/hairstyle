@@ -13,6 +13,7 @@ oss配置可能过期，需要重新设置
 
 
 - 运行jar包（后台运行）：nohup java -jar hairstyle.jar >log.txt &
+- 运行jar包（后台运行）：nohup java -jar hairstyle-0.0.1-SNAPSHOT.jar >log.txt &
 - 查看某端口占用的线程pid：netstat -nlp |grep :8080
 - 查看当前已运行的进程： ps -x
 - 根据pid终止进程：kill pid
