@@ -48,7 +48,7 @@ public class HaircutOrderController {
     @Autowired
     PushTemplateMessageController messageController;
 
-    @ApiOperation(value = "获取一个时间段的预约列表(按预约时间顺序排序，若预约时间一致，按创建时间顺序)-用于“发型师-预约列表”页面", notes = "days的值表示获取几天前到现在的数据，days默认为0，表示只获取今天的订单,days=1表示获取昨天和今天的所有订单,days=-1表示获取今天之后的所有订单")
+    @ApiOperation(value = "获取一个时间段的预约列表(按预约时间倒序排序，若预约时间一致，按创建时间倒序)-用于“发型师-预约列表”页面", notes = "days的值表示获取几天前到现在的数据，days默认为0，表示只获取今天的订单,days=1表示获取昨天和今天的所有订单,days=-1表示获取今天之后的所有订单")
     @GetMapping("/hairstylist/getOrderList")
     public Map getOrderList(String myOpenid,
                             @RequestParam(defaultValue = "0", required = true) int days) {
@@ -83,22 +83,22 @@ public class HaircutOrderController {
                         recordList.add(record);
                     }
 
-                    // 先按创建时间顺序排序一遍
+                    // 先按创建时间倒序排序一遍
                     Collections.sort(recordList, (r1, r2) -> {
                         if (r1.getCreatTime().after(r2.getCreatTime())) {
-                            return 1;
-                        } else if (r2.getCreatTime().after(r1.getCreatTime())) {
                             return -1;
+                        } else if (r2.getCreatTime().after(r1.getCreatTime())) {
+                            return 1;
                         }
                         return 0; //相等为0
                     });
 
-                    // 再按预约时间顺序排序
+                    // 再按预约时间倒序排序
                     Collections.sort(recordList, (r1, r2) -> {
                         if (r1.getBookTime().after(r2.getBookTime())) {
-                            return 1;
-                        } else if (r2.getBookTime().after(r1.getBookTime())) {
                             return -1;
+                        } else if (r2.getBookTime().after(r1.getBookTime())) {
+                            return 1;
                         }
                         return 0; //相等为0
                     });
@@ -177,7 +177,7 @@ public class HaircutOrderController {
     public Map getWaitingOrder(String myOpenid) {
         Map map = new HashMap();
 
-        //获取今天的所有订单(按时间顺序排序)
+        //获取今天的所有订单(按时间倒序排序的)
         map = getOrderList(myOpenid, 0);
         List<HairstylistReservation> reservationList = (List<HairstylistReservation>) map.get("recordList");
 
@@ -186,6 +186,8 @@ public class HaircutOrderController {
 //            logger.info(map.toString());
             return map;//信息都在map里面
         }
+
+        Collections.reverse(reservationList);//将获取到的今天的所有订单按时间正序（因为原来是按预约时和创建时间时间倒序获取到的）
 
         map = doSth(reservationList);//对今天的订单,进行订单区分统计
         return map;
@@ -482,8 +484,8 @@ public class HaircutOrderController {
         }
     }
 
-    @ApiOperation(value = "****************时间传输测试*************************",notes = "m1")
-    @PostMapping("/test")
+    @ApiOperation(value = "****************时间(yyyy-MM-dd HH:mm:ss)传输测试*************************",notes = "m1")
+    @PostMapping("/timeTest")
     public Date getHaircutOrdersPage(String time) throws ParseException {
         Date date = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(time);
         return date;

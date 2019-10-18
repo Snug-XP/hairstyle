@@ -5,7 +5,7 @@ import com.gaocimi.flashpig.entity.UserFormid;
 import com.gaocimi.flashpig.result.ResponseResult;
 import com.gaocimi.flashpig.service.HaircutOrderService;
 import com.gaocimi.flashpig.service.UserFormidService;
-import com.gaocimi.flashpig.utils.MyUtils;
+import com.gaocimi.flashpig.service.UserService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.slf4j.Logger;
@@ -42,9 +42,11 @@ public class PushTemplateMessageController {
     private UserFormidService userFormidService;
     @Autowired
     private UserFormidController userFormidController;
+    @Autowired
+    UserService userService;
 
 
-    @ApiOperation(value = "根据订单id，推送模板消息-预约成功的通知")
+    @ApiOperation(value = "根据订单id，推送模板消息-预约成功的通知（...之后记得关闭url访问）")
     @PostMapping("/pushSuccessMessage")
     public Map pushSuccessMessage(int orderId) {
 
@@ -82,7 +84,7 @@ public class PushTemplateMessageController {
     }
 
 
-    @ApiOperation(value = "根据订单id，推送模板消息-准备前往")
+    @ApiOperation(value = "根据订单id，推送模板消息-准备前往（...之后记得关闭url访问）")
     @PostMapping("/pushComingMessage")
     public Map pushComingMessage(int orderId , int remainingNum ) {
 
@@ -125,7 +127,7 @@ public class PushTemplateMessageController {
     }
 
 
-    @ApiOperation(value = "根据订单id，推送模板消息-订单已完成")
+    @ApiOperation(value = "根据订单id，推送模板消息-订单已完成（...之后记得关闭url访问）")
     @PostMapping("/pushCompleteMessage")
     public Map pushCompleteMessage(int orderId) {
         Map map = new HashMap();
@@ -296,12 +298,12 @@ public class PushTemplateMessageController {
         return templateDataList;
     }
 
-    @ApiOperation(value = "测试Formid列表排序")
+    @ApiOperation(value = "使用userid测试Formid列表排序")
     @GetMapping("/Formidtest")
-    public Map test(int orderId) {
+    public Map test(int userid) {
 
         Map map = new HashMap();
-        List<UserFormid> formidList = haircutOrderService.findHaircutOrderById(orderId).user.getUserFormidList();
+        List<UserFormid> formidList = userService.findUserById(userid).getUserFormidList();
 
         if (formidList == null) {
             System.out.println("为空");
@@ -326,6 +328,4 @@ public class PushTemplateMessageController {
         map.put("formidList", formidList);
         return map;
     }
-
-
 }
