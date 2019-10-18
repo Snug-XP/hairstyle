@@ -517,7 +517,7 @@ public class HairstylistController {
         }
     }
 
-    @ApiOperation(value = "获取个人的忠实顾客预约数情况列表（降序排序）  -  用于“发型师-数据中心-顾客列表”页面")
+    @ApiOperation(value = "获取个人的忠实（粉丝）顾客预约数情况列表（降序排序）  -  用于“发型师-数据中心-顾客列表”页面")
     @GetMapping("/hairstylist/getLoyalCustomerList")
     public Map getLoyalCustomerList(String myOpenid) {
         Map map = new HashMap();
@@ -552,11 +552,11 @@ public class HairstylistController {
             }
             map.put("resultList", resultList);
             if (resultList.size() == 0)
-                map.put("message", "你目前没有忠实顾客!");
+                map.put("message", "你目前没有忠实（粉丝）顾客!");
             return map;
         } catch (Exception e) {
             logger.error(String.valueOf(e));
-            logger.info("个人的忠实顾客预约数情况列表失败！！（后端发生某些错误，例如数据库连接失败）\n\n");
+            logger.info("个人的忠实（粉丝）顾客预约数情况列表失败！！（后端发生某些错误，例如数据库连接失败）\n\n");
             map.put("error", "操作失败！！（后端发生某些错误，例如数据库连接失败）");
             e.printStackTrace();
             return map;

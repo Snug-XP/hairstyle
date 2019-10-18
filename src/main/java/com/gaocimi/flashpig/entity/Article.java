@@ -37,17 +37,8 @@ public class Article {
     @ManyToMany(targetEntity = User.class,fetch = FetchType.LAZY)
     public List<User> userList;
 
-    public Article(Integer id, String introduction, Date createTime, String skill, String imageList) {
-        this.id = id;
-        this.introduction = introduction;
-        this.createTime = createTime;
-        this.skill = skill;
-        this.imageList = imageList;
-    }
 
-    public Article() {
-        super();
-    }
+
 
     public Integer getId() {
         return id;

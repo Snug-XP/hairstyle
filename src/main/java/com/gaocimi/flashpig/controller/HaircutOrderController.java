@@ -15,11 +15,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -55,7 +52,7 @@ public class HaircutOrderController {
         Map map = new HashMap();
         try {
             Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
-            if ( hairstylist == null || hairstylist.getApplyStatus() != 1) {
+            if (hairstylist == null || hairstylist.getApplyStatus() != 1) {
                 logger.info("非发型师用户操作！！");
                 map.put("error", "对不起，你还不是发型师用户，无权操作！！");
                 return map;
@@ -201,7 +198,7 @@ public class HaircutOrderController {
         map = getWaitingOrder(myOpenid);  //获取当前的排号列表
         List<HairstylistReservation> reservationList = (List<HairstylistReservation>) map.get("resultList");
         //今天没订单或出错了
-        if (reservationList == null||reservationList.size()==0) {
+        if (reservationList == null || reservationList.size() == 0) {
 //            logger.info(map.toString());
             return map; //提示信息都在map里面
         }
@@ -213,56 +210,56 @@ public class HaircutOrderController {
         HaircutOrder order = haircutOrderService.findHaircutOrderById(reservation.getOrderId());
 
         //通知排队列表下一顾客（排队列表中的第一个或第二个顾客）前来美发
-        if (order.getStatus() == -1||order.getStatus() == 0) {
+        if (order.getStatus() == -1 || order.getStatus() == 0) {
             //如果排队列表的第一个订单为“待完成”或“已通知”
             //将该订单状态改为“进行中”，并通知用户前来美发
             reservation.setStatus(1);
-            map = notifyUser(order.getId(),0);//通知用户可以前来美发了
-            if(map.get("error")!=null) return map;
-            
+            map = notifyUser(order.getId(), 0);//通知用户可以前来美发了
+            if (map.get("error") != null) return map;
+
         } else if (order.getStatus() == 1) {
             //如果排队列表的第一个订单正在进行
             //将进行中的订单状态改为“已完成”
             reservation.setStatus(2);
-            map = notifyUser(order.getId(),-1);//发送订单已完成，请评价的通知
-            if(map.get("error")!=null) return map;
+            map = notifyUser(order.getId(), -1);//发送订单已完成，请评价的通知
+            if (map.get("error") != null) return map;
 
             //如果排队列表有第二个订单,通知该订单顾客前来美发
-            if(reservationList.size()>1){
+            if (reservationList.size() > 1) {
 
                 //获取排队列表的第二个订单信息
                 reservation = reservationList.get(1);
                 order = haircutOrderService.findHaircutOrderById(reservation.getOrderId());
 
-                if (order.getStatus() == -1||order.getStatus() == 0){
+                if (order.getStatus() == -1 || order.getStatus() == 0) {
                     //如果该订单为“待完成”或“已通知”
                     //将该订单状态改为“进行中”，并通知用户前来美发
                     reservation.setStatus(1);
-                    map = notifyUser(order.getId(),0);//通知用户可以前来美发了
-                    if(map.get("error")!=null) return map;
-                }else{
-                    logger.info("逻辑错误，排队列表的第二个订单状态异常！状态为"+order.getStatus()
-                            +"\n<“-1”表示待完成，“0”表示已通知用户准备， “1”表示订单正在进行中，“2”表示订单已完成，“-2”表示订单已取消>\n");
-                    map.put("error","逻辑错误，排队列表的第二个订单异常！状态为"+order.getStatus()
-                            +"\n<“-1”表示待完成，“0”表示已通知用户准备， “1”表示订单正在进行中，“2”表示订单已完成，“-2”表示订单已取消>");
+                    map = notifyUser(order.getId(), 0);//通知用户可以前来美发了
+                    if (map.get("error") != null) return map;
+                } else {
+                    logger.info("逻辑错误，排队列表的第二个订单状态异常！状态为" + order.getStatus()
+                            + "\n<“-1”表示待完成，“0”表示已通知用户准备， “1”表示订单正在进行中，“2”表示订单已完成，“-2”表示订单已取消>\n");
+                    map.put("error", "逻辑错误，排队列表的第二个订单异常！状态为" + order.getStatus()
+                            + "\n<“-1”表示待完成，“0”表示已通知用户准备， “1”表示订单正在进行中，“2”表示订单已完成，“-2”表示订单已取消>");
                     return map;
                 }
             }
-        }else{
-            logger.info("逻辑错误，排队列表的第一个订单状态异常！状态为"+order.getStatus()
-                    +"\n<“-1”表示待完成，“0”表示已通知用户准备， “1”表示订单正在进行中，“2”表示订单已完成，“-2”表示订单已取消>\n");
-            map.put("error","逻辑错误，排队列表的第一个订单状态异常！状态为"+order.getStatus()
-                    +"\n<“-1”表示待完成，“0”表示已通知用户准备， “1”表示订单正在进行中，“2”表示订单已完成，“-2”表示订单已取消>");
+        } else {
+            logger.info("逻辑错误，排队列表的第一个订单状态异常！状态为" + order.getStatus()
+                    + "\n<“-1”表示待完成，“0”表示已通知用户准备， “1”表示订单正在进行中，“2”表示订单已完成，“-2”表示订单已取消>\n");
+            map.put("error", "逻辑错误，排队列表的第一个订单状态异常！状态为" + order.getStatus()
+                    + "\n<“-1”表示待完成，“0”表示已通知用户准备， “1”表示订单正在进行中，“2”表示订单已完成，“-2”表示订单已取消>");
             return map;
         }//通知排队列表下一顾客前来美发结束
 
         //下面通知后两位顾客进行准备
-        int count=0;
-        for(HairstylistReservation r : reservationList){
-            if(r.getStatus()!=1&&r.getStatus()!=2){//找到前两个状态不是进行中或已完成的预约订单进行通知（本排号列表只可能存在已完成、进行中、已通知、待完成的订单，不会出现已取消和状态异常的订单）
-                notifyUser(r.getOrderId(),++count);
+        int count = 0;
+        for (HairstylistReservation r : reservationList) {
+            if (r.getStatus() != 1 && r.getStatus() != 2) {//找到前两个状态不是进行中或已完成的预约订单进行通知（本排号列表只可能存在已完成、进行中、已通知、待完成的订单，不会出现已取消和状态异常的订单）
+                notifyUser(r.getOrderId(), ++count);
             }
-            if(count==2) break;
+            if (count == 2) break;
         }
 
         map = getWaitingOrder(myOpenid);
@@ -272,49 +269,57 @@ public class HaircutOrderController {
 
 
     /**
-     *
      * @param orderId 要通知的订单id
-     * @param flag 通知用户前面还有几个人，当flag=-1时，通知订单已完成
+     * @param flag    通知用户前面还有几个人，当flag=-1时，通知订单已完成
      * @return
      */
-    public Map notifyUser(int orderId , int flag){
+    @ApiOperation(value = "发模板信息通知用户前面还有flag个人，当flag=-1时，通知订单已完成，并且根据通知类型改变订单状态（...到时候记得关闭url访问）")
+    @GetMapping("/hairstylist/notifyUser")
+    public Map notifyUser(int orderId, int flag) {
         Map map = new HashMap();
 
         HaircutOrder order = haircutOrderService.findHaircutOrderById(orderId);
-        switch (flag){
+        switch (flag) {
             case 0:
                 //发送前往美发的通知
                 order.setStatus(1);
                 haircutOrderService.edit(order);//将订单状态设为进行中
-                logger.info("id为"+order.getId()+"的订单进行中\n");
-                messageController.pushComingMessage(orderId,0);
-                logger.info("通知订单号id为"+order.getId()+"的顾客“"+order.user.getName()+"”前往美发");
-                map.put("flag",1);
+                logger.info("id为" + order.getId() + "的订单进行中\n");
+                messageController.pushComingMessage(orderId, 0);
+                logger.info("通知订单号id为" + order.getId() + "的顾客“" + order.user.getName() + "”前往美发");
                 break;
             case 1:
                 //发送等待前一位的通知
                 order.setStatus(0);//将订单状态设为已通知
                 haircutOrderService.edit(order);
-                messageController.pushComingMessage(orderId,1);
-                logger.info("通知订单号id为"+order.getId()+"的顾客“"+order.user.getName()+"”前面只剩1位顾客了");
+                messageController.pushComingMessage(orderId, 1);
+                logger.info("通知订单号id为" + order.getId() + "的顾客“" + order.user.getName() + "”前面只剩1位顾客了");
                 break;
             case 2:
                 //发送等待前两位的通知
                 order.setStatus(0);//将订单状态设为已通知
                 haircutOrderService.edit(order);
-                messageController.pushComingMessage(orderId,2);
-                logger.info("通知订单号id为"+order.getId()+"的顾客“"+order.user.getName()+"”前面只剩2位顾客了");
+                messageController.pushComingMessage(orderId, 2);
+                logger.info("通知订单号id为" + order.getId() + "的顾客“" + order.user.getName() + "”前面只剩2位顾客了");
                 break;
             case -1:
                 //发送订单已完成，请评价一下的通知
+
                 order.setStatus(2);
                 haircutOrderService.edit(order);
-                messageController.pushCompleteMessage(orderId);
-                logger.info("id为"+order.getId()+"的订单已完成\n");
+
+                //发型师已完成的总订单+1
+                Hairstylist hairstylist = order.getHairstylist();
+                hairstylist.setOrderSum(hairstylist.getOrderSum() + 1);
+                hairstylistService.edit(hairstylist);
+
+                messageController.pushCompletedMessage(orderId);
+                logger.info("id为" + order.getId() + "的订单已完成(用户：“"+order.user.getName()+"”，发型师：“"+hairstylist.getHairstylistName()+"”)\n");
                 break;
             default:
                 //错误flag
                 logger.info("通知flag错误！！请检查代码！！");
+                map.put("error","通知flag错误！！请检查代码！！");
                 break;
         }
         return map;
@@ -327,7 +332,7 @@ public class HaircutOrderController {
         Map map = new HashMap();
         try {
             Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
-            if ( hairstylist == null || hairstylist.getApplyStatus() != 1) {
+            if (hairstylist == null || hairstylist.getApplyStatus() != 1) {
                 logger.info("非发型师用户操作！！");
                 map.put("error", "对不起，你还不是发型师用户，无权操作！！");
                 return map;
@@ -379,12 +384,65 @@ public class HaircutOrderController {
     }
 
 
-    @ApiOperation(value = "普通用户提交预约订单",notes = "m1")
-    @PostMapping("/user/addHaircutOrder")
-    public Map addHaircutOrder( String myOpenid, String userName,String userPhone,
-                                int hairstylistId, String bookTime,int serviceId ) {
+    @ApiOperation(value = "获取自己的运营数据（包括日报周报月报）")
+    @GetMapping("/hairstylist/getOperationalData")
+    public Map getOperationalData(String myOpenid) {
         Map map = new HashMap();
-        try{
+        try {
+            Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
+            if (hairstylist == null || hairstylist.getApplyStatus() != 1) {
+                logger.info("非发型师用户操作！！");
+                map.put("error", "对不起，你还不是发型师用户，无权操作！！");
+                return map;
+            } else {
+                map.put("completedOrderSum", hairstylist.getCompletedOrderSum());//已完成订单总数
+                map.put("CustomerSum", hairstylist.getCustomerSum());//顾客总数
+                map.put("loyalCustomerSum", hairstylist.loyalUserList.size());//忠实（粉丝）顾客数
+                map.put("operationalData",hairstylist.getAllOperationalData(0));//页面中日报周报月报折线图中的数据
+
+                return map;
+            }
+        } catch (Exception e) {
+            logger.error(String.valueOf(e));
+            logger.info("获取运营数据失败！！（后端发生某些错误，例如数据库连接失败）");
+            map.put("error", "获取运营数据失败！！（后端发生某些错误，例如数据库连接失败）");
+            e.printStackTrace();
+            return map;
+        }
+    }
+
+
+//     //发型师操作模版
+//    @ApiOperation(value = "获取自己的运营数据（包括日报周报月报）")
+//    @GetMapping("/hairstylist/getOperationalData")
+//    public Map getOperationalData(String myOpenid ) {
+//        Map map = new HashMap();
+//        try {
+//            Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
+//            if ( hairstylist == null || hairstylist.getApplyStatus() != 1) {
+//                logger.info("非发型师用户操作！！");
+//                map.put("error", "对不起，你还不是发型师用户，无权操作！！");
+//                return map;
+//            } else {
+//
+//                return map;
+//            }
+//        } catch (Exception e) {
+//            logger.error(String.valueOf(e));
+//            logger.info("获取运营数据失败！！（后端发生某些错误，例如数据库连接失败）");
+//            map.put("error", "获取运营数据失败！！（后端发生某些错误，例如数据库连接失败）");
+//            e.printStackTrace();
+//            return map;
+//        }
+//    }
+
+
+    @ApiOperation(value = "普通用户提交预约订单", notes = "m1")
+    @PostMapping("/user/addHaircutOrder")
+    public Map addHaircutOrder(String myOpenid, String userName, String userPhone,
+                               int hairstylistId, String bookTime, int serviceId) {
+        Map map = new HashMap();
+        try {
 
             HaircutOrder order = new HaircutOrder();
 
@@ -407,29 +465,30 @@ public class HaircutOrderController {
             order.setCreateTime(date);
 
             //...设计订单的预约号
-            String reservationNum = "000"+order.user.getId()+date.getYear()+date.getDay()+date.getHours();
+            String reservationNum = "000" + order.user.getId() + date.getYear() + date.getDay() + date.getHours();
             order.setReservationNum(reservationNum);
 
             try {
                 //处理用户提交的预约时间
                 date = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(bookTime);
                 order.setBookTime(date);
-                if(date==null){
-                    logger.info("时间转换失败，请检查时间格式（传入数据："+bookTime+"）");
+                if (date == null) {
+                    logger.info("时间转换失败，请检查时间格式（传入数据：" + bookTime + "）");
                     map.put("error", "时间转换失败，请检查预约的时间格式");
                     return map;
                 }
-            }catch (Exception e){
+            } catch (Exception e) {
                 logger.error(String.valueOf(e));
-                logger.info("时间转换失败，请检查时间格式（传入数据："+bookTime+"）");
+                logger.info("时间转换失败，请检查时间格式（传入数据：" + bookTime + "）");
                 map.put("error", "时间转换失败，请检查预约的时间格式");
                 e.printStackTrace();
                 return map;
             }
 
             haircutOrderService.save(order);
-            logger.info("id为"+user.getId()+"的用户“"+userName+"”提交了一个对发型师（id="+hairstylist.getOpenid()+"）“"+hairstylist.getHairstylistName()+"”的订单");
-            map.put("message","订单提交成功！");
+            messageController.pushSuccessMessage(order.getId());//给用户发送预约成功的模板消息通知
+            logger.info("id为" + user.getId() + "的用户“" + userName + "”提交了一个对发型师（id=" + hairstylist.getOpenid() + "）“" + hairstylist.getHairstylistName() + "”的订单");
+            map.put("message", "订单提交成功！");
         } catch (Exception e) {
             logger.error(String.valueOf(e));
             logger.info("用户提交预约订单失败！！（后端发生某些错误）");
@@ -451,9 +510,9 @@ public class HaircutOrderController {
 //        haircutOrderService.edit(haircutOrders);
 //    }
 
-    @ApiOperation(value = "获取单个用户订单信息",notes = "m1",produces = "application/json")
+    @ApiOperation(value = "获取单个用户订单信息", notes = "m1", produces = "application/json")
     @GetMapping("/haircutOrder")
-    public HaircutOrder getOne( int haircutOrderId) {
+    public HaircutOrder getOne(int haircutOrderId) {
         return haircutOrderService.findHaircutOrderById(haircutOrderId);
     }
 
@@ -484,7 +543,8 @@ public class HaircutOrderController {
         }
     }
 
-    @ApiOperation(value = "****************时间(yyyy-MM-dd HH:mm:ss)传输测试*************************",notes = "m1")
+
+    @ApiOperation(value = "****************时间(yyyy-MM-dd HH:mm:ss)传输测试*************************", notes = "m1")
     @PostMapping("/timeTest")
     public Date getHaircutOrdersPage(String time) throws ParseException {
         Date date = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(time);
