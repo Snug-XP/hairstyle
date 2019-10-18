@@ -285,12 +285,12 @@ public class HairstylistController {
                        @RequestParam(value = "timeList", required = false) List<String> timeList) {
         Map map = new HashMap();
         try {
-            if (hairstylistService.findHairstylistByOpenid(myOpenid) == null || hairstylistService.findHairstylistByOpenid(myOpenid).getApplyStatus() != 1) {
+            Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
+            if ( hairstylist == null || hairstylist.getApplyStatus() != 1) {
                 logger.info("非发型师用户操作！！");
                 map.put("error", "对不起，你还不是发型师用户，无权操作！！");
                 return map;
             } else {
-                Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
                 String str = "";
                 for (String time : timeList) {
                     if (str.length() > 0)
@@ -341,14 +341,14 @@ public class HairstylistController {
     public Map getTime(String myOpenid) {
         Map map = new HashMap();
         try {
-            if (hairstylistService.findHairstylistByOpenid(myOpenid) == null || hairstylistService.findHairstylistByOpenid(myOpenid).getApplyStatus() != 1) {
+            Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
+            if ( hairstylist == null || hairstylist.getApplyStatus() != 1) {
                 logger.info("所查询的发型师不存在！！");
                 map.put("error", "该发型师不存在！");
                 return map;
             }
 
             DateFormat df3 = DateFormat.getTimeInstance();//只显示出时时分秒（12:43:37）的格式
-            Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
             List<String> timeList = new ArrayList<>();
             String[] availableTime = hairstylist.getAvailableTime().split(",");
             for (String str : availableTime) {
@@ -378,12 +378,12 @@ public class HairstylistController {
     public Map getImageUrlList(String myOpenid) {
         Map map = new HashMap();
         try {
-            if (hairstylistService.findHairstylistByOpenid(myOpenid) == null || hairstylistService.findHairstylistByOpenid(myOpenid).getApplyStatus() != 1) {
+            Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
+            if ( hairstylist == null || hairstylist.getApplyStatus() != 1) {
                 logger.info("非发型师用户操作！！");
                 map.put("error", "对不起，你还不是发型师用户，无权操作！！");
                 return map;
             } else {
-                Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
                 map.put("imageUrlList", hairstylist.hairstylistImageUrlList);
                 return map;
             }
@@ -401,12 +401,12 @@ public class HairstylistController {
     public Map addImageUrlList(String myOpenid, @RequestParam(value = "imageList", required = false) List<String> imageList) {
         Map map = new HashMap();
         try {
-            if (hairstylistService.findHairstylistByOpenid(myOpenid) == null || hairstylistService.findHairstylistByOpenid(myOpenid).getApplyStatus() != 1) {
+            Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
+            if ( hairstylist == null || hairstylist.getApplyStatus() != 1) {
                 logger.info("非发型师用户操作！！");
                 map.put("error", "对不起，你还不是发型师用户，无权操作！！");
                 return map;
             } else {
-                Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
                 //下面保存该理发师的作品url
                 if (imageList != null) {
                     int imageSize = imageList.size();
@@ -437,7 +437,8 @@ public class HairstylistController {
     public Map deleteImageUrlList(String myOpenid, int id) {
         Map map = new HashMap();
         try {
-            if (hairstylistService.findHairstylistByOpenid(myOpenid) == null || hairstylistService.findHairstylistByOpenid(myOpenid).getApplyStatus() != 1) {
+            Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
+            if ( hairstylist == null || hairstylist.getApplyStatus() != 1) {
                 logger.info("非发型师用户操作！！");
                 map.put("error", "非发型师用户操作！！");
                 return map;
@@ -474,13 +475,12 @@ public class HairstylistController {
     public Map getOrdinaryCustomerList(String myOpenid) {
         Map map = new HashMap();
         try {
-            if (hairstylistService.findHairstylistByOpenid(myOpenid) == null || hairstylistService.findHairstylistByOpenid(myOpenid).getApplyStatus() != 1) {
+            Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
+            if ( hairstylist == null || hairstylist.getApplyStatus() != 1) {
                 logger.info("非发型师用户操作！！");
                 map.put("error", "对不起，你还不是发型师用户，无权操作！！");
                 return map;
             }
-
-            Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
 
             //先获取所有的顾客预约数情况列表
             map = getCustomerList(myOpenid);
@@ -522,13 +522,12 @@ public class HairstylistController {
     public Map getLoyalCustomerList(String myOpenid) {
         Map map = new HashMap();
         try {
-            if (hairstylistService.findHairstylistByOpenid(myOpenid) == null || hairstylistService.findHairstylistByOpenid(myOpenid).getApplyStatus() != 1) {
+            Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
+            if ( hairstylist == null || hairstylist.getApplyStatus() != 1) {
                 logger.info("非发型师用户操作！！");
                 map.put("error", "对不起，你还不是发型师用户，无权操作！！");
                 return map;
             }
-
-            Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
 
             //先获取所有的顾客预约数情况列表
             map = getCustomerList(myOpenid);
@@ -569,14 +568,14 @@ public class HairstylistController {
     public Map getCustomerList(String myOpenid) {
         Map map = new HashMap();
         try {
-            if (hairstylistService.findHairstylistByOpenid(myOpenid) == null || hairstylistService.findHairstylistByOpenid(myOpenid).getApplyStatus() != 1) {
+            Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
+            if ( hairstylist == null || hairstylist.getApplyStatus() != 1) {
                 logger.info("非发型师用户操作！！");
                 map.put("error", "对不起，你还不是发型师用户，无权操作！！");
                 return map;
             }
             List<CountUser> resultList = new ArrayList<>();
 
-            Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
             List<HaircutOrder> orderList = hairstylist.getHaircutOrderList();
             HaircutOrder order;
             while (orderList.size() > 0) {

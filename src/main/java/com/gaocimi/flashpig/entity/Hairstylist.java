@@ -238,7 +238,12 @@ public class Hairstylist {
     }
 
     public Integer getOrderSum() {
-        return orderSum;
+        int count = 0;
+        for(HaircutOrder order:haircutOrderList){
+            if(order.getStatus()==2)
+                count++;
+        }
+        return count;
     }
 
     public void setOrderSum(Integer orderSum) {

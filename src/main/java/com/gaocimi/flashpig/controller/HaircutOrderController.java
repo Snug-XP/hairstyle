@@ -45,6 +45,8 @@ public class HaircutOrderController {
     UserService userService;
     @Autowired
     HairServiceService hairServiceService;
+    @Autowired
+    PushTemplateMessageController messageController;
 
     @ApiOperation(value = "获取一个时间段的预约列表(按预约时间顺序排序，若预约时间一致，按创建时间顺序)-用于“发型师-预约列表”页面", notes = "days的值表示获取几天前到现在的数据，days默认为0，表示只获取今天的订单,days=1表示获取昨天和今天的所有订单,days=-1表示获取今天之后的所有订单")
     @GetMapping("/hairstylist/getOrderList")
@@ -52,12 +54,12 @@ public class HaircutOrderController {
                             @RequestParam(defaultValue = "0", required = true) int days) {
         Map map = new HashMap();
         try {
-            if (hairstylistService.findHairstylistByOpenid(myOpenid) == null || hairstylistService.findHairstylistByOpenid(myOpenid).getApplyStatus() != 1) {
+            Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
+            if ( hairstylist == null || hairstylist.getApplyStatus() != 1) {
                 logger.info("非发型师用户操作！！");
                 map.put("error", "对不起，你还不是发型师用户，无权操作！！");
                 return map;
             } else {
-                Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
                 List<HaircutOrder> tempOrderList = hairstylist.haircutOrderList;
                 List<HaircutOrder> resultOrderList = new ArrayList<HaircutOrder>();
                 Date orderBookTime;
@@ -189,7 +191,7 @@ public class HaircutOrderController {
         return map;
     }
 
-    @ApiOperation(value = "如果有进行的订单，将进行中的订单状态设为已完成；通知下一位前来美发，并通知再后2位准备前往 - 用于“发型师-排号系统”页面的通知的“下一位”操作")
+    @ApiOperation(value = "下一位操作，如果有进行的订单，将进行中的订单状态设为已完成；通知下一位前来美发，并通知再后2位准备前往 - 用于“发型师-排号系统”页面的通知的“下一位”操作")
     @GetMapping("/hairstylist/nextWaitingOrder")
     public Map nextWaitingOrder(String myOpenid) {
         Map map = new HashMap();
@@ -279,29 +281,33 @@ public class HaircutOrderController {
         HaircutOrder order = haircutOrderService.findHaircutOrderById(orderId);
         switch (flag){
             case 0:
-                //...发送前往美发的通知
+                //发送前往美发的通知
                 order.setStatus(1);
                 haircutOrderService.edit(order);//将订单状态设为进行中
                 logger.info("id为"+order.getId()+"的订单进行中\n");
+                messageController.pushComingMessage(orderId,0);
                 logger.info("通知订单号id为"+order.getId()+"的顾客“"+order.user.getName()+"”前往美发");
                 map.put("flag",1);
                 break;
             case 1:
-                //...发送等待前一位的通知
+                //发送等待前一位的通知
                 order.setStatus(0);//将订单状态设为已通知
                 haircutOrderService.edit(order);
+                messageController.pushComingMessage(orderId,1);
                 logger.info("通知订单号id为"+order.getId()+"的顾客“"+order.user.getName()+"”前面只剩1位顾客了");
                 break;
             case 2:
-                //...发送等待前两位的通知
+                //发送等待前两位的通知
                 order.setStatus(0);//将订单状态设为已通知
                 haircutOrderService.edit(order);
+                messageController.pushComingMessage(orderId,2);
                 logger.info("通知订单号id为"+order.getId()+"的顾客“"+order.user.getName()+"”前面只剩2位顾客了");
                 break;
             case -1:
-                //...发送订单已完成，请评价一下的通知
+                //发送订单已完成，请评价一下的通知
                 order.setStatus(2);
                 haircutOrderService.edit(order);
+                messageController.pushCompleteMessage(orderId);
                 logger.info("id为"+order.getId()+"的订单已完成\n");
                 break;
             default:
@@ -309,23 +315,21 @@ public class HaircutOrderController {
                 logger.info("通知flag错误！！请检查代码！！");
                 break;
         }
-
-
         return map;
     }
 
 
-    @ApiOperation(value = "获取自己关于某个顾客的预约记录(按时间顺序排序)-用于“发型师-预约列表-预约记录”页面")
+    @ApiOperation(value = "获取自己关于某个顾客的预约记录(按时间倒序排序)-用于“发型师-预约列表-预约记录”页面")
     @GetMapping("/hairstylist/getOrderRecordFromOneUser")
     public Map getOrderRecordFromOneUser(String myOpenid, int userId) {
         Map map = new HashMap();
         try {
-            if (hairstylistService.findHairstylistByOpenid(myOpenid) == null || hairstylistService.findHairstylistByOpenid(myOpenid).getApplyStatus() != 1) {
+            Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
+            if ( hairstylist == null || hairstylist.getApplyStatus() != 1) {
                 logger.info("非发型师用户操作！！");
                 map.put("error", "对不起，你还不是发型师用户，无权操作！！");
                 return map;
             } else {
-                Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
                 List<HaircutOrder> tempOrderList = hairstylist.haircutOrderList;
                 List<HaircutOrder> resultOrderList = new ArrayList<HaircutOrder>();
                 for (HaircutOrder order : tempOrderList) {
@@ -375,7 +379,8 @@ public class HaircutOrderController {
 
     @ApiOperation(value = "普通用户提交预约订单",notes = "m1")
     @PostMapping("/user/addHaircutOrder")
-    public Map addHaircutOrder( String myOpenid, String userName,String userPhone,int hairstylistId, String bookTime,int serviceId ) {
+    public Map addHaircutOrder( String myOpenid, String userName,String userPhone,
+                                int hairstylistId, String bookTime,int serviceId ) {
         Map map = new HashMap();
         try{
 
@@ -395,9 +400,13 @@ public class HaircutOrderController {
             order.setUserPhone(userPhone);//设置联系方式
             order.setStatus(-1);//设置订单状态为"待完成"
 
+
             Date date = new Date(System.currentTimeMillis());
             order.setCreateTime(date);
 
+            //...设计订单的预约号
+            String reservationNum = "000"+order.user.getId()+date.getYear()+date.getDay()+date.getHours();
+            order.setReservationNum(reservationNum);
 
             try {
                 //处理用户提交的预约时间

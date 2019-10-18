@@ -3,9 +3,13 @@ package com.gaocimi.flashpig.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.gaocimi.flashpig.service.UserFormidService;
+import com.gaocimi.flashpig.utils.MyUtils;
 import lombok.Data;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.persistence.*;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -16,7 +20,7 @@ import java.util.List;
  */
 @Entity
 @Table(name = "user")
-@JsonIgnoreProperties(value = {"haircutOrderList","articleList","hairstylistList","handler","hibernateLazyInitializer","fieldHandler"})
+@JsonIgnoreProperties(value = { "userFormidList","haircutOrderList","articleList","hairstylistList","handler","hibernateLazyInitializer","fieldHandler"})
 public class User {
 
     @Id
@@ -54,8 +58,11 @@ public class User {
             // 定义连接表中名为hairstylist_id的外键列，该外键列参照当前实体的关联实体(Hairstylist)对应表(hairstylist)的主键列(id)
             inverseJoinColumns = @JoinColumn(name = "hairstylist_id", referencedColumnName = "id"))
     @ManyToMany(fetch = FetchType.LAZY)
-    @JsonIgnore
     public List<Hairstylist> hairstylistList;
+
+    /**用户提交过的Formid列表； 定义该User实体所有关联的UserFormid实体； 指定mappedBy属性表明该User实体不控制关联关系*/
+    @OneToMany(targetEntity = UserFormid.class, mappedBy = "user",fetch = FetchType.LAZY)
+    public List<UserFormid> userFormidList;
 
 
     public Integer getId() {
@@ -126,7 +133,9 @@ public class User {
         return hairstylistList;
     }
 
-    public void setHairstylistList(List<Hairstylist> hairstylistList) {
-        this.hairstylistList = hairstylistList;
-    }
+    public void setHairstylistList(List<Hairstylist> hairstylistList) { this.hairstylistList = hairstylistList; }
+
+    public List<UserFormid> getUserFormidList() { return userFormidList; }
+
+    public void setUserFormidList(List<UserFormid> userFormidList) { this.userFormidList = userFormidList; }
 }
