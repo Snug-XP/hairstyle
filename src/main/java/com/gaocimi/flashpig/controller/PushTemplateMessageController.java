@@ -128,12 +128,12 @@ public class PushTemplateMessageController {
 
 
     @ApiOperation(value = "根据订单id，推送模板消息-订单已完成（...之后记得关闭url访问）")
-    @PostMapping("/pushCompleteMessage")
-    public Map pushCompleteMessage(int orderId) {
+    @PostMapping("/pushCompletedMessage")
+    public Map pushCompletedMessage(int orderId) {
         Map map = new HashMap();
 
         //不同模板要换的地方，还有模版id哦
-        List<WxMaTemplateData> templateDataList = getCompeteTemplateDataList(orderId);
+        List<WxMaTemplateData> templatedDataList = getCompetedTemplateDataList(orderId);
 
         HaircutOrder order = haircutOrderService.findHaircutOrderById(orderId);
         UserFormid userFormid = userFormidController.getOneUserFormid(order.user.getUserFormidList());
@@ -148,7 +148,7 @@ public class PushTemplateMessageController {
                 .toUser(userFormid.getOpenid())//要推送的用户openid
                 .formId(userFormid.getFormid())//收集到的formid
                 .templateId("2Ib132bA4R-Y31pfL3Tb5qMgTW5WkEJ50_c1UyskSDM")//推送的模版id（在小程序后台设置）
-                .data(templateDataList)//模版信息
+                .data(templatedDataList)//模版信息
                 .page("pages/index/index")//要跳转到小程序那个页面
                 .build();
         //4，发起推送
@@ -159,7 +159,7 @@ public class PushTemplateMessageController {
             map.put("error", "推送失败，模版消息的设置错误（例如小程序id不对应）");
             return map;
         }
-        logger.info("推送消息发送成功：", templateDataList);
+        logger.info("推送消息发送成功：", templatedDataList);
         return map;
     }
 
@@ -251,7 +251,7 @@ public class PushTemplateMessageController {
      * @param orderId 订单id
      * @return "订单完成"消息模版数据列表
      */
-    public List<WxMaTemplateData> getCompeteTemplateDataList(int orderId) {
+    public List<WxMaTemplateData> getCompetedTemplateDataList(int orderId) {
 
         //这边必须从数据库获取一遍，不能直接传一个HaircutOrder实体类，因为懒加载原因可能不包含发型师的数据
         HaircutOrder order = haircutOrderService.findHaircutOrderById(orderId);
