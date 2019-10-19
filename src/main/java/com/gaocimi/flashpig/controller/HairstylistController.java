@@ -70,6 +70,9 @@ public class HairstylistController {
 
             hairstylist.setCreateTime(date);//设置注册时间
             hairstylist.setApplyStatus(0);//设置申请状态为申请中
+            hairstylist.setOrderSum(0);
+            hairstylist.setRankValue(-1.0);
+            hairstylist.setPoint(-1.0);
             hairstylistService.save(hairstylist);
 
             hairstylist = hairstylistService.findHairstylistByOpenid(hairstylist.getOpenid());//重新从数据库获取刚进去的数据（主要为了取得id）

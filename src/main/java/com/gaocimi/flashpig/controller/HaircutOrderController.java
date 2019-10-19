@@ -572,8 +572,8 @@ public class HaircutOrderController {
     }
 
 
-    @ApiOperation(value = "****************时间(yyyy-MM-dd HH:mm:ss)传输测试*************************", notes = "m1")
-    @PostMapping("/timeTest")
+    @ApiOperation(value = "****************时间格式(yyyy-MM-dd HH:mm:ss)传输测试*************************", notes = "m1")
+    @GetMapping("/timeFormatTest")
     public Date getHaircutOrdersPage(String time) throws ParseException {
         Date date = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(time);
         return date;

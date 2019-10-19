@@ -292,7 +292,7 @@ public class Hairstylist {
         this.orderSum = orderSum;
     }
 
-    public int getOrderSum() { return orderSum; }
+    public Integer getOrderSum() { return orderSum; }
 
     public Double getRankValue() {
         return rankValue;

@@ -112,7 +112,7 @@ public class ArticleController {
 
             //包装分页数据
             Pageable pageable = PageRequest.of(pageNum,pageSize);
-            Page<Article> page = new PageImpl<Article>(resultArticleList,pageable,tempArticleList.size());
+            Page<Article> page = new PageImpl<>(resultArticleList, pageable, tempArticleList.size());
 
             map.put("page", page);
             return map;
