@@ -25,4 +25,6 @@ public interface HairstylistService {
     public void delete(int id);
 
     public Page<Hairstylist> findAll(int pageNum, int pageSize);
+
+    public Page<Hairstylist> findRegisterList(int pageNum, int pageSize);
 }

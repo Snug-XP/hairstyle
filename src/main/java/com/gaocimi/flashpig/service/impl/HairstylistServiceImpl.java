@@ -6,12 +6,10 @@ import com.gaocimi.flashpig.service.HairstylistService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -57,12 +55,6 @@ public class HairstylistServiceImpl implements HairstylistService {
         hairstylistRepository.deleteById(id);
     }
 
-
-    public List<Hairstylist> findAll()
-    {
-        return hairstylistRepository.findAll();
-    }
-
     // 分页获得列表
     @Override
     public Page<Hairstylist> findAll(int pageNum, int pageSize) {
@@ -80,6 +72,34 @@ public class HairstylistServiceImpl implements HairstylistService {
         }
         return hairstylistPage;
     }
+
+    /**
+     * 分页获取正在注册的发型师用户
+     * @param pageNum 页数（第几页）
+     * @param pageSize 每页大小
+     * @return
+     */
+    @Override
+    public Page<Hairstylist> findRegisterList(int pageNum, int pageSize){
+
+        //获取所求页数的文章数据
+        int first = pageNum*pageSize;
+        int last = pageNum*pageSize+pageSize-1;
+
+        List<Hairstylist> hairstylists = hairstylistRepository.findAllByApplyStatus(0);
+        List<Hairstylist> resultList = new ArrayList<>();
+
+        for(int i = first ; i<=last&&i<hairstylists.size() ; i++){
+            resultList.add(hairstylists.get(i));
+        }
+
+        //包装分页数据
+        Pageable pageable = PageRequest.of(pageNum,pageSize);
+        Page<Hairstylist> page = new PageImpl<>(resultList,pageable,hairstylists.size());
+
+        return page;
+    }
+
 }
 
 

@@ -42,29 +42,31 @@ public class UserFormidController {
     private UserService userService;
 
     @ApiOperation(value = "添加用户的Formid")
-    @GetMapping("/addUserFormid")
-    public Map addUserFormid(String openid,String formid) {
+    @PostMapping("/user/addUserFormid")
+    public Map addUserFormid(String myOpenid,String formid) {
         Map map = new HashMap();
 
-        User user = userService.findUserByOpenid(openid);
+        User user = userService.findUserByOpenid(myOpenid);
         UserFormid userFormid = new UserFormid();
 
         userFormid.setUser(user);
         userFormid.setFormid(formid);
-        userFormid.setOpenid(openid);
+        userFormid.setOpenid(myOpenid);
 
         Date date = new Date(System.currentTimeMillis());
         userFormid.setCreatTime(date);
 
         userFormidService.save(userFormid);
 
+        logger.info("id为"+user.getId()+"的用户“"+user.getName()+"”提交一个formid："+formid);
+        map.put("message","提交formid并存入数据库成功");
         return map;
     }
 
-    /**获取用户可使用的（7天内）的Formid，并删除7天以上的取出来的Formid*/
+    /**获取用户可使用的（7天内）的Formid，并删除7天以上和被取出来的Formid*/
     public UserFormid getOneUserFormid(List<UserFormid> formidList) {
         UserFormid userFormid;
-        // ...将Formid列表按提交的时间顺序排序
+        // 将Formid列表按提交的时间顺序排序
         Collections.sort(formidList, (r1, r2) -> {
             if (r1.getCreatTime().after(r2.getCreatTime())) {
                 return 1;
@@ -111,7 +113,7 @@ public class UserFormidController {
             map.put("formidList",formidList);
             return map;
         }
-        // ...将Formid列表按提交的时间顺序排序
+        // 将Formid列表按提交的时间顺序排序
         Collections.sort(formidList, (r1, r2) -> {
             if (r1.getCreatTime().after(r2.getCreatTime())) {
                 return 1;

@@ -53,21 +53,24 @@ public class WXLoginController {
     @PostMapping("/wxLogin")
     public Map wxLogin(String code,
                        @RequestParam(value = "rawData", required = false) String rawData,
-                       @RequestParam(value = "name", required = false,defaultValue = "未知姓名")String name,
-                       @RequestParam(value = "sex", required = false,defaultValue = "0")int sex,
+                       @RequestParam(value = "name", required = false, defaultValue = "未知姓名") String name,
                        @RequestParam(value = "pictureUrl", required = false) String pictureUrl,
+                       @RequestParam(value = "sex", required = false, defaultValue = "0") int sex,
                        @RequestParam(value = "phoneNum", required = false) String phoneNum) throws WxErrorException {
+        Map map = new HashMap();
 
         Map<String, String> rawDataMap = new HashMap<>();
-        if(rawData!=null){
-            rawDataMap = JsonUtils.jsonToPojo(rawData,rawDataMap.getClass());
+        if (rawData != null) {
+            rawDataMap = JsonUtils.jsonToPojo(rawData, rawDataMap.getClass());
         }
         logger.info("wxlogin临时凭证  -  code:  " + code + "");
-        logger.info("获取的rawData数据为： "+rawData);
-        logger.info("获取的rawDataMap数据为： "+rawDataMap.toString());
+        logger.info("获取的rawDataMap数据为： " + rawDataMap.toString());
 
-        name = rawDataMap.get("nickName");
-        Map map = new HashMap();
+        if ( name == null)
+            name = rawDataMap.get("nickName");
+        if( pictureUrl == null)
+            pictureUrl = rawDataMap.get("avatarUrl");
+
 //        WXSessionModel wxModel;
 //        try {
 
@@ -86,43 +89,43 @@ public class WXLoginController {
 //            logger.info("wxResult的数据为"+wxResult);
 //            wxModel = JsonUtils. jsonToPojo(wxResult, WXSessionModel.class);
 
-            if (code == null) {
-                logger.info("临时登录凭证获取失败\n\n\n\n");
-                map.put("error", "临时登录凭证获取失败");
-                return map;
-            }
+        if (code == null) {
+            logger.info("临时登录凭证获取失败\n\n\n\n");
+            map.put("error", "临时登录凭证获取失败");
+            return map;
+        }
 
-            WxMaJscode2SessionResult session = wxService.getUserService().getSessionInfo(code);
-            map.put("openid", session.getOpenid());
-            map.put("sessionKey", session.getSessionKey());
+        WxMaJscode2SessionResult session = wxService.getUserService().getSessionInfo(code);
+        map.put("openid", session.getOpenid());
+        map.put("sessionKey", session.getSessionKey());
 
-            logger.info("登录用户openid为  " + session.getOpenid());
-            logger.info("   sessionKey为  " + session.getSessionKey() + "\n");
+        logger.info("登录用户openid为  " + session.getOpenid());
+        logger.info("   sessionKey为  " + session.getSessionKey() + "\n");
 
-            User user = userService.findUserByOpenid(session.getOpenid());
-            if (user == null) {
-                logger.info("该用户未登录过本平台！进行自动注册\n\n");
+        User user = userService.findUserByOpenid(session.getOpenid());
+        if (user == null) {
+            logger.info("该用户未登录过本平台！进行自动注册\n\n");
 
-                user = new User();
-                user.setOpenid(session.getOpenid());
-                user.setName(name);
-                user.setSex(sex);
+            user = new User();
+            user.setOpenid(session.getOpenid());
+            user.setName(name);
+            user.setSex(sex);
+            user.setPhoneNum(phoneNum);
+            user.setPictureUrl(pictureUrl);
+            userService.save(user);
+        } else {
+            //以前登录过，更新信息
+            user.setSex(sex);
+            user.setName(name);
+
+            if (phoneNum != null)
                 user.setPhoneNum(phoneNum);
+            if (pictureUrl != null)
                 user.setPictureUrl(pictureUrl);
-                userService.save(user);
-            } else {
-                //以前登录过，更新信息
-                user.setSex(sex);
-                user.setName(name);
 
-                if (phoneNum != null)
-                    user.setPhoneNum(phoneNum);
-                if (pictureUrl != null)
-                    user.setPictureUrl(pictureUrl);
-
-                userService.edit(user);
-                logger.info("用户 " + user.getName() + " 登录成功！\n\n\n\n");
-            }
+            userService.edit(user);
+            logger.info("用户 " + user.getName() + " 登录成功！\n\n\n\n");
+        }
 //        } catch (Exception e) {
 //            logger.error(String.valueOf(e));
 //            logger.info("临时登录凭证错误-不对应\n\n\n\n");

@@ -70,6 +70,9 @@ public class HairstylistController {
 
             hairstylist.setCreateTime(date);//设置注册时间
             hairstylist.setApplyStatus(0);//设置申请状态为申请中
+            hairstylist.setOrderSum(0);
+            hairstylist.setRankValue(-1.0);
+            hairstylist.setPoint(-1.0);
             hairstylistService.save(hairstylist);
 
             hairstylist = hairstylistService.findHairstylistByOpenid(hairstylist.getOpenid());//重新从数据库获取刚进去的数据（主要为了取得id）
@@ -497,7 +500,7 @@ public class HairstylistController {
                 User user = userService.findUserById(countUser.getUserId());
 
                 //如果用户收藏了该发型师
-                if (MyUtils.isUserLoyalToHairstylist(user, hairstylist)) {
+                if (MyUtils.isUserLoyalToHairstylist(user, hairstylist.getId())) {
                     resultList.remove(countUser);
                 } else {
                     i++;
@@ -517,7 +520,7 @@ public class HairstylistController {
         }
     }
 
-    @ApiOperation(value = "获取个人的忠实顾客预约数情况列表（降序排序）  -  用于“发型师-数据中心-顾客列表”页面")
+    @ApiOperation(value = "获取个人的忠实（粉丝）顾客预约数情况列表（降序排序）  -  用于“发型师-数据中心-顾客列表”页面")
     @GetMapping("/hairstylist/getLoyalCustomerList")
     public Map getLoyalCustomerList(String myOpenid) {
         Map map = new HashMap();
@@ -544,7 +547,7 @@ public class HairstylistController {
                 User user = userService.findUserById(countUser.getUserId());
 
                 //如果用户没有收藏该发型师
-                if (!MyUtils.isUserLoyalToHairstylist(user, hairstylist)) {
+                if (!MyUtils.isUserLoyalToHairstylist(user, hairstylist.getId())) {
                     resultList.remove(countUser);
                 } else {
                     i++;
@@ -552,11 +555,11 @@ public class HairstylistController {
             }
             map.put("resultList", resultList);
             if (resultList.size() == 0)
-                map.put("message", "你目前没有忠实顾客!");
+                map.put("message", "你目前没有忠实（粉丝）顾客!");
             return map;
         } catch (Exception e) {
             logger.error(String.valueOf(e));
-            logger.info("个人的忠实顾客预约数情况列表失败！！（后端发生某些错误，例如数据库连接失败）\n\n");
+            logger.info("个人的忠实（粉丝）顾客预约数情况列表失败！！（后端发生某些错误，例如数据库连接失败）\n\n");
             map.put("error", "操作失败！！（后端发生某些错误，例如数据库连接失败）");
             e.printStackTrace();
             return map;

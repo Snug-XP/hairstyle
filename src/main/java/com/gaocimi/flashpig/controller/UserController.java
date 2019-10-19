@@ -4,14 +4,15 @@ import com.gaocimi.flashpig.entity.User;
 import com.gaocimi.flashpig.result.ResponseResult;
 import com.gaocimi.flashpig.service.UserService;
 import com.gaocimi.flashpig.utils.LogUtils;
+import com.gaocimi.flashpig.utils.MyUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import java.util.HashMap;
-import java.util.Map;
+
+import java.util.*;
 
 /**
  * @author xp
@@ -69,17 +70,5 @@ public class UserController {
 //
 //        return page;
 //    }
-
-    @ApiOperation(value = "测试", produces = "application/json")
-    @GetMapping("/test")
-    public Map Test(int userId ) {
-
-        Map map = new HashMap();
-        User user = userService.findUserById(userId);
-        map.put("hairstylistList",user.hairstylistList);
-
-        return map;
-    }
-
 
 }

@@ -5,7 +5,7 @@ import com.gaocimi.flashpig.entity.UserFormid;
 import com.gaocimi.flashpig.result.ResponseResult;
 import com.gaocimi.flashpig.service.HaircutOrderService;
 import com.gaocimi.flashpig.service.UserFormidService;
-import com.gaocimi.flashpig.utils.MyUtils;
+import com.gaocimi.flashpig.service.UserService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.slf4j.Logger;
@@ -42,10 +42,12 @@ public class PushTemplateMessageController {
     private UserFormidService userFormidService;
     @Autowired
     private UserFormidController userFormidController;
+    @Autowired
+    UserService userService;
 
 
-    @ApiOperation(value = "根据订单id，推送模板消息-预约成功的通知")
-    @PostMapping("/pushSuccessMessage")
+    @ApiOperation(value = "根据订单id，推送模板消息-预约成功的通知（...之后记得关闭url访问）")
+    @PostMapping("/hairstylist/pushSuccessMessage")
     public Map pushSuccessMessage(int orderId) {
 
         Map map = new HashMap();
@@ -57,7 +59,7 @@ public class PushTemplateMessageController {
         UserFormid userFormid = userFormidController.getOneUserFormid(order.user.getUserFormidList());
 
         if (userFormid == null) {
-            logger.info("该用户没有合适的Formid用于发送模版消息，记得想办法获取用户的Formid哦");
+            logger.info("id为" + order.user.getId() + "的用户“" + order.user.getName() + "”没有合适的Formid用于发送模版消息，记得想办法获取用户的Formid哦");
             map.put("message", "该用户没有合适的Formid用于发送模版消息，记得想办法获取用户的Formid哦");
             return map;
         }
@@ -78,12 +80,13 @@ public class PushTemplateMessageController {
             return map;
         }
         logger.info("推送消息发送成功：", templateDataList);
+        map.put("message","推送预约成功消息成功");
         return map;
     }
 
 
-    @ApiOperation(value = "根据订单id，推送模板消息-准备前往")
-    @PostMapping("/pushComingMessage")
+    @ApiOperation(value = "根据订单id，推送模板消息-准备前往（...之后记得关闭url访问）")
+    @PostMapping("/hairstylist/pushComingMessage")
     public Map pushComingMessage(int orderId , int remainingNum ) {
 
         Map map = new HashMap();
@@ -100,7 +103,7 @@ public class PushTemplateMessageController {
         UserFormid userFormid = userFormidController.getOneUserFormid(order.user.getUserFormidList());
 
         if (userFormid == null) {
-            logger.info("该用户没有合适的Formid用于发送模版消息，记得想办法获取用户的Formid哦");
+            logger.info("id为" + order.user.getId() + "的用户“" + order.user.getName() + "”没有合适的Formid用于发送模版消息，记得想办法获取用户的Formid哦");
             map.put("message", "该用户没有合适的Formid用于发送模版消息，记得想办法获取用户的Formid哦");
             return map;
         }
@@ -121,23 +124,24 @@ public class PushTemplateMessageController {
             return map;
         }
         logger.info("推送消息发送成功：", templateDataList);
+        map.put("message","推送准备前往消息成功");
         return map;
     }
 
 
-    @ApiOperation(value = "根据订单id，推送模板消息-订单已完成")
-    @PostMapping("/pushCompleteMessage")
-    public Map pushCompleteMessage(int orderId) {
+    @ApiOperation(value = "根据订单id，推送模板消息-订单已完成（...之后记得关闭url访问）")
+    @PostMapping("/hairstylist/pushCompletedMessage")
+    public Map pushCompletedMessage(int orderId) {
         Map map = new HashMap();
 
         //不同模板要换的地方，还有模版id哦
-        List<WxMaTemplateData> templateDataList = getCompeteTemplateDataList(orderId);
+        List<WxMaTemplateData> templatedDataList = getCompetedTemplateDataList(orderId);
 
         HaircutOrder order = haircutOrderService.findHaircutOrderById(orderId);
         UserFormid userFormid = userFormidController.getOneUserFormid(order.user.getUserFormidList());
 
         if (userFormid == null) {
-            logger.info("该用户没有合适的Formid用于发送模版消息，记得想办法获取用户的Formid哦");
+            logger.info("id为" + order.user.getId() + "的用户“" + order.user.getName() + "”没有合适的Formid用于发送模版消息，记得想办法获取用户的Formid哦");
             map.put("message", "该用户没有合适的Formid用于发送模版消息，记得想办法获取用户的Formid哦");
             return map;
         }
@@ -146,7 +150,7 @@ public class PushTemplateMessageController {
                 .toUser(userFormid.getOpenid())//要推送的用户openid
                 .formId(userFormid.getFormid())//收集到的formid
                 .templateId("2Ib132bA4R-Y31pfL3Tb5qMgTW5WkEJ50_c1UyskSDM")//推送的模版id（在小程序后台设置）
-                .data(templateDataList)//模版信息
+                .data(templatedDataList)//模版信息
                 .page("pages/index/index")//要跳转到小程序那个页面
                 .build();
         //4，发起推送
@@ -157,7 +161,8 @@ public class PushTemplateMessageController {
             map.put("error", "推送失败，模版消息的设置错误（例如小程序id不对应）");
             return map;
         }
-        logger.info("推送消息发送成功：", templateDataList);
+        logger.info("推送消息发送成功：", templatedDataList);
+        map.put("message","推送订单已完成消息成功");
         return map;
     }
 
@@ -243,13 +248,14 @@ public class PushTemplateMessageController {
         return templateDataList;
     }
 
+
     /**
      * 使用订单id获取"订单完成"消息模版数据列表
      *
      * @param orderId 订单id
      * @return "订单完成"消息模版数据列表
      */
-    public List<WxMaTemplateData> getCompeteTemplateDataList(int orderId) {
+    public List<WxMaTemplateData> getCompetedTemplateDataList(int orderId) {
 
         //这边必须从数据库获取一遍，不能直接传一个HaircutOrder实体类，因为懒加载原因可能不包含发型师的数据
         HaircutOrder order = haircutOrderService.findHaircutOrderById(orderId);
@@ -296,36 +302,6 @@ public class PushTemplateMessageController {
         return templateDataList;
     }
 
-    @ApiOperation(value = "测试Formid列表排序")
-    @GetMapping("/Formidtest")
-    public Map test(int orderId) {
-
-        Map map = new HashMap();
-        List<UserFormid> formidList = haircutOrderService.findHaircutOrderById(orderId).user.getUserFormidList();
-
-        if (formidList == null) {
-            System.out.println("为空");
-            map.put("formidList", formidList);
-            return map;
-        }
-        if (formidList.size() == 0) {
-            System.out.println("为0");
-            map.put("formidList", formidList);
-            return map;
-        }
-        // ...将Formid列表按提交的时间顺序排序
-        Collections.sort(formidList, (r1, r2) -> {
-            if (r1.getCreatTime().after(r2.getCreatTime())) {
-                return 1;
-            } else if (r2.getCreatTime().after(r1.getCreatTime())) {
-                return -1;
-            }
-            return 0; //相等为0
-        });
-
-        map.put("formidList", formidList);
-        return map;
-    }
 
 
 }
