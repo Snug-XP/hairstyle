@@ -71,7 +71,6 @@ public class HairstylistController {
             hairstylist.setCreateTime(date);//设置注册时间
             hairstylist.setApplyStatus(0);//设置申请状态为申请中
             hairstylist.setOrderSum(0);
-            hairstylist.setRankValue(-1.0);
             hairstylist.setPoint(-1.0);
             hairstylistService.save(hairstylist);
 

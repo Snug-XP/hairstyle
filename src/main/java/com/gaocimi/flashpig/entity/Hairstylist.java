@@ -107,11 +107,6 @@ public class Hairstylist {
     private Integer orderSum;
 
     /**
-     * 竞价排名
-     */
-    private Double rankValue;
-
-    /**
      * 发型师申请状态（0表示申请中，1表示申请通过, -1表示申请失败）
      */
     private Integer applyStatus;
@@ -293,14 +288,6 @@ public class Hairstylist {
     }
 
     public Integer getOrderSum() { return orderSum; }
-
-    public Double getRankValue() {
-        return rankValue;
-    }
-
-    public void setRankValue(Double rankValue) {
-        this.rankValue = rankValue;
-    }
 
     public Integer getApplyStatus() {
         return applyStatus;
