@@ -497,7 +497,7 @@ public class HairstylistController {
                 User user = userService.findUserById(countUser.getUserId());
 
                 //如果用户收藏了该发型师
-                if (MyUtils.isUserLoyalToHairstylist(user, hairstylist)) {
+                if (MyUtils.isUserLoyalToHairstylist(user, hairstylist.getId())) {
                     resultList.remove(countUser);
                 } else {
                     i++;
@@ -544,7 +544,7 @@ public class HairstylistController {
                 User user = userService.findUserById(countUser.getUserId());
 
                 //如果用户没有收藏该发型师
-                if (!MyUtils.isUserLoyalToHairstylist(user, hairstylist)) {
+                if (!MyUtils.isUserLoyalToHairstylist(user, hairstylist.getId())) {
                     resultList.remove(countUser);
                 } else {
                     i++;

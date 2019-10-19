@@ -399,15 +399,26 @@ public class Hairstylist {
         return count;
     }
 
-    public Map getAllOperationalData(int day) {
+    /**
+     * 获取页面中日报周报月报折线图中的所有数据
+     *
+     * */
+    public Map getAllOperationalData() {
         Map map = new HashMap();
+        
         Map daily = new HashMap();
         Map weekly = new HashMap();
         Map monthly = new HashMap();
+
+        Date today = MyUtils.getTodayFirstTime();//获取今天00点00分00秒的时间Data
+        Date week = MyUtils.getFirstDayOfWeek(today);//获取今天所在周的星期一的日期Date(时间为00:00:00)
+        Date month = MyUtils.getFirstDayOfMonth(today);//获取今天所在月的第一天的日期Date(时间为00:00:00)
+
+        //获取第0~6天（周、月）前的数据
         for(int i = 0;i<7;i++){
-            daily.put(i,getOperationalData(i,i));
-            weekly.put(i,getOperationalData(i*7,i*7+6));
-            monthly.put(i,getOperationalData(i*30,i*30+30));
+            daily.put(i+"daysAgo",getOperationalData(MyUtils.stepDay(today,-i),MyUtils.stepDay(today,-i+1)));
+            weekly.put(i+"weeksAgo",getOperationalData(MyUtils.stepWeek(week,-i),MyUtils.stepWeek(week,-i+1)));
+            monthly.put(i+"monthsAgo",getOperationalData(MyUtils.stepMonth(month,-i),MyUtils.stepMonth(month,-i+1)));
         }
         map.put("daily",daily);
         map.put("weekly",weekly);
@@ -416,20 +427,21 @@ public class Hairstylist {
     }
 
     /**
-     * 获取发型师距离今天day1到距离今天day2天(包括day1和day2且day1<=day2)的运营数据（day1=day2=0表示获取今天的运营数据）
+     * 获取发型师日期在date1到date2之间(包括date1和date2且date1<=date2)的运营数据
      *
-     * @param day1 距离今天day1天
-     * @param day2 距离今天day2天
-     * @return 距离今天day1到距离今天day2天(包括day1和day2)的运营数据
+     * @param date1 日期时间1
+     * @param date2 日期时间2
+     * @return 日期在date1到date2之间(包括date1和date2且date1<=date2)的运营数据
      */
-    public Map getOperationalData(int day1,int day2) {
+    public Map getOperationalData(Date date1,Date date2) {
         Map map = new HashMap();
         List<HaircutOrder> orderList = new ArrayList<>();
         int newCustomerNum = 0;
 
         for (HaircutOrder order : haircutOrderList) {
-            Long day = MyUtils.getDifferenceToday(order.getBookTime());//取得预约时间与今天23点59分相差的天数
-            if (day1<=day&&day<=day2) {
+            Date bookTime = order.getBookTime();
+            //取出相应时间的订单
+            if (bookTime.after(date1)&&bookTime.before(date2)) {
                 orderList.add(order);
             }
         }
@@ -441,7 +453,7 @@ public class Hairstylist {
 
         map.put("reservationNum", orderList.size());
         map.put("newCustomerNum", newCustomerNum);
-        map.put("newLoyalCustomerNum", getNewLoyalCustomerNum(day1,day2));
+        map.put("newLoyalCustomerNum", getNewLoyalCustomerNum(date1,date2));
 
         return map;
     }
@@ -464,17 +476,18 @@ public class Hairstylist {
 
 
     /**
-     * 获取发型师距离今天day1到距离今天day2天(包括day1和day2)的新增忠实（粉丝）用户数（day=0表示今天的日报）
+     * 获取发型师日期在date1到date2之间(包括date1和date2且date1<=date2)的新增忠实（粉丝）用户数
      *
-     * @param day1 距离今天day1天
-     * @param day2 距离今天day2天
-     * @return 距离今天day天的新增忠实（粉丝）用户数
+     * @param date1 日期时间1
+     * @param date2 日期时间2
+     * @return 日期在date1到date2之间(包括date1和date2且date1<=date2)的新增忠实（粉丝）用户数
      */
-    public int getNewLoyalCustomerNum(int day1, int day2) {
+    public int getNewLoyalCustomerNum(Date date1, Date date2) {
         int count = 0;
         for (UserToHairstylist record : loyalUserRecordList) {
-            Long day = MyUtils.getDifferenceToday(record.getCreateTime());//取得收藏记录的创建时间与今天23点59分相差的天数
-            if(day1<=day&&day<=day2){
+            Date createTime = record.getCreateTime();
+            //取出相应时间的记录
+            if (createTime.after(date1)&&createTime.before(date2)) {
                 count++;
             }
         }

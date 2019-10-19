@@ -398,7 +398,7 @@ public class HaircutOrderController {
                 map.put("completedOrderSum", hairstylist.getCompletedOrderSum());//已完成订单总数
                 map.put("CustomerSum", hairstylist.getCustomerSum());//顾客总数
                 map.put("loyalCustomerSum", hairstylist.loyalUserList.size());//忠实（粉丝）顾客数
-                map.put("operationalData",hairstylist.getAllOperationalData(0));//页面中日报周报月报折线图中的数据
+                map.put("operationalData",hairstylist.getAllOperationalData());//页面中日报周报月报折线图中的数据
 
                 return map;
             }
@@ -409,6 +409,31 @@ public class HaircutOrderController {
             e.printStackTrace();
             return map;
         }
+    }
+
+
+    @ApiOperation(value = "时间测试", produces = "application/json")
+    @GetMapping("/timeTest")
+    public Map Test() {
+        Map map = new HashMap();
+
+        Map daily = new HashMap();
+        Map weekly = new HashMap();
+        Map monthly = new HashMap();
+
+        Date today = MyUtils.getTodayFirstTime();
+        Date week = MyUtils.getFirstDayOfWeek(today);
+        Date month = MyUtils.getFirstDayOfMonth(today);
+
+        for(int i = 0;i<13;i++){
+            daily.put(i+"daysAgo", MyUtils.stepDay(today,-i));
+            weekly.put(i+"weeksAgo",MyUtils.stepWeek(week,-i));
+            monthly.put(i+"monthsAgo",MyUtils.stepMonth(month,-i));
+        }
+        map.put("daily",daily);
+        map.put("weekly",weekly);
+        map.put("monthly",monthly);
+        return map;
     }
 
 
@@ -435,6 +460,9 @@ public class HaircutOrderController {
 //            return map;
 //        }
 //    }
+
+
+
 
 
     @ApiOperation(value = "普通用户提交预约订单", notes = "m1")
