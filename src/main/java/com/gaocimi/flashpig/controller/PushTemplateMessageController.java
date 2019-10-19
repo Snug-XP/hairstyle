@@ -47,7 +47,7 @@ public class PushTemplateMessageController {
 
 
     @ApiOperation(value = "根据订单id，推送模板消息-预约成功的通知（...之后记得关闭url访问）")
-    @PostMapping("/pushSuccessMessage")
+    @PostMapping("/hairstylist/pushSuccessMessage")
     public Map pushSuccessMessage(int orderId) {
 
         Map map = new HashMap();
@@ -59,7 +59,7 @@ public class PushTemplateMessageController {
         UserFormid userFormid = userFormidController.getOneUserFormid(order.user.getUserFormidList());
 
         if (userFormid == null) {
-            logger.info("该用户没有合适的Formid用于发送模版消息，记得想办法获取用户的Formid哦");
+            logger.info("id为" + order.user.getId() + "的用户“" + order.user.getName() + "”没有合适的Formid用于发送模版消息，记得想办法获取用户的Formid哦");
             map.put("message", "该用户没有合适的Formid用于发送模版消息，记得想办法获取用户的Formid哦");
             return map;
         }
@@ -80,12 +80,13 @@ public class PushTemplateMessageController {
             return map;
         }
         logger.info("推送消息发送成功：", templateDataList);
+        map.put("message","推送预约成功消息成功");
         return map;
     }
 
 
     @ApiOperation(value = "根据订单id，推送模板消息-准备前往（...之后记得关闭url访问）")
-    @PostMapping("/pushComingMessage")
+    @PostMapping("/hairstylist/pushComingMessage")
     public Map pushComingMessage(int orderId , int remainingNum ) {
 
         Map map = new HashMap();
@@ -102,7 +103,7 @@ public class PushTemplateMessageController {
         UserFormid userFormid = userFormidController.getOneUserFormid(order.user.getUserFormidList());
 
         if (userFormid == null) {
-            logger.info("该用户没有合适的Formid用于发送模版消息，记得想办法获取用户的Formid哦");
+            logger.info("id为" + order.user.getId() + "的用户“" + order.user.getName() + "”没有合适的Formid用于发送模版消息，记得想办法获取用户的Formid哦");
             map.put("message", "该用户没有合适的Formid用于发送模版消息，记得想办法获取用户的Formid哦");
             return map;
         }
@@ -123,12 +124,13 @@ public class PushTemplateMessageController {
             return map;
         }
         logger.info("推送消息发送成功：", templateDataList);
+        map.put("message","推送准备前往消息成功");
         return map;
     }
 
 
     @ApiOperation(value = "根据订单id，推送模板消息-订单已完成（...之后记得关闭url访问）")
-    @PostMapping("/pushCompletedMessage")
+    @PostMapping("/hairstylist/pushCompletedMessage")
     public Map pushCompletedMessage(int orderId) {
         Map map = new HashMap();
 
@@ -139,7 +141,7 @@ public class PushTemplateMessageController {
         UserFormid userFormid = userFormidController.getOneUserFormid(order.user.getUserFormidList());
 
         if (userFormid == null) {
-            logger.info("该用户没有合适的Formid用于发送模版消息，记得想办法获取用户的Formid哦");
+            logger.info("id为" + order.user.getId() + "的用户“" + order.user.getName() + "”没有合适的Formid用于发送模版消息，记得想办法获取用户的Formid哦");
             map.put("message", "该用户没有合适的Formid用于发送模版消息，记得想办法获取用户的Formid哦");
             return map;
         }
@@ -160,6 +162,7 @@ public class PushTemplateMessageController {
             return map;
         }
         logger.info("推送消息发送成功：", templatedDataList);
+        map.put("message","推送订单已完成消息成功");
         return map;
     }
 
@@ -245,6 +248,7 @@ public class PushTemplateMessageController {
         return templateDataList;
     }
 
+
     /**
      * 使用订单id获取"订单完成"消息模版数据列表
      *
@@ -298,34 +302,6 @@ public class PushTemplateMessageController {
         return templateDataList;
     }
 
-    @ApiOperation(value = "使用userid测试Formid列表排序")
-    @GetMapping("/Formidtest")
-    public Map test(int userid) {
 
-        Map map = new HashMap();
-        List<UserFormid> formidList = userService.findUserById(userid).getUserFormidList();
 
-        if (formidList == null) {
-            System.out.println("为空");
-            map.put("formidList", formidList);
-            return map;
-        }
-        if (formidList.size() == 0) {
-            System.out.println("为0");
-            map.put("formidList", formidList);
-            return map;
-        }
-        // ...将Formid列表按提交的时间顺序排序
-        Collections.sort(formidList, (r1, r2) -> {
-            if (r1.getCreatTime().after(r2.getCreatTime())) {
-                return 1;
-            } else if (r2.getCreatTime().after(r1.getCreatTime())) {
-                return -1;
-            }
-            return 0; //相等为0
-        });
-
-        map.put("formidList", formidList);
-        return map;
-    }
 }

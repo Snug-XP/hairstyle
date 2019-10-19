@@ -14,7 +14,7 @@ import java.util.*;
  */
 @Entity
 @Table(name = "hairstylist")
-@JsonIgnoreProperties(value = {"loyalUserRecordList","haircutOrderList", "hairstylistImageUrlList", "hairServiceList", "recordToUserList", "userList", "handler", "hibernateLazyInitializer", "fieldHandler"})
+@JsonIgnoreProperties(value = {"allOperationalData","loyalUserList","loyalUserRecordList","haircutOrderList", "hairstylistImageUrlList", "hairServiceList", "recordToUserList", "userList", "handler", "hibernateLazyInitializer", "fieldHandler"})
 public class Hairstylist {
 
     @Id
@@ -292,9 +292,7 @@ public class Hairstylist {
         this.orderSum = orderSum;
     }
 
-    public int getOrderSum() {
-        return orderSum;
-    }
+    public int getOrderSum() { return orderSum; }
 
     public Double getRankValue() {
         return rankValue;
@@ -358,6 +356,11 @@ public class Hairstylist {
     public void setLoyalUserRecordList(List<UserToHairstylist> loyalUserRecordList) {
         this.loyalUserRecordList = loyalUserRecordList;
     }
+
+
+
+
+/**************下面是一些关于发型师数据统计相关的方法*******************************************************************/
 
     /**
      * 获取发型师自己的已完成订单数
@@ -451,9 +454,9 @@ public class Hairstylist {
             }
         }
 
-        map.put("reservationNum", orderList.size());
-        map.put("newCustomerNum", newCustomerNum);
-        map.put("newLoyalCustomerNum", getNewLoyalCustomerNum(date1,date2));
+        map.put("reservationNum", orderList.size());//已完成的预约订单数
+        map.put("newCustomerNum", newCustomerNum);//新增顾客数
+        map.put("newLoyalCustomerNum", getNewLoyalCustomerNum(date1,date2));//新增忠实（粉丝）用户数
 
         return map;
     }

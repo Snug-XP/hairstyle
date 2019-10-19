@@ -49,16 +49,5 @@ public class PageQO<T> {
         return (this.pageNum - 1) * this.pageSize;
     }
 
-	public int getPageNum() {
-		// TODO 自动生成的方法存根
-		//...待写
-		return pageNum;
-	}
-
-	public int getPageSize() {
-		// TODO 自动生成的方法存根
-		//...待写
-		return pageSize;
-	}
 
 }

@@ -22,13 +22,13 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
- * @author liyutg
- * @date 2019/6/12 2:15
- * @description
+ * @author xp
+ * @date 2019-10-13 19:12:25
+ * @description 操作用户订单的相关业务
  */
 @RestController
 @ResponseResult
-@Api(value = "用户订单操作服务", description = "操作用户订单相关业务")
+@Api(value = "用户订单操作服务", description = "操作用户订单的相关业务")
 public class HaircutOrderController {
     protected static final Logger logger = LoggerFactory.getLogger(HairstylistController.class);
 
@@ -384,7 +384,7 @@ public class HaircutOrderController {
     }
 
 
-    @ApiOperation(value = "获取自己的运营数据（包括日报周报月报）")
+    @ApiOperation(value = "获取自己的运营数据（包括中数据和日报周报月报表格的所有数据）")
     @GetMapping("/hairstylist/getOperationalData")
     public Map getOperationalData(String myOpenid) {
         Map map = new HashMap();
@@ -493,7 +493,7 @@ public class HaircutOrderController {
             order.setCreateTime(date);
 
             //...设计订单的预约号
-            String reservationNum = "000" + order.user.getId() + date.getYear() + date.getDay() + date.getHours();
+            String reservationNum = "00" + user.getId()+"00"+hairstylist.getId()+date.getSeconds() + date.getYear() + date.getDay() + date.getHours();
             order.setReservationNum(reservationNum);
 
             try {
@@ -514,8 +514,8 @@ public class HaircutOrderController {
             }
 
             haircutOrderService.save(order);
-            messageController.pushSuccessMessage(order.getId());//给用户发送预约成功的模板消息通知
             logger.info("id为" + user.getId() + "的用户“" + userName + "”提交了一个对发型师（id=" + hairstylist.getOpenid() + "）“" + hairstylist.getHairstylistName() + "”的订单");
+            messageController.pushSuccessMessage(order.getId());//给用户发送预约成功的模板消息通知
             map.put("message", "订单提交成功！");
         } catch (Exception e) {
             logger.error(String.valueOf(e));

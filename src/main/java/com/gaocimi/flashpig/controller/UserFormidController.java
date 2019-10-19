@@ -66,7 +66,7 @@ public class UserFormidController {
     /**获取用户可使用的（7天内）的Formid，并删除7天以上和被取出来的Formid*/
     public UserFormid getOneUserFormid(List<UserFormid> formidList) {
         UserFormid userFormid;
-        // ...将Formid列表按提交的时间顺序排序
+        // 将Formid列表按提交的时间顺序排序
         Collections.sort(formidList, (r1, r2) -> {
             if (r1.getCreatTime().after(r2.getCreatTime())) {
                 return 1;
@@ -113,7 +113,7 @@ public class UserFormidController {
             map.put("formidList",formidList);
             return map;
         }
-        // ...将Formid列表按提交的时间顺序排序
+        // 将Formid列表按提交的时间顺序排序
         Collections.sort(formidList, (r1, r2) -> {
             if (r1.getCreatTime().after(r2.getCreatTime())) {
                 return 1;

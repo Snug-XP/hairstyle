@@ -84,7 +84,7 @@ public class MyUtils {
 
         Calendar calendar = Calendar.getInstance();
 
-        // （外国是周天到下一周的周六为一周，即一周中数字1、2、3、4、5、6、7对应星期天、星期一、星期二、...、星期六）
+        // （外国是周天到下一周的周六为一周，即一周中数字1、2、3、4、5、6、7对应星期天、星期一、星期二、..、星期六）
         //  如果今天是星期天(对应数字1)，会获取到下一周的周一，所以将获取到的时间周数减1
         boolean flag = false;
         if(calendar.get(Calendar.DAY_OF_WEEK)==1) {
