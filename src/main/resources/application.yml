@@ -115,8 +115,8 @@ wechat:
 oss:
   fileHost: https://jianzhao.oss-cn-shanghai.aliyuncs.com
   endpoint: oss-cn-shanghai.aliyuncs.com
-  accessId: LTAI4Fnx4kSzXhwhhUbrWpsZ
-  accessKey: V5tgW4sfoDwuI7M8wvDBeN20OLSbo7
+  accessId: LTAI4FfXJXtDuFsJnswQUDdm
+  accessKey: v0f4MbYCoovG0Nqlp1SHwME7tQnbqr
   bucket: jianzhao
   #  endpoint: oss-cn-shenzhen.aliyuncs.com
   #  accessId: LTAIbMjv8jqIdJdW
