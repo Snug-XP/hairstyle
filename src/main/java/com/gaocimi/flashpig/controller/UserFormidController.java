@@ -6,7 +6,7 @@ import com.gaocimi.flashpig.result.ResponseResult;
 import com.gaocimi.flashpig.service.HaircutOrderService;
 import com.gaocimi.flashpig.service.UserFormidService;
 import com.gaocimi.flashpig.service.UserService;
-import com.gaocimi.flashpig.utils.MyUtils;
+import com.gaocimi.flashpig.utils.xp.MyUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.slf4j.Logger;

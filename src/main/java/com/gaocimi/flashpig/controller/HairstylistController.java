@@ -4,7 +4,7 @@ import com.gaocimi.flashpig.entity.*;
 import com.gaocimi.flashpig.model.CountUser;
 import com.gaocimi.flashpig.result.ResponseResult;
 import com.gaocimi.flashpig.service.*;
-import com.gaocimi.flashpig.utils.MyUtils;
+import com.gaocimi.flashpig.utils.xp.MyUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.slf4j.Logger;

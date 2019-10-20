@@ -1,4 +1,4 @@
- #eureka:
+#eureka:
 #  client:
 #    serviceUrl:
 #      defaultZone: http://119.23.35.107:8761/eureka/
@@ -7,7 +7,7 @@ server:
   ssl:
     key-store: classpath:1998pic.cn.jks
     key-store-password: 8957l8t81v7xkb
-#        key-store-type: PKCS12
+    #        key-store-type: PKCS12
     key-alias: xp.1998pic.cn
 #  port: 80
 #是否开启熔断器
@@ -60,13 +60,6 @@ spring:
     useGlobalDataSourceStat: true
 
 
-
-#logging:
-#  level:
-#    com:
-#      spring:
-#        jiminshiro:
-#          mapper: debug
 #日志输出
 logging:
   path: ./usr
@@ -94,8 +87,8 @@ wechat:
     msgDataFormat: JSON
 
     #        上面是“型式”的，下面是“简照”的
-#    appid: wx3b612db5165b11b6
-#    secret: 3f31f17374c5406f24cdf5657085da92
+    #    appid: wx3b612db5165b11b6
+    #    secret: 3f31f17374c5406f24cdf5657085da92
     appid: wx0eebc4a396708dee
     secret: ff3774682602c7c21040c09ce1bf9ea1
 
@@ -114,17 +107,24 @@ wechat:
       emphasisKeyword:
       data:
       page:
-#        上面是“型式”的，下面是“简照”的
-#      templateId: RcF6gCn0tPrr1UKT0PPs5DX7bBvopZu_SRFWJUOA9qY
+      #        上面是“型式”的，下面是“简照”的
+      #      templateId: RcF6gCn0tPrr1UKT0PPs5DX7bBvopZu_SRFWJUOA9qY
       templateId: BoMgswyVTNC6jCA6zZ2WM5ufy3bQraBNbqDVkRK2XbE
 
 #OSS存储设置
 oss:
-  endpoint: oss-cn-shenzhen.aliyuncs.com
-  accessId: LTAIbMjv8jqIdJdW
-  accessKey: kaGz4hlk5OEBsxC5CeK8AuHrMJwaYq
-  bucket: pictures1998
-  dir: user-dir
+  fileHost: https://jianzhao.oss-cn-shanghai.aliyuncs.com
+  endpoint: oss-cn-shanghai.aliyuncs.com
+  accessId: LTAI4FfXJXtDuFsJnswQUDdm
+  accessKey: v0f4MbYCoovG0Nqlp1SHwME7tQnbqr
+  bucket: jianzhao
+  #  endpoint: oss-cn-shenzhen.aliyuncs.com
+  #  accessId: LTAIbMjv8jqIdJdW
+  #  accessKey: kaGz4hlk5OEBsxC5CeK8AuHrMJwaYq
+  #  bucket: pictures1998
+
+  #设置当前用户上传指定的前缀，必须以斜线结尾,类似目录（OSS不存在多级目录，但是可以模拟）
+  dir: user-dir/
 
 
 

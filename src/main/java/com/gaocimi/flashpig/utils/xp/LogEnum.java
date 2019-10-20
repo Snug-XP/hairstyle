@@ -1,4 +1,4 @@
-package com.gaocimi.flashpig.utils;
+package com.gaocimi.flashpig.utils.xp;
 /**
  * 本地日志枚举
  * @author https://blog.csdn.net/u010598111/article/details/80556437

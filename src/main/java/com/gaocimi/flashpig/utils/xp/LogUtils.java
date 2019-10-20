@@ -1,4 +1,4 @@
-package com.gaocimi.flashpig.utils;
+package com.gaocimi.flashpig.utils.xp;
  
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

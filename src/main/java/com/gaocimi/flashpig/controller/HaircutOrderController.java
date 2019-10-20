@@ -8,7 +8,7 @@ import com.gaocimi.flashpig.model.HairstylistReservation;
 import com.gaocimi.flashpig.model.OrderRecordFromOneUser;
 import com.gaocimi.flashpig.result.ResponseResult;
 import com.gaocimi.flashpig.service.*;
-import com.gaocimi.flashpig.utils.MyUtils;
+import com.gaocimi.flashpig.utils.xp.MyUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.slf4j.Logger;
@@ -433,6 +433,7 @@ public class HaircutOrderController {
         map.put("daily",daily);
         map.put("weekly",weekly);
         map.put("monthly",monthly);
+        map.put("nowTime",new Date(System.currentTimeMillis()));
         return map;
     }
 
@@ -540,8 +541,8 @@ public class HaircutOrderController {
 
     @ApiOperation(value = "获取单个用户订单信息", notes = "m1", produces = "application/json")
     @GetMapping("/haircutOrder")
-    public HaircutOrder getOne(int haircutOrderId) {
-        return haircutOrderService.findHaircutOrderById(haircutOrderId);
+    public HaircutOrder getOne(int orderId) {
+        return haircutOrderService.findHaircutOrderById(orderId);
     }
 
 

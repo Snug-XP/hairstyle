@@ -1,4 +1,4 @@
-package com.gaocimi.flashpig.utils;
+package com.gaocimi.flashpig.utils.xp;
 
 import com.gaocimi.flashpig.controller.HairstylistController;
 import com.gaocimi.flashpig.entity.Hairstylist;
