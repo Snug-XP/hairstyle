@@ -32,7 +32,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/policy")
+@RequestMapping
 public class OssAccessController {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
@@ -50,7 +50,7 @@ public class OssAccessController {
 
     @ApiOperation(value = "获取oss直传所需的信息（仅允许数据库中存在的用户、发型师和管理员获取oss签名）", notes = "[采用JavaScript客户端直接签名](https://help.aliyun.com/document_detail/31925.html?spm=a2c4g.11186623.2.11.16076e284W2rpY#concept-frd-4gy-5db)" +
             "时，AccessKeyID和AcessKeySecret会暴露在前端页面，因此存在严重的安全隐患。因此，OSS提供了服务端签名后直传的方案")
-    @GetMapping("/getOssInfo")
+    @GetMapping("/policy/getOssInfo")
     public Map getOssInfo(String myOpenid) {
 
         Map map = new HashMap();
@@ -64,7 +64,7 @@ public class OssAccessController {
                 User user = userService.findUserByOpenid(myOpenid);
                 if (user == null) {
                     logger.info("抱歉，您无权限上传文件！！");
-                    map.put("error", "抱歉，您无权限上传文件！！");
+                    map.put("error", "抱歉，您无权限上传文件！！（openid为"+myOpenid+"）");
                     return map;
                 } else {
                     logger.info("id为" + user.getId() + "普通用户“" + user.getName() + "”获取了一个oss临时上传的签名");
@@ -83,9 +83,8 @@ public class OssAccessController {
         long expireTime = 30;//30秒时间限制
         long expireEndTime = System.currentTimeMillis() + expireTime * 1000;
         Date expireDate = new Date(expireEndTime);//到期时间
-        System.out.println(expireDate+"\n\n\n");
         PolicyConditions policyConds = new PolicyConditions();
-        policyConds.addConditionItem(PolicyConditions.COND_CONTENT_LENGTH_RANGE, 0, 1048576000);//允许上传的文件大小限制
+        policyConds.addConditionItem(PolicyConditions.COND_CONTENT_LENGTH_RANGE, 0, 10485760);//允许上传的文件大小限制
         policyConds.addConditionItem(MatchMode.StartWith, PolicyConditions.COND_KEY, this.properties.getDir());//上传目录
         String hostUrl = "https://" + this.properties.getBucket() + "." + this.properties.getEndpoint();
         String postPolicy = client.generatePostPolicy(expireDate, policyConds);//给policyConds添加过期时间并json序列化（格式iso8601:"yyyy-MM-dd'T'HH:mm:ss.fff'Z'"）
@@ -104,7 +103,7 @@ public class OssAccessController {
         respMap.put("accessid", this.properties.getAccessId());
         respMap.put("policy", encodedPolicy);
         respMap.put("signature", postSignature);//对应的签名
-        respMap.put("dir", dir);//当前用户上传指定的前缀
+        respMap.put("dir", this.properties.getDir());//当前用户上传指定的前缀
         respMap.put("hostUrl", hostUrl);//当前用户上传指定的前缀
         respMap.put("expire", String.valueOf(expireEndTime / 1000));//签名到期时间的时间戳(不知道怎么用)
         respMap.put("expireDate", expireDate);//签名到期时间
