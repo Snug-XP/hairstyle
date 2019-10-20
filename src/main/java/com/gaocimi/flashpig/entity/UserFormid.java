@@ -33,7 +33,7 @@ public class UserFormid {
     private String formid;
 
     /** 用户提交该Formid的时间*/
-    private Date creatTime;
+    private Date createTime;
 
 
     public Integer getId() {
@@ -68,12 +68,12 @@ public class UserFormid {
         this.formid = formid;
     }
 
-    public Date getCreatTime() {
-        return creatTime;
+    public Date getCreateTime() {
+        return createTime;
     }
 
-    public void setCreatTime(Date creatTime) {
-        this.creatTime = creatTime;
+    public void setCreateTime(Date createTime) {
+        this.createTime = createTime;
     }
 
 }

@@ -4,7 +4,7 @@ import com.gaocimi.flashpig.entity.*;
 import com.gaocimi.flashpig.model.CountUser;
 import com.gaocimi.flashpig.result.ResponseResult;
 import com.gaocimi.flashpig.service.*;
-import com.gaocimi.flashpig.utils.MyUtils;
+import com.gaocimi.flashpig.utils.xp.MyUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.slf4j.Logger;
@@ -71,7 +71,6 @@ public class HairstylistController {
             hairstylist.setCreateTime(date);//设置注册时间
             hairstylist.setApplyStatus(0);//设置申请状态为申请中
             hairstylist.setOrderSum(0);
-            hairstylist.setRankValue(-1.0);
             hairstylist.setPoint(-1.0);
             hairstylistService.save(hairstylist);
 

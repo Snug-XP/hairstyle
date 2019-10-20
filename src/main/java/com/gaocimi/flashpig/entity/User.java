@@ -1,15 +1,9 @@
 package com.gaocimi.flashpig.entity;
 
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.gaocimi.flashpig.service.UserFormidService;
-import com.gaocimi.flashpig.utils.MyUtils;
-import lombok.Data;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.persistence.*;
-import java.util.Collections;
 import java.util.List;
 
 /**

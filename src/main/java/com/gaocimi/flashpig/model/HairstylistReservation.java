@@ -25,7 +25,7 @@ public class HairstylistReservation {
     private String userPhone;
 
     /**创建的时间*/
-    private Date creatTime;
+    private Date createTime;
 
     /**预约时间*/
     private Date bookTime;
@@ -49,7 +49,7 @@ public class HairstylistReservation {
         setUserId(order.user.getId());
         setImgUrl(order.user.getPictureUrl());
         setUserName(order.getUserName());
-        setCreatTime(order.getCreateTime());
+        setCreateTime(order.getCreateTime());
         setBookTime(order.getBookTime());
         setServiceName(order.getServiceName());
         setDescription(order.getDescription());
@@ -89,12 +89,12 @@ public class HairstylistReservation {
         this.userName = userName;
     }
 
-    public Date getCreatTime() {
-        return creatTime;
+    public Date getCreateTime() {
+        return createTime;
     }
 
-    public void setCreatTime(Date creatTime) {
-        this.creatTime = creatTime;
+    public void setCreateTime(Date createTime) {
+        this.createTime = createTime;
     }
 
     public Date getBookTime() {

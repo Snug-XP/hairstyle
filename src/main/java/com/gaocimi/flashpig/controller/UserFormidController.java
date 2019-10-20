@@ -1,19 +1,14 @@
 package com.gaocimi.flashpig.controller;
 
-import cn.binarywang.wx.miniapp.api.WxMaService;
-import cn.binarywang.wx.miniapp.bean.WxMaTemplateData;
-import cn.binarywang.wx.miniapp.bean.WxMaTemplateMessage;
-import com.gaocimi.flashpig.entity.HaircutOrder;
 import com.gaocimi.flashpig.entity.User;
 import com.gaocimi.flashpig.entity.UserFormid;
 import com.gaocimi.flashpig.result.ResponseResult;
 import com.gaocimi.flashpig.service.HaircutOrderService;
 import com.gaocimi.flashpig.service.UserFormidService;
 import com.gaocimi.flashpig.service.UserService;
-import com.gaocimi.flashpig.utils.MyUtils;
+import com.gaocimi.flashpig.utils.xp.MyUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import me.chanjar.weixin.common.error.WxErrorException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,7 +49,7 @@ public class UserFormidController {
         userFormid.setOpenid(myOpenid);
 
         Date date = new Date(System.currentTimeMillis());
-        userFormid.setCreatTime(date);
+        userFormid.setCreateTime(date);
 
         userFormidService.save(userFormid);
 
@@ -68,9 +63,9 @@ public class UserFormidController {
         UserFormid userFormid;
         // 将Formid列表按提交的时间顺序排序
         Collections.sort(formidList, (r1, r2) -> {
-            if (r1.getCreatTime().after(r2.getCreatTime())) {
+            if (r1.getCreateTime().after(r2.getCreateTime())) {
                 return 1;
-            } else if (r2.getCreatTime().after(r1.getCreatTime())) {
+            } else if (r2.getCreateTime().after(r1.getCreateTime())) {
                 return -1;
             }
             return 0; //相等为0
@@ -80,7 +75,7 @@ public class UserFormidController {
         while(formidList.size() > 0 ){
 
             userFormid = formidList.get(0);//获取最早提交的Formid
-            Long day = MyUtils.getDifferenceNow(userFormid.getCreatTime());//取得提交Formid的时间与当前时刻相差的天数
+            Long day = MyUtils.getDifferenceNow(userFormid.getCreateTime());//取得提交Formid的时间与当前时刻相差的天数
 
             if (day<7) {
                 formidList.remove(userFormid);
@@ -115,9 +110,9 @@ public class UserFormidController {
         }
         // 将Formid列表按提交的时间顺序排序
         Collections.sort(formidList, (r1, r2) -> {
-            if (r1.getCreatTime().after(r2.getCreatTime())) {
+            if (r1.getCreateTime().after(r2.getCreateTime())) {
                 return 1;
-            } else if (r2.getCreatTime().after(r1.getCreatTime())) {
+            } else if (r2.getCreateTime().after(r1.getCreateTime())) {
                 return -1;
             }
             return 0; //相等为0

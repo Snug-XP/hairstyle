@@ -14,6 +14,12 @@ import org.springframework.stereotype.Component;
 @Data
 public class SystemConfigProperty {
     /**
+     * OSS存储设置，fileHost="https://" + this.getBucket() + "." + this.getEndpoint();
+     */
+    @Value("${oss.fileHost}")
+    private String fileHost;
+
+    /**
      * OSS存储设置，endpoint
      */
     @Value("${oss.endpoint}")
@@ -148,10 +154,16 @@ public class SystemConfigProperty {
     @Value("${wechat.message.templete.emphasisKeyword}")
     private String emphasisKeyword;
 
-    
-    
-    
-	public String getEndpoint() {
+
+    public String getFileHost() {
+        return fileHost;
+    }
+
+    public void setFileHost(String fileHost) {
+        this.fileHost = fileHost;
+    }
+
+    public String getEndpoint() {
 		return endpoint;
 	}
 
