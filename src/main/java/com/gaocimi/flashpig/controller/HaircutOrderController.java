@@ -82,9 +82,9 @@ public class HaircutOrderController {
 
                     // 先按创建时间倒序排序一遍
                     Collections.sort(recordList, (r1, r2) -> {
-                        if (r1.getCreatTime().after(r2.getCreatTime())) {
+                        if (r1.getCreateTime().after(r2.getCreateTime())) {
                             return -1;
-                        } else if (r2.getCreatTime().after(r1.getCreatTime())) {
+                        } else if (r2.getCreateTime().after(r1.getCreateTime())) {
                             return 1;
                         }
                         return 0; //相等为0
