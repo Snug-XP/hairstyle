@@ -28,14 +28,18 @@ public class Article {
     /**技巧*/
     private String skill;
 
-    private String imageList;
-
     /**收藏该文章的用户列表*/
     @JoinTable(name="user_to_article",
             joinColumns={@JoinColumn(name="article_id", referencedColumnName="id")},
             inverseJoinColumns={@JoinColumn(name="user_id", referencedColumnName="id")})
     @ManyToMany(targetEntity = User.class,fetch = FetchType.LAZY)
     public List<User> userList;
+
+    /**
+     * 该文章中的图片列表； 定义该Article实体所有关联的ArticleImageUrl实体； 指定mappedBy属性表明该Article实体不控制关联关系
+     */
+    @OneToMany(targetEntity = ArticleImageUrl.class, mappedBy = "article")
+    public List<ArticleImageUrl> articleImageUrlList;
 
 
 
@@ -68,15 +72,23 @@ public class Article {
         this.skill = skill == null ? null : skill.trim();
     }
 
-    public String getImageList() {
-        return imageList;
-    }
-
-    public void setImageList(String imageList) {
-        this.imageList = imageList == null ? null : imageList.trim();
-    }
-
     public String getSkill() {
         return skill;
+    }
+
+    public List<User> getUserList() {
+        return userList;
+    }
+
+    public void setUserList(List<User> userList) {
+        this.userList = userList;
+    }
+
+    public List<ArticleImageUrl> getArticleImageUrlList() {
+        return articleImageUrlList;
+    }
+
+    public void setArticleImageUrlList(List<ArticleImageUrl> articleImageUrlList) {
+        this.articleImageUrlList = articleImageUrlList;
     }
 }
