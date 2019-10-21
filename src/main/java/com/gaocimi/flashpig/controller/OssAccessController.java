@@ -19,9 +19,7 @@ import io.swagger.annotations.ApiOperation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -64,19 +62,19 @@ public class OssAccessController {
                 User user = userService.findUserByOpenid(myOpenid);
                 if (user == null) {
                     logger.info("抱歉，您无权限上传文件！！");
-                    map.put("error", "抱歉，您无权限上传文件！！（openid为"+myOpenid+"）");
+                    map.put("error", "抱歉，您无权限上传文件！！（openid为" + myOpenid + "）");
                     return map;
                 } else {
                     logger.info("id为" + user.getId() + "普通用户“" + user.getName() + "”获取了一个oss临时上传的签名");
-                    dir = "user/"+user.getId()+"/";
+                    dir = "user/" + user.getId() + "/";
                 }
             } else {
                 logger.info("id为" + hairstylist.getId() + "发型师“" + hairstylist.getHairstylistName() + "”获取了一个oss临时上传的签名");
-                dir = "hairstylist/"+hairstylist.getId()+"/";
+                dir = "hairstylist/" + hairstylist.getId() + "/";
             }
         } else {
             logger.info("id为" + administrator.getId() + "管理员“" + administrator.getName() + "”获取了一个oss临时上传的签名");
-            dir = "administrator/"+administrator.getId()+"/";
+            dir = "administrator/" + administrator.getId() + "/";
         }
 
         //第一步，构造policy
@@ -103,7 +101,7 @@ public class OssAccessController {
         respMap.put("accessid", this.properties.getAccessId());
         respMap.put("policy", encodedPolicy);
         respMap.put("signature", postSignature);//对应的签名
-        respMap.put("dir", this.properties.getDir());//当前用户上传指定的前缀
+        respMap.put("dir", this.properties.getDir()+dir);//当前用户上传指定的前缀
         respMap.put("hostUrl", hostUrl);//当前用户上传指定的前缀
         respMap.put("expire", String.valueOf(expireEndTime / 1000));//签名到期时间的时间戳(不知道怎么用)
         respMap.put("expireDate", expireDate);//签名到期时间
@@ -112,15 +110,12 @@ public class OssAccessController {
         return respMap;
     }
 
-    //已经采用了前端从后端获取签名后，在前端直传的方式上传图片，这个方法就没用到了
-    public ImgMessage saveImg(MultipartFile file) {
 
-        // 创建新实例
-        AliOssClient client = new AliOssClient();
-        // 连接需要的信息
-        client.setAccessKeyId("你的AccessKeyId");
-        client.setAccessKeySecret("你的AccessKeySecret");
-        client.setEndpoint("你的Endpoint");
+    //已经采用了前端从后端获取签名后，在前端直传的方式上传图片，这个方法就没用到了
+    @ApiOperation(value = "上传文件")
+    @PostMapping("/oss/saveObject")
+    public Map saveObject(MultipartFile file) {
+        Map map = new HashMap();
 
         // 返回的文件访问路径
         String url = "";
@@ -139,9 +134,9 @@ public class OssAccessController {
             InputStream inputStream = file.getInputStream();
 
             // 上传到OSS
-            client.putObject(this.properties.getBucket(), this.properties.getDir() + fileName, inputStream);
+            map.put("result",client.putObject(this.properties.getBucket(), this.properties.getDir() + fileName, inputStream) );
 
-            url += this.properties.getFileHost() + fileName;
+            url += this.properties.getFileHost() + "/" + this.properties.getDir() + fileName;
             System.out.println("下载url是:" + url);
 
 
@@ -149,12 +144,50 @@ public class OssAccessController {
             e.printStackTrace();
         }
 
-        // 是否有可访问的地址
-        if (url.length() < 2) {
-            return new ImgMessage("fail", null);
-        }
-        HashMap<String, Object> data = new HashMap<String, Object>();
-        data.put("image_src", url);
-        return new ImgMessage("success", data);
+        map.put("image_src", url);
+        return map;
     }
+
+
+    @ApiOperation(value = "删除文件")
+    @DeleteMapping("/oss/deleteObj")
+    public Map deleteObject(String myOpenid, String imgUrl) {
+        Map map = new HashMap();
+        //权限判断（仅允许数据库中存在的用户、发型师和管理员获取oss签名）
+        Administrator administrator = administratorService.findAdministratorByOpenid(myOpenid);
+        if (administrator == null) {
+            Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
+            if (hairstylist == null) {
+                User user = userService.findUserByOpenid(myOpenid);
+                if (user == null) {
+                    logger.info("抱歉，您无权限删除文件！！");
+                    map.put("error", "抱歉，您无权限删除文件！！（openid为" + myOpenid + "）");
+                    return map;
+                } else {
+                    logger.info("id为" + user.getId() + "普通用户“" + user.getName() + "”删除了oss的照片：" + imgUrl);
+                }
+            } else {
+                logger.info("id为" + hairstylist.getId() + "发型师“" + hairstylist.getHairstylistName() + "”删除了oss的照片：" + imgUrl);
+            }
+        } else {
+            logger.info("id为" + administrator.getId() + "管理员“" + administrator.getName() + "”删除了oss的照片：" + imgUrl);
+        }
+
+        if(!verifyExist(imgUrl)){
+            logger.info("要删除的图片不存在（"+imgUrl+"）");
+            map.put("error","图片不存在");
+            return map;
+        }
+        client.deleteObject(this.properties.getBucket(), imgUrl);
+
+        map.put("message", "图片删除成功");
+        return map;
+    }
+
+    @ApiOperation(value = "验证对象是否存在")
+    @PostMapping("/oss/verifyObjectExist")
+    public boolean verifyExist(String imgUrl) {
+        return client.doesObjectExist(properties.getBucket(), imgUrl);
+    }
+
 }

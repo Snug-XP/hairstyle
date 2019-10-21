@@ -124,7 +124,7 @@ oss:
   #  bucket: pictures1998
 
   #设置当前用户上传指定的前缀，必须以斜线结尾,类似目录（OSS不存在多级目录，但是可以模拟）
-  dir: user-dir/
+  dir: wxminiapp/
 
 
 
