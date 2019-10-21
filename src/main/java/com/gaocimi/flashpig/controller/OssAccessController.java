@@ -13,8 +13,7 @@ import com.gaocimi.flashpig.service.HairstylistService;
 import com.gaocimi.flashpig.service.UserService;
 import com.gaocimi.flashpig.utils.JsonUtils;
 
-import com.gaocimi.flashpig.utils.xp.AliOssClient;
-import com.gaocimi.flashpig.utils.xp.ImgMessage;
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,6 +30,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping
+@Api(value = "阿里云OSS服务", description = "阿里云OSS操作相关业务")
 public class OssAccessController {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
@@ -101,7 +101,7 @@ public class OssAccessController {
         respMap.put("accessid", this.properties.getAccessId());
         respMap.put("policy", encodedPolicy);
         respMap.put("signature", postSignature);//对应的签名
-        respMap.put("dir", this.properties.getDir()+dir);//当前用户上传指定的前缀
+        respMap.put("dir", this.properties.getDir() + dir);//当前用户上传指定的前缀
         respMap.put("hostUrl", hostUrl);//当前用户上传指定的前缀
         respMap.put("expire", String.valueOf(expireEndTime / 1000));//签名到期时间的时间戳(不知道怎么用)
         respMap.put("expireDate", expireDate);//签名到期时间
@@ -134,7 +134,7 @@ public class OssAccessController {
             InputStream inputStream = file.getInputStream();
 
             // 上传到OSS
-            map.put("result",client.putObject(this.properties.getBucket(), this.properties.getDir() + fileName, inputStream) );
+            map.put("result", client.putObject(this.properties.getBucket(), this.properties.getDir() + fileName, inputStream));
 
             url += this.properties.getFileHost() + "/" + this.properties.getDir() + fileName;
             System.out.println("下载url是:" + url);
@@ -149,45 +149,58 @@ public class OssAccessController {
     }
 
 
-    @ApiOperation(value = "删除文件")
-    @DeleteMapping("/oss/deleteObj")
+    @ApiOperation(value = "删除文件（仅允许数据库中存在的用户、发型师和管理员删除文件）...记得关闭url接口", notes = "文件url格式不包括域名")
+    @DeleteMapping("/oss/deleteObject")
     public Map deleteObject(String myOpenid, String imgUrl) {
         Map map = new HashMap();
-        //权限判断（仅允许数据库中存在的用户、发型师和管理员获取oss签名）
-        Administrator administrator = administratorService.findAdministratorByOpenid(myOpenid);
-        if (administrator == null) {
-            Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
-            if (hairstylist == null) {
-                User user = userService.findUserByOpenid(myOpenid);
-                if (user == null) {
-                    logger.info("抱歉，您无权限删除文件！！");
-                    map.put("error", "抱歉，您无权限删除文件！！（openid为" + myOpenid + "）");
-                    return map;
+
+        try {
+            //权限判断（仅允许数据库中存在的用户、发型师和管理员获取oss签名）
+            Administrator administrator = administratorService.findAdministratorByOpenid(myOpenid);
+            if (administrator == null) {
+                Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
+                if (hairstylist == null) {
+                    User user = userService.findUserByOpenid(myOpenid);
+                    if (user == null) {
+                        logger.info("抱歉，您无权限删除文件！！");
+                        map.put("error", "抱歉，您无权限删除文件！！（openid为" + myOpenid + "）");
+                        return map;
+                    } else {
+                        logger.info("id为" + user.getId() + "普通用户“" + user.getName() + "”删除了oss的照片：" + imgUrl);
+                    }
                 } else {
-                    logger.info("id为" + user.getId() + "普通用户“" + user.getName() + "”删除了oss的照片：" + imgUrl);
+                    logger.info("id为" + hairstylist.getId() + "发型师“" + hairstylist.getHairstylistName() + "”删除了oss的照片：" + imgUrl);
                 }
             } else {
-                logger.info("id为" + hairstylist.getId() + "发型师“" + hairstylist.getHairstylistName() + "”删除了oss的照片：" + imgUrl);
+                logger.info("id为" + administrator.getId() + "管理员“" + administrator.getName() + "”删除了oss的照片：" + imgUrl);
             }
-        } else {
-            logger.info("id为" + administrator.getId() + "管理员“" + administrator.getName() + "”删除了oss的照片：" + imgUrl);
-        }
 
-        if(!verifyExist(imgUrl)){
-            logger.info("要删除的图片不存在（"+imgUrl+"）");
-            map.put("error","图片不存在");
-            return map;
-        }
-        client.deleteObject(this.properties.getBucket(), imgUrl);
 
-        map.put("message", "图片删除成功");
+            if (!client.doesObjectExist(properties.getBucket(), imgUrl)) {
+                logger.info("要删除的图片不存在（" + imgUrl + "）");
+                map.put("error", "图片不存在");
+                return map;
+            }
+            client.deleteObject(this.properties.getBucket(), imgUrl);
+            map.put("message", "图片删除成功");
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            map.put("error", e.getMessage());
+        }
         return map;
     }
 
     @ApiOperation(value = "验证对象是否存在")
     @PostMapping("/oss/verifyObjectExist")
-    public boolean verifyExist(String imgUrl) {
-        return client.doesObjectExist(properties.getBucket(), imgUrl);
+    public Map verifyExist(String imgUrl) {
+        Map map = new HashMap();
+        try {
+            map.put("result", client.doesObjectExist(properties.getBucket(), imgUrl));
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            map.put("error", e.getMessage());
+        }
+        return map;
     }
 
 }
