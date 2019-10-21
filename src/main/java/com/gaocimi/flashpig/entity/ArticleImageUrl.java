@@ -22,7 +22,7 @@ public class ArticleImageUrl {
     /** 上传该图片的文章； 定义名为article_id的外键列，该外键引用article表的主键(id)列,采用懒加载 */
     @ManyToOne(targetEntity = Article.class, fetch = FetchType.LAZY)
     @JoinColumn(name = "article_id", nullable = false)
-    private Article article;
+    public Article article;
 
     /**文章图片的url*/
     @Column(nullable = false,unique = true)
@@ -38,9 +38,9 @@ public class ArticleImageUrl {
         this.id = id;
     }
 
-    public Article getArticle() {
-        return article;
-    }
+//    public Article getArticle() {
+//        return article;
+//    }
 
     public void setArticle(Article article) {
         this.article = article;

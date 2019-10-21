@@ -76,9 +76,10 @@ public class Article {
         return skill;
     }
 
-    public List<User> getUserList() {
-        return userList;
-    }
+//不能取消注释，否则序列化时和User造成死循环使得栈溢出(可利用公有方式访问该属性)
+//    public List<User> getUserList() {
+//        return userList;
+//    }
 
     public void setUserList(List<User> userList) {
         this.userList = userList;
