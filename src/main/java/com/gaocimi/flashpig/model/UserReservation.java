@@ -20,11 +20,11 @@ public class UserReservation {
     /**预约的发型师id*/
     private Integer hairstylistId;
 
-    /**提交预约的发型师头像图片url*/
+    /**预约的发型师头像图片url*/
     private String imgUrl;
 
-    /**提交预约的发型师姓名*/
-    private String userName;
+    /**预约的发型师姓名*/
+    private String hairstylistName;
 
     /**预约时间*/
     private Date bookTime;
@@ -39,8 +39,8 @@ public class UserReservation {
         setOrderId(order.getId());
         setReservationNum(order.getReservationNum());
         setHairstylistId(order.getHairstylist().getId());
-        setImgUrl(order.user.getPictureUrl());
-        setUserName(order.getUserName());
+        setImgUrl(order.getHairstylist().getPersonalPhotoUrl());
+        setHairstylistName(order.getHairstylist().getHairstylistName());
         setBookTime(order.getBookTime());
         setStatus(order.getStatus());
         setServiceName(order.getServiceName());
