@@ -586,7 +586,7 @@ public class HairstylistController {
                 CountUser countUser = new CountUser();
 
                 countUser.setUserId(order.user.getId());
-                countUser.setUserName(order.user.getName());
+                countUser.setUserName(order.getUserName());
                 countUser.setHeadImgUrl(order.user.getPictureUrl());
 
                 //找到该顾客的其他预约记录，计数后删除
