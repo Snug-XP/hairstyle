@@ -78,8 +78,7 @@ public class ArticleController {
     @GetMapping("/article/getMyCollection")
     public Map getMyCollectionByPage( String myOpenid,
                                     @RequestParam(name = "pageNum", defaultValue = "0") int pageNum,
-                                    @RequestParam(name = "pageSize", defaultValue = "10") int pageSize
-    ) {
+                                    @RequestParam(name = "pageSize", defaultValue = "10") int pageSize ) {
         Map map = new HashMap();
         try {
 

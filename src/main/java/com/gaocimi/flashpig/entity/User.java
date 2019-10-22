@@ -54,6 +54,14 @@ public class User {
     @ManyToMany(fetch = FetchType.LAZY)
     public List<Hairstylist> hairstylistList;
 
+    /**
+     * 用户提交的对该发型师的收藏记录列表； 定义该User实体所有关联的UserToHairstylist实体； 指定mappedBy属性表明该User实体不控制关联关系
+     */
+    @OneToMany(targetEntity = UserToHairstylist.class, mappedBy = "user")
+    public List<UserToHairstylist> hairstylistRecordList;
+
+
+
     /**用户提交过的Formid列表； 定义该User实体所有关联的UserFormid实体； 指定mappedBy属性表明该User实体不控制关联关系*/
     @OneToMany(targetEntity = UserFormid.class, mappedBy = "user",fetch = FetchType.LAZY)
     public List<UserFormid> userFormidList;
@@ -132,4 +140,12 @@ public class User {
     public List<UserFormid> getUserFormidList() { return userFormidList; }
 
     public void setUserFormidList(List<UserFormid> userFormidList) { this.userFormidList = userFormidList; }
+
+    public List<UserToHairstylist> getHairstylistRecordList() {
+        return hairstylistRecordList;
+    }
+
+    public void setHairstylistRecordList(List<UserToHairstylist> hairstylistRecordList) {
+        this.hairstylistRecordList = hairstylistRecordList;
+    }
 }
