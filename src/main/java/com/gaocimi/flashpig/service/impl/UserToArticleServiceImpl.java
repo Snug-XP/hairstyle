@@ -37,6 +37,11 @@ public class UserToArticleServiceImpl implements UserToArticleService {
     }
 
     @Override
+    public UserToArticle findByUserAndArticle(int userId,int articleId){
+        return userToArticleRepository.findByUser_IdAndArticle_Id(userId,articleId);
+    }
+
+    @Override
     public void save(UserToArticle userToArticle) {
         userToArticleRepository.save(userToArticle);
     }

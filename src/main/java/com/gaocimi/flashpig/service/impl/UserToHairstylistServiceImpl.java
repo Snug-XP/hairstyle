@@ -37,6 +37,11 @@ public class UserToHairstylistServiceImpl implements UserToHairstylistService {
     }
 
     @Override
+    public UserToHairstylist findByUserAndHairstylist(int userId, int hairstylistId){
+        return userToHairstylistRepository.findByUser_IdAndHairstylist_Id(userId,hairstylistId);
+    }
+
+    @Override
     public void save(UserToHairstylist userToHairstylist) {
         userToHairstylistRepository.save(userToHairstylist);
     }

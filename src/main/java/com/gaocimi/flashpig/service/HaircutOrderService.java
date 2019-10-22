@@ -16,6 +16,8 @@ public interface HaircutOrderService {
 
     public HaircutOrder findHaircutOrderById(int id);
 
+    public HaircutOrder findByReservationNum(String reservationNum);
+
     public void save(HaircutOrder haircutOrder);
 
     public void edit(HaircutOrder haircutOrder);

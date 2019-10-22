@@ -1,9 +1,10 @@
 package com.gaocimi.flashpig.controller;
-import com.gaocimi.flashpig.entity.User;
-import com.gaocimi.flashpig.entity.UserToHairstylist;
+import com.gaocimi.flashpig.entity.*;
 import com.gaocimi.flashpig.model.HairstylistInfo;
 import com.gaocimi.flashpig.result.ResponseResult;
+import com.gaocimi.flashpig.service.HairstylistService;
 import com.gaocimi.flashpig.service.UserService;
+import com.gaocimi.flashpig.service.UserToHairstylistService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.slf4j.Logger;
@@ -30,6 +31,10 @@ public class UserController {
 
     @Autowired
     UserService userService;
+    @Autowired
+    HairstylistService hairstylistService;
+    @Autowired
+    UserToHairstylistService userToHairstylistService;
 
 
 
@@ -83,6 +88,43 @@ public class UserController {
             return map;
         }
     }
+
+    @ApiOperation(value = "收藏该发型师")
+    @PostMapping("/user/addHairstylistToCollection")
+    public Map addToCollection( String myOpenid,int hairstylistId){
+        Map map = new HashMap();
+        try{
+            User user = userService.findUserByOpenid(myOpenid);
+            Hairstylist hairstylist = hairstylistService.findHairstylistById(hairstylistId);
+            if(user==null){
+                logger.info("（"+myOpenid+"）该用户不存在！");
+                map.put("error","无效的用户！！");
+                return map;
+            }
+            if(hairstylist==null){
+                logger.info("id为"+hairstylistId+"的发型师不存在！");
+                map.put("error","该发型师不存在！！");
+                return map;
+            }
+            if(userToHairstylistService.findByUserAndHairstylist(user.getId(),hairstylistId)!=null){
+                logger.info("该用户已收藏该发型师，不需要重复收藏");
+                map.put("message","已收藏该发型师!!");
+                return map;
+            }
+            UserToHairstylist userToHairstylist = new UserToHairstylist(user,hairstylist);
+            userToHairstylistService.save(userToHairstylist);
+            logger.info("id为"+user.getId()+"的用户收藏了id为"+hairstylist.getId()+"的发型师“"+hairstylist.getHairstylistName()+"”");
+            map.put("message","收藏成功！");
+
+        }catch (Exception e){
+            logger.info("后端发生异常：\n");
+            logger.error(e.getMessage());
+            map.put("error","抱歉，后端发生异常!!");
+        }
+
+        return map;
+    }
+
 
 //    @ApiOperation(value = "添加用户")
 //    @PostMapping("/user")

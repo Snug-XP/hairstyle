@@ -14,6 +14,9 @@ public class HairstylistReservation {
     /**预约订单id*/
     private Integer orderId;
 
+    /**预约订单的预约编号*/
+    private String reservationNum;
+
     /**提交预约的用户id*/
     private Integer userId;
 
@@ -47,6 +50,7 @@ public class HairstylistReservation {
 
     public HairstylistReservation(HaircutOrder order) {
         setOrderId(order.getId());
+        setReservationNum(order.getReservationNum());
         setUserPhone(order.getUserPhone());
         setUserId(order.user.getId());
         setImgUrl(order.user.getPictureUrl());

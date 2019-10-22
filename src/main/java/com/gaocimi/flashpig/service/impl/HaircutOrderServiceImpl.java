@@ -36,6 +36,11 @@ public class HaircutOrderServiceImpl implements HaircutOrderService {
     }
 
     @Override
+    public HaircutOrder findByReservationNum(String reservationNum){
+        return haircutOrderRepository.findByReservationNum(reservationNum);
+    }
+
+    @Override
     public void save(HaircutOrder haircutOrder) {
         haircutOrderRepository.save(haircutOrder);
     }
