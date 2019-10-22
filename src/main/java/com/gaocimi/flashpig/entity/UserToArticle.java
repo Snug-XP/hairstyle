@@ -4,18 +4,17 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import javax.persistence.*;
 import java.util.Date;
-import java.util.List;
 
 /**
- * UserToHairstylist - 用户收藏发型师的中间表记录类
+ * UserToArticle - 用户收藏文章的中间表记录类
  *
  * @author xp
- * @date 2019-10-18 19:33:52
+ * @date 2019-10-22 15:32:44
  */
 @Entity
-@Table(name = "user_to_hairstylist")
-@JsonIgnoreProperties(value = {"user","hairstylist","handler","hibernateLazyInitializer","fieldHandler"})
-public class UserToHairstylist {
+@Table(name = "user_to_article")
+@JsonIgnoreProperties(value = {"user","article","handler","hibernateLazyInitializer","fieldHandler"})
+public class UserToArticle {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,10 +27,10 @@ public class UserToHairstylist {
     @JoinColumn(name = "user_id", nullable = false)
     public User user;
 
-    /**该收藏记录对应的发型师； 定义名为hairstylist_id的外键列，该外键引用hairstylist表的主键(id)列,采用懒加载*/
-    @ManyToOne(targetEntity = Hairstylist.class, fetch = FetchType.LAZY)
-    @JoinColumn(name = "hairstylist_id", nullable = false)
-    public Hairstylist hairstylist;
+    /**该收藏记录对应的文章； 定义名为article_id的外键列，该外键引用article表的主键(id)列,采用懒加载*/
+    @ManyToOne(targetEntity = Article.class, fetch = FetchType.LAZY)
+    @JoinColumn(name = "article_id", nullable = false)
+    public Article article;
 
     public Integer getId() {
         return id;
@@ -57,11 +56,11 @@ public class UserToHairstylist {
         this.user = user;
     }
 
-    public Hairstylist getHairstylist() {
-        return hairstylist;
+    public Article getArticle() {
+        return article;
     }
 
-    public void setHairstylist(Hairstylist hairstylist) {
-        this.hairstylist = hairstylist;
+    public void setArticle(Article article) {
+        this.article = article;
     }
 }

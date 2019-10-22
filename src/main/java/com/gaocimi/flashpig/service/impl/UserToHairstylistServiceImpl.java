@@ -17,7 +17,7 @@ import java.util.List;
 /**
  * @author xp
  * @date 2019-10-18 19:43:22
- * @description 对数据库userToHairstylist表进行相关操作的实现类
+ * @description 对数据库user_to_hairstylist表进行相关操作的实现类
  */
 @Service
 public class UserToHairstylistServiceImpl implements UserToHairstylistService {

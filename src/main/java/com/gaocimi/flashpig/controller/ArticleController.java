@@ -3,6 +3,7 @@ package com.gaocimi.flashpig.controller;
 import com.gaocimi.flashpig.entity.Article;
 import com.gaocimi.flashpig.entity.HaircutOrder;
 import com.gaocimi.flashpig.entity.User;
+import com.gaocimi.flashpig.entity.UserToArticle;
 import com.gaocimi.flashpig.result.ResponseResult;
 import com.gaocimi.flashpig.service.ArticleService;
 import com.gaocimi.flashpig.service.UserService;
@@ -73,18 +74,26 @@ public class ArticleController {
         return page;
     }
 
+    @ApiOperation(value = "收藏该文章")
+    @GetMapping("/article/addToCollection")
+    public Map addToCollection( String myOpenid,int articleId){
+        Map map = new HashMap();
+
+
+        return map;
+    }
+
 
     @ApiOperation(value = "普通用户分页获取自己收藏的文章列表")
     @GetMapping("/article/getMyCollection")
     public Map getMyCollectionByPage( String myOpenid,
                                     @RequestParam(name = "pageNum", defaultValue = "0") int pageNum,
-                                    @RequestParam(name = "pageSize", defaultValue = "10") int pageSize
-    ) {
+                                    @RequestParam(name = "pageSize", defaultValue = "10") int pageSize ) {
         Map map = new HashMap();
         try {
 
             User user = userService.findUserByOpenid(myOpenid);
-            List<Article> tempArticleList = user.articleList;
+            List<UserToArticle> tempArticleList = user.getArticleRecordList();
             List<Article> resultArticleList = new ArrayList<>();
 
             if(tempArticleList==null){
@@ -107,7 +116,7 @@ public class ArticleController {
             int first = pageNum*pageSize;
             int last = pageNum*pageSize+pageSize-1;
             for(int i = first ; i<=last&&i<tempArticleList.size() ; i++){
-                resultArticleList.add(tempArticleList.get(i));
+                resultArticleList.add(tempArticleList.get(i).article);
             }
 
             //包装分页数据

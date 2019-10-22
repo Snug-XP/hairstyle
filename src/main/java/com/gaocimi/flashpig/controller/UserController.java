@@ -1,12 +1,21 @@
 package com.gaocimi.flashpig.controller;
-
+import com.gaocimi.flashpig.entity.User;
+import com.gaocimi.flashpig.entity.UserToHairstylist;
+import com.gaocimi.flashpig.model.HairstylistInfo;
 import com.gaocimi.flashpig.result.ResponseResult;
 import com.gaocimi.flashpig.service.UserService;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.*;
 
 /**
  * @author xp
@@ -15,12 +24,65 @@ import org.springframework.web.bind.annotation.*;
  */
 @RestController
 @ResponseResult
-@Api(value = "管理端用户服务", description = "管理员操作用户相关业务")
+@Api(value = "用户服务", description = "用户操作相关业务")
 public class UserController {
     protected static final Logger logger = LoggerFactory.getLogger(UserController.class);
 
     @Autowired
     UserService userService;
+
+
+
+    @ApiOperation(value = "普通用户分页获取自己收藏的发型师列表")
+    @GetMapping("/user/getMyHairstylists")
+    public Map getMyCollectionByPage(String myOpenid,
+                                     @RequestParam(name = "pageNum", defaultValue = "0") int pageNum,
+                                     @RequestParam(name = "pageSize", defaultValue = "10") int pageSize ) {
+        Map map = new HashMap();
+        try {
+
+            User user = userService.findUserByOpenid(myOpenid);
+            List<UserToHairstylist> tempRecordList= user.hairstylistRecordList;
+            List<HairstylistInfo> resultList = new ArrayList<>();
+
+            if(tempRecordList==null){
+                logger.info("你还没有收藏的发型师哦~");
+                map.put("message","你还没有收藏的发型师哦~");
+                return map;
+            }
+
+            // 按时间倒序排序
+            Collections.sort(tempRecordList, (o1, o2) -> {
+                if (o2.getCreateTime().after(o1.getCreateTime())) {
+                    return 1;
+                } else if (o1.getCreateTime().after(o2.getCreateTime())) {
+                    return -1;
+                }
+                return 0; //相等为0
+            });
+
+            //获取所求页数的发型师数据
+            int first = pageNum*pageSize;
+            int last = pageNum*pageSize+pageSize-1;
+            for(int i = first ; i<=last&&i<tempRecordList.size() ; i++){
+                HairstylistInfo info = new HairstylistInfo(tempRecordList.get(i));
+                resultList.add(info);
+            }
+
+            //包装分页数据
+            Pageable pageable = PageRequest.of(pageNum,pageSize);
+            Page<HairstylistInfo> page = new PageImpl<>(resultList, pageable, tempRecordList.size());
+
+            map.put("page", page);
+            return map;
+        } catch (Exception e) {
+            logger.error(String.valueOf(e));
+            logger.info("获取自己收藏的发型师列表失败！！（后端发生某些错误，例如数据库连接失败）");
+            map.put("error", "获取收藏的发型师失败！！（后端发生某些错误，例如数据库连接失败）");
+            e.printStackTrace();
+            return map;
+        }
+    }
 
 //    @ApiOperation(value = "添加用户")
 //    @PostMapping("/user")

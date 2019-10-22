@@ -15,6 +15,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -350,7 +351,7 @@ public class HairstylistController {
                 return map;
             }
 
-            DateFormat df3 = DateFormat.getTimeInstance();//只显示出时时分秒（12:43:37）的格式
+            DateFormat df3 = new SimpleDateFormat("HH:mm:ss");;//只显示出时时分秒（12:43:37）的格式
             List<String> timeList = new ArrayList<>();
             String[] availableTime = hairstylist.getAvailableTime().split(",");
             for (String str : availableTime) {
@@ -585,7 +586,7 @@ public class HairstylistController {
                 CountUser countUser = new CountUser();
 
                 countUser.setUserId(order.user.getId());
-                countUser.setUserName(order.user.getName());
+                countUser.setUserName(order.getUserName());
                 countUser.setHeadImgUrl(order.user.getPictureUrl());
 
                 //找到该顾客的其他预约记录，计数后删除

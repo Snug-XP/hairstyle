@@ -397,7 +397,7 @@ public class HaircutOrderController {
             } else {
                 map.put("completedOrderSum", hairstylist.getCompletedOrderSum());//已完成订单总数
                 map.put("CustomerSum", hairstylist.getCustomerSum());//顾客总数
-                map.put("loyalCustomerSum", hairstylist.loyalUserList.size());//忠实（粉丝）顾客数
+                map.put("loyalCustomerSum", hairstylist.getLoyalUserRecordList().size());//忠实（粉丝）顾客数
                 map.put("operationalData",hairstylist.getAllOperationalData());//页面中日报周报月报折线图中的数据
 
                 return map;
