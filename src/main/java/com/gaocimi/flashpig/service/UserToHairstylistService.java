@@ -8,7 +8,7 @@ import java.util.List;
 /**
  * @author xp
  * @date 2019-10-18 19:41:58
- * @description 对数据库userToHairstylist表进行相关操作
+ * @description 对数据库user_to_hairstylist表进行相关操作
  */
 public interface UserToHairstylistService {
 

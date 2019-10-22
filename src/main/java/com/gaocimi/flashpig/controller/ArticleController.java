@@ -73,7 +73,7 @@ public class ArticleController {
         return page;
     }
 
-    @ApiOperation(value = "普通用户分页获取自己收藏的文章列表")
+    @ApiOperation(value = "收藏该文章")
     @GetMapping("/article/addToCollection")
     public Map addToCollection( String myOpenid,int articleId){
         Map map = new HashMap();
