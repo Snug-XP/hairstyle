@@ -1,8 +1,7 @@
 package com.gaocimi.flashpig.controller;
-
-import com.gaocimi.flashpig.entity.Article;
-import com.gaocimi.flashpig.entity.Hairstylist;
 import com.gaocimi.flashpig.entity.User;
+import com.gaocimi.flashpig.entity.UserToHairstylist;
+import com.gaocimi.flashpig.model.HairstylistInfo;
 import com.gaocimi.flashpig.result.ResponseResult;
 import com.gaocimi.flashpig.service.UserService;
 import io.swagger.annotations.Api;
@@ -43,17 +42,17 @@ public class UserController {
         try {
 
             User user = userService.findUserByOpenid(myOpenid);
-            List<Hairstylist> tempHairstylists= user.hairstylistList;
-            List<Hairstylist> resultList = new ArrayList<>();
+            List<UserToHairstylist> tempRecordList= user.hairstylistRecordList;
+            List<HairstylistInfo> resultList = new ArrayList<>();
 
-            if(tempHairstylists==null){
+            if(tempRecordList==null){
                 logger.info("你还没有收藏的发型师哦~");
                 map.put("message","你还没有收藏的发型师哦~");
                 return map;
             }
 
             // 按时间倒序排序
-            Collections.sort(tempHairstylists, (o1, o2) -> {
+            Collections.sort(tempRecordList, (o1, o2) -> {
                 if (o2.getCreateTime().after(o1.getCreateTime())) {
                     return 1;
                 } else if (o1.getCreateTime().after(o2.getCreateTime())) {
@@ -62,16 +61,17 @@ public class UserController {
                 return 0; //相等为0
             });
 
-            //获取所求页数的文章数据
+            //获取所求页数的发型师数据
             int first = pageNum*pageSize;
             int last = pageNum*pageSize+pageSize-1;
-            for(int i = first ; i<=last&&i<tempHairstylists.size() ; i++){
-                resultList.add(tempHairstylists.get(i));
+            for(int i = first ; i<=last&&i<tempRecordList.size() ; i++){
+                HairstylistInfo info = new HairstylistInfo(tempRecordList.get(i));
+                resultList.add(info);
             }
 
             //包装分页数据
             Pageable pageable = PageRequest.of(pageNum,pageSize);
-            Page<Hairstylist> page = new PageImpl< >(resultList, pageable, tempHairstylists.size());
+            Page<HairstylistInfo> page = new PageImpl<>(resultList, pageable, tempRecordList.size());
 
             map.put("page", page);
             return map;

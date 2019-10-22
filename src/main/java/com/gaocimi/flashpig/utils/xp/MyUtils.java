@@ -3,6 +3,8 @@ package com.gaocimi.flashpig.utils.xp;
 import com.gaocimi.flashpig.controller.HairstylistController;
 import com.gaocimi.flashpig.entity.Hairstylist;
 import com.gaocimi.flashpig.entity.User;
+import com.gaocimi.flashpig.entity.UserToHairstylist;
+import com.gaocimi.flashpig.model.HairstylistInfo;
 import com.gaocimi.flashpig.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -185,12 +187,12 @@ public class MyUtils {
      * @return 用户是否收藏了发型师
      */
     public static boolean isUserLoyalToHairstylist(User user, int hairstylistId) {
-        List<Hairstylist> hairstylists = user.getHairstylistList();
-        if (hairstylists == null || hairstylists.size() == 0) {
+        List<UserToHairstylist> recordList = user.getHairstylistRecordList();
+        if (recordList == null || recordList.size() == 0) {
             return false;
         }
-        for (Hairstylist h : hairstylists) {
-            if (h.getId() == hairstylistId )
+        for (UserToHairstylist h : recordList) {
+            if (h.getHairstylist().getId() == hairstylistId )
                 return true;
         }
         return false;

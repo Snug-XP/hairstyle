@@ -44,18 +44,8 @@ public class User {
     @ManyToMany(targetEntity = Article.class,mappedBy="userList",fetch = FetchType.LAZY)
     public List<Article> articleList;
 
-    /**用户收藏的发型师列表*/
-    // 映射连接表(即中间表)为user_to_hairstylist
-    @JoinTable(name = "user_to_hairstylist",
-            // 定义连接表中名为user_id的外键列，该外键列参照当前实体对应表(user)的主键列(id)
-            joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"),
-            // 定义连接表中名为hairstylist_id的外键列，该外键列参照当前实体的关联实体(Hairstylist)对应表(hairstylist)的主键列(id)
-            inverseJoinColumns = @JoinColumn(name = "hairstylist_id", referencedColumnName = "id"))
-    @ManyToMany(fetch = FetchType.LAZY)
-    public List<Hairstylist> hairstylistList;
-
     /**
-     * 用户提交的对该发型师的收藏记录列表； 定义该User实体所有关联的UserToHairstylist实体； 指定mappedBy属性表明该User实体不控制关联关系
+     * 该用户提交的对发型师的收藏记录列表； 定义该User实体所有关联的UserToHairstylist实体； 指定mappedBy属性表明该User实体不控制关联关系
      */
     @OneToMany(targetEntity = UserToHairstylist.class, mappedBy = "user")
     public List<UserToHairstylist> hairstylistRecordList;
@@ -130,12 +120,6 @@ public class User {
     public void setArticleList(List<Article> articleList) {
         this.articleList = articleList;
     }
-
-    public List<Hairstylist> getHairstylistList() {
-        return hairstylistList;
-    }
-
-    public void setHairstylistList(List<Hairstylist> hairstylistList) { this.hairstylistList = hairstylistList; }
 
     public List<UserFormid> getUserFormidList() { return userFormidList; }
 

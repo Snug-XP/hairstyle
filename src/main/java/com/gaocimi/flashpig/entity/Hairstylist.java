@@ -136,16 +136,11 @@ public class Hairstylist {
     public List<RecordHairstylisToUser> recordToUserList;
 
     /**
-     * 用户提交的对该发型师的收藏记录列表； 定义该Hairstylist实体所有关联的UserToHairstylist实体； 指定mappedBy属性表明该Hairstylist实体不控制关联关系
+     * 收藏该发型师的用户（即粉丝）提交的对该发型师的收藏记录列表； 定义该Hairstylist实体所有关联的UserToHairstylist实体； 指定mappedBy属性表明该Hairstylist实体不控制关联关系
      */
     @OneToMany(targetEntity = UserToHairstylist.class, mappedBy = "hairstylist")
     public List<UserToHairstylist> loyalUserRecordList;
 
-    /**
-     * 收藏该发型师的用户（即粉丝）列表
-     */
-    @ManyToMany(targetEntity = User.class, mappedBy = "hairstylistList", fetch = FetchType.LAZY)
-    public List<User> loyalUserList;
 
     public Integer getId() {
         return id;
@@ -329,13 +324,6 @@ public class Hairstylist {
 
     public void setRecordToUserList(List<RecordHairstylisToUser> recordToUserList) {
         this.recordToUserList = recordToUserList;
-    }
-
-//    不能取消注释，否则序列化时和User造成死循环使得栈溢出(可利用公有方式访问该属性)
-//    public List<User> getLoyalUserList() { return loyalUserList; }
-
-    public void setLoyalUserList(List<User> loyalUserList) {
-        this.loyalUserList = loyalUserList;
     }
 
     public List<UserToHairstylist> getLoyalUserRecordList() {

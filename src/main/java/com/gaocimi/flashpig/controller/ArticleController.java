@@ -73,6 +73,15 @@ public class ArticleController {
         return page;
     }
 
+    @ApiOperation(value = "普通用户分页获取自己收藏的文章列表")
+    @GetMapping("/article/addToCollection")
+    public Map addToCollection( String myOpenid,int articleId){
+        Map map = new HashMap();
+
+
+        return map;
+    }
+
 
     @ApiOperation(value = "普通用户分页获取自己收藏的文章列表")
     @GetMapping("/article/getMyCollection")

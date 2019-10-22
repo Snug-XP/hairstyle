@@ -7,7 +7,7 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * UserToHairstylist - 用户收藏发型师的记录类
+ * UserToHairstylist - 用户收藏发型师的中间表记录类
  *
  * @author xp
  * @date 2019-10-18 19:33:52
@@ -26,12 +26,12 @@ public class UserToHairstylist {
     /**提交该收藏记录的用户； 定义名为user_id的外键列，该外键引用user表的主键(id)列,采用懒加载*/
     @ManyToOne(targetEntity = User.class, fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    public User user;
 
     /**该收藏记录对应的发型师； 定义名为hairstylist_id的外键列，该外键引用hairstylist表的主键(id)列,采用懒加载*/
     @ManyToOne(targetEntity = Hairstylist.class, fetch = FetchType.LAZY)
     @JoinColumn(name = "hairstylist_id", nullable = false)
-    private Hairstylist hairstylist;
+    public Hairstylist hairstylist;
 
     public Integer getId() {
         return id;
