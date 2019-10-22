@@ -25,11 +25,11 @@ import java.util.*;
 /**
  * @author xp
  * @date 2019-10-13 19:12:25
- * @description 操作用户订单的相关业务
+ * @description 订单的相关业务
  */
 @RestController
 @ResponseResult
-@Api(value = "订单操作服务", description = "操作用户订单的相关业务")
+@Api(value = "订单操作服务", description = "订单的相关业务")
 public class HaircutOrderController {
     protected static final Logger logger = LoggerFactory.getLogger(HairstylistController.class);
 
@@ -439,24 +439,32 @@ public class HaircutOrderController {
             Date date = new Date(System.currentTimeMillis());
             order.setCreateTime(date);
 
-            //...设计订单的预约号
-            String reservationNum = "00" + user.getId()+"00"+hairstylist.getId()+date.getSeconds() + date.getYear() + date.getDay() + date.getHours();
-            order.setReservationNum(reservationNum);
-
             try {
                 //处理用户提交的预约时间
                 date = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(bookTime);
                 order.setBookTime(date);
                 if (date == null) {
                     logger.info("时间转换失败，请检查时间格式（传入数据：" + bookTime + "）");
-                    map.put("error", "时间转换失败，请检查预约的时间格式");
+                    map.put("error", "时间转换失败，请检查预约的时间格式：“yyyy-MM-dd HH:mm:ss”");
                     return map;
                 }
             } catch (Exception e) {
                 logger.error(String.valueOf(e));
                 logger.info("时间转换失败，请检查时间格式（传入数据：" + bookTime + "）");
-                map.put("error", "时间转换失败，请检查预约的时间格式");
+                map.put("error", "时间转换失败，请检查预约的时间格式：“yyyy-MM-dd HH:mm:ss”");
                 e.printStackTrace();
+                return map;
+            }
+
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(date);
+            //...设计订单的预约号(预约的年月日+0+发型师id+0+服务项目id+0+用户id)
+            String reservationNum = calendar.get(Calendar.YEAR)+""+calendar.get(Calendar.MONTH)+"" +calendar.get(Calendar.DAY_OF_MONTH)+"0"+hairstylist.getId()+ "0" + serviceId + "0" + user.getId();
+            order.setReservationNum(reservationNum);
+
+            if(haircutOrderService.findByReservationNum(reservationNum)!=null){
+                logger.info("该用户当天已有相同的预约，不可重复预约");
+                map.put("error", "当天已有相同的预约，不可重复预约！");
                 return map;
             }
 
@@ -474,7 +482,7 @@ public class HaircutOrderController {
     }
 
     @ApiOperation(value = "普通用户获取自己的预约订单列表(分页展示)")
-    @PostMapping("/user/getHaircutOrderList")
+    @GetMapping("/user/getHaircutOrderList")
     public Map addHaircutOrder(String myOpenid,@RequestParam(name = "pageNum", defaultValue = "0") int pageNum,
                                @RequestParam(name = "pageSize", defaultValue = "10") int pageSize ) {
         Map map = new HashMap();
@@ -543,7 +551,7 @@ public class HaircutOrderController {
 //        haircutOrderService.edit(haircutOrders);
 //    }
 
-    @ApiOperation(value = "获取单个用户订单信息", produces = "application/json")
+    @ApiOperation(value = "获取单个订单信息的所有信息，包括其中用户和发型师信息", produces = "application/json")
     @GetMapping("/haircutOrder")
     public HaircutOrder getOne(int orderId) {
         return haircutOrderService.findHaircutOrderById(orderId);
