@@ -13,7 +13,7 @@ import java.util.Date;
  */
 @Entity
 @Table(name = "user_to_article")
-@JsonIgnoreProperties(value = {"user","article"})
+@JsonIgnoreProperties(value = {"user","article","handler","hibernateLazyInitializer","fieldHandler"})
 public class UserToArticle {
 
     @Id

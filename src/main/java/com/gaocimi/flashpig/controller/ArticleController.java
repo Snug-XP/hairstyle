@@ -3,6 +3,7 @@ package com.gaocimi.flashpig.controller;
 import com.gaocimi.flashpig.entity.Article;
 import com.gaocimi.flashpig.entity.HaircutOrder;
 import com.gaocimi.flashpig.entity.User;
+import com.gaocimi.flashpig.entity.UserToArticle;
 import com.gaocimi.flashpig.result.ResponseResult;
 import com.gaocimi.flashpig.service.ArticleService;
 import com.gaocimi.flashpig.service.UserService;
@@ -92,7 +93,7 @@ public class ArticleController {
         try {
 
             User user = userService.findUserByOpenid(myOpenid);
-            List<Article> tempArticleList = user.articleList;
+            List<UserToArticle> tempArticleList = user.getArticleRecordList();
             List<Article> resultArticleList = new ArrayList<>();
 
             if(tempArticleList==null){
@@ -115,7 +116,7 @@ public class ArticleController {
             int first = pageNum*pageSize;
             int last = pageNum*pageSize+pageSize-1;
             for(int i = first ; i<=last&&i<tempArticleList.size() ; i++){
-                resultArticleList.add(tempArticleList.get(i));
+                resultArticleList.add(tempArticleList.get(i).article);
             }
 
             //包装分页数据
