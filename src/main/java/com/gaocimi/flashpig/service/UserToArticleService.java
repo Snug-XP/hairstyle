@@ -23,4 +23,6 @@ public interface UserToArticleService {
     public void delete(int id);
 
     public Page<UserToArticle> findAll(int pageNum, int pageSize);
+
+    public UserToArticle findByUserAndArticle(int userId,int articleId);
 }

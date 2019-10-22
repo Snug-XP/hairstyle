@@ -7,6 +7,7 @@ import com.gaocimi.flashpig.entity.UserToArticle;
 import com.gaocimi.flashpig.result.ResponseResult;
 import com.gaocimi.flashpig.service.ArticleService;
 import com.gaocimi.flashpig.service.UserService;
+import com.gaocimi.flashpig.service.UserToArticleService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.slf4j.Logger;
@@ -36,6 +37,8 @@ public class ArticleController {
     ArticleService articleService;
     @Autowired
     UserService userService;
+    @Autowired
+    UserToArticleService userToArticleService;
 
     @ApiOperation(value = "添加文章")
     @PostMapping("/article")
@@ -78,7 +81,34 @@ public class ArticleController {
     @GetMapping("/article/addToCollection")
     public Map addToCollection( String myOpenid,int articleId){
         Map map = new HashMap();
+        try{
+            User user = userService.findUserByOpenid(myOpenid);
+            Article article = articleService.findArticleById(articleId);
+            if(user==null){
+                logger.info("（"+myOpenid+"）该用户不存在！");
+                map.put("error","无效的用户！！");
+                return map;
+            }
+            if(article==null){
+                logger.info("id为"+article+"的文章不存在！");
+                map.put("error","文章不存在！！");
+                return map;
+            }
+            if(userToArticleService.findByUserAndArticle(user.getId(),articleId)!=null){
+                logger.info("该用户已收藏该文章，不需要重复收藏");
+                map.put("message","已收藏该文章!!");
+                return map;
+            }
+            UserToArticle userToArticle = new UserToArticle(user,article);
+            userToArticleService.save(userToArticle);
+            logger.info("id为"+user.getId()+"的用户收藏了id为"+article.getId()+"的文章（skill："+article.getSkill()+"）");
+            map.put("message","收藏成功！");
 
+        }catch (Exception e){
+            logger.info("后端发生异常：\n");
+            logger.error(e.getMessage());
+            map.put("error","抱歉，后端发生异常!!");
+        }
 
         return map;
     }

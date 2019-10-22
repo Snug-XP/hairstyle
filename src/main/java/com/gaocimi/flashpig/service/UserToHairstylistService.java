@@ -1,5 +1,6 @@
 package com.gaocimi.flashpig.service;
 
+import com.gaocimi.flashpig.entity.UserToArticle;
 import com.gaocimi.flashpig.entity.UserToHairstylist;
 import org.springframework.data.domain.Page;
 
@@ -23,4 +24,7 @@ public interface UserToHairstylistService {
     public void delete(int id);
 
     public Page<UserToHairstylist> findAll(int pageNum, int pageSize);
+
+    public UserToHairstylist findByUserAndHairstylist(int userId, int hairstylistId);
+
 }
