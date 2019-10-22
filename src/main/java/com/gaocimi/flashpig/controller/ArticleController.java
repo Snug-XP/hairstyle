@@ -78,7 +78,7 @@ public class ArticleController {
     }
 
     @ApiOperation(value = "收藏该文章")
-    @GetMapping("/article/addToCollection")
+    @PostMapping("/article/addToCollection")
     public Map addToCollection( String myOpenid,int articleId){
         Map map = new HashMap();
         try{
@@ -90,8 +90,8 @@ public class ArticleController {
                 return map;
             }
             if(article==null){
-                logger.info("id为"+article+"的文章不存在！");
-                map.put("error","文章不存在！！");
+                logger.info("id为"+articleId+"的文章不存在！");
+                map.put("error","该文章不存在！！");
                 return map;
             }
             if(userToArticleService.findByUserAndArticle(user.getId(),articleId)!=null){

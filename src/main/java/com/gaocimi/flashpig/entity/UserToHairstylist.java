@@ -1,6 +1,7 @@
 package com.gaocimi.flashpig.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import lombok.Data;
 
 import javax.persistence.*;
 import java.util.Date;
@@ -14,7 +15,8 @@ import java.util.List;
  */
 @Entity
 @Table(name = "user_to_hairstylist")
-@JsonIgnoreProperties(value = {"user","hairstylist","handler","hibernateLazyInitializer","fieldHandler"})
+@JsonIgnoreProperties(value = {"user", "hairstylist", "handler", "hibernateLazyInitializer", "fieldHandler"})
+@Data
 public class UserToHairstylist {
 
     @Id
@@ -23,45 +25,27 @@ public class UserToHairstylist {
 
     private Date createTime;
 
-    /**提交该收藏记录的用户； 定义名为user_id的外键列，该外键引用user表的主键(id)列,采用懒加载*/
+    /**
+     * 提交该收藏记录的用户； 定义名为user_id的外键列，该外键引用user表的主键(id)列,采用懒加载
+     */
     @ManyToOne(targetEntity = User.class, fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     public User user;
 
-    /**该收藏记录对应的发型师； 定义名为hairstylist_id的外键列，该外键引用hairstylist表的主键(id)列,采用懒加载*/
+    /**
+     * 该收藏记录对应的发型师； 定义名为hairstylist_id的外键列，该外键引用hairstylist表的主键(id)列,采用懒加载
+     */
     @ManyToOne(targetEntity = Hairstylist.class, fetch = FetchType.LAZY)
     @JoinColumn(name = "hairstylist_id", nullable = false)
     public Hairstylist hairstylist;
 
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    public Date getCreateTime() {
-        return createTime;
-    }
-
-    public void setCreateTime(Date createTime) {
-        this.createTime = createTime;
-    }
-
-    public User getUser() {
-        return user;
-    }
-
-    public void setUser(User user) {
+    public UserToHairstylist(User user, Hairstylist hairstylist) {
         this.user = user;
-    }
-
-    public Hairstylist getHairstylist() {
-        return hairstylist;
-    }
-
-    public void setHairstylist(Hairstylist hairstylist) {
         this.hairstylist = hairstylist;
+        this.createTime = new Date(System.currentTimeMillis());
+    }
+
+    public UserToHairstylist() {
+        super();
     }
 }
