@@ -1,11 +1,9 @@
 package com.gaocimi.flashpig.controller;
 
-import com.gaocimi.flashpig.entity.HairService;
-import com.gaocimi.flashpig.entity.HaircutOrder;
-import com.gaocimi.flashpig.entity.Hairstylist;
-import com.gaocimi.flashpig.entity.User;
+import com.gaocimi.flashpig.entity.*;
 import com.gaocimi.flashpig.model.HairstylistReservation;
 import com.gaocimi.flashpig.model.OrderRecordFromOneUser;
+import com.gaocimi.flashpig.model.UserReservation;
 import com.gaocimi.flashpig.result.ResponseResult;
 import com.gaocimi.flashpig.service.*;
 import com.gaocimi.flashpig.utils.xp.MyUtils;
@@ -15,6 +13,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 
 import java.text.ParseException;
@@ -28,7 +29,7 @@ import java.util.*;
  */
 @RestController
 @ResponseResult
-@Api(value = "用户订单操作服务", description = "操作用户订单的相关业务")
+@Api(value = "订单操作服务", description = "操作用户订单的相关业务")
 public class HaircutOrderController {
     protected static final Logger logger = LoggerFactory.getLogger(HairstylistController.class);
 
@@ -411,62 +412,7 @@ public class HaircutOrderController {
         }
     }
 
-
-    @ApiOperation(value = "时间测试", produces = "application/json")
-    @GetMapping("/timeTest")
-    public Map Test() {
-        Map map = new HashMap();
-
-        Map daily = new HashMap();
-        Map weekly = new HashMap();
-        Map monthly = new HashMap();
-
-        Date today = MyUtils.getTodayFirstTime();
-        Date week = MyUtils.getFirstDayOfWeek(today);
-        Date month = MyUtils.getFirstDayOfMonth(today);
-
-        for(int i = 0;i<13;i++){
-            daily.put(i+"daysAgo", MyUtils.stepDay(today,-i));
-            weekly.put(i+"weeksAgo",MyUtils.stepWeek(week,-i));
-            monthly.put(i+"monthsAgo",MyUtils.stepMonth(month,-i));
-        }
-        map.put("daily",daily);
-        map.put("weekly",weekly);
-        map.put("monthly",monthly);
-        map.put("nowTime",new Date(System.currentTimeMillis()));
-        return map;
-    }
-
-
-//     //发型师操作模版
-//    @ApiOperation(value = "获取自己的运营数据（包括日报周报月报）")
-//    @GetMapping("/hairstylist/getOperationalData")
-//    public Map getOperationalData(String myOpenid ) {
-//        Map map = new HashMap();
-//        try {
-//            Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
-//            if ( hairstylist == null || hairstylist.getApplyStatus() != 1) {
-//                logger.info("非发型师用户操作！！");
-//                map.put("error", "对不起，你还不是发型师用户，无权操作！！");
-//                return map;
-//            } else {
-//
-//                return map;
-//            }
-//        } catch (Exception e) {
-//            logger.error(String.valueOf(e));
-//            logger.info("获取运营数据失败！！（后端发生某些错误，例如数据库连接失败）");
-//            map.put("error", "获取运营数据失败！！（后端发生某些错误，例如数据库连接失败）");
-//            e.printStackTrace();
-//            return map;
-//        }
-//    }
-
-
-
-
-
-    @ApiOperation(value = "普通用户提交预约订单", notes = "m1")
+    @ApiOperation(value = "普通用户提交预约订单")
     @PostMapping("/user/addHaircutOrder")
     public Map addHaircutOrder(String myOpenid, String userName, String userPhone,
                                int hairstylistId, String bookTime, int serviceId) {
@@ -526,7 +472,65 @@ public class HaircutOrderController {
         }
         return map;
     }
-//
+
+    @ApiOperation(value = "普通用户获取自己的预约订单列表(分页展示)")
+    @PostMapping("/user/getHaircutOrderList")
+    public Map addHaircutOrder(String myOpenid,@RequestParam(name = "pageNum", defaultValue = "0") int pageNum,
+                               @RequestParam(name = "pageSize", defaultValue = "10") int pageSize ) {
+        Map map = new HashMap();
+        try {
+
+            User user = userService.findUserByOpenid(myOpenid);
+            List<HaircutOrder> tempOrderList = user.getHaircutOrderList();
+            List<UserReservation> resultList = new ArrayList<>();
+
+            if(tempOrderList==null||tempOrderList.size()==0){
+                logger.info("你还没有进行预约过哦~");
+                map.put("message","你还没有进行预约过哦~");
+                return map;
+            }
+
+            // 按创建时间倒序排序
+            Collections.sort(tempOrderList, (o1, o2) -> {
+                if (o2.getCreateTime().after(o1.getCreateTime())) {
+                    return 1;
+                } else if (o1.getCreateTime().after(o2.getCreateTime())) {
+                    return -1;
+                }
+                return 0; //相等为0
+            });
+            // 按预约时间倒序排序
+            Collections.sort(tempOrderList, (o1, o2) -> {
+                if (o2.getBookTime().after(o1.getBookTime())) {
+                    return 1;
+                } else if (o1.getBookTime().after(o2.getBookTime())) {
+                    return -1;
+                }
+                return 0; //相等为0
+            });
+
+            //获取所求页数的文章数据
+            int first = pageNum*pageSize;
+            int last = pageNum*pageSize+pageSize-1;
+            for(int i = first ; i<=last&&i<tempOrderList.size() ; i++){
+                UserReservation userReservation = new UserReservation(tempOrderList.get(i));
+                resultList.add(userReservation);
+            }
+
+            //包装分页数据
+            Pageable pageable = PageRequest.of(pageNum,pageSize);
+            Page<UserReservation> page = new PageImpl<>(resultList, pageable, tempOrderList.size());
+
+            map.put("page", page);
+            return map;
+        } catch (Exception e) {
+            logger.error(String.valueOf(e));
+            logger.info("获取自己的预约列表失败！！（后端发生某些错误，例如数据库连接失败）");
+            map.put("error", "获取我的预约列表失败！！（后端发生某些错误，例如数据库连接失败）");
+            e.printStackTrace();
+            return map;
+        }
+    }
 //    @ApiOperation(value = "删除用户订单",notes = "m1")
 //    @DeleteMapping("/haircutOrder/{haircutOrderId}")
 //    public void deleteHaircutOrder(@PathVariable("haircutOrderId") Integer haircutOrderId) {
@@ -539,7 +543,7 @@ public class HaircutOrderController {
 //        haircutOrderService.edit(haircutOrders);
 //    }
 
-    @ApiOperation(value = "获取单个用户订单信息", notes = "m1", produces = "application/json")
+    @ApiOperation(value = "获取单个用户订单信息", produces = "application/json")
     @GetMapping("/haircutOrder")
     public HaircutOrder getOne(int orderId) {
         return haircutOrderService.findHaircutOrderById(orderId);
@@ -573,11 +577,6 @@ public class HaircutOrderController {
     }
 
 
-    @ApiOperation(value = "****************时间格式(yyyy-MM-dd HH:mm:ss)传输测试*************************", notes = "m1")
-    @GetMapping("/timeFormatTest")
-    public Date getHaircutOrdersPage(String time) throws ParseException {
-        Date date = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(time);
-        return date;
-    }
+
 
 }
