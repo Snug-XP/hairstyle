@@ -274,11 +274,16 @@ public class HaircutOrderController {
      * @param flag    通知用户前面还有几个人，当flag=-1时，通知订单已完成
      * @return
      */
-    @ApiOperation(value = "发模板信息通知用户前面还有flag个人，当flag=-1时，通知订单已完成，并且根据通知类型改变订单状态（...到时候记得关闭url访问）")
+    @ApiOperation(value = "发模板信息通知用户前面还有flag个人（flag=0/1/2/-1），当flag=-1时，通知订单已完成，并且根据通知类型改变订单状态（...到时候记得关闭url访问）")
     @GetMapping("/hairstylist/notifyUser")
     public Map notifyUser(int orderId, int flag) {
         Map map = new HashMap();
-
+        //错误flag
+        if(flag<-1) {
+            logger.info("通知flag错误！！(仅允许大于等于-1的整数)");
+            map.put("error", "通知flag错误！！(仅允许大于等于-1的整数)");
+            return map;
+        }
         HaircutOrder order = haircutOrderService.findHaircutOrderById(orderId);
         switch (flag) {
             case 0:
@@ -318,9 +323,11 @@ public class HaircutOrderController {
                 logger.info("id为" + order.getId() + "的订单已完成(用户：“"+order.user.getName()+"”，发型师：“"+hairstylist.getHairstylistName()+"”)\n");
                 break;
             default:
-                //错误flag
-                logger.info("通知flag错误！！请检查代码！！");
-                map.put("error","通知flag错误！！请检查代码！！");
+                //发送等待前flag位的通知
+                order.setStatus(0);//将订单状态设为已通知
+                haircutOrderService.edit(order);
+                messageController.pushComingMessage(orderId, flag);
+                logger.info("通知订单号id为" + order.getId() + "的顾客“" + order.user.getName() + "”前面还有"+flag+"位顾客,请耐心等候");
                 break;
         }
         return map;
@@ -539,6 +546,8 @@ public class HaircutOrderController {
             return map;
         }
     }
+
+
 //    @ApiOperation(value = "删除用户订单",notes = "m1")
 //    @DeleteMapping("/haircutOrder/{haircutOrderId}")
 //    public void deleteHaircutOrder(@PathVariable("haircutOrderId") Integer haircutOrderId) {

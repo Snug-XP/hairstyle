@@ -185,7 +185,7 @@ public class PushTemplateMessageController {
             case 2:
                 tipsStr = "亲，前面还有2位顾客哦，你可以准备前往了";break;
             default:
-                return null;
+                tipsStr = "亲，前面还有"+remainingNum+"位顾客哦，请耐心等候";break;
 
         }
 
