@@ -109,9 +109,9 @@ public class HaircutOrderController {
                 return map;
             }
         } catch (Exception e) {
-            logger.error(String.valueOf(e));
-            logger.info("获取预约列表失败！！（后端发生某些错误，例如数据库连接失败）");
-            map.put("error", "获取预约列表失败！！（后端发生某些错误，例如数据库连接失败）");
+            logger.error(e.getMessage());
+            logger.info("获取预约列表失败！！（后端发生某些错误）");
+            map.put("error", "获取预约列表失败！！（后端发生某些错误）");
             e.printStackTrace();
             return map;
         }
@@ -383,9 +383,9 @@ public class HaircutOrderController {
                 return map;
             }
         } catch (Exception e) {
-            logger.error(String.valueOf(e));
-            logger.info("获取预约记录列表失败！！（后端发生某些错误，例如数据库连接失败）");
-            map.put("error", "获取预约记录列表失败！！（后端发生某些错误，例如数据库连接失败）");
+            logger.error(e.getMessage());
+            logger.info("获取预约记录列表失败！！（后端发生某些错误）");
+            map.put("error", "获取预约记录列表失败！！（后端发生某些错误）");
             e.printStackTrace();
             return map;
         }
@@ -403,7 +403,7 @@ public class HaircutOrderController {
                 map.put("error", "对不起，你还不是发型师用户，无权操作！！");
                 return map;
             } else {
-                map.put("completedOrderSum", hairstylist.getCompletedOrderSum());//已完成订单总数
+                map.put("completedOrderSum", hairstylist.getOrderSum());//已完成订单总数
                 map.put("CustomerSum", hairstylist.getCustomerSum());//顾客总数
                 map.put("loyalCustomerSum", hairstylist.getLoyalUserRecordList().size());//忠实（粉丝）顾客数
                 map.put("operationalData",hairstylist.getAllOperationalData());//页面中日报周报月报折线图中的数据
@@ -411,9 +411,9 @@ public class HaircutOrderController {
                 return map;
             }
         } catch (Exception e) {
-            logger.error(String.valueOf(e));
-            logger.info("获取运营数据失败！！（后端发生某些错误，例如数据库连接失败）");
-            map.put("error", "获取运营数据失败！！（后端发生某些错误，例如数据库连接失败）");
+            logger.error(e.getMessage());
+            logger.info("获取运营数据失败！！（后端发生某些错误）");
+            map.put("error", "获取运营数据失败！！（后端发生某些错误）");
             e.printStackTrace();
             return map;
         }
@@ -456,7 +456,7 @@ public class HaircutOrderController {
                     return map;
                 }
             } catch (Exception e) {
-                logger.error(String.valueOf(e));
+                logger.error(e.getMessage());
                 logger.info("时间转换失败，请检查时间格式（传入数据：" + bookTime + "）");
                 map.put("error", "时间转换失败，请检查预约的时间格式：“yyyy-MM-dd HH:mm:ss”");
                 e.printStackTrace();
@@ -480,7 +480,7 @@ public class HaircutOrderController {
             messageController.pushSuccessMessage(order.getId());//给用户发送预约成功的模板消息通知
             map.put("message", "订单提交成功！");
         } catch (Exception e) {
-            logger.error(String.valueOf(e));
+            logger.error(e.getMessage());
             logger.info("用户提交预约订单失败！！（后端发生某些错误）");
             map.put("error", "操作失败！！（后端发生某些错误）");
             e.printStackTrace();
@@ -539,9 +539,9 @@ public class HaircutOrderController {
             map.put("page", page);
             return map;
         } catch (Exception e) {
-            logger.error(String.valueOf(e));
-            logger.info("获取自己的预约列表失败！！（后端发生某些错误，例如数据库连接失败）");
-            map.put("error", "获取我的预约列表失败！！（后端发生某些错误，例如数据库连接失败）");
+            logger.error(e.getMessage());
+            logger.info("获取自己的预约列表失败！！（后端发生某些错误）");
+            map.put("error", "获取我的预约列表失败！！（后端发生某些错误）");
             e.printStackTrace();
             return map;
         }
@@ -585,9 +585,9 @@ public class HaircutOrderController {
                 return map;
             }
         } catch (Exception e) {
-            logger.error(String.valueOf(e));
-            logger.info("获取订单列表失败！！（后端发生某些错误，例如数据库连接失败）");
-            map.put("error", "获取订单列表失败！！（后端发生某些错误，例如数据库连接失败）");
+            logger.error(e.getMessage());
+            logger.info("获取订单列表失败！！（后端发生某些错误）");
+            map.put("error", "获取订单列表失败！！（后端发生某些错误）");
             e.printStackTrace();
             return map;
         }

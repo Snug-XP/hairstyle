@@ -118,7 +118,7 @@ public class WXLoginController {
             logger.info("用户 " + user.getName() + " 登录成功！\n\n\n\n");
         }
 //        } catch (Exception e) {
-//            logger.error(String.valueOf(e));
+//            logger.error(e.getMessage());
 //            logger.info("临时登录凭证错误-不对应\n\n\n\n");
 //            e.printStackTrace();
 //            map.put("error", "临时登录凭证错误");

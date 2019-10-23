@@ -292,6 +292,7 @@ public class Hairstylist {
     }
 
     public Integer getOrderSum() {
+        setOrderSum();
         return orderSum;
     }
 
@@ -345,20 +346,6 @@ public class Hairstylist {
 
 
 /**************下面是一些关于发型师数据统计相关的方法*******************************************************************/
-
-    /**
-     * 获取发型师自己的已完成订单数
-     *
-     * @return 已完成订单数
-     */
-    public Integer getCompletedOrderSum() {
-        int count = 0;//已完成订单数
-        for (HaircutOrder order : haircutOrderList) {
-            if (order.getStatus() == 2)
-                count++;
-        }
-        return count;
-    }
 
     /**
      * 获取发型师自己的顾客总数

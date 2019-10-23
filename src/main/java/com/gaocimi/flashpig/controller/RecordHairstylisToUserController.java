@@ -84,9 +84,9 @@ public class RecordHairstylisToUserController {
             }
 
         } catch (Exception e) {
-            logger.error(String.valueOf(e));
-            logger.info("备注添加操作失败！！（后端发生某些错误，例如数据库连接失败）");
-            map.put("error", "操作失败！！（后端发生某些错误，例如数据库连接失败）");
+            logger.error(e.getMessage());
+            logger.info("备注添加操作失败！！（后端发生某些错误）");
+            map.put("error", "操作失败！！（后端发生某些错误）");
             e.printStackTrace();
             return map;
         }
@@ -149,9 +149,9 @@ public class RecordHairstylisToUserController {
                 return map;
             }
         } catch (Exception e) {
-            logger.error(String.valueOf(e));
-            logger.info("获取自己对某个顾客的备注信息列表失败！！（后端发生某些错误，例如数据库连接失败）");
-            map.put("error", "获取备注列表操作失败！！（后端发生某些错误，例如数据库连接失败）");
+            logger.error(e.getMessage());
+            logger.info("获取自己对某个顾客的备注信息列表失败！！（后端发生某些错误）");
+            map.put("error", "获取备注列表操作失败！！（后端发生某些错误）");
             e.printStackTrace();
             return map;
         }
@@ -192,9 +192,9 @@ public class RecordHairstylisToUserController {
             }
 
         } catch (Exception e) {
-            logger.error(String.valueOf(e));
+            logger.error(e.getMessage());
             e.printStackTrace();
-            map.put("error", "操作失败！！（后端发生某些错误，例如数据库连接失败）");
+            map.put("error", "操作失败！！（后端发生某些错误）");
             return map;
         }
     }
@@ -249,9 +249,9 @@ public class RecordHairstylisToUserController {
             }
 
         } catch (Exception e) {
-            logger.error(String.valueOf(e));
+            logger.error(e.getMessage());
             e.printStackTrace();
-            map.put("error", "操作失败！！（后端发生某些错误，例如数据库连接失败）");
+            map.put("error", "操作失败！！（后端发生某些错误）");
             return map;
         }
     }
