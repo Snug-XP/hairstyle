@@ -102,7 +102,7 @@ public class HaircutOrderController {
                     });
 
                     map.put("recordList", recordList);
-                    map.put("todayOrderCount", recordList.size());
+                    map.put("orderSum", recordList.size());
                 } else
                     map.put("message", "你今天没有订单");
 
@@ -135,7 +135,8 @@ public class HaircutOrderController {
 
         //订单状态，“-1”表示待完成，“0”表示已通知用户准备，“1”表示订单正在进行中，“2”表示订单已完成，“-2”表示订单已取消
         List<HairstylistReservation> resultList = new ArrayList<>();//要返回的排号订单列表
-        for (HairstylistReservation reservation : reservationList) {
+        for (int i=0 ; i<reservationList.size() ; i++) {
+            HairstylistReservation reservation = reservationList.get(i);
             switch (reservation.getStatus()) {
                 case -1:
                     //待完成的订单,加入排号订单列表中
@@ -143,6 +144,7 @@ public class HaircutOrderController {
                     //已通知用户准备的订单,加入排号订单列表中
                 case 1:
                     //当前正在进行中的订单,加入排号订单列表中
+                    reservation.setIndex(i+1);
                     resultList.add(reservation); //加入排号订单列表
                     break;
                 case 2:
