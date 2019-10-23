@@ -492,7 +492,8 @@ public class HaircutOrderController {
 
     @ApiOperation(value = "普通用户获取自己的预约订单列表(分页展示)")
     @GetMapping("/user/getHaircutOrderList")
-    public Map addHaircutOrder(String myOpenid,@RequestParam(name = "pageNum", defaultValue = "0") int pageNum,
+    public Map getHaircutOrderList(String myOpenid,
+                               @RequestParam(name = "pageNum", defaultValue = "0") int pageNum,
                                @RequestParam(name = "pageSize", defaultValue = "10") int pageSize ) {
         Map map = new HashMap();
         try {

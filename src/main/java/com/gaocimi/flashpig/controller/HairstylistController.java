@@ -2,6 +2,8 @@ package com.gaocimi.flashpig.controller;
 
 import com.gaocimi.flashpig.entity.*;
 import com.gaocimi.flashpig.model.CountUser;
+import com.gaocimi.flashpig.model.RankingData;
+import com.gaocimi.flashpig.model.UserReservation;
 import com.gaocimi.flashpig.result.ResponseResult;
 import com.gaocimi.flashpig.service.*;
 import com.gaocimi.flashpig.utils.xp.MyUtils;
@@ -11,6 +13,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -235,17 +240,8 @@ public class HairstylistController {
         try {
             Hairstylist hairstylist = hairstylistService.findHairstylistById(hairstylistId);
             List<HaircutOrder> haircutOrderList = hairstylist.getHaircutOrderList();
-            int todayOrderCount = 0;//今日预约人数
 
-            for (HaircutOrder haircutOrder : haircutOrderList) {
-                Long day = MyUtils.getDifferenceToday(haircutOrder.getBookTime());//取得预约时间与今天23点59分相差的天数
-                if (day == 0) {
-                    todayOrderCount++;
-                }
-            }
-            map.put("sumOrderCount", hairstylist.getOrderSum());//完成订单数
-            map.put("todayOrderCount", todayOrderCount);//今日预约人数
-            map.put("hairstylist", hairstylist);
+            map.put("hairstylist", hairstylist);//总预约人数和今日预约人数已经在Hairstylist的get方法里面，会直接被当做属性放进去
             return map;
         } catch (Exception e) {
             logger.error(e.getMessage());
@@ -629,24 +625,324 @@ public class HairstylistController {
         }
     }
 
-    @ApiOperation(value = "获取店内排行")
-    @GetMapping("/hairstylist/getInStoreRanking")
-    public Map getInStoreRanking( String myOpenid) {
+    @ApiOperation(value = "获取店内排行 - 全部")
+    @GetMapping("/hairstylist/getInStoreRanking/all")
+    public Map getInStoreRankingAll( String myOpenid) {
         Map map = new HashMap();
-        try {Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
+        try {
+            Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
             if ( hairstylist == null || hairstylist.getApplyStatus() != 1) {
                 logger.info("非发型师用户操作！！");
                 map.put("error", "对不起，你还不是发型师用户，无权操作！！");
                 return map;
             } else {
+                Double radius = 0.001;//0.001经纬度相对大概100米
+                List<Hairstylist> hairstylists = hairstylistService.getHairstylistsByRadiusAndShopName(hairstylist.getLongitude(),hairstylist.getLatitude(),radius,hairstylist.getShopName());
+                // 按完成订单数倒序排序
+                Collections.sort(hairstylists, (o1, o2) -> {
+                    if (o1.getOrderSum()<o2.getOrderSum()) {
+                        return 1;
+                    } else if ((o1.getOrderSum()>o2.getOrderSum())) {
+                        return -1;
+                    }
+                    return 0; //相等为0
+                });
 
+                List<RankingData> resultList = new ArrayList<>();
+                int myRankings = -1;//我的排名
 
-
+                for(int i=0 ; i<hairstylists.size();i++){
+                    Hairstylist h = hairstylists.get(i);
+                    RankingData data = new RankingData(i+1, h , h.getOrderSum());
+                    resultList.add(data);
+                    if(data.getHairstylistId()==hairstylist.getId())
+                        myRankings = i+1;//获取我的排名
+                }
+                map.put("resultList",resultList);
+                map.put("sumNum",resultList.size());
+                map.put("myRankings",myRankings);
                 return map;
             }
         }catch (Exception e) {
             logger.error(e.getMessage());
-            logger.info("获取个人的顾客预约数情况列表失败！！（后端发生某些错误）\n\n");
+            logger.info("获取店内排行列表失败！！（后端发生某些错误）\n\n");
+            map.put("error", "操作失败！！（后端发生某些错误）");
+            e.printStackTrace();
+            return map;
+        }
+    }
+
+    @ApiOperation(value = "获取店内排行 - 今天")
+    @GetMapping("/hairstylist/getInStoreRanking/today")
+    public Map getInStoreRankingToday( String myOpenid) {
+        Map map = new HashMap();
+        try {
+            Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
+            if ( hairstylist == null || hairstylist.getApplyStatus() != 1) {
+                logger.info("非发型师用户操作！！");
+                map.put("error", "对不起，你还不是发型师用户，无权操作！！");
+                return map;
+            } else {
+                Double radius = 0.001;//0.001经纬度相对大概100米
+                List<Hairstylist> hairstylists = hairstylistService.getHairstylistsByRadiusAndShopName(hairstylist.getLongitude(),hairstylist.getLatitude(),radius,hairstylist.getShopName());
+                // 按今日预约的订单数倒序排序
+                Collections.sort(hairstylists, (o1, o2) -> {
+                    if (o1.getTodayOrderSum()<o2.getTodayOrderSum()) {
+                        return 1;
+                    } else if ((o1.getTodayOrderSum()>o2.getTodayOrderSum())) {
+                        return -1;
+                    }
+                    return 0; //相等为0
+                });
+
+                List<RankingData> resultList = new ArrayList<>();
+                int myRankings = -1;//我的排名
+
+                for(int i=0 ; i<hairstylists.size();i++){
+                    Hairstylist h = hairstylists.get(i);
+                    RankingData data = new RankingData(i+1, h , h.getTodayOrderSum());
+                    resultList.add(data);
+                    if(data.getHairstylistId()==hairstylist.getId())
+                        myRankings = i+1;//获取我的排名
+                }
+                map.put("resultList",resultList);
+                map.put("sumNum",resultList.size());
+                map.put("myRankings",myRankings);
+                return map;
+            }
+        }catch (Exception e) {
+            logger.error(e.getMessage());
+            logger.info("获取店内排行列表失败！！（后端发生某些错误）\n\n");
+            map.put("error", "操作失败！！（后端发生某些错误）");
+            e.printStackTrace();
+            return map;
+        }
+    }
+
+    @ApiOperation(value = "获取店内排行 - 本月")
+    @GetMapping("/hairstylist/getInStoreRanking/month")
+    public Map getInStoreRankingMonth( String myOpenid) {
+        Map map = new HashMap();
+        try {
+            Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
+            if ( hairstylist == null || hairstylist.getApplyStatus() != 1) {
+                logger.info("非发型师用户操作！！");
+                map.put("error", "对不起，你还不是发型师用户，无权操作！！");
+                return map;
+            } else {
+                Double radius = 0.001;//0.001经纬度相对大概100米
+                List<Hairstylist> hairstylists = hairstylistService.getHairstylistsByRadiusAndShopName(hairstylist.getLongitude(),hairstylist.getLatitude(),radius,hairstylist.getShopName());
+                // 按完成订单数倒序排序
+                Collections.sort(hairstylists, (o1, o2) -> {
+                    if (o1.getCurrentMonthOrderSum()<o2.getCurrentMonthOrderSum()) {
+                        return 1;
+                    } else if ((o1.getCurrentMonthOrderSum()>o2.getCurrentMonthOrderSum())) {
+                        return -1;
+                    }
+                    return 0; //相等为0
+                });
+
+                List<RankingData> resultList = new ArrayList<>();
+                int myRankings = -1;//我的排名
+
+                for(int i=0 ; i<hairstylists.size();i++){
+                    Hairstylist h = hairstylists.get(i);
+                    RankingData data = new RankingData(i+1, h , h.getCurrentMonthOrderSum());
+                    resultList.add(data);
+                    if(data.getHairstylistId()==hairstylist.getId())
+                        myRankings = i+1;//获取我的排名
+                }
+                map.put("resultList",resultList);
+                map.put("sumNum",resultList.size());
+                map.put("myRankings",myRankings);
+                return map;
+            }
+        }catch (Exception e) {
+            logger.error(e.getMessage());
+            logger.info("获取店内排行列表失败！！（后端发生某些错误）\n\n");
+            map.put("error", "操作失败！！（后端发生某些错误）");
+            e.printStackTrace();
+            return map;
+        }
+    }
+
+    @ApiOperation(value = "获取区域排行 - 全部")
+    @GetMapping("/hairstylist/getRegionalRanking/all")
+    public Map getRegionalRankingAll( String myOpenid,
+                                      @RequestParam(name = "pageNum", defaultValue = "0") int pageNum,
+                                      @RequestParam(name = "pageSize", defaultValue = "10") int pageSize) {
+        Map map = new HashMap();
+        try {
+            Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
+            if ( hairstylist == null || hairstylist.getApplyStatus() != 1) {
+                logger.info("非发型师用户操作！！");
+                map.put("error", "对不起，你还不是发型师用户，无权操作！！");
+                return map;
+            } else {
+                Double radius = 0.001;//0.001经纬度相对大概100米
+                List<Hairstylist> hairstylists = hairstylistService.getHairstylistsByRadius(hairstylist.getLongitude(),hairstylist.getLatitude(),radius);
+                // 按完成订单数倒序排序
+                Collections.sort(hairstylists, (o1, o2) -> {
+                    if (o1.getOrderSum()<o2.getOrderSum()) {
+                        return 1;
+                    } else if ((o1.getOrderSum()>o2.getOrderSum())) {
+                        return -1;
+                    }
+                    return 0; //相等为0
+                });
+
+                List<RankingData> tempList = new ArrayList<>();
+                List<RankingData> resultList = new ArrayList<>();
+                int myRankings = -1;//我的排名
+
+                for(int i=0 ; i<hairstylists.size();i++){
+                    Hairstylist h = hairstylists.get(i);
+                    RankingData data = new RankingData(i+1, h , h.getOrderSum());
+                    tempList.add(data);
+                    if(data.getHairstylistId()==hairstylist.getId())
+                        myRankings = i+1;//获取我的排名
+                }
+
+                int first = pageNum*pageSize;
+                int last = pageNum*pageSize+pageSize-1;
+                for(int i = first ; i<=last&&i<tempList.size() ; i++){
+                    resultList.add(tempList.get(i));
+                }
+
+                //包装分页数据
+                Pageable pageable = PageRequest.of(pageNum,pageSize);
+                Page<RankingData> page = new PageImpl<>(resultList, pageable, tempList.size());
+
+                map.put("page", page);
+                map.put("sumNum",tempList.size());
+                map.put("myRankings",myRankings);
+                return map;
+            }
+        }catch (Exception e) {
+            logger.error(e.getMessage());
+            logger.info("获取区域排行列表失败！！（后端发生某些错误）\n\n");
+            map.put("error", "操作失败！！（后端发生某些错误）");
+            e.printStackTrace();
+            return map;
+        }
+    }
+
+    @ApiOperation(value = "获取区域排行 - 今天")
+    @GetMapping("/hairstylist/getRegionalRanking/today")
+    public Map getRegionalRankingToday( String myOpenid,
+                                        @RequestParam(name = "pageNum", defaultValue = "0") int pageNum,
+                                        @RequestParam(name = "pageSize", defaultValue = "10") int pageSize) {
+        Map map = new HashMap();
+        try {
+            Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
+            if ( hairstylist == null || hairstylist.getApplyStatus() != 1) {
+                logger.info("非发型师用户操作！！");
+                map.put("error", "对不起，你还不是发型师用户，无权操作！！");
+                return map;
+            } else {
+                Double radius = 0.001;//0.001经纬度相对大概100米
+                List<Hairstylist> hairstylists = hairstylistService.getHairstylistsByRadius(hairstylist.getLongitude(),hairstylist.getLatitude(),radius );
+                // 按今日预约的订单数倒序排序
+                Collections.sort(hairstylists, (o1, o2) -> {
+                    if (o1.getTodayOrderSum()<o2.getTodayOrderSum()) {
+                        return 1;
+                    } else if ((o1.getTodayOrderSum()>o2.getTodayOrderSum())) {
+                        return -1;
+                    }
+                    return 0; //相等为0
+                });
+
+                List<RankingData> tempList = new ArrayList<>();
+                List<RankingData> resultList = new ArrayList<>();
+                int myRankings = -1;//我的排名
+
+                for(int i=0 ; i<hairstylists.size();i++){
+                    Hairstylist h = hairstylists.get(i);
+                    RankingData data = new RankingData(i+1, h , h.getTodayOrderSum());
+                    tempList.add(data);
+                    if(data.getHairstylistId()==hairstylist.getId())
+                        myRankings = i+1;//获取我的排名
+                }
+
+                int first = pageNum*pageSize;
+                int last = pageNum*pageSize+pageSize-1;
+                for(int i = first ; i<=last&&i<tempList.size() ; i++){
+                    resultList.add(tempList.get(i));
+                }
+
+                //包装分页数据
+                Pageable pageable = PageRequest.of(pageNum,pageSize);
+                Page<RankingData> page = new PageImpl<>(resultList, pageable, tempList.size());
+
+                map.put("page", page);
+                map.put("sumNum",tempList.size());
+                map.put("myRankings",myRankings);
+                return map;
+            }
+        }catch (Exception e) {
+            logger.error(e.getMessage());
+            logger.info("获取区域排行列表失败！！（后端发生某些错误）\n\n");
+            map.put("error", "操作失败！！（后端发生某些错误）");
+            e.printStackTrace();
+            return map;
+        }
+    }
+
+    @ApiOperation(value = "获取区域排行 - 本月")
+    @GetMapping("/hairstylist/getRegionalRanking/month")
+    public Map getRegionalRankingMonth( String myOpenid,
+                                        @RequestParam(name = "pageNum", defaultValue = "0") int pageNum,
+                                        @RequestParam(name = "pageSize", defaultValue = "10") int pageSize) {
+        Map map = new HashMap();
+        try {
+            Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
+            if ( hairstylist == null || hairstylist.getApplyStatus() != 1) {
+                logger.info("非发型师用户操作！！");
+                map.put("error", "对不起，你还不是发型师用户，无权操作！！");
+                return map;
+            } else {
+                Double radius = 0.001;//0.001经纬度相对大概100米
+                List<Hairstylist> hairstylists = hairstylistService.getHairstylistsByRadius(hairstylist.getLongitude(),hairstylist.getLatitude(),radius );
+                // 按完成订单数倒序排序
+                Collections.sort(hairstylists, (o1, o2) -> {
+                    if (o1.getCurrentMonthOrderSum()<o2.getCurrentMonthOrderSum()) {
+                        return 1;
+                    } else if ((o1.getCurrentMonthOrderSum()>o2.getCurrentMonthOrderSum())) {
+                        return -1;
+                    }
+                    return 0; //相等为0
+                });
+
+                List<RankingData> tempList = new ArrayList<>();
+                List<RankingData> resultList = new ArrayList<>();
+                int myRankings = -1;//我的排名
+
+                for(int i=0 ; i<hairstylists.size();i++){
+                    Hairstylist h = hairstylists.get(i);
+                    RankingData data = new RankingData(i+1, h , h.getCurrentMonthOrderSum());
+                    tempList.add(data);
+                    if(data.getHairstylistId()==hairstylist.getId())
+                        myRankings = i+1;//获取我的排名
+                }
+
+                int first = pageNum*pageSize;
+                int last = pageNum*pageSize+pageSize-1;
+                for(int i = first ; i<=last&&i<tempList.size() ; i++){
+                    resultList.add(tempList.get(i));
+                }
+
+                //包装分页数据
+                Pageable pageable = PageRequest.of(pageNum,pageSize);
+                Page<RankingData> page = new PageImpl<>(resultList, pageable, tempList.size());
+
+                map.put("page", page);
+                map.put("sumNum",tempList.size());
+                map.put("myRankings",myRankings);
+                return map;
+            }
+        }catch (Exception e) {
+            logger.error(e.getMessage());
+            logger.info("获取区域排行列表失败！！（后端发生某些错误）\n\n");
             map.put("error", "操作失败！！（后端发生某些错误）");
             e.printStackTrace();
             return map;
@@ -658,7 +954,8 @@ public class HairstylistController {
 //    @GetMapping("/hairstylist/getInStoreRanking")
 //    public Map getInStoreRanking( String myOpenid) {
 //        Map map = new HashMap();
-//        try {Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
+//        try {
+//            Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
 //            if ( hairstylist == null || hairstylist.getApplyStatus() != 1) {
 //                logger.info("非发型师用户操作！！");
 //                map.put("error", "对不起，你还不是发型师用户，无权操作！！");

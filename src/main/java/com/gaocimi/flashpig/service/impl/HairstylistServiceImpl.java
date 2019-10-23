@@ -121,7 +121,7 @@ public class HairstylistServiceImpl implements HairstylistService {
      */
     @Override
     public List<Hairstylist> getHairstylistsByRadiusAndShopName(Double longitude,Double latitude, Double radius,String shopName) {
-        List<Hairstylist> hairstylists = hairstylistRepository.findAllByLongitudeBetweenAndLatitudeBetweenAndShopNameLike(longitude-radius,longitude+radius,latitude-radius,latitude+radius,"%"+shopName+"%");
+        List<Hairstylist> hairstylists = hairstylistRepository.findAllByLongitudeBetweenAndLatitudeBetweenAndShopName(longitude-radius,longitude+radius,latitude-radius,latitude+radius,shopName);
         return hairstylists;
     }
 

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.gaocimi.flashpig.utils.xp.MyUtils;
 
 import javax.persistence.*;
+import javax.xml.crypto.Data;
 import java.util.*;
 
 /**
@@ -14,7 +15,7 @@ import java.util.*;
  */
 @Entity
 @Table(name = "hairstylist")
-@JsonIgnoreProperties(value = {"allOperationalData", "loyalUserRecordList", "haircutOrderList", "hairstylistImageUrlList", "hairServiceList", "recordToUserList", "userList", "handler", "hibernateLazyInitializer", "fieldHandler"})
+@JsonIgnoreProperties(value = {"getCurrentMonthOrderSum", "allOperationalData", "loyalUserRecordList", "haircutOrderList", "hairstylistImageUrlList", "hairServiceList", "recordToUserList", "userList", "handler", "hibernateLazyInitializer", "fieldHandler"})
 public class Hairstylist {
 
     @Id
@@ -412,6 +413,7 @@ public class Hairstylist {
         int newCustomerNum = 0;
 
         for (HaircutOrder order : haircutOrderList) {
+            if (order.getStatus() != 2) continue;
             Date bookTime = order.getBookTime();
             //取出相应时间的订单
             if (bookTime.after(date1) && bookTime.before(date2)) {
@@ -431,6 +433,39 @@ public class Hairstylist {
         return map;
     }
 
+    /**
+     * 获取发型师在本月的完成订单数
+     *
+     * @return 本月的完成订单数
+     */
+    public int getCurrentMonthOrderSum() {
+        int count = 0;
+        Date month = MyUtils.getFirstDayOfMonth(new Date(System.currentTimeMillis()));//获取今天所在月的第一天的日期Date(时间为00:00:00)
+        for (HaircutOrder order : haircutOrderList) {
+            if (order.getStatus() == 2 && order.getBookTime().after(month)) {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    /**
+     * 获取发型师今天的预约订单数
+     *
+     * @return 今天的预约订单数
+     */
+    public int getTodayOrderSum() {
+        int todayOrderCount = 0;//今日预约人数
+
+        for (HaircutOrder haircutOrder : haircutOrderList) {
+            if(haircutOrder.getStatus()==-2) continue;//已被取消的订单不计算进去
+            Long day = MyUtils.getDifferenceToday(haircutOrder.getBookTime());//取得预约时间与今天23点59分相差的天数
+            if (day == 0) {
+                todayOrderCount++;
+            }
+        }
+        return todayOrderCount;
+    }
 
     /**
      * 判断该订单用户是不是该发型师的新顾客
