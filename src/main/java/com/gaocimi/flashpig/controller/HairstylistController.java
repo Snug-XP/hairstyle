@@ -71,7 +71,7 @@ public class HairstylistController {
 
             hairstylist.setCreateTime(date);//设置注册时间
             hairstylist.setApplyStatus(0);//设置申请状态为申请中
-            hairstylist.setOrderSum(0);
+            hairstylist.setOrderSum();//根据自己的订单列表（中的已完成）数量进行校正,注册时没有订单，所以为0
             hairstylist.setPoint(-1.0);
             hairstylistService.save(hairstylist);
 
@@ -243,7 +243,8 @@ public class HairstylistController {
                     todayOrderCount++;
                 }
             }
-            map.put("sumOrderCount", haircutOrderList.size());//总预约人数
+            hairstylist.setOrderSum();//根据自己的订单列表（中的已完成）数量进行校正
+            map.put("sumOrderCount", hairstylist.getOrderSum());//完成订单数
             map.put("todayOrderCount", todayOrderCount);//今日预约人数
             map.put("hairstylist", hairstylist);
             return map;
@@ -651,29 +652,4 @@ public class HairstylistController {
 //            return map;
 //        }
 //    }
-//
-//
-//    @ApiOperation(value = "获取某个顾客关于自己的预约记录")
-//    @GetMapping("/hairstylist/getOrderListFromOneUser/{myOpenid}")
-//    public Map getOrderListFromOneUser( String openid,int user_id) {
-//        Map map = new HashMap();
-//        try {
-//            if (hairstylistService.findHairstylistByOpenid(openid) == null || hairstylistService.findHairstylistByOpenid(openid).getApplyState()!=1 ) {
-//                logger.info("非发型师用户操作！！");
-//                map.put("error", "对不起，你还不是发型师用户，无权操作！！");
-//                return map;
-//            } else {
-//                Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(openid);
-//
-//
-//                return map;
-//            }
-//        }catch (Exception e) {
-//            logger.error(String.valueOf(e));
-//            e.printStackTrace();
-//            map.put("error", "操作失败！！（后端发生某些错误，例如数据库连接失败）");
-//            return map;
-//        }
-//    }
-
 }

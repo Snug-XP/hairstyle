@@ -316,7 +316,7 @@ public class HaircutOrderController {
 
                 //发型师已完成的总订单+1
                 Hairstylist hairstylist = order.getHairstylist();
-                hairstylist.setOrderSum(hairstylist.getOrderSum() + 1);
+                hairstylist.setOrderSum();//根据自己的订单列表（中的已完成）数量进行校正
                 hairstylistService.edit(hairstylist);
 
                 messageController.pushCompletedMessage(orderId);

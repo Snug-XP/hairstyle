@@ -278,8 +278,17 @@ public class Hairstylist {
         this.createTime = createTime;
     }
 
-    public void setOrderSum(Integer orderSum) {
-        this.orderSum = orderSum;
+    /**
+     * 根据自己的订单列表（中的已完成）数量进行校正
+     */
+    public void setOrderSum() {
+        int count = 0;
+        for (HaircutOrder order : haircutOrderList) {
+            if (order.getStatus() == 2) {
+                count++;
+            }
+        }
+        this.orderSum = count;
     }
 
     public Integer getOrderSum() {
@@ -456,7 +465,7 @@ public class Hairstylist {
             if (o.getStatus() != -2 && o.getUser().getId() == order.getUser().getId()) {
                 //找到预约时间最早的相同用户的有效订单（即排除取消的订单）
 
-                if(o.getId()==order.getId())
+                if (o.getId() == order.getId())
                     return true;
                 else
                     return false;
