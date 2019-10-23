@@ -169,7 +169,7 @@ public class MyUtils {
     }
 
     /**
-     * 用于删除7天前的Formid
+     * 仅用于删除7天前的Formid
      *
      * @return 返回与当前时间相差的天数（例：明天为-1，今天为0，昨天为1）
      */
@@ -177,25 +177,6 @@ public class MyUtils {
         Date nowTime = new Date(System.currentTimeMillis());
         Long days = nowTime.getTime() / 86400000 - date.getTime() / 86400000;//与当前时刻相差的天数
         return days;
-    }
-
-
-    /**
-     *
-     * @param user 用户类
-     * @param hairstylistId 发型师的id
-     * @return 用户是否收藏了发型师
-     */
-    public static boolean isUserLoyalToHairstylist(User user, int hairstylistId) {
-        List<UserToHairstylist> recordList = user.getHairstylistRecordList();
-        if (recordList == null || recordList.size() == 0) {
-            return false;
-        }
-        for (UserToHairstylist h : recordList) {
-            if (h.getHairstylist().getId() == hairstylistId )
-                return true;
-        }
-        return false;
     }
 
 
