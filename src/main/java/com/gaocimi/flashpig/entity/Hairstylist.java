@@ -15,7 +15,7 @@ import java.util.*;
  */
 @Entity
 @Table(name = "hairstylist")
-@JsonIgnoreProperties(value = {"getCurrentMonthOrderSum", "allOperationalData", "loyalUserRecordList", "haircutOrderList", "hairstylistImageUrlList", "hairServiceList", "recordToUserList", "userList", "handler", "hibernateLazyInitializer", "fieldHandler"})
+@JsonIgnoreProperties(value = {"articleList","getCurrentMonthOrderSum", "allOperationalData", "loyalUserRecordList", "haircutOrderList", "hairstylistImageUrlList", "hairServiceList", "recordToUserList", "userList", "handler", "hibernateLazyInitializer", "fieldHandler"})
 public class Hairstylist {
 
     @Id
@@ -123,6 +123,12 @@ public class Hairstylist {
      */
     @OneToMany(targetEntity = HairService.class, mappedBy = "hairstylist")
     public List<HairService> hairServiceList;
+
+    /**
+     * 发型师发表的发型文章列表； 定义该Hairstylist实体所有关联的Article实体； 指定mappedBy属性表明该Hairstylist实体不控制关联关系
+     */
+    @OneToMany(targetEntity = Article.class, mappedBy = "hairstylist")
+    public List<Article> articleList;
 
     /**
      * 发型师拥有的订单列表； 定义该Hairstylist实体所有关联的HaircutOrder实体； 指定mappedBy属性表明该Hairstylist实体不控制关联关系
@@ -297,6 +303,10 @@ public class Hairstylist {
         return orderSum;
     }
 
+    public void setOrderSum(Integer orderSum) {
+        this.orderSum = orderSum;
+    }
+
     public Integer getApplyStatus() {
         return applyStatus;
     }
@@ -345,8 +355,15 @@ public class Hairstylist {
         this.loyalUserRecordList = loyalUserRecordList;
     }
 
+    public List<Article> getArticleList() {
+        return articleList;
+    }
 
-/**************下面是一些关于发型师数据统计相关的方法*******************************************************************/
+    public void setArticleList(List<Article> articleList) {
+        this.articleList = articleList;
+    }
+
+    /**************下面是一些关于发型师数据统计相关的方法*******************************************************************/
 
     /**
      * 获取发型师自己的顾客总数
