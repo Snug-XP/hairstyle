@@ -1,13 +1,8 @@
 package com.gaocimi.flashpig.controller;
 
-import com.gaocimi.flashpig.entity.Article;
-import com.gaocimi.flashpig.entity.HaircutOrder;
-import com.gaocimi.flashpig.entity.User;
-import com.gaocimi.flashpig.entity.UserToArticle;
+import com.gaocimi.flashpig.entity.*;
 import com.gaocimi.flashpig.result.ResponseResult;
-import com.gaocimi.flashpig.service.ArticleService;
-import com.gaocimi.flashpig.service.UserService;
-import com.gaocimi.flashpig.service.UserToArticleService;
+import com.gaocimi.flashpig.service.*;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.slf4j.Logger;
@@ -36,15 +31,54 @@ public class ArticleController {
     @Autowired
     ArticleService articleService;
     @Autowired
+    HairstylistService hairstylistService;
+    @Autowired
     UserService userService;
     @Autowired
     UserToArticleService userToArticleService;
+    @Autowired
+    ArticleImageUrlService imageUrlService;
+    @Autowired
+    AdministratorService administratorService;
 
     @ApiOperation(value = "添加文章")
     @PostMapping("/article")
-    public int addArticle(@Validated Article articles) {
-        articleService.save(articles);
-        return 200;
+    public Map addArticle(String myOpenid ,String title, String content,
+                          @RequestParam(value = "tagList", required = false) List<String> tagList,
+                          @RequestParam(value = "imgUrlList", required = false) List<String> imgUrlList) {
+        Map map = new HashMap();
+        try {
+            Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
+            if (hairstylist == null || hairstylist.getApplyStatus() != 1) {
+                logger.info("非发型师用户操作！！");
+                map.put("error", "对不起，你还不是发型师用户，无权操作！！");
+                return map;
+            }
+
+            Article article = new Article();
+            article.setHairstylist(hairstylist);
+            article.setTag(tagList);
+            article.setTitle(title);
+            article.setContent(content);
+            article.setCreateTime(new Date(System.currentTimeMillis()));
+            articleService.save(article);
+
+            for (String imageUrlStr : imgUrlList) {
+                ArticleImageUrl imageUrl = new ArticleImageUrl();
+                imageUrl.setArticle(article);
+                imageUrl.setImageUrl(imageUrlStr);
+
+                imageUrlService.save(imageUrl);
+            }
+            map.put("message", "文章上传成功！");
+            return map;
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            logger.info("文章上传失败！！（后端发生某些错误）");
+            map.put("error", "文章上传失败！！（后端发生某些错误）");
+            e.printStackTrace();
+            return map;
+        }
     }
 
     @ApiOperation(value = "删除文章")
@@ -71,7 +105,7 @@ public class ArticleController {
     @ApiOperation(value = "获取所有文章列表")
     @GetMapping("/articles/getAll")
     public Page<Article> getAllByPage(@RequestParam(name = "pageNum", defaultValue = "0") int pageNum,
-                                 @RequestParam(name = "pageSize", defaultValue = "10") int pageSize
+                                      @RequestParam(name = "pageSize", defaultValue = "10") int pageSize
     ) {
         Page<Article> page = articleService.findAll(pageNum, pageSize);
         return page;
@@ -79,35 +113,35 @@ public class ArticleController {
 
     @ApiOperation(value = "收藏该文章")
     @PostMapping("/article/addToCollection")
-    public Map addToCollection( String myOpenid,int articleId){
+    public Map addToCollection(String myOpenid, int articleId) {
         Map map = new HashMap();
-        try{
+        try {
             User user = userService.findUserByOpenid(myOpenid);
             Article article = articleService.findArticleById(articleId);
-            if(user==null){
-                logger.info("（"+myOpenid+"）该用户不存在！");
-                map.put("error","无效的用户！！");
+            if (user == null) {
+                logger.info("（" + myOpenid + "）该用户不存在！");
+                map.put("error", "无效的用户！！");
                 return map;
             }
-            if(article==null){
-                logger.info("id为"+articleId+"的文章不存在！");
-                map.put("error","该文章不存在！！");
+            if (article == null) {
+                logger.info("id为" + articleId + "的文章不存在！");
+                map.put("error", "该文章不存在！！");
                 return map;
             }
-            if(userToArticleService.findByUserAndArticle(user.getId(),articleId)!=null){
+            if (userToArticleService.findByUserAndArticle(user.getId(), articleId) != null) {
                 logger.info("该用户已收藏该文章，不需要重复收藏");
-                map.put("message","已收藏该文章!!");
+                map.put("message", "已收藏该文章!!");
                 return map;
             }
-            UserToArticle userToArticle = new UserToArticle(user,article);
+            UserToArticle userToArticle = new UserToArticle(user, article);
             userToArticleService.save(userToArticle);
-            logger.info("id为"+user.getId()+"的用户收藏了id为"+article.getId()+"的文章（skill："+article.getSkill()+"）");
-            map.put("message","收藏成功！");
+            logger.info("id为" + user.getId() + "的用户收藏了id为" + article.getId() + "的文章（title：" + article.getTitle() + "）");
+            map.put("message", "收藏成功！");
 
-        }catch (Exception e){
+        } catch (Exception e) {
             logger.info("后端发生异常：\n");
             logger.error(e.getMessage());
-            map.put("error","抱歉，后端发生异常!!");
+            map.put("error", "抱歉，后端发生异常!!");
         }
 
         return map;
@@ -116,9 +150,9 @@ public class ArticleController {
 
     @ApiOperation(value = "普通用户分页获取自己收藏的文章列表")
     @GetMapping("/article/getMyCollection")
-    public Map getMyCollectionByPage( String myOpenid,
-                                    @RequestParam(name = "pageNum", defaultValue = "0") int pageNum,
-                                    @RequestParam(name = "pageSize", defaultValue = "10") int pageSize ) {
+    public Map getMyCollectionByPage(String myOpenid,
+                                     @RequestParam(name = "pageNum", defaultValue = "0") int pageNum,
+                                     @RequestParam(name = "pageSize", defaultValue = "10") int pageSize) {
         Map map = new HashMap();
         try {
 
@@ -126,9 +160,9 @@ public class ArticleController {
             List<UserToArticle> tempArticleList = user.getArticleRecordList();
             List<Article> resultArticleList = new ArrayList<>();
 
-            if(tempArticleList==null){
+            if (tempArticleList == null) {
                 logger.info("你还没有收藏文章哦~");
-                map.put("message","你还没有收藏文章哦~");
+                map.put("message", "你还没有收藏文章哦~");
                 return map;
             }
 
@@ -143,14 +177,14 @@ public class ArticleController {
             });
 
             //获取所求页数的文章数据
-            int first = pageNum*pageSize;
-            int last = pageNum*pageSize+pageSize-1;
-            for(int i = first ; i<=last&&i<tempArticleList.size() ; i++){
+            int first = pageNum * pageSize;
+            int last = pageNum * pageSize + pageSize - 1;
+            for (int i = first; i <= last && i < tempArticleList.size(); i++) {
                 resultArticleList.add(tempArticleList.get(i).article);
             }
 
             //包装分页数据
-            Pageable pageable = PageRequest.of(pageNum,pageSize);
+            Pageable pageable = PageRequest.of(pageNum, pageSize);
             Page<Article> page = new PageImpl<>(resultArticleList, pageable, tempArticleList.size());
 
             map.put("page", page);

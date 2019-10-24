@@ -29,6 +29,11 @@ public class Article {
     private String tag;
 
     /**
+     * 标题
+     */
+    private String title;
+
+    /**
      * 发型文章内容
      */
     private String content;
@@ -67,7 +72,13 @@ public class Article {
     }
 
     public String[] getTag() {
+        if(tag==null)
+            return null;
         return tag.split(",");
+    }
+
+    public void setTag(String tag) {
+        this.tag = tag;
     }
 
     public void setTag(List<String> tagList) {
@@ -126,5 +137,15 @@ public class Article {
 
     public void setArticleImageUrlList(List<ArticleImageUrl> articleImageUrlList) {
         this.articleImageUrlList = articleImageUrlList;
+    }
+
+
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
     }
 }
