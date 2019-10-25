@@ -40,6 +40,10 @@ public class ArticleController {
     ArticleImageUrlService imageUrlService;
     @Autowired
     AdministratorService administratorService;
+    @Autowired
+    AlbumService albumService;
+//    @Autowired
+//    ArticleToAlbumlbumService articleToAlbumlbumService;
 
     @ApiOperation(value = "添加文章")
     @PostMapping("/hairstylist/addArticle")
@@ -104,7 +108,7 @@ public class ArticleController {
         return articleService.findArticleById(articleId);
     }
 
-    @ApiOperation(value = "获取所有文章列表")
+    @ApiOperation(value = "获取所有文章列表（分页展示）")
     @GetMapping("/articles/getAll")
     public Page<Article> getAllByPage(@RequestParam(name = "pageNum", defaultValue = "0") int pageNum,
                                       @RequestParam(name = "pageSize", defaultValue = "10") int pageSize
@@ -139,6 +143,54 @@ public class ArticleController {
             userToArticleService.save(userToArticle);
             logger.info("id为" + user.getId() + "的用户收藏了id为" + article.getId() + "的文章（title：" + article.getTitle() + "）");
             map.put("message", "收藏成功！");
+
+        } catch (Exception e) {
+            logger.info("后端发生异常：\n");
+            logger.error(e.getMessage());
+            map.put("error", "抱歉，后端发生异常!!");
+        }
+
+        return map;
+    }
+
+
+    @ApiOperation(value = "将某文章加入某专辑")
+    @PostMapping("/article/addToAlbum")
+    public Map addToAlbum(String myOpenid, int articleId , int albumId) {
+        Map map = new HashMap();
+        try {
+            Administrator administrator = administratorService.findAdministratorByOpenid(myOpenid);
+            if ((administrator == null)) {
+                logger.info("非管理员操作！！");
+                map.put("error", "对不起，你不是管理员，无权操作！！");
+                return map;
+            }
+            Article article = articleService.findArticleById(articleId);
+            if (article == null) {
+                logger.info("id为" + articleId + "的文章不存在！");
+                map.put("error", "该文章不存在！！");
+                return map;
+            }
+            Album album = albumService.findAlbumById(albumId);
+            if (album == null) {
+                logger.info("id为" + albumId + "的专辑不存在！");
+                map.put("error", "该专辑不存在！！");
+                return map;
+            }
+            for(Article a : album.getArticleList()) {
+                if(a.getId()==articleId) {
+                    logger.info("该专辑已收录该发型文章，不需要重复收录");
+                    map.put("message", "已收录该文章!!");
+                    return map;
+                }
+            }
+            List<Article> articleList = album.getArticleList();
+            articleList.add(article);
+            album.setArticleList(articleList);
+            albumService.edit(album);
+
+            logger.info("id为" + albumId + "的专辑（title：" + album.getTitle() + "）收录了id为" + articleId + "的文章（title：" + article.getTitle() + "）");
+            map.put("message", "收录成功！");
 
         } catch (Exception e) {
             logger.info("后端发生异常：\n");
