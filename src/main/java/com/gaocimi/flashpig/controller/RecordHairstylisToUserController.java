@@ -48,7 +48,7 @@ public class RecordHairstylisToUserController {
             Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
             User user = userService.findUserById(userId);
             if ( hairstylist == null || hairstylist.getApplyStatus() != 1) {
-                logger.info("非发型师用户操作！！");
+                logger.info("非发型师用户操作（发型师新增对顾客的备注）！！");
                 map.put("error", "对不起，你还不是发型师用户，无权操作！！");
                 return map;
             } else if (user == null) {

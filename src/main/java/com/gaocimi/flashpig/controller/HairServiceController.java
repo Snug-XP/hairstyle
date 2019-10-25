@@ -32,7 +32,7 @@ public class HairServiceController {
     @Autowired
     HairstylistService hairstylistService;
 
-    @ApiOperation(value = "添加发型服务")
+    @ApiOperation(value = "添加一个发型服务")
     @PostMapping("/hairstylist/addHairService")
     public Map addHairService(String myOpenid, String serviceName, String description, Double price) {
 

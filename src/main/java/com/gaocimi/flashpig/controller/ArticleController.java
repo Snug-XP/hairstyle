@@ -45,15 +45,15 @@ public class ArticleController {
 //    @Autowired
 //    ArticleToAlbumlbumService articleToAlbumlbumService;
 
-    @ApiOperation(value = "添加文章")
+    @ApiOperation(value = "添加发型文章")
     @PostMapping("/hairstylist/addArticle")
-    public Map addArticle(String myOpenid ,String title, String content,
+    public Map addArticle(String myOpenid, String title, String content,
                           @RequestParam(value = "tagList", required = false) List<String> tagList,
                           @RequestParam(value = "imgUrlList", required = false) List<String> imgUrlList) {
         Map map = new HashMap();
         try {
             Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
-            if ((hairstylist == null || hairstylist.getApplyStatus() != 1)&&(!administratorService.isExist(myOpenid))) {
+            if ((hairstylist == null || hairstylist.getApplyStatus() != 1) && (!administratorService.isExist(myOpenid))) {
                 logger.info("非发型师用户或管理员操作（添加文章）！！");
                 map.put("error", "对不起，你不是发型师或管理员，无权操作！！");
                 return map;
@@ -65,7 +65,11 @@ public class ArticleController {
             article.setTitle(title);
             article.setContent(content);
             article.setCreateTime(new Date(System.currentTimeMillis()));
-            article.setStatus(0);//设置发型文章状态为审核中
+            if(administratorService.isExist(myOpenid))
+                article.setStatus(1);//设置发型文章状态为审核通过
+            else
+                article.setStatus(0);//设置发型文章状态为审核中
+
             articleService.save(article);
 
             //储存发型文章的图片url列表
@@ -87,20 +91,62 @@ public class ArticleController {
         }
     }
 
-    @ApiOperation(value = "删除文章")
+    @ApiOperation(value = "删除发型文章", notes = "权限：仅文章的发布者或管理员")
     @DeleteMapping("/article")
-    public int deleteArticle(Integer articleId) {
-        articleService.delete(articleId);
-        return 200;
+    public Map deleteArticle(String myOpenid,int articleId) {
+
+        Map map = new HashMap();
+        try {
+            Article article = articleService.findArticleById(articleId);
+            if (article == null) {
+                logger.info("id为" + articleId + "的文章不存在（删除文章）！");
+                map.put("error", "该文章不存在！！");
+                return map;
+            }
+
+            Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
+            if ((hairstylist == null || hairstylist.getApplyStatus() != 1) && (!administratorService.isExist(myOpenid))) {
+                logger.info("非发型师用户或管理员操作（删除文章）！！");
+                map.put("error", "对不起，你不是发型师或管理员，无权操作！！");
+                return map;
+            }
+
+
+            if (!hairstylist.isMyArticle(articleId)) {
+                logger.info("该文章不是该发型师创建的，无权删除！！");
+                map.put("error", "该文章不是你创建的，无权删除！！");
+                return map;
+            }
+
+            logger.info("id为"+hairstylist.getId()+"的发型师“"+hairstylist.getHairstylistName()+"”删除了id为"+articleId+"的文章（Title:"+article.getTitle()+"）");
+            articleService.delete(articleId);
+            map.put("message","删除成功！");
+            return map;
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            logger.info("文章删除失败！！（后端发生某些错误）");
+            map.put("error", "文章删除失败！！（后端发生某些错误）");
+            e.printStackTrace();
+            return map;
+        }
     }
 
-    @ApiOperation(value = "修改文章" , notes = "权限：仅发型师本人" )
-    @PutMapping("/article")
-    public Map updateArticle(String myOpenid ,int articleId,String title, String content,
+    @ApiOperation(value = "修改发型文章", notes = "权限：仅文章的发布者")
+    @PutMapping("/hairstylist/updateArticle")
+    public Map updateArticle(String myOpenid, int articleId, String title, String content,
                              @RequestParam(value = "tagList", required = false) List<String> tagList,
                              @RequestParam(value = "imgUrlList", required = false) List<String> imgUrlList) {
         Map map = new HashMap();
         try {
+
+            Article article = articleService.findArticleById(articleId);
+
+            if (article == null) {
+                logger.info("id为" + articleId + "的文章不存在（修改文章）！");
+                map.put("error", "该文章不存在！！");
+                return map;
+            }
+
             Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
             if (hairstylist == null || hairstylist.getApplyStatus() != 1) {
                 logger.info("非发型师用户操作（修改文章）！！");
@@ -108,8 +154,7 @@ public class ArticleController {
                 return map;
             }
 
-            Article article = articleService.findArticleById(articleId);
-            if( !hairstylist.isMyArticle(articleId)){
+            if (!hairstylist.isMyArticle(articleId)) {
                 logger.info("该文章不是该发型师创建的，无权修改！！");
                 map.put("error", "该文章不是你创建的，无权修改！！");
                 return map;
@@ -133,6 +178,7 @@ public class ArticleController {
 
                 imageUrlService.save(imageUrl);
             }
+            logger.info("id为"+hairstylist.getId()+"的发型师“"+hairstylist.getHairstylistName()+"”修改了id为"+articleId+"的文章");
             map.put("message", "文章修改成功！");
             return map;
         } catch (Exception e) {
@@ -197,9 +243,9 @@ public class ArticleController {
     }
 
 
-    @ApiOperation(value = "将某文章加入某专辑")
+    @ApiOperation(value = "将某文章加入某专辑", notes = "权限：仅管理员")
     @PostMapping("/article/addToAlbum")
-    public Map addToAlbum(String myOpenid, int articleId , int albumId) {
+    public Map addToAlbum(String myOpenid, int articleId, int albumId) {
         Map map = new HashMap();
         try {
             Administrator administrator = administratorService.findAdministratorByOpenid(myOpenid);
@@ -210,18 +256,18 @@ public class ArticleController {
             }
             Article article = articleService.findArticleById(articleId);
             if (article == null) {
-                logger.info("id为" + articleId + "的文章不存在！");
+                logger.info("id为" + articleId + "的文章不存在！（将某文章加入某专辑）");
                 map.put("error", "该文章不存在！！");
                 return map;
             }
             Album album = albumService.findAlbumById(albumId);
             if (album == null) {
-                logger.info("id为" + albumId + "的专辑不存在！");
+                logger.info("id为" + albumId + "的专辑不存在！（将某文章加入某专辑）");
                 map.put("error", "该专辑不存在！！");
                 return map;
             }
-            for(Article a : album.getArticleList()) {
-                if(a.getId()==articleId) {
+            for (Article a : album.getArticleList()) {
+                if (a.getId() == articleId) {
                     logger.info("该专辑已收录该发型文章，不需要重复收录");
                     map.put("message", "已收录该文章!!");
                     return map;

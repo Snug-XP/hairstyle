@@ -76,7 +76,7 @@ public class HairstylistController {
 
             hairstylist.setCreateTime(date);//设置注册时间
             hairstylist.setApplyStatus(0);//设置申请状态为申请中
-            hairstylist.setOrderSum();//根据自己的订单列表（中的已完成）数量进行校正,注册时没有订单，所以为0
+            hairstylist.setOrderSum(0);//根据自己的订单列表（中的已完成）数量进行校正,注册时没有订单，所以为0
             hairstylist.setPoint(-1.0);
             hairstylistService.save(hairstylist);
 
