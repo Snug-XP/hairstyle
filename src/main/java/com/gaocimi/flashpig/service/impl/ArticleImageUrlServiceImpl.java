@@ -51,6 +51,12 @@ public class ArticleImageUrlServiceImpl implements ArticleImageUrlService {
         articleImageUrlRepository.deleteById(id);
     }
 
+    @Override
+    public void deleteAllByArticlId(int articleId){
+        articleImageUrlRepository.deleteAllByArticle_Id(articleId);
+    }
+
+
 
     public List<ArticleImageUrl> findAll()
     {

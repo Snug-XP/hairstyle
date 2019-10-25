@@ -535,4 +535,11 @@ public class Hairstylist {
     }
 
 
+    public boolean isMyArticle(int articleId) {
+        for(Article article: articleList) {
+            if (articleId == article.getId())
+                return true;
+        }
+        return false;
+    }
 }

@@ -54,7 +54,7 @@ public class ArticleController {
         try {
             Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
             if ((hairstylist == null || hairstylist.getApplyStatus() != 1)&&(!administratorService.isExist(myOpenid))) {
-                logger.info("非发型师用户或管理员操作！！");
+                logger.info("非发型师用户或管理员操作（添加文章）！！");
                 map.put("error", "对不起，你不是发型师或管理员，无权操作！！");
                 return map;
             }
@@ -88,17 +88,60 @@ public class ArticleController {
     }
 
     @ApiOperation(value = "删除文章")
-    @DeleteMapping("/article/{articleId}")
-    public int deleteArticle(@PathVariable("articleId") Integer articleId) {
+    @DeleteMapping("/article")
+    public int deleteArticle(Integer articleId) {
         articleService.delete(articleId);
         return 200;
     }
 
-    @ApiOperation(value = "修改文章")
+    @ApiOperation(value = "修改文章" , notes = "权限：仅发型师本人" )
     @PutMapping("/article")
-    public int updateArticle(@Validated Article articles) {
-        articleService.edit(articles);
-        return 200;
+    public Map updateArticle(String myOpenid ,int articleId,String title, String content,
+                             @RequestParam(value = "tagList", required = false) List<String> tagList,
+                             @RequestParam(value = "imgUrlList", required = false) List<String> imgUrlList) {
+        Map map = new HashMap();
+        try {
+            Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
+            if (hairstylist == null || hairstylist.getApplyStatus() != 1) {
+                logger.info("非发型师用户操作（修改文章）！！");
+                map.put("error", "对不起，你不是发型师，无权操作！！");
+                return map;
+            }
+
+            Article article = articleService.findArticleById(articleId);
+            if( !hairstylist.isMyArticle(articleId)){
+                logger.info("该文章不是该发型师创建的，无权修改！！");
+                map.put("error", "该文章不是你创建的，无权修改！！");
+                return map;
+            }
+
+            article.setTag(tagList);
+            article.setTitle(title);
+            article.setContent(content);
+            article.setStatus(0);//设置发型文章状态为审核中
+            articleService.edit(article);
+
+
+            //删除原有文章的图片url
+            imageUrlService.deleteAllByArticlId(articleId);
+
+            //储存发型文章的图片url列表
+            for (String imageUrlStr : imgUrlList) {
+                ArticleImageUrl imageUrl = new ArticleImageUrl();
+                imageUrl.setArticle(article);
+                imageUrl.setImageUrl(imageUrlStr);
+
+                imageUrlService.save(imageUrl);
+            }
+            map.put("message", "文章修改成功！");
+            return map;
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            logger.info("文章修改失败！！（后端发生某些错误）");
+            map.put("error", "文章修改失败！！（后端发生某些错误）");
+            e.printStackTrace();
+            return map;
+        }
     }
 
 
@@ -161,7 +204,7 @@ public class ArticleController {
         try {
             Administrator administrator = administratorService.findAdministratorByOpenid(myOpenid);
             if ((administrator == null)) {
-                logger.info("非管理员操作！！");
+                logger.info("非管理员操作（将某文章加入某专辑）！！");
                 map.put("error", "对不起，你不是管理员，无权操作！！");
                 return map;
             }

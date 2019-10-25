@@ -286,7 +286,7 @@ public class HairstylistController {
         try {
             Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
             if ( hairstylist == null || hairstylist.getApplyStatus() != 1) {
-                logger.info("非发型师用户操作！！");
+                logger.info("非发型师用户操作（设置可预约时间）！！");
                 map.put("error", "对不起，你还不是发型师用户，无权操作！！");
                 return map;
             } else {
