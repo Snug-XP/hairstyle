@@ -42,16 +42,16 @@ public class ArticleController {
     AdministratorService administratorService;
 
     @ApiOperation(value = "添加文章")
-    @PostMapping("/article")
+    @PostMapping("/hairstylist/addArticle")
     public Map addArticle(String myOpenid ,String title, String content,
                           @RequestParam(value = "tagList", required = false) List<String> tagList,
                           @RequestParam(value = "imgUrlList", required = false) List<String> imgUrlList) {
         Map map = new HashMap();
         try {
             Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
-            if (hairstylist == null || hairstylist.getApplyStatus() != 1) {
-                logger.info("非发型师用户操作！！");
-                map.put("error", "对不起，你还不是发型师用户，无权操作！！");
+            if ((hairstylist == null || hairstylist.getApplyStatus() != 1)&&(!administratorService.isExist(myOpenid))) {
+                logger.info("非发型师用户或管理员操作！！");
+                map.put("error", "对不起，你不是发型师或管理员，无权操作！！");
                 return map;
             }
 
@@ -61,8 +61,10 @@ public class ArticleController {
             article.setTitle(title);
             article.setContent(content);
             article.setCreateTime(new Date(System.currentTimeMillis()));
+            article.setStatus(0);//设置发型文章状态为审核中
             articleService.save(article);
 
+            //储存发型文章的图片url列表
             for (String imageUrlStr : imgUrlList) {
                 ArticleImageUrl imageUrl = new ArticleImageUrl();
                 imageUrl.setArticle(article);

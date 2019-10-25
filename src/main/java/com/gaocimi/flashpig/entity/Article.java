@@ -9,7 +9,7 @@ import java.util.Date;
 import java.util.List;
 
 /**
- * Article - 文章类
+ * Article - 发型文章类
  *
  * @author xp
  * @date 2019-9-23 03:00:36
@@ -44,10 +44,15 @@ public class Article {
     private Date createTime;
 
     /**
-     * 发表该文章的发型师； 定义名为create_by的外键列，该外键引用hairstylist表的主键(id)列,采用懒加载
+     * 发型文章的状态（“0”表示审核中，“1”表示审核通过，“-1”表示审核失败）
+     */
+    private Integer status;
+
+    /**
+     * 发表该文章的发型师； 定义名为create_by的外键列，该外键引用hairstylist表的主键(openid)列,采用懒加载
      */
     @ManyToOne(targetEntity = Hairstylist.class, fetch = FetchType.LAZY)
-    @JoinColumn(name = "create_by", nullable = false)
+    @JoinColumn(name = "hairstylist_id",nullable = false)
     public Hairstylist hairstylist;
 
 
@@ -139,13 +144,19 @@ public class Article {
         this.articleImageUrlList = articleImageUrlList;
     }
 
-
-
     public String getTitle() {
         return title;
     }
 
     public void setTitle(String title) {
         this.title = title;
+    }
+
+    public Integer getStatus() {
+        return status;
+    }
+
+    public void setStatus(Integer status) {
+        this.status = status;
     }
 }

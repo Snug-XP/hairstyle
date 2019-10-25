@@ -21,7 +21,9 @@ public class TestController {
 
     @ApiOperation(value = "时间测试", produces = "application/json")
     @GetMapping("/timeTest")
-    public Map Test() {
+    public Map Test(Double a) {
+        Double testDouble;
+        testDouble = Double.parseDouble(a.toString());
         Map map = new HashMap();
 
         Map daily = new HashMap();
@@ -41,6 +43,7 @@ public class TestController {
         map.put("weekly",weekly);
         map.put("monthly",monthly);
         map.put("nowTime",new Date(System.currentTimeMillis()));
+        map.put("double",testDouble);
         return map;
     }
 
