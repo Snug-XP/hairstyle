@@ -18,7 +18,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -318,7 +317,7 @@ public class HaircutOrderController {
 
                 //发型师已完成的总订单+1
                 Hairstylist hairstylist = order.getHairstylist();
-                hairstylist.setOrderSum();//根据自己的订单列表（中的已完成）数量进行校正
+                hairstylist.regulateOrderSum();//根据自己的订单列表（中的已完成）数量进行校正
                 hairstylistService.edit(hairstylist);
 
                 messageController.pushCompletedMessage(orderId);
@@ -550,6 +549,83 @@ public class HaircutOrderController {
         }
     }
 
+    @ApiOperation(value = "普通用户获取预约单详情")
+    @PostMapping("/user/getHaircutOrder")
+    public Map addHaircutOrder(String myOpenid, int orderId) {
+        Map map = new HashMap();
+        try {
+
+            HaircutOrder order = haircutOrderService.findHaircutOrderById(orderId);
+            if(order==null){
+                logger.info("id为"+orderId+"的订单不存在！");
+                map.put("error","未找到该订单！！");
+                return map;
+            }
+            User user = userService.findUserByOpenid(myOpenid);
+            if( order.getUser().getId() != user.getId()){
+                logger.info("id为"+order.getId()+"的订单不是id为"+user.getId()+"的用户“"+user.getName()+"”的订单，无权查看");
+                map.put("error","该订单不是你的，无权操作！！");
+                return map;
+            }
+
+
+            map.put("orderDetail",order);
+        } catch (Exception e) {
+            logger.info("用户获取预约单详情失败！！（后端发生某些错误）\n\n");
+            map.put("error", "获取预约单详情失败！！（后端发生某些错误）");
+            e.printStackTrace();
+        }
+        return map;
+    }
+
+    @ApiOperation(value = "普通用户给该订单的发型师评分")
+    @PostMapping("/user/order/rate")
+    public Map rateThisOrder(String myOpenid, int orderId , double point) {
+        Map map = new HashMap();
+        try {
+
+            HaircutOrder order = haircutOrderService.findHaircutOrderById(orderId);
+            if(order==null){
+                logger.info("id为"+orderId+"的订单不存在！");
+                map.put("error","未找到该订单！！");
+                return map;
+            }
+            User user = userService.findUserByOpenid(myOpenid);
+            if( order.getUser().getId() != user.getId()){
+                logger.info("id为"+order.getId()+"的订单不是id为"+user.getId()+"的用户“"+user.getName()+"”的订单，无权评分");
+                map.put("error","该订单不是你的，无权操作！！");
+                return map;
+            }
+
+            if (order.getStatus()!=2){
+                logger.info("id为"+order.getId()+"的订单还未完成，不允许评分！");
+                map.put("error","订单未完成，不允许评分！！");
+                return map;
+            }
+            if( order.getPoint()!=null&&order.getPoint()>0){
+                logger.info("id为"+order.getId()+"的订单已经评过分了，不允许重复评分！");
+                map.put("error","已经评过分了，不允许重复评分！！");
+                return map;
+            }
+
+            //进行评分
+            order.setPoint(point);
+            haircutOrderService.edit(order);
+
+            Hairstylist hairstylist = order.getHairstylist();
+            hairstylist.regulatePoint();//校正发型师的评分
+            hairstylistService.edit(hairstylist);
+
+            logger.info("id为"+order.getId()+"的订单中，用户“"+user.getName()+"”给发型师“"+hairstylist.getHairstylistName()+"”  <id为"+hairstylist.getId()+">评分评了“"+point+"”分");
+            map.put("message","评分成功！");
+        } catch (Exception e) {
+            logger.info("用户为订单评分失败！！（后端发生某些错误）\n\n");
+            map.put("error", "评分失败！！（后端发生某些错误）");
+            e.printStackTrace();
+        }
+        return map;
+    }
+
 
 //    @ApiOperation(value = "删除用户订单",notes = "m1")
 //    @DeleteMapping("/haircutOrder/{haircutOrderId}")
@@ -562,12 +638,12 @@ public class HaircutOrderController {
 //    public void updateHaircutOrder(@Validated HaircutOrder haircutOrders) {
 //        haircutOrderService.edit(haircutOrders);
 //    }
-
-    @ApiOperation(value = "获取单个订单信息的所有信息，包括其中用户和发型师信息", produces = "application/json")
-    @GetMapping("/haircutOrder")
-    public HaircutOrder getOne(int orderId) {
-        return haircutOrderService.findHaircutOrderById(orderId);
-    }
+//
+//    @ApiOperation(value = "获取单个订单信息的所有信息，包括其中用户和发型师信息", produces = "application/json")
+//    @GetMapping("/haircutOrder")
+//    public HaircutOrder getOne(int orderId) {
+//        return haircutOrderService.findHaircutOrderById(orderId);
+//    }
 
 
     @ApiOperation(value = "分页获取所有订单列表", notes = "仅管理员有权限", produces = "application/json")

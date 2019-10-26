@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.gaocimi.flashpig.utils.xp.MyUtils;
 
 import javax.persistence.*;
-import javax.xml.crypto.Data;
 import java.util.*;
 
 /**
@@ -15,7 +14,7 @@ import java.util.*;
  */
 @Entity
 @Table(name = "hairstylist")
-@JsonIgnoreProperties(value = {"articleList","getCurrentMonthOrderSum", "allOperationalData", "loyalUserRecordList", "haircutOrderList", "hairstylistImageUrlList", "hairServiceList", "recordToUserList", "userList", "handler", "hibernateLazyInitializer", "fieldHandler"})
+@JsonIgnoreProperties(value = {"articleList", "getCurrentMonthOrderSum", "allOperationalData", "loyalUserRecordList", "haircutOrderList", "hairstylistImageUrlList", "hairServiceList", "recordToUserList", "userList", "handler", "hibernateLazyInitializer", "fieldHandler"})
 public class Hairstylist {
 
     @Id
@@ -270,11 +269,28 @@ public class Hairstylist {
     }
 
     public Double getPoint() {
+        regulatePoint();
         return point;
     }
 
     public void setPoint(Double point) {
         this.point = point;
+    }
+
+    /**
+     * 根据自己的订单列表（已完成且有评分的）进行校正
+     */
+    public void regulatePoint() {
+        int count = 0;
+        double sumPoint = 0.0;
+        for (HaircutOrder order : haircutOrderList) {
+            if (order.getStatus() == 2 && order.getPoint() != null && order.getPoint() > 0) {
+                count++;
+                sumPoint += order.getPoint();
+            }
+        }
+        if (count > 0)
+            this.point = sumPoint / count;
     }
 
     public Date getCreateTime() {
@@ -288,7 +304,7 @@ public class Hairstylist {
     /**
      * 根据自己的订单列表（中的已完成）数量进行校正
      */
-    public void setOrderSum() {
+    public void regulateOrderSum() {
         int count = 0;
         for (HaircutOrder order : haircutOrderList) {
             if (order.getStatus() == 2) {
@@ -299,7 +315,7 @@ public class Hairstylist {
     }
 
     public Integer getOrderSum() {
-        setOrderSum();
+        regulateOrderSum();
         return orderSum;
     }
 
@@ -475,7 +491,7 @@ public class Hairstylist {
         int todayOrderCount = 0;//今日预约人数
 
         for (HaircutOrder haircutOrder : haircutOrderList) {
-            if(haircutOrder.getStatus()==-2) continue;//已被取消的订单不计算进去
+            if (haircutOrder.getStatus() == -2) continue;//已被取消的订单不计算进去
             Long day = MyUtils.getDifferenceToday(haircutOrder.getBookTime());//取得预约时间与今天23点59分相差的天数
             if (day == 0) {
                 todayOrderCount++;
@@ -536,7 +552,7 @@ public class Hairstylist {
 
 
     public boolean isMyArticle(int articleId) {
-        for(Article article: articleList) {
+        for (Article article : articleList) {
             if (articleId == article.getId())
                 return true;
         }

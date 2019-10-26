@@ -163,7 +163,10 @@ public class ArticleController {
             article.setTag(tagList);
             article.setTitle(title);
             article.setContent(content);
-            article.setStatus(0);//设置发型文章状态为审核中
+            if(administratorService.isExist(myOpenid))
+                article.setStatus(1);//设置发型文章状态为审核通过
+            else
+                article.setStatus(0);//设置发型文章状态为审核中
             articleService.edit(article);
 
 
@@ -190,10 +193,68 @@ public class ArticleController {
         }
     }
 
+    @ApiOperation(value = "获取自己的发型文章列表(分页展示)", notes = "权限：发型师(管理员会有一个发型师记录)")
+    @GetMapping("/hairstylist/getMyArticleList")
+    public Map getMyArticleList(String myOpenid,
+                                @RequestParam(name = "pageNum", defaultValue = "0") int pageNum,
+                                @RequestParam(name = "pageSize", defaultValue = "10") int pageSize) {
+
+        Map map = new HashMap();
+        try {
+            Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
+            if ((hairstylist == null || hairstylist.getApplyStatus() != 1) && (!administratorService.isExist(myOpenid))) {
+                logger.info("非发型师用户或管理员操作（删除文章）！！");
+                map.put("error", "对不起，你不是发型师或管理员，无权操作！！");
+                return map;
+            }
+
+            List<Article> tempArticleList = hairstylist.getArticleList();
+            List<Article> resultList = new ArrayList<>();
+
+            if(tempArticleList==null||tempArticleList.size()==0){
+                logger.info("你还没有创建过发型文章哦~");
+                map.put("message","你还没有创建过发型文章哦~");
+                return map;
+            }
+
+            // 按创建时间倒序排序
+            Collections.sort(tempArticleList, (o1, o2) -> {
+                if (o2.getCreateTime().after(o1.getCreateTime())) {
+                    return 1;
+                } else if (o1.getCreateTime().after(o2.getCreateTime())) {
+                    return -1;
+                }
+                return 0; //相等为0
+            });
+
+            //获取所求页数的文章数据
+            int first = pageNum * pageSize;
+            int last = pageNum * pageSize + pageSize - 1;
+            for (int i = first; i <= last && i < tempArticleList.size(); i++) {
+                resultList.add(tempArticleList.get(i));
+            }
+
+            //包装分页数据
+            Pageable pageable = PageRequest.of(pageNum, pageSize);
+            Page<Article> page = new PageImpl<>(resultList, pageable, tempArticleList.size());
+
+            map.put("page", page);
+            return map;
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            logger.info("获取自己的发型文章列表失败！！（后端发生某些错误）");
+            map.put("error", "获取自己的发型文章列表失败！！（后端发生某些错误）");
+            e.printStackTrace();
+            return map;
+        }
+    }
+
+
+
 
     @ApiOperation(value = "获取单个文章信息", produces = "application/json")
-    @GetMapping("/article/getOne/{articleId}")
-    public Article getOne(@PathVariable("articleId") Integer articleId) {
+    @GetMapping("/article/getOne")
+    public Article getOne(Integer articleId) {
         return articleService.findArticleById(articleId);
     }
 
