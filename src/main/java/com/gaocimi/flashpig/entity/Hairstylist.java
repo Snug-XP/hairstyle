@@ -421,12 +421,49 @@ public class Hairstylist {
         Date week = MyUtils.getFirstDayOfWeek(today);//获取今天所在周的星期一的日期Date(时间为00:00:00)
         Date month = MyUtils.getFirstDayOfMonth(today);//获取今天所在月的第一天的日期Date(时间为00:00:00)
 
-        //获取第0~6天（周、月）前的数据
-        for (int i = 0; i < 7; i++) {
-            daily.put(i + "daysAgo", getOperationalData(MyUtils.stepDay(today, -i), MyUtils.stepDay(today, -i + 1)));
-            weekly.put(i + "weeksAgo", getOperationalData(MyUtils.stepWeek(week, -i), MyUtils.stepWeek(week, -i + 1)));
-            monthly.put(i + "monthsAgo", getOperationalData(MyUtils.stepMonth(month, -i), MyUtils.stepMonth(month, -i + 1)));
+        Map data;
+        List<Integer> reservationNum = new ArrayList<>();
+        List<Integer> newCustomerNum = new ArrayList<>();
+        List<Integer> newLoyalCustomerNum = new ArrayList<>();
+        //获取第0~6天前的数据
+        for (int i = 6; i >=0; i--) {
+            data = getOperationalData(MyUtils.stepDay(today, -i), MyUtils.stepDay(today, -i + 1));
+            reservationNum.add((Integer) data.get("reservationNum"));
+            newCustomerNum.add((Integer) data.get("newCustomerNum"));
+            newLoyalCustomerNum.add((Integer) data.get("newLoyalCustomerNum"));
         }
+        daily.put("reservationNum", reservationNum);
+        daily.put("newCustomerNum", newCustomerNum);
+        daily.put("newLoyalCustomerNum", newLoyalCustomerNum);
+        reservationNum = new ArrayList<>();
+        newCustomerNum = new ArrayList<>();
+        newLoyalCustomerNum = new ArrayList<>();
+
+        //获取第0~3周前的数据
+        for (int i = 3; i >=0; i--) {
+            data = getOperationalData(MyUtils.stepWeek(week, -i), MyUtils.stepWeek(week, -i + 1));
+            reservationNum.add((Integer) data.get("reservationNum"));
+            newCustomerNum.add((Integer) data.get("newCustomerNum"));
+            newLoyalCustomerNum.add((Integer) data.get("newLoyalCustomerNum"));
+        }
+        weekly.put("reservationNum", reservationNum);
+        weekly.put("newCustomerNum", newCustomerNum);
+        weekly.put("newLoyalCustomerNum", newLoyalCustomerNum);
+        reservationNum = new ArrayList<>();
+        newCustomerNum = new ArrayList<>();
+        newLoyalCustomerNum = new ArrayList<>();
+
+        //获取第0~5月前的数据
+        for (int i = 5; i >=0; i--) {
+            data = getOperationalData(MyUtils.stepMonth(month, -i), MyUtils.stepMonth(month, -i + 1));
+            reservationNum.add((Integer) data.get("reservationNum"));
+            newCustomerNum.add((Integer) data.get("newCustomerNum"));
+            newLoyalCustomerNum.add((Integer) data.get("newLoyalCustomerNum"));
+        }
+        monthly.put("reservationNum", reservationNum);
+        monthly.put("newCustomerNum", newCustomerNum);
+        monthly.put("newLoyalCustomerNum", newLoyalCustomerNum);
+
         map.put("daily", daily);
         map.put("weekly", weekly);
         map.put("monthly", monthly);
@@ -446,7 +483,7 @@ public class Hairstylist {
         int newCustomerNum = 0;
 
         for (HaircutOrder order : haircutOrderList) {
-            if (order.getStatus() != 2) continue;
+            if (order.getStatus() != 2) continue;//只选择已完成的订单
             Date bookTime = order.getBookTime();
             //取出相应时间的订单
             if (bookTime.after(date1) && bookTime.before(date2)) {
@@ -517,8 +554,8 @@ public class Hairstylist {
             return 0; //相等为0
         });
         for (HaircutOrder o : haircutOrderList) {
-            if (o.getStatus() != -2 && o.getUser().getId() == order.getUser().getId()) {
-                //找到预约时间最早的相同用户的有效订单（即排除取消的订单）
+            if (o.getStatus() == 2 && o.getUser().getId() == order.getUser().getId()) {
+                //找到预约时间最早的相同用户的已完成订单
 
                 if (o.getId() == order.getId())
                     return true;
@@ -526,7 +563,6 @@ public class Hairstylist {
                     return false;
             }
         }
-        //能执行这边的说明传入订单是非有效的（已被取消或被从数据库删除掉的订单）
         return false;
     }
 
