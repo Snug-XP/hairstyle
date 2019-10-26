@@ -22,5 +22,7 @@ public interface ArticleImageUrlService {
 
     public void delete(int id);
 
+    public void deleteAllByArticlId(int articleId);
+
     public Page<ArticleImageUrl> findAll(int pageNum, int pageSize);
 }

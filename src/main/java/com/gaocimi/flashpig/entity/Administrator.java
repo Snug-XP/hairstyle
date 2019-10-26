@@ -1,7 +1,11 @@
 package com.gaocimi.flashpig.entity;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import lombok.Data;
+
 import javax.persistence.*;
+import java.util.List;
 
 /**
  * Administrator - 管理员类
@@ -11,6 +15,8 @@ import javax.persistence.*;
  */
 @Entity
 @Table(name = "administrator")
+@JsonIgnoreProperties(value = {"albumList", "handler", "hibernateLazyInitializer", "fieldHandler"})
+@Data
 public class Administrator {
 
     @Id
@@ -21,27 +27,9 @@ public class Administrator {
 
     private String openid;
 
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getOpenid() {
-        return openid;
-    }
-
-    public void setOpenid(String openid) {
-        this.openid = openid;
-    }
+    /**
+     * 该管理员创建的专辑； 定义该Administrator实体所有关联的Album实体； 指定mappedBy属性表明该Administrator实体不控制关联关系
+     */
+    @OneToMany(targetEntity = Album.class, mappedBy = "administrator")
+    public List<Album> albumList;
 }

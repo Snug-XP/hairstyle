@@ -38,9 +38,9 @@ public class ArticleImageUrl {
         this.id = id;
     }
 
-//    public Article getArticle() {
-//        return article;
-//    }
+    public Article getArticle() {
+        return article;
+    }
 
     public void setArticle(Article article) {
         this.article = article;
@@ -53,4 +53,6 @@ public class ArticleImageUrl {
     public void setImageUrl(String imageUrl) {
         this.imageUrl = imageUrl;
     }
+
+
 }

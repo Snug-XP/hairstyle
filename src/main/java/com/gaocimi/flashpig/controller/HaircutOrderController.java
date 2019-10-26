@@ -18,7 +18,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -102,16 +101,16 @@ public class HaircutOrderController {
                     });
 
                     map.put("recordList", recordList);
-                    map.put("todayOrderCount", recordList.size());
+                    map.put("orderSum", recordList.size());
                 } else
                     map.put("message", "你今天没有订单");
 
                 return map;
             }
         } catch (Exception e) {
-            logger.error(String.valueOf(e));
-            logger.info("获取预约列表失败！！（后端发生某些错误，例如数据库连接失败）");
-            map.put("error", "获取预约列表失败！！（后端发生某些错误，例如数据库连接失败）");
+            logger.error(e.getMessage());
+            logger.info("获取预约列表失败！！（后端发生某些错误）");
+            map.put("error", "获取预约列表失败！！（后端发生某些错误）");
             e.printStackTrace();
             return map;
         }
@@ -135,7 +134,8 @@ public class HaircutOrderController {
 
         //订单状态，“-1”表示待完成，“0”表示已通知用户准备，“1”表示订单正在进行中，“2”表示订单已完成，“-2”表示订单已取消
         List<HairstylistReservation> resultList = new ArrayList<>();//要返回的排号订单列表
-        for (HairstylistReservation reservation : reservationList) {
+        for (int i=0 ; i<reservationList.size() ; i++) {
+            HairstylistReservation reservation = reservationList.get(i);
             switch (reservation.getStatus()) {
                 case -1:
                     //待完成的订单,加入排号订单列表中
@@ -143,6 +143,7 @@ public class HaircutOrderController {
                     //已通知用户准备的订单,加入排号订单列表中
                 case 1:
                     //当前正在进行中的订单,加入排号订单列表中
+                    reservation.setIndex(i+1);
                     resultList.add(reservation); //加入排号订单列表
                     break;
                 case 2:
@@ -274,11 +275,16 @@ public class HaircutOrderController {
      * @param flag    通知用户前面还有几个人，当flag=-1时，通知订单已完成
      * @return
      */
-    @ApiOperation(value = "发模板信息通知用户前面还有flag个人，当flag=-1时，通知订单已完成，并且根据通知类型改变订单状态（...到时候记得关闭url访问）")
+    @ApiOperation(value = "发模板信息通知用户前面还有flag个人（flag=0/1/2/-1），当flag=-1时，通知订单已完成，并且根据通知类型改变订单状态（...到时候记得关闭url访问）")
     @GetMapping("/hairstylist/notifyUser")
     public Map notifyUser(int orderId, int flag) {
         Map map = new HashMap();
-
+        //错误flag
+        if(flag<-1) {
+            logger.info("通知flag错误！！(仅允许大于等于-1的整数)");
+            map.put("error", "通知flag错误！！(仅允许大于等于-1的整数)");
+            return map;
+        }
         HaircutOrder order = haircutOrderService.findHaircutOrderById(orderId);
         switch (flag) {
             case 0:
@@ -311,16 +317,18 @@ public class HaircutOrderController {
 
                 //发型师已完成的总订单+1
                 Hairstylist hairstylist = order.getHairstylist();
-                hairstylist.setOrderSum(hairstylist.getOrderSum() + 1);
+                hairstylist.regulateOrderSum();//根据自己的订单列表（中的已完成）数量进行校正
                 hairstylistService.edit(hairstylist);
 
                 messageController.pushCompletedMessage(orderId);
                 logger.info("id为" + order.getId() + "的订单已完成(用户：“"+order.user.getName()+"”，发型师：“"+hairstylist.getHairstylistName()+"”)\n");
                 break;
             default:
-                //错误flag
-                logger.info("通知flag错误！！请检查代码！！");
-                map.put("error","通知flag错误！！请检查代码！！");
+                //发送等待前flag位的通知
+                order.setStatus(0);//将订单状态设为已通知
+                haircutOrderService.edit(order);
+                messageController.pushComingMessage(orderId, flag);
+                logger.info("通知订单号id为" + order.getId() + "的顾客“" + order.user.getName() + "”前面还有"+flag+"位顾客,请耐心等候");
                 break;
         }
         return map;
@@ -376,9 +384,9 @@ public class HaircutOrderController {
                 return map;
             }
         } catch (Exception e) {
-            logger.error(String.valueOf(e));
-            logger.info("获取预约记录列表失败！！（后端发生某些错误，例如数据库连接失败）");
-            map.put("error", "获取预约记录列表失败！！（后端发生某些错误，例如数据库连接失败）");
+            logger.error(e.getMessage());
+            logger.info("获取预约记录列表失败！！（后端发生某些错误）");
+            map.put("error", "获取预约记录列表失败！！（后端发生某些错误）");
             e.printStackTrace();
             return map;
         }
@@ -396,7 +404,7 @@ public class HaircutOrderController {
                 map.put("error", "对不起，你还不是发型师用户，无权操作！！");
                 return map;
             } else {
-                map.put("completedOrderSum", hairstylist.getCompletedOrderSum());//已完成订单总数
+                map.put("completedOrderSum", hairstylist.getOrderSum());//已完成订单总数
                 map.put("CustomerSum", hairstylist.getCustomerSum());//顾客总数
                 map.put("loyalCustomerSum", hairstylist.getLoyalUserRecordList().size());//忠实（粉丝）顾客数
                 map.put("operationalData",hairstylist.getAllOperationalData());//页面中日报周报月报折线图中的数据
@@ -404,9 +412,9 @@ public class HaircutOrderController {
                 return map;
             }
         } catch (Exception e) {
-            logger.error(String.valueOf(e));
-            logger.info("获取运营数据失败！！（后端发生某些错误，例如数据库连接失败）");
-            map.put("error", "获取运营数据失败！！（后端发生某些错误，例如数据库连接失败）");
+            logger.error(e.getMessage());
+            logger.info("获取运营数据失败！！（后端发生某些错误）");
+            map.put("error", "获取运营数据失败！！（后端发生某些错误）");
             e.printStackTrace();
             return map;
         }
@@ -449,7 +457,7 @@ public class HaircutOrderController {
                     return map;
                 }
             } catch (Exception e) {
-                logger.error(String.valueOf(e));
+                logger.error(e.getMessage());
                 logger.info("时间转换失败，请检查时间格式（传入数据：" + bookTime + "）");
                 map.put("error", "时间转换失败，请检查预约的时间格式：“yyyy-MM-dd HH:mm:ss”");
                 e.printStackTrace();
@@ -473,7 +481,7 @@ public class HaircutOrderController {
             messageController.pushSuccessMessage(order.getId());//给用户发送预约成功的模板消息通知
             map.put("message", "订单提交成功！");
         } catch (Exception e) {
-            logger.error(String.valueOf(e));
+            logger.error(e.getMessage());
             logger.info("用户提交预约订单失败！！（后端发生某些错误）");
             map.put("error", "操作失败！！（后端发生某些错误）");
             e.printStackTrace();
@@ -483,7 +491,8 @@ public class HaircutOrderController {
 
     @ApiOperation(value = "普通用户获取自己的预约订单列表(分页展示)")
     @GetMapping("/user/getHaircutOrderList")
-    public Map addHaircutOrder(String myOpenid,@RequestParam(name = "pageNum", defaultValue = "0") int pageNum,
+    public Map getHaircutOrderList(String myOpenid,
+                               @RequestParam(name = "pageNum", defaultValue = "0") int pageNum,
                                @RequestParam(name = "pageSize", defaultValue = "10") int pageSize ) {
         Map map = new HashMap();
         try {
@@ -532,13 +541,92 @@ public class HaircutOrderController {
             map.put("page", page);
             return map;
         } catch (Exception e) {
-            logger.error(String.valueOf(e));
-            logger.info("获取自己的预约列表失败！！（后端发生某些错误，例如数据库连接失败）");
-            map.put("error", "获取我的预约列表失败！！（后端发生某些错误，例如数据库连接失败）");
+            logger.error(e.getMessage());
+            logger.info("获取自己的预约列表失败！！（后端发生某些错误）");
+            map.put("error", "获取我的预约列表失败！！（后端发生某些错误）");
             e.printStackTrace();
             return map;
         }
     }
+
+    @ApiOperation(value = "普通用户获取预约单详情")
+    @PostMapping("/user/getHaircutOrder")
+    public Map addHaircutOrder(String myOpenid, int orderId) {
+        Map map = new HashMap();
+        try {
+
+            HaircutOrder order = haircutOrderService.findHaircutOrderById(orderId);
+            if(order==null){
+                logger.info("id为"+orderId+"的订单不存在！");
+                map.put("error","未找到该订单！！");
+                return map;
+            }
+            User user = userService.findUserByOpenid(myOpenid);
+            if( order.getUser().getId() != user.getId()){
+                logger.info("id为"+order.getId()+"的订单不是id为"+user.getId()+"的用户“"+user.getName()+"”的订单，无权查看");
+                map.put("error","该订单不是你的，无权操作！！");
+                return map;
+            }
+
+
+            map.put("orderDetail",order);
+        } catch (Exception e) {
+            logger.info("用户获取预约单详情失败！！（后端发生某些错误）\n\n");
+            map.put("error", "获取预约单详情失败！！（后端发生某些错误）");
+            e.printStackTrace();
+        }
+        return map;
+    }
+
+    @ApiOperation(value = "普通用户给该订单的发型师评分")
+    @PostMapping("/user/order/rate")
+    public Map rateThisOrder(String myOpenid, int orderId , double point) {
+        Map map = new HashMap();
+        try {
+
+            HaircutOrder order = haircutOrderService.findHaircutOrderById(orderId);
+            if(order==null){
+                logger.info("id为"+orderId+"的订单不存在！");
+                map.put("error","未找到该订单！！");
+                return map;
+            }
+            User user = userService.findUserByOpenid(myOpenid);
+            if( order.getUser().getId() != user.getId()){
+                logger.info("id为"+order.getId()+"的订单不是id为"+user.getId()+"的用户“"+user.getName()+"”的订单，无权评分");
+                map.put("error","该订单不是你的，无权操作！！");
+                return map;
+            }
+
+            if (order.getStatus()!=2){
+                logger.info("id为"+order.getId()+"的订单还未完成，不允许评分！");
+                map.put("error","订单未完成，不允许评分！！");
+                return map;
+            }
+            if( order.getPoint()!=null&&order.getPoint()>0){
+                logger.info("id为"+order.getId()+"的订单已经评过分了，不允许重复评分！");
+                map.put("error","已经评过分了，不允许重复评分！！");
+                return map;
+            }
+
+            //进行评分
+            order.setPoint(point);
+            haircutOrderService.edit(order);
+
+            Hairstylist hairstylist = order.getHairstylist();
+            hairstylist.regulatePoint();//校正发型师的评分
+            hairstylistService.edit(hairstylist);
+
+            logger.info("id为"+order.getId()+"的订单中，用户“"+user.getName()+"”给发型师“"+hairstylist.getHairstylistName()+"”  <id为"+hairstylist.getId()+">评分评了“"+point+"”分");
+            map.put("message","评分成功！");
+        } catch (Exception e) {
+            logger.info("用户为订单评分失败！！（后端发生某些错误）\n\n");
+            map.put("error", "评分失败！！（后端发生某些错误）");
+            e.printStackTrace();
+        }
+        return map;
+    }
+
+
 //    @ApiOperation(value = "删除用户订单",notes = "m1")
 //    @DeleteMapping("/haircutOrder/{haircutOrderId}")
 //    public void deleteHaircutOrder(@PathVariable("haircutOrderId") Integer haircutOrderId) {
@@ -550,12 +638,12 @@ public class HaircutOrderController {
 //    public void updateHaircutOrder(@Validated HaircutOrder haircutOrders) {
 //        haircutOrderService.edit(haircutOrders);
 //    }
-
-    @ApiOperation(value = "获取单个订单信息的所有信息，包括其中用户和发型师信息", produces = "application/json")
-    @GetMapping("/haircutOrder")
-    public HaircutOrder getOne(int orderId) {
-        return haircutOrderService.findHaircutOrderById(orderId);
-    }
+//
+//    @ApiOperation(value = "获取单个订单信息的所有信息，包括其中用户和发型师信息", produces = "application/json")
+//    @GetMapping("/haircutOrder")
+//    public HaircutOrder getOne(int orderId) {
+//        return haircutOrderService.findHaircutOrderById(orderId);
+//    }
 
 
     @ApiOperation(value = "分页获取所有订单列表", notes = "仅管理员有权限", produces = "application/json")
@@ -576,9 +664,9 @@ public class HaircutOrderController {
                 return map;
             }
         } catch (Exception e) {
-            logger.error(String.valueOf(e));
-            logger.info("获取订单列表失败！！（后端发生某些错误，例如数据库连接失败）");
-            map.put("error", "获取订单列表失败！！（后端发生某些错误，例如数据库连接失败）");
+            logger.error(e.getMessage());
+            logger.info("获取订单列表失败！！（后端发生某些错误）");
+            map.put("error", "获取订单列表失败！！（后端发生某些错误）");
             e.printStackTrace();
             return map;
         }

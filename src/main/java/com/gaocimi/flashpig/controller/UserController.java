@@ -81,9 +81,9 @@ public class UserController {
             map.put("page", page);
             return map;
         } catch (Exception e) {
-            logger.error(String.valueOf(e));
-            logger.info("获取自己收藏的发型师列表失败！！（后端发生某些错误，例如数据库连接失败）");
-            map.put("error", "获取收藏的发型师失败！！（后端发生某些错误，例如数据库连接失败）");
+            logger.error(e.getMessage());
+            logger.info("获取自己收藏的发型师列表失败！！（后端发生某些错误）");
+            map.put("error", "获取收藏的发型师失败！！（后端发生某些错误）");
             e.printStackTrace();
             return map;
         }

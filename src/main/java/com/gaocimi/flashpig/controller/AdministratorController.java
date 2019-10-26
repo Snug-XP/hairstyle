@@ -54,9 +54,9 @@ class AdministratorController {
                 return map;
             }
         } catch (Exception e) {
-            logger.error(String.valueOf(e));
-            logger.info("获取正在注册的发型师列表信息失败！！（后端发生某些错误，例如数据库连接失败）");
-            map.put("error", "获取正在注册的发型师列表信息失败！！（后端发生某些错误，例如数据库连接失败）");
+            logger.error(e.getMessage());
+            logger.info("获取正在注册的发型师列表信息失败！！（后端发生某些错误）");
+            map.put("error", "获取正在注册的发型师列表信息失败！！（后端发生某些错误）");
             e.printStackTrace();
             return map;
         }
@@ -103,9 +103,9 @@ class AdministratorController {
                 map.put("error", "同意发型师注册操作失败！！（没有权限！！）");
             }
         } catch (Exception e) {
-            logger.error(String.valueOf(e));
-            logger.info("同意发型师注册操作失败！！（后端发生某些错误，例如数据库连接失败）");
-            map.put("error", "同意发型师注册操作失败！！（后端发生某些错误，例如数据库连接失败）");
+            logger.error(e.getMessage());
+            logger.info("同意发型师注册操作失败！！（后端发生某些错误）");
+            map.put("error", "同意发型师注册操作失败！！（后端发生某些错误）");
             e.printStackTrace();
 
         }

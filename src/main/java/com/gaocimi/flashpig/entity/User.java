@@ -15,7 +15,7 @@ import java.util.List;
  */
 @Entity
 @Table(name = "user")
-@JsonIgnoreProperties(value = { "userFormidList","haircutOrderList","articleRecordList","haircutOrderList","handler","hibernateLazyInitializer","fieldHandler"})
+@JsonIgnoreProperties(value = { "userFormidList","haircutOrderList","hairstylistRecordList","articleRecordList","haircutOrderList","handler","hibernateLazyInitializer","fieldHandler"})
 @Data
 public class User {
 
@@ -60,4 +60,22 @@ public class User {
     @OneToMany(targetEntity = UserFormid.class, mappedBy = "user",fetch = FetchType.LAZY)
     public List<UserFormid> userFormidList;
 
+
+    /**
+     * 判断该用户是否收藏了发型师
+     *
+     * @param hairstylistId 发型师的id
+     * @return 用户是否收藏了发型师
+     */
+    public boolean isLoyalToHairstylist(int hairstylistId) {
+        List<UserToHairstylist> recordList = getHairstylistRecordList();
+        if (recordList == null || recordList.size() == 0) {
+            return false;
+        }
+        for (UserToHairstylist h : recordList) {
+            if (h.getHairstylist().getId() == hairstylistId )
+                return true;
+        }
+        return false;
+    }
 }

@@ -14,7 +14,7 @@ import java.util.*;
  */
 @Entity
 @Table(name = "hairstylist")
-@JsonIgnoreProperties(value = {"allOperationalData", "loyalUserRecordList", "haircutOrderList", "hairstylistImageUrlList", "hairServiceList", "recordToUserList", "userList", "handler", "hibernateLazyInitializer", "fieldHandler"})
+@JsonIgnoreProperties(value = {"articleList", "getCurrentMonthOrderSum", "allOperationalData", "loyalUserRecordList", "haircutOrderList", "hairstylistImageUrlList", "hairServiceList", "recordToUserList", "userList", "handler", "hibernateLazyInitializer", "fieldHandler"})
 public class Hairstylist {
 
     @Id
@@ -72,12 +72,12 @@ public class Hairstylist {
     private String address;
 
     /**
-     * 门店经度
+     * 门店经度，对于两个接近赤道的点，在纬度相等的情况下： 经度每隔0.00001度，距离相差约1米；每隔0.0001度，距离相差约10米；每隔0.001度，距离相差约100米；
      */
     private Double longitude;
 
     /**
-     * 门店纬度
+     * 门店纬度，对于两个接近赤道的点，在经度相等的情况下： 纬度每隔0.00001度，距离相差约1.1米；每隔0.0001度，距离相差约11米；每隔0.001度，距离相差约111米；
      */
     private Double latitude;
 
@@ -122,6 +122,12 @@ public class Hairstylist {
      */
     @OneToMany(targetEntity = HairService.class, mappedBy = "hairstylist")
     public List<HairService> hairServiceList;
+
+    /**
+     * 发型师发表的发型文章列表； 定义该Hairstylist实体所有关联的Article实体； 指定mappedBy属性表明该Hairstylist实体不控制关联关系
+     */
+    @OneToMany(targetEntity = Article.class, mappedBy = "hairstylist")
+    public List<Article> articleList;
 
     /**
      * 发型师拥有的订单列表； 定义该Hairstylist实体所有关联的HaircutOrder实体； 指定mappedBy属性表明该Hairstylist实体不控制关联关系
@@ -263,11 +269,28 @@ public class Hairstylist {
     }
 
     public Double getPoint() {
+        regulatePoint();
         return point;
     }
 
     public void setPoint(Double point) {
         this.point = point;
+    }
+
+    /**
+     * 根据自己的订单列表（已完成且有评分的）进行校正
+     */
+    public void regulatePoint() {
+        int count = 0;
+        double sumPoint = 0.0;
+        for (HaircutOrder order : haircutOrderList) {
+            if (order.getStatus() == 2 && order.getPoint() != null && order.getPoint() > 0) {
+                count++;
+                sumPoint += order.getPoint();
+            }
+        }
+        if (count > 0)
+            this.point = sumPoint / count;
     }
 
     public Date getCreateTime() {
@@ -278,12 +301,26 @@ public class Hairstylist {
         this.createTime = createTime;
     }
 
-    public void setOrderSum(Integer orderSum) {
-        this.orderSum = orderSum;
+    /**
+     * 根据自己的订单列表（中的已完成）数量进行校正
+     */
+    public void regulateOrderSum() {
+        int count = 0;
+        for (HaircutOrder order : haircutOrderList) {
+            if (order.getStatus() == 2) {
+                count++;
+            }
+        }
+        this.orderSum = count;
     }
 
     public Integer getOrderSum() {
+        regulateOrderSum();
         return orderSum;
+    }
+
+    public void setOrderSum(Integer orderSum) {
+        this.orderSum = orderSum;
     }
 
     public Integer getApplyStatus() {
@@ -334,22 +371,15 @@ public class Hairstylist {
         this.loyalUserRecordList = loyalUserRecordList;
     }
 
-
-/**************下面是一些关于发型师数据统计相关的方法*******************************************************************/
-
-    /**
-     * 获取发型师自己的已完成订单数
-     *
-     * @return 已完成订单数
-     */
-    public Integer getCompletedOrderSum() {
-        int count = 0;//已完成订单数
-        for (HaircutOrder order : haircutOrderList) {
-            if (order.getStatus() == 2)
-                count++;
-        }
-        return count;
+    public List<Article> getArticleList() {
+        return articleList;
     }
+
+    public void setArticleList(List<Article> articleList) {
+        this.articleList = articleList;
+    }
+
+    /**************下面是一些关于发型师数据统计相关的方法*******************************************************************/
 
     /**
      * 获取发型师自己的顾客总数
@@ -391,12 +421,49 @@ public class Hairstylist {
         Date week = MyUtils.getFirstDayOfWeek(today);//获取今天所在周的星期一的日期Date(时间为00:00:00)
         Date month = MyUtils.getFirstDayOfMonth(today);//获取今天所在月的第一天的日期Date(时间为00:00:00)
 
-        //获取第0~6天（周、月）前的数据
-        for (int i = 0; i < 7; i++) {
-            daily.put(i + "daysAgo", getOperationalData(MyUtils.stepDay(today, -i), MyUtils.stepDay(today, -i + 1)));
-            weekly.put(i + "weeksAgo", getOperationalData(MyUtils.stepWeek(week, -i), MyUtils.stepWeek(week, -i + 1)));
-            monthly.put(i + "monthsAgo", getOperationalData(MyUtils.stepMonth(month, -i), MyUtils.stepMonth(month, -i + 1)));
+        Map data;
+        List<Integer> reservationNum = new ArrayList<>();
+        List<Integer> newCustomerNum = new ArrayList<>();
+        List<Integer> newLoyalCustomerNum = new ArrayList<>();
+        //获取第0~6天前的数据
+        for (int i = 6; i >=0; i--) {
+            data = getOperationalData(MyUtils.stepDay(today, -i), MyUtils.stepDay(today, -i + 1));
+            reservationNum.add((Integer) data.get("reservationNum"));
+            newCustomerNum.add((Integer) data.get("newCustomerNum"));
+            newLoyalCustomerNum.add((Integer) data.get("newLoyalCustomerNum"));
         }
+        daily.put("reservationNum", reservationNum);
+        daily.put("newCustomerNum", newCustomerNum);
+        daily.put("newLoyalCustomerNum", newLoyalCustomerNum);
+        reservationNum = new ArrayList<>();
+        newCustomerNum = new ArrayList<>();
+        newLoyalCustomerNum = new ArrayList<>();
+
+        //获取第0~3周前的数据
+        for (int i = 3; i >=0; i--) {
+            data = getOperationalData(MyUtils.stepWeek(week, -i), MyUtils.stepWeek(week, -i + 1));
+            reservationNum.add((Integer) data.get("reservationNum"));
+            newCustomerNum.add((Integer) data.get("newCustomerNum"));
+            newLoyalCustomerNum.add((Integer) data.get("newLoyalCustomerNum"));
+        }
+        weekly.put("reservationNum", reservationNum);
+        weekly.put("newCustomerNum", newCustomerNum);
+        weekly.put("newLoyalCustomerNum", newLoyalCustomerNum);
+        reservationNum = new ArrayList<>();
+        newCustomerNum = new ArrayList<>();
+        newLoyalCustomerNum = new ArrayList<>();
+
+        //获取第0~5月前的数据
+        for (int i = 5; i >=0; i--) {
+            data = getOperationalData(MyUtils.stepMonth(month, -i), MyUtils.stepMonth(month, -i + 1));
+            reservationNum.add((Integer) data.get("reservationNum"));
+            newCustomerNum.add((Integer) data.get("newCustomerNum"));
+            newLoyalCustomerNum.add((Integer) data.get("newLoyalCustomerNum"));
+        }
+        monthly.put("reservationNum", reservationNum);
+        monthly.put("newCustomerNum", newCustomerNum);
+        monthly.put("newLoyalCustomerNum", newLoyalCustomerNum);
+
         map.put("daily", daily);
         map.put("weekly", weekly);
         map.put("monthly", monthly);
@@ -416,6 +483,7 @@ public class Hairstylist {
         int newCustomerNum = 0;
 
         for (HaircutOrder order : haircutOrderList) {
+            if (order.getStatus() != 2) continue;//只选择已完成的订单
             Date bookTime = order.getBookTime();
             //取出相应时间的订单
             if (bookTime.after(date1) && bookTime.before(date2)) {
@@ -435,6 +503,39 @@ public class Hairstylist {
         return map;
     }
 
+    /**
+     * 获取发型师在本月的完成订单数
+     *
+     * @return 本月的完成订单数
+     */
+    public int getCurrentMonthOrderSum() {
+        int count = 0;
+        Date month = MyUtils.getFirstDayOfMonth(new Date(System.currentTimeMillis()));//获取今天所在月的第一天的日期Date(时间为00:00:00)
+        for (HaircutOrder order : haircutOrderList) {
+            if (order.getStatus() == 2 && order.getBookTime().after(month)) {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    /**
+     * 获取发型师今天的预约订单数
+     *
+     * @return 今天的预约订单数
+     */
+    public int getTodayOrderSum() {
+        int todayOrderCount = 0;//今日预约人数
+
+        for (HaircutOrder haircutOrder : haircutOrderList) {
+            if (haircutOrder.getStatus() == -2) continue;//已被取消的订单不计算进去
+            Long day = MyUtils.getDifferenceToday(haircutOrder.getBookTime());//取得预约时间与今天23点59分相差的天数
+            if (day == 0) {
+                todayOrderCount++;
+            }
+        }
+        return todayOrderCount;
+    }
 
     /**
      * 判断该订单用户是不是该发型师的新顾客
@@ -453,16 +554,15 @@ public class Hairstylist {
             return 0; //相等为0
         });
         for (HaircutOrder o : haircutOrderList) {
-            if (o.getStatus() != -2 && o.getUser().getId() == order.getUser().getId()) {
-                //找到预约时间最早的相同用户的有效订单（即排除取消的订单）
+            if (o.getStatus() == 2 && o.getUser().getId() == order.getUser().getId()) {
+                //找到预约时间最早的相同用户的已完成订单
 
-                if(o.getId()==order.getId())
+                if (o.getId() == order.getId())
                     return true;
                 else
                     return false;
             }
         }
-        //能执行这边的说明传入订单是非有效的（已被取消或被从数据库删除掉的订单）
         return false;
     }
 
@@ -487,4 +587,11 @@ public class Hairstylist {
     }
 
 
+    public boolean isMyArticle(int articleId) {
+        for (Article article : articleList) {
+            if (articleId == article.getId())
+                return true;
+        }
+        return false;
+    }
 }
