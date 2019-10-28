@@ -1,17 +1,16 @@
 package com.gaocimi.flashpig.service.impl;
 
 import com.gaocimi.flashpig.entity.Article;
+import com.gaocimi.flashpig.entity.Article;
 import com.gaocimi.flashpig.repository.ArticleRepository;
 import com.gaocimi.flashpig.service.ArticleService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -71,6 +70,32 @@ public class ArticleServiceImpl implements ArticleService {
             return null;
         }
         return articlePage;
+    }
+
+
+    /**
+     * 分页获取待审核的发型文章
+     *
+     * @param pageNum  页数（第几页）
+     * @param pageSize 每页大小
+     * @return
+     */
+    public Page<Article> findPendingList(int pageNum, int pageSize){
+        int first = pageNum * pageSize;
+        int last = pageNum * pageSize + pageSize - 1;
+
+        List<Article> articles = articleRepository.findAllByStatus(0);
+        List<Article> resultList = new ArrayList<>();
+
+        for (int i = first; i <= last && i < articles.size(); i++) {
+            resultList.add(articles.get(i));
+        }
+
+        //包装分页数据
+        Pageable pageable = PageRequest.of(pageNum, pageSize);
+        Page<Article> page = new PageImpl<>(resultList, pageable, articles.size());
+
+        return page;
     }
 }
 

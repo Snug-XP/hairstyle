@@ -53,7 +53,19 @@ public class HairstylistController {
 
     @ApiOperation(value = "发型师注册申请")
     @PostMapping("/hairstylist/register/apply")
-    public Map addHairstylist(HttpServletRequest request,@Validated Hairstylist hairstylist,
+    public Map addHairstylist(HttpServletRequest request,String openid,
+                              @RequestParam(value = "hairstylistName", required = false) String hairstylistName,
+                              @RequestParam(value = "personalPhotoUrl", required = false) String personalPhotoUrl,
+                              @RequestParam(value = "personalPhone", required = false) String personalPhone,
+                              @RequestParam(value = "personalProfile", required = false) String personalProfile,
+                              @RequestParam(value = "shopName", required = false) String shopName,
+                              @RequestParam(value = "province", required = false) String province,
+                              @RequestParam(value = "city", required = false) String city,
+                              @RequestParam(value = "district", required = false) String district,
+                              @RequestParam(value = "address", required = false) String address,
+                              @RequestParam(value = "attention", required = false) String attention,
+                              @RequestParam(value = "longitude", required = false) Double longitude,
+                              @RequestParam(value = "latitude", required = false) Double latitude,
                               @RequestParam(value = "timeList", required = false) List<String> timeList,
                               @RequestParam(value = "hairService", required = false) List<String> hairService,
                               @RequestParam(value = "description", required = false) List<String> description,
@@ -61,27 +73,48 @@ public class HairstylistController {
                               @RequestParam(value = "imageList", required = false) List<String> imageList) {
         Map map = new HashMap();
 
+
+        if (hairstylistName ==null||personalPhone==null||personalPhotoUrl ==null||personalProfile ==null||shopName ==null||province ==null||city ==null||district ==null||address ==null||longitude ==null||latitude ==null)
+        {
+            logger.info("请完整填写个人资料!(发型师注册申请)");
+            logger.info("传入的数据："+JSONObject.toJSON(request.getParameterMap())+"\n");
+            map.put("message","请完整填写个人资料！");
+            return map;
+        }
+
+        Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(openid);
         try {
-            if (hairstylistService.findHairstylistByOpenid(hairstylist.getOpenid()) != null) {
+            if (hairstylist != null) {
                 //之前有申请过
-                Hairstylist h = hairstylistService.findHairstylistByOpenid(hairstylist.getOpenid());
+
                 //之前申请失败了，删除记录
-                if (h.getApplyStatus() == -1) {
-                    logger.info("删除" + h.getHairstylistName() + "之前申请失败的记录,并重新申请\n");
-                    hairstylistService.delete(h.getId());
+                if (hairstylist.getApplyStatus() == -1) {
+                    logger.info("删除" + hairstylist.getHairstylistName() + "之前申请失败的记录,并重新申请\n");
+                    hairstylistService.delete(hairstylist.getId());
                 } else {
-                    logger.info(h.getHairstylistName() + "重复申请！！你的申请正在审核中或者已通过，无需重复提交！！");
+                    logger.info(hairstylist.getHairstylistName() + "重复申请！！你的申请正在审核中或者已通过，无需重复提交！！");
                     map.put("message", "你的申请正在审核中或者已通过，无需重复提交！！");
                     return map;
                 }
             }
 
-            Date date = new Date(System.currentTimeMillis());
+            hairstylist = new Hairstylist();
 
-            hairstylist.setCreateTime(date);//设置注册时间
-            hairstylist.setApplyStatus(0);//设置申请状态为申请中
-            hairstylist.setOrderSum(0);//根据自己的订单列表（中的已完成）数量进行校正,注册时没有订单，所以为0
-            hairstylist.setPoint(-1.0);
+            hairstylist.setOpenid(openid);
+            hairstylist.setHairstylistName(hairstylistName);
+            hairstylist.setPersonalPhotoUrl(personalPhotoUrl);
+            hairstylist.setPersonalPhone(personalPhone);
+            hairstylist.setShopName(shopName);
+            hairstylist.setProvince(province);
+            hairstylist.setCity(city);
+            hairstylist.setDistrict(district);
+            hairstylist.setAddress(address);
+            hairstylist.setLongitude(longitude);
+            hairstylist.setLatitude(latitude);
+
+            hairstylist.setAttention(attention);
+
+
             hairstylistService.save(hairstylist);
 
             hairstylist = hairstylistService.findHairstylistByOpenid(hairstylist.getOpenid());//重新从数据库获取刚进去的数据（主要为了取得id）
@@ -126,11 +159,11 @@ public class HairstylistController {
             }
         } catch (Exception e) {
             e.printStackTrace();
-            logger.info("传入的数据："+JSONObject.toJSON(request.getParameterMap()));
+            logger.info("传入的数据："+JSONObject.toJSON(request.getParameterMap())+"\n");
             map.put("error", "发型师提交申请失败！请检查输入数据（也有可能后端发生错误）");
             return map;
         }
-        logger.info("传入的数据："+JSONObject.toJSON(request.getParameterMap()));
+        logger.info("传入的数据："+JSONObject.toJSON(request.getParameterMap())+"\n");
         logger.info("id为" + hairstylist.getId() + "的发型师“" + hairstylist.getHairstylistName() + "”提交申请成功！");
 
         map.put("message", "发型师提交申请成功！");
@@ -170,7 +203,7 @@ public class HairstylistController {
 
     @ApiOperation(value = "发型师修改个人信息", notes = "权限：发型师本人")
     @PutMapping("/hairstylist")
-    public Map updateHairstylist(HttpServletRequest request, String myOpenid,
+    public Map updateHairstylist(HttpServletRequest request,String myOpenid,
                                  @RequestParam(value = "hairstylistName", required = false) String hairstylistName,
                                  @RequestParam(value = "personalPhotoUrl", required = false) String personalPhotoUrl,
                                  @RequestParam(value = "personalProfile", required = false) String personalProfile,
@@ -187,7 +220,7 @@ public class HairstylistController {
             Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
             if (hairstylist == null) {
                 logger.info("该发型师用户不存在（修改信息）！！");
-                logger.info("传入的数据："+JSONObject.toJSON(request.getParameterMap()));
+                logger.info("传入的数据："+JSONObject.toJSON(request.getParameterMap())+"\n");
 
                 map.put("error", "发型师用户不存在！！");
                 return map;
@@ -222,12 +255,12 @@ public class HairstylistController {
 
 
                 logger.info("发型师用户 " + hairstylist.getHairstylistName() + "（" + myOpenid + "）重新修改了基本信息");
-                logger.info("传入的数据："+JSONObject.toJSON(request.getParameterMap()));
+                logger.info("传入的数据："+JSONObject.toJSON(request.getParameterMap())+"\n");
                 map.put("message", "发型师信息修改成功！");
                 return map;
             } else {
                 logger.info("发型师信息修改失败！！（没有权限！！）");
-                logger.info("传入的数据："+JSONObject.toJSON(request.getParameterMap()));
+                logger.info("传入的数据："+JSONObject.toJSON(request.getParameterMap())+"\n");
                 map.put("error", "发型师信息修改失败！！（没有权限！！）");
                 return map;
             }
