@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.*;
@@ -38,7 +39,7 @@ public class UserFormidController {
 
     @ApiOperation(value = "添加用户的Formid")
     @PostMapping("/user/addUserFormid")
-    public Map addUserFormid(String myOpenid,String formid) {
+    public Map addUserFormid(@RequestParam String myOpenid,@RequestParam String formid) {
         Map map = new HashMap();
 
         User user = userService.findUserByOpenid(myOpenid);

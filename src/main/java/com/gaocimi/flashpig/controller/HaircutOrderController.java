@@ -47,7 +47,7 @@ public class HaircutOrderController {
 
     @ApiOperation(value = "获取一个时间段的预约列表(按预约时间倒序排序，若预约时间一致，按创建时间倒序)-用于“发型师-预约列表”页面", notes = "days的值表示获取几天前到现在的数据，days默认为0，表示只获取今天的订单,days=1表示获取昨天和今天的所有订单,days=-1表示获取今天之后的所有订单")
     @GetMapping("/hairstylist/getOrderList")
-    public Map getOrderList(String myOpenid,
+    public Map getOrderList(@RequestParam String myOpenid,
                             @RequestParam(defaultValue = "0", required = true) int days) {
         Map map = new HashMap();
         try {
@@ -173,7 +173,7 @@ public class HaircutOrderController {
 
     @ApiOperation(value = "获取当前的排号列表(按预约时间顺序排序，若预约时间一致，按订单创建时间顺序) - 用于“发型师-排号系统”页面")
     @GetMapping("/hairstylist/getWaitingOrder")
-    public Map getWaitingOrder(String myOpenid) {
+    public Map getWaitingOrder(@RequestParam String myOpenid) {
         Map map = new HashMap();
 
         //获取今天的所有订单(按时间倒序排序的)
@@ -194,7 +194,7 @@ public class HaircutOrderController {
 
     @ApiOperation(value = "下一位操作，如果有进行的订单，将进行中的订单状态设为已完成；通知下一位前来美发，并通知再后2位准备前往 - 用于“发型师-排号系统”页面的通知的“下一位”操作")
     @GetMapping("/hairstylist/nextWaitingOrder")
-    public Map nextWaitingOrder(String myOpenid) {
+    public Map nextWaitingOrder(@RequestParam String myOpenid) {
         Map map = new HashMap();
 
         map = getWaitingOrder(myOpenid);  //获取当前的排号列表
@@ -337,7 +337,7 @@ public class HaircutOrderController {
 
     @ApiOperation(value = "获取自己关于某个顾客的预约记录(按时间倒序排序)-用于“发型师-预约列表-预约记录”页面")
     @GetMapping("/hairstylist/getOrderRecordFromOneUser")
-    public Map getOrderRecordFromOneUser(String myOpenid, int userId) {
+    public Map getOrderRecordFromOneUser(@RequestParam String myOpenid, int userId) {
         Map map = new HashMap();
         try {
             Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
@@ -395,7 +395,7 @@ public class HaircutOrderController {
 
     @ApiOperation(value = "获取自己的运营数据（包括中数据和日报周报月报表格的所有数据）")
     @GetMapping("/hairstylist/getOperationalData")
-    public Map getOperationalData(String myOpenid) {
+    public Map getOperationalData(@RequestParam String myOpenid) {
         Map map = new HashMap();
         try {
             Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
@@ -422,7 +422,7 @@ public class HaircutOrderController {
 
     @ApiOperation(value = "普通用户提交预约订单")
     @PostMapping("/user/addHaircutOrder")
-    public Map addHaircutOrder(String myOpenid, String userName, String userPhone,
+    public Map addHaircutOrder(@RequestParam String myOpenid, String userName, String userPhone,
                                int hairstylistId, String bookTime, int serviceId) {
         Map map = new HashMap();
         try {
@@ -430,6 +430,11 @@ public class HaircutOrderController {
             HaircutOrder order = new HaircutOrder();
 
             User user = userService.findUserByOpenid(myOpenid);
+            if(user==null){
+                logger.info("openid为"+myOpenid+"的普通用户不存在！");
+                map.put("error", "无效的用户！！");
+                return map;
+            }
             Hairstylist hairstylist = hairstylistService.findHairstylistById(hairstylistId);
             HairService hairService = hairServiceService.findHairServiceById(serviceId);
 
@@ -491,13 +496,18 @@ public class HaircutOrderController {
 
     @ApiOperation(value = "普通用户获取自己的预约订单列表(分页展示)")
     @GetMapping("/user/getHaircutOrderList")
-    public Map getHaircutOrderList(String myOpenid,
+    public Map getHaircutOrderList(@RequestParam String myOpenid,
                                @RequestParam(name = "pageNum", defaultValue = "0") int pageNum,
                                @RequestParam(name = "pageSize", defaultValue = "10") int pageSize ) {
         Map map = new HashMap();
         try {
 
             User user = userService.findUserByOpenid(myOpenid);
+            if(user==null){
+                logger.info("openid为"+myOpenid+"的普通用户不存在！");
+                map.put("error", "无效的用户！！");
+                return map;
+            }
             List<HaircutOrder> tempOrderList = user.getHaircutOrderList();
             List<UserReservation> resultList = new ArrayList<>();
 
@@ -541,7 +551,6 @@ public class HaircutOrderController {
             map.put("page", page);
             return map;
         } catch (Exception e) {
-            logger.error(e.getMessage());
             logger.info("获取自己的预约列表失败！！（后端发生某些错误）");
             map.put("error", "获取我的预约列表失败！！（后端发生某些错误）");
             e.printStackTrace();
@@ -551,7 +560,7 @@ public class HaircutOrderController {
 
     @ApiOperation(value = "普通用户获取预约单详情")
     @PostMapping("/user/getHaircutOrder")
-    public Map addHaircutOrder(String myOpenid, int orderId) {
+    public Map addHaircutOrder(@RequestParam String myOpenid, int orderId) {
         Map map = new HashMap();
         try {
 
@@ -562,6 +571,11 @@ public class HaircutOrderController {
                 return map;
             }
             User user = userService.findUserByOpenid(myOpenid);
+            if(user==null){
+                logger.info("openid为"+myOpenid+"的普通用户不存在！");
+                map.put("error", "无效的用户！！");
+                return map;
+            }
             if( order.getUser().getId() != user.getId()){
                 logger.info("id为"+order.getId()+"的订单不是id为"+user.getId()+"的用户“"+user.getName()+"”的订单，无权查看");
                 map.put("error","该订单不是你的，无权操作！！");
@@ -580,7 +594,7 @@ public class HaircutOrderController {
 
     @ApiOperation(value = "普通用户给该订单的发型师评分")
     @PostMapping("/user/order/rate")
-    public Map rateThisOrder(String myOpenid, int orderId , double point) {
+    public Map rateThisOrder(@RequestParam String myOpenid, int orderId , double point) {
         Map map = new HashMap();
         try {
 
@@ -591,6 +605,11 @@ public class HaircutOrderController {
                 return map;
             }
             User user = userService.findUserByOpenid(myOpenid);
+            if(user==null){
+                logger.info("openid为"+myOpenid+"的普通用户不存在！");
+                map.put("error", "无效的用户！！");
+                return map;
+            }
             if( order.getUser().getId() != user.getId()){
                 logger.info("id为"+order.getId()+"的订单不是id为"+user.getId()+"的用户“"+user.getName()+"”的订单，无权评分");
                 map.put("error","该订单不是你的，无权操作！！");
@@ -648,7 +667,7 @@ public class HaircutOrderController {
 
     @ApiOperation(value = "分页获取所有订单列表", notes = "仅管理员有权限", produces = "application/json")
     @GetMapping("/haircutOrders/getAll")
-    public Map getHaircutOrdersPage(String myOpenid,
+    public Map getHaircutOrdersPage(@RequestParam String myOpenid,
                                     @RequestParam(name = "pageNum", defaultValue = "0") int pageNum,
                                     @RequestParam(name = "pageSize", defaultValue = "10") int pageSize) {
         Map map = new HashMap();

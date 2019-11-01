@@ -23,4 +23,6 @@ public interface HairstylistImageUrlService {
     public void delete(int id);
 
     public Page<HairstylistImageUrl> findAll(int pageNum, int pageSize);
+
+    HairstylistImageUrl findByImgUrl(String imgUrl);
 }

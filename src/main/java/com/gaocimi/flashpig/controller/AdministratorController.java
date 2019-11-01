@@ -42,7 +42,7 @@ class AdministratorController {
 
     @ApiOperation(value = "获取正在注册的发型师信息列表(分页展示)", notes = "仅管理员有权限", produces = "application/json")
     @GetMapping("/Administrator/hairstylist/getRegisterList")
-    public Map getRegisterList(String myOpenid,
+    public Map getRegisterList(@RequestParam String myOpenid,
                                @RequestParam(name = "pageNum", defaultValue = "0") int pageNum,
                                @RequestParam(name = "pageSize", defaultValue = "10") int pageSize) {
         Map map = new HashMap();
@@ -69,7 +69,7 @@ class AdministratorController {
 
     @ApiOperation(value = "同意或拒绝发型师的注册（decide=1表示同意，decide=-1表示不同意）", notes = "仅管理员有权限", produces = "application/json")
     @PostMapping("/Administrator/hairstylist/approveOrReject")
-    public Map approveOrReject(String myOpenid, int hairstylistId, int decide) {
+    public Map approveOrReject(@RequestParam String myOpenid, int hairstylistId, int decide) {
         Map map = new HashMap();
         try {
             Administrator administrator = administratorService.findAdministratorByOpenid(myOpenid);
@@ -120,7 +120,7 @@ class AdministratorController {
 
     @ApiOperation(value = "获取待审核的文章列表(分页展示)", notes = "仅管理员有权限", produces = "application/json")
     @GetMapping("/Administrator/article/getPendingList")
-    public Map getairstylistsPage(String myOpenid,
+    public Map getairstylistsPage(@RequestParam String myOpenid,
                                   @RequestParam(name = "pageNum", defaultValue = "0") int pageNum,
                                   @RequestParam(name = "pageSize", defaultValue = "10") int pageSize) {
         Map map = new HashMap();
@@ -147,7 +147,7 @@ class AdministratorController {
 
     @ApiOperation(value = "同意或拒绝发型文章的发表（decide=1表示同意，decide=-1表示不同意）", notes = "仅管理员有权限", produces = "application/json")
     @PostMapping("/Administrator/article/approveOrReject")
-    public Map approveOrRejectArticle(String myOpenid, int articleId, int decide) {
+    public Map approveOrRejectArticle(@RequestParam String myOpenid, int articleId, int decide) {
         Map map = new HashMap();
         try {
             Administrator administrator = administratorService.findAdministratorByOpenid(myOpenid);

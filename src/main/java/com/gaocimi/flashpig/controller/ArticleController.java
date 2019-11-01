@@ -47,7 +47,7 @@ public class ArticleController {
 
     @ApiOperation(value = "添加发型文章")
     @PostMapping("/hairstylist/addArticle")
-    public Map addArticle(String myOpenid, String title, String content,
+    public Map addArticle(@RequestParam String myOpenid, String title, String content,
                           @RequestParam(value = "tagList", required = false) List<String> tagList,
                           @RequestParam(value = "imgUrlList", required = false) List<String> imgUrlList) {
         Map map = new HashMap();
@@ -93,7 +93,7 @@ public class ArticleController {
 
     @ApiOperation(value = "删除发型文章", notes = "权限：仅文章的发布者或管理员")
     @DeleteMapping("/article")
-    public Map deleteArticle(String myOpenid,int articleId) {
+    public Map deleteArticle(@RequestParam String myOpenid,int articleId) {
 
         Map map = new HashMap();
         try {
@@ -133,7 +133,7 @@ public class ArticleController {
 
     @ApiOperation(value = "修改发型文章", notes = "权限：仅文章的发布者")
     @PutMapping("/hairstylist/updateArticle")
-    public Map updateArticle(String myOpenid, int articleId, String title, String content,
+    public Map updateArticle(@RequestParam String myOpenid, int articleId, String title, String content,
                              @RequestParam(value = "tagList", required = false) List<String> tagList,
                              @RequestParam(value = "imgUrlList", required = false) List<String> imgUrlList) {
         Map map = new HashMap();
@@ -195,7 +195,7 @@ public class ArticleController {
 
     @ApiOperation(value = "获取自己的发型文章列表(分页展示)", notes = "权限：发型师(管理员会有一个发型师记录)")
     @GetMapping("/hairstylist/getMyArticleList")
-    public Map getMyArticleList(String myOpenid,
+    public Map getMyArticleList(@RequestParam String myOpenid,
                                 @RequestParam(name = "pageNum", defaultValue = "0") int pageNum,
                                 @RequestParam(name = "pageSize", defaultValue = "10") int pageSize) {
 
@@ -269,7 +269,7 @@ public class ArticleController {
 
     @ApiOperation(value = "收藏该文章")
     @PostMapping("/article/addToCollection")
-    public Map addToCollection(String myOpenid, int articleId) {
+    public Map addToCollection(@RequestParam String myOpenid, int articleId) {
         Map map = new HashMap();
         try {
             User user = userService.findUserByOpenid(myOpenid);
@@ -306,7 +306,7 @@ public class ArticleController {
 
     @ApiOperation(value = "将某文章加入某专辑", notes = "权限：仅管理员")
     @PostMapping("/article/addToAlbum")
-    public Map addToAlbum(String myOpenid, int articleId, int albumId) {
+    public Map addToAlbum(@RequestParam String myOpenid, int articleId, int albumId) {
         Map map = new HashMap();
         try {
             Administrator administrator = administratorService.findAdministratorByOpenid(myOpenid);
@@ -354,13 +354,18 @@ public class ArticleController {
 
     @ApiOperation(value = "普通用户分页获取自己收藏的文章列表")
     @GetMapping("/article/getMyCollection")
-    public Map getMyCollectionByPage(String myOpenid,
+    public Map getMyCollectionByPage(@RequestParam String myOpenid,
                                      @RequestParam(name = "pageNum", defaultValue = "0") int pageNum,
                                      @RequestParam(name = "pageSize", defaultValue = "10") int pageSize) {
         Map map = new HashMap();
         try {
 
             User user = userService.findUserByOpenid(myOpenid);
+            if (user == null) {
+                logger.info("（" + myOpenid + "）该用户不存在！");
+                map.put("error", "无效的用户！！");
+                return map;
+            }
             List<UserToArticle> tempArticleList = user.getArticleRecordList();
             List<Article> resultArticleList = new ArrayList<>();
 

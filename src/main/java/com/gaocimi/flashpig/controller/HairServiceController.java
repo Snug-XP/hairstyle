@@ -34,7 +34,7 @@ public class HairServiceController {
 
     @ApiOperation(value = "添加一个发型服务")
     @PostMapping("/hairstylist/addHairService")
-    public Map addHairService(String myOpenid, String serviceName, String description, Double price) {
+    public Map addHairService(@RequestParam String myOpenid, String serviceName, String description, Double price) {
 
         Map map = new HashMap();
         try {
@@ -68,7 +68,7 @@ public class HairServiceController {
 
     @ApiOperation(value = "根据服务项目id，修改个人的服务项目")
     @PostMapping("/hairstylist/editHairService")
-    public Map editHairService(String myOpenid, int serviceId, String serviceName, String description, Double price) {
+    public Map editHairService(@RequestParam String myOpenid, int serviceId, String serviceName, String description, Double price) {
 
         Map map = new HashMap();
         try {
@@ -135,7 +135,7 @@ public class HairServiceController {
 
     @ApiOperation(value = "获取自己的服务列表")
     @GetMapping("/hairstylist/getServiceList")
-    public Map getServiceList(String myOpenid) {
+    public Map getServiceList(@RequestParam String myOpenid) {
         Map map = new HashMap();
         try {
             Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
@@ -158,7 +158,7 @@ public class HairServiceController {
 
     @ApiOperation(value = "根据服务项目id,删除个人服务项目")
     @DeleteMapping("/hairstylist/deleteService")
-    public Map deleteService(String myOpenid, int serviceId) {
+    public Map deleteService(@RequestParam String myOpenid, int serviceId) {
         Map map = new HashMap();
         try {
             Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
@@ -195,7 +195,7 @@ public class HairServiceController {
 
 
     /**根据发型师openid，同时修改全部的服务项目列表（目前没用）*/
-    public Map deleteServiceByHairstylistId(String myOpenid,@RequestParam(value = "hairService", required = false) List<String> hairService,
+    public Map deleteServiceByHairstylistId(@RequestParam String myOpenid,@RequestParam(value = "hairService", required = false) List<String> hairService,
                                              @RequestParam(value = "description", required = false) List<String> description,
                                              @RequestParam(value = "price", required = false) List<Double> price){
 
