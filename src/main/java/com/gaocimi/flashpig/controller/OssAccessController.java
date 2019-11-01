@@ -151,7 +151,7 @@ public class OssAccessController {
 
     @ApiOperation(value = "删除文件（仅允许数据库中存在的用户、发型师和管理员删除文件）...记得关闭url接口", notes = "文件url格式不包括域名")
     @DeleteMapping("/oss/deleteObject")
-    public Map deleteObject(@RequestParam String myOpenid, String imgUrl) {
+    public Map deleteObject(@RequestParam String myOpenid,@RequestParam String imgUrl) {
         Map map = new HashMap();
 
         try {
@@ -192,7 +192,7 @@ public class OssAccessController {
 
     @ApiOperation(value = "验证对象是否存在")
     @PostMapping("/oss/verifyObjectExist")
-    public Map verifyExist(String imgUrl) {
+    public Map verifyExist(@RequestParam String imgUrl) {
         Map map = new HashMap();
         try {
             map.put("result", client.doesObjectExist(properties.getBucket(), imgUrl));

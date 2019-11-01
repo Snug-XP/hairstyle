@@ -34,12 +34,12 @@ public class HairServiceController {
 
     @ApiOperation(value = "添加一个发型服务")
     @PostMapping("/hairstylist/addHairService")
-    public Map addHairService(@RequestParam String myOpenid, String serviceName, String description, Double price) {
+    public Map addHairService(@RequestParam String myOpenid, @RequestParam String serviceName, @RequestParam String description, @RequestParam Double price) {
 
         Map map = new HashMap();
         try {
             Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
-            if ( hairstylist == null || hairstylist.getApplyStatus() != 1) {
+            if (hairstylist == null || hairstylist.getApplyStatus() != 1) {
                 logger.info("非发型师用户操作！！");
                 map.put("error", "对不起，你还不是发型师用户，无权操作！！");
                 return map;
@@ -68,12 +68,12 @@ public class HairServiceController {
 
     @ApiOperation(value = "根据服务项目id，修改个人的服务项目")
     @PostMapping("/hairstylist/editHairService")
-    public Map editHairService(@RequestParam String myOpenid, int serviceId, String serviceName, String description, Double price) {
+    public Map editHairService(@RequestParam String myOpenid, @RequestParam Integer serviceId, @RequestParam String serviceName, @RequestParam String description, @RequestParam Double price) {
 
         Map map = new HashMap();
         try {
             Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
-            if ( hairstylist == null || hairstylist.getApplyStatus() != 1) {
+            if (hairstylist == null || hairstylist.getApplyStatus() != 1) {
                 logger.info("非发型师用户操作！！");
                 map.put("error", "对不起，你还不是发型师用户，无权操作！！");
                 return map;
@@ -113,7 +113,7 @@ public class HairServiceController {
 
     @ApiOperation(value = "根据发型师id，获取发型师的服务列表")
     @GetMapping("/getHairstylistServiceList")
-    public Map getHairstylistServiceList(int hairstylistId) {
+    public Map getHairstylistServiceList(@RequestParam Integer hairstylistId) {
         Map map = new HashMap();
         try {
             Hairstylist hairstylist = hairstylistService.findHairstylistById(hairstylistId);
@@ -139,7 +139,7 @@ public class HairServiceController {
         Map map = new HashMap();
         try {
             Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
-            if ( hairstylist == null || hairstylist.getApplyStatus() != 1) {
+            if (hairstylist == null || hairstylist.getApplyStatus() != 1) {
                 logger.info("非发型师用户操作！！");
                 map.put("error", "对不起，你还不是发型师用户，无权操作！！");
                 return map;
@@ -158,11 +158,11 @@ public class HairServiceController {
 
     @ApiOperation(value = "根据服务项目id,删除个人服务项目")
     @DeleteMapping("/hairstylist/deleteService")
-    public Map deleteService(@RequestParam String myOpenid, int serviceId) {
+    public Map deleteService(@RequestParam String myOpenid,  @RequestParam Integer serviceId) {
         Map map = new HashMap();
         try {
             Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
-            if ( hairstylist == null || hairstylist.getApplyStatus() != 1) {
+            if (hairstylist == null || hairstylist.getApplyStatus() != 1) {
                 logger.info("非发型师用户操作！！");
                 map.put("error", "非发型师用户操作！！");
                 return map;
@@ -194,12 +194,14 @@ public class HairServiceController {
     }
 
 
-    /**根据发型师openid，同时修改全部的服务项目列表（目前没用）*/
-    public Map deleteServiceByHairstylistId(@RequestParam String myOpenid,@RequestParam(value = "hairService", required = false) List<String> hairService,
-                                             @RequestParam(value = "description", required = false) List<String> description,
-                                             @RequestParam(value = "price", required = false) List<Double> price){
+    /**
+     * 根据发型师openid，同时修改全部的服务项目列表（目前没用）
+     */
+    public Map deleteServiceByHairstylistId(@RequestParam String myOpenid, @RequestParam(value = "hairService", required = false) List<String> hairService,
+                                            @RequestParam(value = "description", required = false) List<String> description,
+                                            @RequestParam(value = "price", required = false) List<Double> price) {
 
-        Map map =new HashMap();
+        Map map = new HashMap();
         Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
         //下面保存该理发师的服务项目
         //先删除原来对应的的服务项目
@@ -229,7 +231,7 @@ public class HairServiceController {
             logger.info("hairService有" + serviceSize + "个： " + hairService);
             map.put("message", "同时修改全部服务项目成功！");
             return map;
-        }else{
+        } else {
             //没有新的服务项目传入，说明把原有服务项目都删了
             logger.info("删除全部服务项目");
             map.put("message", "删除全部服务项目成功！");

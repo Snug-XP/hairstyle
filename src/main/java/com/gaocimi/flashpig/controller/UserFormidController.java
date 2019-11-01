@@ -93,7 +93,7 @@ public class UserFormidController {
 
     @ApiOperation(value = "测试Formid列表排序")
     @GetMapping("/formidTest")
-    public Map test(int orderId) {
+    public Map test(@RequestParam Integer orderId) {
 
         Map map = new HashMap();
         List<UserFormid> formidList = haircutOrderService.findHaircutOrderById(orderId).user.getUserFormidList();

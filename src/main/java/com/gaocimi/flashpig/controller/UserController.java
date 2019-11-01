@@ -96,7 +96,7 @@ public class UserController {
 
     @ApiOperation(value = "收藏该发型师")
     @PostMapping("/user/addHairstylistToCollection")
-    public Map addToCollection( @RequestParam String myOpenid,int hairstylistId){
+    public Map addToCollection( @RequestParam String myOpenid,@RequestParam Integer hairstylistId){
         Map map = new HashMap();
         try{
             User user = userService.findUserByOpenid(myOpenid);
