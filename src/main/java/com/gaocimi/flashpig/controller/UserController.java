@@ -40,13 +40,18 @@ public class UserController {
 
     @ApiOperation(value = "普通用户分页获取自己收藏的发型师列表")
     @GetMapping("/user/getMyHairstylists")
-    public Map getMyCollectionByPage(String myOpenid,
+    public Map getMyCollectionByPage(@RequestParam String myOpenid,
                                      @RequestParam(name = "pageNum", defaultValue = "0") int pageNum,
                                      @RequestParam(name = "pageSize", defaultValue = "10") int pageSize ) {
         Map map = new HashMap();
         try {
 
             User user = userService.findUserByOpenid(myOpenid);
+            if(user==null){
+                logger.info("openid为"+myOpenid+"的普通用户不存在！");
+                map.put("error", "无效的用户！！");
+                return map;
+            }
             List<UserToHairstylist> tempRecordList= user.hairstylistRecordList;
             List<HairstylistInfo> resultList = new ArrayList<>();
 
@@ -91,13 +96,13 @@ public class UserController {
 
     @ApiOperation(value = "收藏该发型师")
     @PostMapping("/user/addHairstylistToCollection")
-    public Map addToCollection( String myOpenid,int hairstylistId){
+    public Map addToCollection( @RequestParam String myOpenid,@RequestParam Integer hairstylistId){
         Map map = new HashMap();
         try{
             User user = userService.findUserByOpenid(myOpenid);
             Hairstylist hairstylist = hairstylistService.findHairstylistById(hairstylistId);
             if(user==null){
-                logger.info("（"+myOpenid+"）该用户不存在！");
+                logger.info("openid为"+myOpenid+"的普通用户不存在！");
                 map.put("error","无效的用户！！");
                 return map;
             }

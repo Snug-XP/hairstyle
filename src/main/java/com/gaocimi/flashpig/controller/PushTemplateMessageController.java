@@ -8,11 +8,13 @@ import com.gaocimi.flashpig.service.UserFormidService;
 import com.gaocimi.flashpig.service.UserService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.models.auth.In;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.*;
@@ -48,7 +50,7 @@ public class PushTemplateMessageController {
 
     @ApiOperation(value = "根据订单id，推送模板消息-预约成功的通知（...之后记得关闭url访问）")
     @PostMapping("/hairstylist/pushSuccessMessage")
-    public Map pushSuccessMessage(int orderId) {
+    public Map pushSuccessMessage(@RequestParam Integer orderId) {
 
         Map map = new HashMap();
 
@@ -87,7 +89,7 @@ public class PushTemplateMessageController {
 
     @ApiOperation(value = "根据订单id，推送模板消息-准备前往（...之后记得关闭url访问）")
     @PostMapping("/hairstylist/pushComingMessage")
-    public Map pushComingMessage(int orderId , int remainingNum ) {
+    public Map pushComingMessage(@RequestParam Integer orderId , @RequestParam Integer remainingNum ) {
 
         Map map = new HashMap();
 
@@ -131,7 +133,7 @@ public class PushTemplateMessageController {
 
     @ApiOperation(value = "根据订单id，推送模板消息-订单已完成（...之后记得关闭url访问）")
     @PostMapping("/hairstylist/pushCompletedMessage")
-    public Map pushCompletedMessage(int orderId) {
+    public Map pushCompletedMessage(@RequestParam Integer orderId) {
         Map map = new HashMap();
 
         //不同模板要换的地方，还有模版id哦
@@ -174,7 +176,7 @@ public class PushTemplateMessageController {
      * @param orderId 订单id
      * @return "通知前往"消息模版数据列表
      */
-    private List<WxMaTemplateData> getComingTemplateDataList(int orderId, int remainingNum) {
+    private List<WxMaTemplateData> getComingTemplateDataList(@RequestParam Integer orderId, @RequestParam Integer remainingNum) {
 
         String tipsStr=null ;
         switch (remainingNum){
@@ -220,7 +222,7 @@ public class PushTemplateMessageController {
      * @param orderId 订单id
      * @return "预约成功"消息模版数据列表
      */
-    public List<WxMaTemplateData> getSuccessTemplateDataList(int orderId) {
+    public List<WxMaTemplateData> getSuccessTemplateDataList(@RequestParam Integer orderId) {
 
         //这边必须从数据库获取一遍，不能直接传一个HaircutOrder实体类，因为懒加载原因可能不包含发型师的数据
         HaircutOrder order = haircutOrderService.findHaircutOrderById(orderId);
@@ -255,7 +257,7 @@ public class PushTemplateMessageController {
      * @param orderId 订单id
      * @return "订单完成"消息模版数据列表
      */
-    public List<WxMaTemplateData> getCompetedTemplateDataList(int orderId) {
+    public List<WxMaTemplateData> getCompetedTemplateDataList(@RequestParam Integer orderId) {
 
         //这边必须从数据库获取一遍，不能直接传一个HaircutOrder实体类，因为懒加载原因可能不包含发型师的数据
         HaircutOrder order = haircutOrderService.findHaircutOrderById(orderId);

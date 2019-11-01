@@ -39,7 +39,7 @@ public class User {
     private String phoneNum;
 
     /**用户提交过的订单列表； 定义该User实体所有关联的HaircutOrder实体； 指定mappedBy属性表明该User实体不控制关联关系*/
-    @OneToMany(targetEntity = HaircutOrder.class, mappedBy = "user",fetch = FetchType.LAZY)
+    @OneToMany(targetEntity = HaircutOrder.class, mappedBy = "user")
     public List<HaircutOrder> haircutOrderList;
 
 
@@ -57,9 +57,13 @@ public class User {
 
 
     /**用户提交过的Formid列表； 定义该User实体所有关联的UserFormid实体； 指定mappedBy属性表明该User实体不控制关联关系*/
-    @OneToMany(targetEntity = UserFormid.class, mappedBy = "user",fetch = FetchType.LAZY)
+    @OneToMany(targetEntity = UserFormid.class, mappedBy = "user")
     public List<UserFormid> userFormidList;
 
+
+    public User() {
+        super();
+    }
 
     /**
      * 判断该用户是否收藏了发型师

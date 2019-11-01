@@ -13,4 +13,6 @@ public interface HairstylistImageUrlRepository extends JpaRepository<Hairstylist
 
     //分页
     public Page<HairstylistImageUrl> findAll(Pageable pageable);
+
+    HairstylistImageUrl findByImageUrl(String imgUrl);
 }

@@ -49,7 +49,7 @@ public class OssAccessController {
     @ApiOperation(value = "获取oss直传所需的信息（仅允许数据库中存在的用户、发型师和管理员获取oss签名）", notes = "[采用JavaScript客户端直接签名](https://help.aliyun.com/document_detail/31925.html?spm=a2c4g.11186623.2.11.16076e284W2rpY#concept-frd-4gy-5db)" +
             "时，AccessKeyID和AcessKeySecret会暴露在前端页面，因此存在严重的安全隐患。因此，OSS提供了服务端签名后直传的方案")
     @GetMapping("/policy/getOssInfo")
-    public Map getOssInfo(String myOpenid) {
+    public Map getOssInfo(@RequestParam String myOpenid) {
 
         Map map = new HashMap();
         String dir = null;//设置当前用户上传指定的前缀，必须以斜线结尾,类似目录（OSS不存在多级目录，但是可以模拟）
@@ -151,7 +151,7 @@ public class OssAccessController {
 
     @ApiOperation(value = "删除文件（仅允许数据库中存在的用户、发型师和管理员删除文件）...记得关闭url接口", notes = "文件url格式不包括域名")
     @DeleteMapping("/oss/deleteObject")
-    public Map deleteObject(String myOpenid, String imgUrl) {
+    public Map deleteObject(@RequestParam String myOpenid,@RequestParam String imgUrl) {
         Map map = new HashMap();
 
         try {
@@ -192,7 +192,7 @@ public class OssAccessController {
 
     @ApiOperation(value = "验证对象是否存在")
     @PostMapping("/oss/verifyObjectExist")
-    public Map verifyExist(String imgUrl) {
+    public Map verifyExist(@RequestParam String imgUrl) {
         Map map = new HashMap();
         try {
             map.put("result", client.doesObjectExist(properties.getBucket(), imgUrl));

@@ -39,7 +39,7 @@ public class AlbumController {
 
     @ApiOperation(value = "管理员创建专辑")
     @PostMapping("/administrator/addAlbum")
-    public Map addAlbum(String myOpenid ,String title, String introduction,String imgUrl) {
+    public Map addAlbum(@RequestParam String myOpenid ,@RequestParam String title,@RequestParam String introduction,@RequestParam String imgUrl) {
         Map map = new HashMap();
         try {
             Administrator administrator = administratorService.findAdministratorByOpenid(myOpenid);
@@ -85,8 +85,8 @@ public class AlbumController {
 
 
     @ApiOperation(value = "获取单个专辑信息", produces = "application/json")
-    @GetMapping("/album/getOne/{albumId}")
-    public Album getOne(@PathVariable("albumId") Integer albumId) {
+    @GetMapping("/album/getOne")
+    public Album getOne(@RequestParam Integer albumId) {
         return albumService.findAlbumById(albumId);
     }
 
@@ -104,7 +104,7 @@ public class AlbumController {
 
     @ApiOperation(value = "管理员分页获取自己创建的专辑列表")
     @GetMapping("/album/getMyAlbum")
-    public Map getMyCollectionByPage(String myOpenid,
+    public Map getMyCollectionByPage(@RequestParam String myOpenid,
                                      @RequestParam(name = "pageNum", defaultValue = "0") int pageNum,
                                      @RequestParam(name = "pageSize", defaultValue = "10") int pageSize) {
         Map map = new HashMap();

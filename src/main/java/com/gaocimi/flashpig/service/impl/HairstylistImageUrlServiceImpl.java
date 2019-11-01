@@ -37,6 +37,11 @@ public class HairstylistImageUrlServiceImpl implements HairstylistImageUrlServic
     }
 
     @Override
+    public HairstylistImageUrl findByImgUrl(String imgUrl){
+        return hairstylistImageUrlRepository.findByImageUrl(imgUrl);
+    }
+
+    @Override
     public void save(HairstylistImageUrl hairstylistImageUrl) {
         hairstylistImageUrlRepository.save(hairstylistImageUrl);
     }

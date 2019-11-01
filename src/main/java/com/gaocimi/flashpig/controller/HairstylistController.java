@@ -53,7 +53,7 @@ public class HairstylistController {
 
     @ApiOperation(value = "发型师注册申请")
     @PostMapping("/hairstylist/register/apply")
-    public Map addHairstylist(HttpServletRequest request,String openid,
+    public Map addHairstylist(HttpServletRequest request,@RequestParam String openid,
                               @RequestParam(value = "hairstylistName", required = false) String hairstylistName,
                               @RequestParam(value = "personalPhotoUrl", required = false) String personalPhotoUrl,
                               @RequestParam(value = "personalPhone", required = false) String personalPhone,
@@ -150,12 +150,16 @@ public class HairstylistController {
             if (imageList != null) {
                 int imageSize = imageList.size();
                 for (int i = 0; i < imageSize; i++) {
+                    if(hairstylistImageUrlService.findByImgUrl(imageList.get(i))!=null){
+                        logger.info("存在相同的个人作品图片，本次图片不上传");
+                        continue;
+                    }
                     HairstylistImageUrl hairstylistImageUrl = new HairstylistImageUrl();
                     hairstylistImageUrl.setHairstylist(hairstylist);
                     hairstylistImageUrl.setImageUrl(imageList.get(i));
                     hairstylistImageUrlService.save(hairstylistImageUrl);
                 }
-                logger.info("imageList有" + imageSize + "个： " + imageList);
+                logger.info("imageList有" + imageSize + "(实际上还要减去重复个数)个： " + imageList);
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -172,7 +176,7 @@ public class HairstylistController {
 
     @ApiOperation(value = "根据发型师id，删除发型师", notes = "权限：发型师本人或管理员")
     @DeleteMapping("/hairstylist")
-    public Map deleteHairstylist(String myOpenid, Integer hairstylistId) {
+    public Map deleteHairstylist(@RequestParam String myOpenid,@RequestParam Integer hairstylistId) {
         Map map = new HashMap();
         try {
             if (hairstylistService.findHairstylistById(hairstylistId) == null) {
@@ -203,7 +207,7 @@ public class HairstylistController {
 
     @ApiOperation(value = "发型师修改个人信息", notes = "权限：发型师本人")
     @PutMapping("/hairstylist")
-    public Map updateHairstylist(HttpServletRequest request,String myOpenid,
+    public Map updateHairstylist(HttpServletRequest request,@RequestParam String myOpenid,
                                  @RequestParam(value = "hairstylistName", required = false) String hairstylistName,
                                  @RequestParam(value = "personalPhotoUrl", required = false) String personalPhotoUrl,
                                  @RequestParam(value = "personalProfile", required = false) String personalProfile,
@@ -276,7 +280,7 @@ public class HairstylistController {
 
     @ApiOperation(value = "根据发型师openid,获取单个发型师信息（包括总预约人数和今日预约人数）- 用于发型师首页", produces = "application/json")
     @GetMapping("/hairstylist")
-    public Map getOne(String myOpenid) {
+    public Map getOne(@RequestParam String myOpenid) {
         Map map = new HashMap();
         try {
             Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
@@ -298,7 +302,7 @@ public class HairstylistController {
 
     @ApiOperation(value = "根据发型师id(不是openid),获取单个发型师信息（包括总预约人数和今日预约人数）", produces = "application/json")
     @GetMapping("/getHairstylistById")
-    public Map getOneById(int hairstylistId) {
+    public Map getOneById(@RequestParam Integer hairstylistId) {
         Map map = new HashMap();
         try {
             Hairstylist hairstylist = hairstylistService.findHairstylistById(hairstylistId);
@@ -317,7 +321,7 @@ public class HairstylistController {
 
     @ApiOperation(value = "分页获取所有发型师列表", notes = "仅管理员有权限", produces = "application/json")
     @GetMapping("/hairstylists/getAll")
-    public Map getairstylistsPage(String myOpenid,
+    public Map getairstylistsPage(@RequestParam String myOpenid,
                                   @RequestParam(name = "pageNum", defaultValue = "0") int pageNum,
                                   @RequestParam(name = "pageSize", defaultValue = "10") int pageSize) {
         Map map = new HashMap();
@@ -343,7 +347,7 @@ public class HairstylistController {
 
     @ApiOperation(value = "发型师设置可预约时间")
     @PostMapping("/hairstylist/setTime")
-    public Map setTime(String myOpenid,
+    public Map setTime(@RequestParam String myOpenid,
                        @RequestParam(value = "timeList", required = false) List<String> timeList) {
         Map map = new HashMap();
         try {
@@ -378,7 +382,7 @@ public class HairstylistController {
 
     @ApiOperation(value = "根据发型师id，获取发型师的可预约时间")
     @GetMapping("/getHairstylistTime")
-    public Map getHairstylistTime(int hairstylistId) {
+    public Map getHairstylistTime(@RequestParam Integer hairstylistId) {
         Map map = new HashMap();
         try {
             Hairstylist hairstylist = hairstylistService.findHairstylistById(hairstylistId);
@@ -400,7 +404,7 @@ public class HairstylistController {
 
     @ApiOperation(value = "根据openid，获取发型师的可预约时间")
     @GetMapping("/hairstylist/getTime")
-    public Map getTime(String myOpenid) {
+    public Map getTime(@RequestParam String myOpenid) {
         Map map = new HashMap();
         try {
             Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
@@ -438,7 +442,7 @@ public class HairstylistController {
 
     @ApiOperation(value = "获取个人作品图片url列表")
     @GetMapping("/hairstylist/getImageUrlList")
-    public Map getImageUrlList(String myOpenid) {
+    public Map getImageUrlList(@RequestParam String myOpenid) {
         Map map = new HashMap();
         try {
             Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
@@ -461,7 +465,8 @@ public class HairstylistController {
 
     @ApiOperation(value = "添加个人作品图片url列表")
     @PostMapping("/hairstylist/addImageUrlList")
-    public Map addImageUrlList(String myOpenid, @RequestParam(value = "imageList", required = false) List<String> imageList) {
+    public Map addImageUrlList(@RequestParam String myOpenid,
+                               @RequestParam(value = "imageList", required = false) List<String> imageList) {
         Map map = new HashMap();
         try {
             Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
@@ -474,12 +479,16 @@ public class HairstylistController {
                 if (imageList != null) {
                     int imageSize = imageList.size();
                     for (int i = 0; i < imageSize; i++) {
+                        if(hairstylistImageUrlService.findByImgUrl(imageList.get(i))!=null){
+                            logger.info("存在相同的个人作品图片，本次图片不上传");
+                            continue;
+                        }
                         HairstylistImageUrl hairstylistImageUrl = new HairstylistImageUrl();
                         hairstylistImageUrl.setHairstylist(hairstylist);
                         hairstylistImageUrl.setImageUrl(imageList.get(i));
                         hairstylistImageUrlService.save(hairstylistImageUrl);
                     }
-                    logger.info("发型师用户 " + hairstylist.getHairstylistName() + "（" + myOpenid + "）保存了" + imageSize + "张个人照片图片： " + imageList);
+                    logger.info("发型师用户 " + hairstylist.getHairstylistName() + "（" + myOpenid + "）保存了" + imageSize + "(实际上还要减去重复个数)张个人照片图片： " + imageList);
                     map.put("messgae", "保存成功！");
                 } else {
                     map.put("error", "请选择图片！！");
@@ -497,7 +506,7 @@ public class HairstylistController {
 
     @ApiOperation(value = "根据图片对应id,删除个人作品图片url")
     @DeleteMapping("/hairstylist/deleteImageUrlList")
-    public Map deleteImageUrlList(String myOpenid, int id) {
+    public Map deleteImageUrlList(@RequestParam String myOpenid,@RequestParam Integer id) {
         Map map = new HashMap();
         try {
             Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
@@ -535,7 +544,7 @@ public class HairstylistController {
 
     @ApiOperation(value = "获取个人的普通顾客预约数情况列表（降序排序） -  用于“发型师-数据中心-顾客列表”")
     @GetMapping("/hairstylist/getOrdinaryCustomerList")
-    public Map getOrdinaryCustomerList(String myOpenid) {
+    public Map getOrdinaryCustomerList(@RequestParam String myOpenid) {
         Map map = new HashMap();
         try {
             Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
@@ -582,7 +591,7 @@ public class HairstylistController {
 
     @ApiOperation(value = "获取个人的忠实（粉丝）顾客预约数情况列表（降序排序）  -  用于“发型师-数据中心-顾客列表”页面")
     @GetMapping("/hairstylist/getLoyalCustomerList")
-    public Map getLoyalCustomerList(String myOpenid) {
+    public Map getLoyalCustomerList(@RequestParam String myOpenid) {
         Map map = new HashMap();
         try {
             Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
@@ -628,7 +637,7 @@ public class HairstylistController {
 
     @ApiOperation(value = "获取个人的所有顾客预约数情况列表（降序排序）  -  用于“发型师-数据中心-顾客列表”")
     @GetMapping("/hairstylist/getCustomerList")
-    public Map getCustomerList(String myOpenid) {
+    public Map getCustomerList(@RequestParam String myOpenid) {
         Map map = new HashMap();
         try {
             Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
@@ -691,7 +700,7 @@ public class HairstylistController {
 
     @ApiOperation(value = "获取店内排行 - 全部")
     @GetMapping("/hairstylist/getInStoreRanking/all")
-    public Map getInStoreRankingAll(String myOpenid) {
+    public Map getInStoreRankingAll(@RequestParam String myOpenid) {
         Map map = new HashMap();
         try {
             Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
@@ -738,7 +747,7 @@ public class HairstylistController {
 
     @ApiOperation(value = "获取店内排行 - 今天")
     @GetMapping("/hairstylist/getInStoreRanking/today")
-    public Map getInStoreRankingToday(String myOpenid) {
+    public Map getInStoreRankingToday(@RequestParam String myOpenid) {
         Map map = new HashMap();
         try {
             Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
@@ -785,7 +794,7 @@ public class HairstylistController {
 
     @ApiOperation(value = "获取店内排行 - 本月")
     @GetMapping("/hairstylist/getInStoreRanking/month")
-    public Map getInStoreRankingMonth(String myOpenid) {
+    public Map getInStoreRankingMonth(@RequestParam String myOpenid) {
         Map map = new HashMap();
         try {
             Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
@@ -832,7 +841,7 @@ public class HairstylistController {
 
     @ApiOperation(value = "获取区域排行 - 全部")
     @GetMapping("/hairstylist/getRegionalRanking/all")
-    public Map getRegionalRankingAll(String myOpenid,
+    public Map getRegionalRankingAll(@RequestParam String myOpenid,
                                      @RequestParam(name = "pageNum", defaultValue = "0") int pageNum,
                                      @RequestParam(name = "pageSize", defaultValue = "10") int pageSize) {
         Map map = new HashMap();
@@ -893,7 +902,7 @@ public class HairstylistController {
 
     @ApiOperation(value = "获取区域排行 - 今天")
     @GetMapping("/hairstylist/getRegionalRanking/today")
-    public Map getRegionalRankingToday(String myOpenid,
+    public Map getRegionalRankingToday(@RequestParam String myOpenid,
                                        @RequestParam(name = "pageNum", defaultValue = "0") int pageNum,
                                        @RequestParam(name = "pageSize", defaultValue = "10") int pageSize) {
         Map map = new HashMap();
@@ -954,7 +963,7 @@ public class HairstylistController {
 
     @ApiOperation(value = "获取区域排行 - 本月")
     @GetMapping("/hairstylist/getRegionalRanking/month")
-    public Map getRegionalRankingMonth(String myOpenid,
+    public Map getRegionalRankingMonth(@RequestParam String myOpenid,
                                        @RequestParam(name = "pageNum", defaultValue = "0") int pageNum,
                                        @RequestParam(name = "pageSize", defaultValue = "10") int pageSize) {
         Map map = new HashMap();
@@ -1016,7 +1025,7 @@ public class HairstylistController {
 
 //    @ApiOperation(value = "获取店内排行")
 //    @GetMapping("/hairstylist/getInStoreRanking")
-//    public Map getInStoreRanking( String myOpenid) {
+//    public Map getInStoreRanking( @RequestParam String myOpenid) {
 //        Map map = new HashMap();
 //        try {
 //            Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
