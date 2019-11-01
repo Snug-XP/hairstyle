@@ -147,7 +147,7 @@ class AdministratorController {
 
     @ApiOperation(value = "同意或拒绝发型文章的发表（decide=1表示同意，decide=-1表示不同意）", notes = "仅管理员有权限", produces = "application/json")
     @PostMapping("/Administrator/article/approveOrReject")
-    public Map approveOrRejectArticle(@RequestParam String myOpenid, int articleId, int decide) {
+    public Map approveOrRejectArticle(@RequestParam String myOpenid, @RequestParam Integer articleId, @RequestParam Integer decide) {
         Map map = new HashMap();
         try {
             Administrator administrator = administratorService.findAdministratorByOpenid(myOpenid);

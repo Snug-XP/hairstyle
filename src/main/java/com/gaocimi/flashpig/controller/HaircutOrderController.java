@@ -277,7 +277,7 @@ public class HaircutOrderController {
      */
     @ApiOperation(value = "发模板信息通知用户前面还有flag个人（flag=0/1/2/-1），当flag=-1时，通知订单已完成，并且根据通知类型改变订单状态（...到时候记得关闭url访问）")
     @GetMapping("/hairstylist/notifyUser")
-    public Map notifyUser(int orderId, int flag) {
+    public Map notifyUser(@RequestParam Integer orderId,@RequestParam Integer flag) {
         Map map = new HashMap();
         //错误flag
         if(flag<-1) {
@@ -337,7 +337,7 @@ public class HaircutOrderController {
 
     @ApiOperation(value = "获取自己关于某个顾客的预约记录(按时间倒序排序)-用于“发型师-预约列表-预约记录”页面")
     @GetMapping("/hairstylist/getOrderRecordFromOneUser")
-    public Map getOrderRecordFromOneUser(@RequestParam String myOpenid, int userId) {
+    public Map getOrderRecordFromOneUser(@RequestParam String myOpenid, @RequestParam Integer userId) {
         Map map = new HashMap();
         try {
             Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
@@ -422,8 +422,8 @@ public class HaircutOrderController {
 
     @ApiOperation(value = "普通用户提交预约订单")
     @PostMapping("/user/addHaircutOrder")
-    public Map addHaircutOrder(@RequestParam String myOpenid, String userName, String userPhone,
-                               int hairstylistId, String bookTime, int serviceId) {
+    public Map addHaircutOrder(@RequestParam String myOpenid,@RequestParam String userName,@RequestParam String userPhone,
+                               @RequestParam Integer hairstylistId,@RequestParam String bookTime,@RequestParam Integer serviceId) {
         Map map = new HashMap();
         try {
 
@@ -560,7 +560,7 @@ public class HaircutOrderController {
 
     @ApiOperation(value = "普通用户获取预约单详情")
     @PostMapping("/user/getHaircutOrder")
-    public Map addHaircutOrder(@RequestParam String myOpenid, int orderId) {
+    public Map addHaircutOrder(@RequestParam String myOpenid, @RequestParam Integer orderId) {
         Map map = new HashMap();
         try {
 
@@ -594,7 +594,7 @@ public class HaircutOrderController {
 
     @ApiOperation(value = "普通用户给该订单的发型师评分")
     @PostMapping("/user/order/rate")
-    public Map rateThisOrder(@RequestParam String myOpenid, int orderId , double point) {
+    public Map rateThisOrder(@RequestParam String myOpenid, @RequestParam Integer orderId ,@RequestParam Double point) {
         Map map = new HashMap();
         try {
 
