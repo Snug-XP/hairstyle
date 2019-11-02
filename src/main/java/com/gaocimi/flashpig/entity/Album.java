@@ -50,8 +50,8 @@ public class Album {
 
     /**该专辑中包含的发型文章*/
     @JoinTable(name="article_to_album",
-            joinColumns={@JoinColumn(name="article_id", referencedColumnName="id")},
-            inverseJoinColumns={@JoinColumn(name="album_id", referencedColumnName="id")})
+            joinColumns={@JoinColumn(name="album_id", referencedColumnName="id")},
+            inverseJoinColumns={@JoinColumn(name="article_id", referencedColumnName="id")})
     @ManyToMany(fetch = FetchType.LAZY)
     public List<Article> articleList;
 
