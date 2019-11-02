@@ -87,8 +87,8 @@ wechat:
     msgDataFormat: JSON
 
     #        上面是“型式”的，下面是“简照”的
-    #    appid: wx3b612db5165b11b6
-    #    secret: 3f31f17374c5406f24cdf5657085da92
+#    appid: wx3b612db5165b11b6
+#    secret: 3f31f17374c5406f24cdf5657085da92
     appid: wx0eebc4a396708dee
     secret: ff3774682602c7c21040c09ce1bf9ea1
 

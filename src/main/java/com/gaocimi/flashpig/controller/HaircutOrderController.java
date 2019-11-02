@@ -536,7 +536,7 @@ public class HaircutOrderController {
                 return 0; //相等为0
             });
 
-            //获取所求页数的文章数据
+            //获取所求页数的订单列表数据
             int first = pageNum*pageSize;
             int last = pageNum*pageSize+pageSize-1;
             for(int i = first ; i<=last&&i<tempOrderList.size() ; i++){

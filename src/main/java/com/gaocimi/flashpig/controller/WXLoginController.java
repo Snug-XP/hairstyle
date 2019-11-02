@@ -2,7 +2,9 @@ package com.gaocimi.flashpig.controller;
 
 import cn.binarywang.wx.miniapp.api.WxMaService;
 import cn.binarywang.wx.miniapp.bean.WxMaJscode2SessionResult;
+import cn.binarywang.wx.miniapp.bean.WxMaPhoneNumberInfo;
 import cn.binarywang.wx.miniapp.bean.WxMaUserInfo;
+import com.gaocimi.flashpig.entity.Hairstylist;
 import com.gaocimi.flashpig.entity.User;
 import com.gaocimi.flashpig.result.ResponseResult;
 import com.gaocimi.flashpig.service.HairstylistService;
@@ -46,21 +48,28 @@ public class WXLoginController {
                        @RequestParam(value = "rawData", required = false) String rawData,
                        @RequestParam(value = "name", required = false, defaultValue = "未知姓名") String name,
                        @RequestParam(value = "pictureUrl", required = false) String pictureUrl,
-                       @RequestParam(value = "sex", required = false, defaultValue = "0") int sex,
+                       @RequestParam(value = "sex", required = false, defaultValue = "0") Integer sex,
                        @RequestParam(value = "phoneNum", required = false) String phoneNum) throws WxErrorException {
         Map map = new HashMap();
 
+        if (code == null) {
+            logger.info("临时登录凭证获取失败\n\n\n\n");
+            map.put("error", "临时登录凭证获取失败");
+            return map;
+        }
         Map<String, String> rawDataMap = new HashMap<>();
         if (rawData != null) {
             rawDataMap = JsonUtils.jsonToPojo(rawData, rawDataMap.getClass());
+            logger.info("wxlogin临时凭证  -  code:  " + code + "");
+            logger.info("获取的rawDataMap数据为： " + rawDataMap.toString());
         }
-        logger.info("wxlogin临时凭证  -  code:  " + code + "");
-        logger.info("获取的rawDataMap数据为： " + rawDataMap.toString());
 
-        if ( name == null)
+        if (name == null) {
             name = rawDataMap.get("nickName");
-        if( pictureUrl == null)
+        }
+        if (pictureUrl == null) {
             pictureUrl = rawDataMap.get("avatarUrl");
+        }
 
 //        WXSessionModel wxModel;
 //        try {
@@ -80,11 +89,6 @@ public class WXLoginController {
 //            logger.info("wxResult的数据为"+wxResult);
 //            wxModel = JsonUtils. jsonToPojo(wxResult, WXSessionModel.class);
 
-        if (code == null) {
-            logger.info("临时登录凭证获取失败\n\n\n\n");
-            map.put("error", "临时登录凭证获取失败");
-            return map;
-        }
 
         WxMaJscode2SessionResult session = wxService.getUserService().getSessionInfo(code);
         map.put("openid", session.getOpenid());
@@ -99,23 +103,31 @@ public class WXLoginController {
 
             user = new User();
             user.setOpenid(session.getOpenid());
+            user.setSessionKey(session.getSessionKey());
             user.setName(name);
             user.setSex(sex);
             user.setPhoneNum(phoneNum);
             user.setPictureUrl(pictureUrl);
             userService.save(user);
+            logger.info("用户 " + user.getName() + " （" + user.getOpenid() + "）登录成功！\n\n\n\n");
+
         } else {
             //以前登录过，更新信息
-            user.setSex(sex);
-            user.setName(name);
+            if (sex != 0)
+                user.setSex(sex);
+            if (name != null)
+                user.setName(name);
 
             if (phoneNum != null)
                 user.setPhoneNum(phoneNum);
+
             if (pictureUrl != null)
                 user.setPictureUrl(pictureUrl);
 
+            user.setSessionKey(session.getSessionKey());
+
             userService.edit(user);
-            logger.info("用户 " + user.getName() + " 登录成功！\n\n\n\n");
+            logger.info("用户 " + user.getName() + " （" + user.getOpenid() + "）登录成功！\n\n\n\n");
         }
 //        } catch (Exception e) {
 //            logger.error(e.getMessage());
@@ -126,41 +138,58 @@ public class WXLoginController {
         return map;
     }
 
-//    @ApiOperation(value = "用户登录成功后输入用户数据")
-//    @PostMapping("/setUserInfo")
-//    public String setUserInfo(@RequestParameter Map<String,Object> param) {
-//        JSONObject jsonParam = this.getJSONParam(request);
-//            logger.info(json);
-//        return "helllooooooooooo！";
-//    }
 
-    @ApiOperation(value = "测试方法")
-    @GetMapping("/login_status")
-    public String getLoginStatus(@RequestParam(value = "code") String code,
-                                 @RequestParam(value = "signature") String signature,
-                                 @RequestParam(value = "rawData") String rawData,
-                                 @RequestParam(value = "encryptedData") String encryptedData,
-                                 @RequestParam(value = "iv") String iv) throws WxErrorException {
-        if (code == null || code.length() < 10) {
-            return "无效的code";
-        } else {
-            //存在有效的 code
-            System.out.println("这里请求了一次code==========" + code);
-            WxMaJscode2SessionResult session = this.wxService.getUserService().getSessionInfo(code);
-            String sessionKey = session.getSessionKey();
-            //通过openId sessionKey 生成3rd session 返回给客户端小程序
-            String accessToken = UUID.randomUUID().toString();
-            // 用户信息校验
-            if (!this.wxService.getUserService().checkUserInfo(sessionKey, rawData, signature)) {
-                return "用户信息校验失败";
-            }
-            // 解密用户信息
-            WxMaUserInfo userInfo = this.wxService.getUserService().getUserInfo(sessionKey, encryptedData, iv);
-            System.out.println(userInfo);
-            System.out.println("accessToken : " + accessToken);
-//            redisUtil.set("asdfKevin", accessToken, 180L);
-            return accessToken;
+    @ApiOperation(value = "获取微信用户绑定的手机号码")
+    @PostMapping("/getPhoneNumber")
+    public Map getPhoneNumber(@RequestParam String myOpenid,
+                              @RequestParam(value = "sessionKey", required = false) String sessionKey,
+                              @RequestParam(value = "encryptedData") String encryptedData,
+                              @RequestParam(value = "iv") String iv) {
+        Map map = new HashMap();
+
+        User user = userService.findUserByOpenid(myOpenid);
+        if (user == null) {
+            logger.info("openid为" + myOpenid + "的普通用户不存在！");
+            map.put("error", "无效的用户！！");
+            return map;
         }
+        if (sessionKey == null)
+            sessionKey = user.getSessionKey();
+
+        // 解密用户电话信息
+        WxMaPhoneNumberInfo userInfo = this.wxService.getUserService().getPhoneNoInfo(sessionKey, encryptedData, iv);
+//        System.out.println("获取到用户电话号码： "+userInfo+"\n");
+        map.put("userInfo", userInfo);
+        return map;
+    }
+
+    @ApiOperation(value = "解密用户普通信息数据")
+    @PostMapping("/decryptingData")
+    public Map decryptingData(@RequestParam String myOpenid,
+                              @RequestParam(value = "sessionKey", required = false) String sessionKey,
+                              @RequestParam(value = "encryptedData") String encryptedData,
+                              @RequestParam(value = "iv") String iv) {
+        Map map = new HashMap();
+
+        User user = userService.findUserByOpenid(myOpenid);
+        if (user == null) {
+            logger.info("openid为" + myOpenid + "的普通用户不存在！");
+            map.put("error", "无效的用户！！");
+            return map;
+        }
+        if (sessionKey == null)
+            sessionKey = user.getSessionKey();
+
+        // 解密用户信息
+        try {
+            WxMaUserInfo userInfo = this.wxService.getUserService().getUserInfo(sessionKey, encryptedData, iv);
+            System.out.println("获取到用户信息： " + userInfo + "\n");
+            map.put("userInfo", userInfo);
+        } catch (Exception e) {
+            logger.info(e.getMessage());
+            map.put("error", e.getMessage());
+        }
+        return map;
     }
 
 }

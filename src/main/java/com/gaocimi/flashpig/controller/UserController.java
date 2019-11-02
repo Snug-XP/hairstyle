@@ -100,12 +100,12 @@ public class UserController {
         Map map = new HashMap();
         try{
             User user = userService.findUserByOpenid(myOpenid);
-            Hairstylist hairstylist = hairstylistService.findHairstylistById(hairstylistId);
             if(user==null){
                 logger.info("openid为"+myOpenid+"的普通用户不存在！");
                 map.put("error","无效的用户！！");
                 return map;
             }
+            Hairstylist hairstylist = hairstylistService.findHairstylistById(hairstylistId);
             if(hairstylist==null){
                 logger.info("id为"+hairstylistId+"的发型师不存在！");
                 map.put("error","该发型师不存在！！");

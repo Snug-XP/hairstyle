@@ -306,7 +306,6 @@ public class HairstylistController {
         Map map = new HashMap();
         try {
             Hairstylist hairstylist = hairstylistService.findHairstylistById(hairstylistId);
-            List<HaircutOrder> haircutOrderList = hairstylist.getHaircutOrderList();
 
             map.put("hairstylist", hairstylist);//总预约人数和今日预约人数已经在Hairstylist的get方法里面，会直接被当做属性放进去
             return map;

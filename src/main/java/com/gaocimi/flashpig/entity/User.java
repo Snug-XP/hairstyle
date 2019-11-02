@@ -38,6 +38,9 @@ public class User {
     /** 用户绑定的手机号码*/
     private String phoneNum;
 
+    /** 用户微信临时的sessionKey*/
+    private String sessionKey;
+
     /**用户提交过的订单列表； 定义该User实体所有关联的HaircutOrder实体； 指定mappedBy属性表明该User实体不控制关联关系*/
     @OneToMany(targetEntity = HaircutOrder.class, mappedBy = "user")
     public List<HaircutOrder> haircutOrderList;
