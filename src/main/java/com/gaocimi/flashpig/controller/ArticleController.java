@@ -343,9 +343,9 @@ public class ArticleController {
             map.put("message", "收录成功！");
 
         } catch (Exception e) {
-            logger.info("后端发生异常：\n");
-            logger.error(e.getMessage());
+            logger.info("后端发生异常\n");
             map.put("error", "抱歉，后端发生异常!!");
+            e.printStackTrace();
         }
 
         return map;

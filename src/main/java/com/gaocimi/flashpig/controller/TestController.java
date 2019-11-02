@@ -53,4 +53,10 @@ public class TestController {
         Date date = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(time);
         return date;
     }
+
+    @ApiOperation(value = "字符串测试", produces = "application/json")
+    @GetMapping("/stringTest")
+    public int TestString(String str1,String str2) {
+        return str1.compareTo(str2);
+    }
 }

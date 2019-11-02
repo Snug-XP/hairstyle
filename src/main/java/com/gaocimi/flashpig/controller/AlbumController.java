@@ -1,6 +1,7 @@
 package com.gaocimi.flashpig.controller;
 
 import com.gaocimi.flashpig.entity.*;
+import com.gaocimi.flashpig.model.ArticleInfo;
 import com.gaocimi.flashpig.result.ResponseResult;
 import com.gaocimi.flashpig.service.*;
 import io.swagger.annotations.Api;
@@ -15,6 +16,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.text.Collator;
 import java.util.*;
 
 /**
@@ -36,10 +38,12 @@ public class AlbumController {
     UserService userService;
     @Autowired
     AdministratorService administratorService;
+    @Autowired
+    OssAccessController ossAccessController;
 
     @ApiOperation(value = "管理员创建专辑")
     @PostMapping("/administrator/addAlbum")
-    public Map addAlbum(@RequestParam String myOpenid ,@RequestParam String title,@RequestParam String introduction,@RequestParam String imgUrl) {
+    public Map addAlbum(@RequestParam String myOpenid, @RequestParam String title, @RequestParam String introduction, @RequestParam String imgUrl) {
         Map map = new HashMap();
         try {
             Administrator administrator = administratorService.findAdministratorByOpenid(myOpenid);
@@ -71,9 +75,37 @@ public class AlbumController {
 
     @ApiOperation(value = "删除专辑")
     @DeleteMapping("/album")
-    public int deleteAlbum(@PathVariable("albumId") Integer albumId) {
-        albumService.delete(albumId);
-        return 200;
+    public Map deleteAlbum(@RequestParam String myOpenid, @RequestParam Integer albumId) {
+        Map map = new HashMap();
+        try {
+            Administrator administrator = administratorService.findAdministratorByOpenid(myOpenid);
+            if ((administrator == null)) {
+                logger.info("非管理员操作！！");
+                map.put("error", "对不起，你不是管理员，无权操作！！");
+                return map;
+            }
+            Album album = albumService.findAlbumById(albumId);
+
+            if (album == null) {
+                logger.info("id为" + albumId + "的专辑不存在！");
+                map.put("error", "该专辑不存在！");
+                return map;
+            }
+            map = ossAccessController.deleteObject(myOpenid, album.getImgUrl());
+            logger.info("oss操作结果：" + map + "\n");
+            map.clear();
+
+            albumService.delete(albumId);
+            logger.info("id为" + administrator.getId() + "的管理员“" + administrator.getName() + "”删除了id为" + albumId + "的专辑“" + album.getTitle() + "”");
+            map.put("message", "删除成功!");
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            logger.info("删除专辑失败！！（后端发生某些错误）");
+            map.put("error", "删除专辑失败！！（后端发生某些错误）");
+            e.printStackTrace();
+            return map;
+        }
+        return map;
     }
 
     @ApiOperation(value = "修改专辑")
@@ -84,22 +116,34 @@ public class AlbumController {
     }
 
 
-    @ApiOperation(value = "获取单个专辑信息", produces = "application/json")
-    @GetMapping("/album/getOne")
-    public Album getOne(@RequestParam Integer albumId) {
-        return albumService.findAlbumById(albumId);
+    @ApiOperation(value = "获取单个专辑中的文章列表以及该专辑的相关信息", produces = "application/json")
+    @GetMapping("/album")
+    public Map getOne(@RequestParam Integer albumId) {
+        Map map = new HashMap();
+        Album album = albumService.findAlbumById(albumId);
+        List<Article> articleList = album.getArticleList();
+        List<ArticleInfo> showList = new ArrayList<>();
+
+        for (Article article : articleList){
+            showList.add(new ArticleInfo(article));
+        }
+
+        // 按标题升序排序
+        Collections.sort(showList, (o1, o2) -> Collator.getInstance(Locale.CHINESE).compare(o1.getTitle(),o2.getTitle()));
+
+        map.put("albumInfo",album);
+        map.put("articleList",showList);
+        return map;
     }
 
     @ApiOperation(value = "获取所有专辑列表")
     @GetMapping("/albums/getAll")
     public Page<Album> getAllByPage(@RequestParam(name = "pageNum", defaultValue = "0") int pageNum,
-                                      @RequestParam(name = "pageSize", defaultValue = "10") int pageSize
+                                    @RequestParam(name = "pageSize", defaultValue = "10") int pageSize
     ) {
         Page<Album> page = albumService.findAll(pageNum, pageSize);
         return page;
     }
-
-
 
 
     @ApiOperation(value = "管理员分页获取自己创建的专辑列表")
