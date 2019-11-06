@@ -91,7 +91,7 @@ public class Article {
     public void setTag(List<String> tagList) {
         this.tag = "";
         for (String tag : tagList) {
-            this.tag += "," + tag;
+            this.tag += "," + tag.trim();
         }
         if (this.tag.length() > 0)
             this.tag = this.tag.substring(1);
@@ -100,9 +100,9 @@ public class Article {
     public void addTag(List<String> tagList) {
         for (String tag : tagList) {
             if (this.tag == null || this.tag.length() == 0)
-                this.tag = tag;
+                this.tag = tag.trim();
             else
-                this.tag += "," + tag;
+                this.tag += "," + tag.trim();
         }
     }
 
@@ -162,8 +162,4 @@ public class Article {
         this.status = status;
     }
 
-    @Override
-    public boolean equals(Object obj) {
-        return (obj instanceof Article) && (this.id != null )&& (this.id.equals(((Article)obj).getId()));
-    }
 }

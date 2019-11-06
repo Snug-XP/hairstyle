@@ -46,7 +46,7 @@ public class AlbumController {
 
     @ApiOperation(value = "管理员创建专辑")
     @PostMapping("/administrator/addAlbum")
-    public Map addAlbum(@RequestParam String myOpenid, @RequestParam String title,@RequestParam String imgUrl,
+    public Map addAlbum(@RequestParam String myOpenid, @RequestParam String title, @RequestParam String imgUrl,
                         @RequestParam(value = "tagList", required = false) List<String> tagList) {
         Map map = new HashMap();
         try {
@@ -66,12 +66,50 @@ public class AlbumController {
             album.setCreateTime(new Date(System.currentTimeMillis()));
             albumService.save(album);
 
+            logger.info("id为" + administrator.getId() + "的管理员“" + administrator.getName() + "”上传了id为" + album.getId() + "的专辑“" + album.getTitle() + "”");
             map.put("message", "专辑上传成功！");
             return map;
         } catch (Exception e) {
             logger.error(e.getMessage());
             logger.info("专辑上传失败！！（后端发生某些错误）");
             map.put("error", "专辑上传失败！！（后端发生某些错误）");
+            e.printStackTrace();
+            return map;
+        }
+    }
+
+    @ApiOperation(value = "管理员修改专辑")
+    @PutMapping("/administrator/updateAlbum")
+    public Map updateAlbum(@RequestParam String myOpenid, @RequestParam Integer albumId, @RequestParam String title, @RequestParam String imgUrl,
+                           @RequestParam(value = "tagList", required = false) List<String> tagList) {
+        Map map = new HashMap();
+        try {
+            Administrator administrator = administratorService.findAdministratorByOpenid(myOpenid);
+            if ((administrator == null)) {
+                logger.info("非管理员操作！！");
+                map.put("error", "对不起，你不是管理员，无权操作！！");
+                return map;
+            }
+
+            Album album = albumService.findAlbumById(albumId);
+            if (album == null) {
+                logger.info("id为" + albumId + "的专辑不存在！");
+                map.put("error", "id为" + albumId + "的专辑不存在！");
+                return map;
+            }
+
+            album.setTitle(title);
+            album.setTag(tagList);
+            album.setImgUrl(imgUrl);
+            albumService.edit(album);
+
+            logger.info("id为" + administrator.getId() + "的管理员“" + administrator.getName() + "”修改了id为" + albumId + "的专辑");
+            map.put("message", "专辑修改成功！");
+            return map;
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            logger.info("专辑修改失败！！（后端发生某些错误）");
+            map.put("error", "专辑修改失败！！（后端发生某些错误）");
             e.printStackTrace();
             return map;
         }
@@ -112,83 +150,108 @@ public class AlbumController {
         return map;
     }
 
-//    @ApiOperation(value = "修改专辑")
-//    @PutMapping("/album")
-//    public int updateAlbum(@Validated Album albums) {
-//        albumService.edit(albums);
-//        return 200;
-//    }
 
-    @ApiOperation(value = "根据专辑id，获取该专辑标签相关的所有文章列表（分页展示）")
+    @ApiOperation(value = "根据专辑id，获取与该专辑标签相关的所有文章列表（分页展示）")
     @GetMapping("/album/getArticleByTagList")
     public Map getAllByTagList(@RequestParam Integer albumId,
                                @RequestParam(name = "pageNum", defaultValue = "0") int pageNum,
-                               @RequestParam(name = "pageSize", defaultValue = "10") int pageSize
-    ) {
+                               @RequestParam(name = "pageSize", defaultValue = "10") int pageSize) {
         Map map = new HashMap();
-        Album album = albumService.findAlbumById(albumId);
-        if(album==null){
-            logger.info("id为"+albumId+"的专辑不存在！");
-            map.put("error","id为"+albumId+"的专辑不存在！");
+        try {
+            Album album = albumService.findAlbumById(albumId);
+            if (album == null) {
+                logger.info("id为" + albumId + "的专辑不存在！");
+                map.put("error", "id为" + albumId + "的专辑不存在！");
+                return map;
+            }
+            List<Article> tempList = articleService.findAllByTagLike(album.getTag());
+            List<ArticleInfo> resultList = new ArrayList<>();
+
+            if (tempList.size() == 0) {
+                map.put("message", "未找到相关标签的文章");
+                return map;
+            }
+
+            // 按标题升序排序
+            Collections.sort(tempList, (o1, o2) -> Collator.getInstance(Locale.CHINESE).compare(o1.getTitle(), o2.getTitle()));
+
+            //获取所求页数的专辑数据
+            int first = pageNum * pageSize;
+            int last = pageNum * pageSize + pageSize - 1;
+            for (int i = first; i <= last && i < tempList.size(); i++) {
+                resultList.add(new ArticleInfo(tempList.get(i)));
+            }
+
+            //包装分页数据
+            Pageable pageable = PageRequest.of(pageNum, pageSize);
+            Page<ArticleInfo> page = new PageImpl<>(resultList, pageable, tempList.size());
+
+            map.put("page", page);
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            logger.info("获取与该专辑标签相关的所有文章列表失败！！（后端发生某些错误）");
+            map.put("error", "获取相关文章列表失败！！（后端发生某些错误）");
+            e.printStackTrace();
             return map;
         }
-        List<Article> tempList = articleService.findAllByTagLike(album.getTag());
-        List<ArticleInfo> resultList = new ArrayList<>();
-
-        if(tempList.size()==0)
-        {
-            map.put("message","未找到相关标签的文章");
-            return map;
-        }
-
-        //获取所求页数的专辑数据
-        int first = pageNum * pageSize;
-        int last = pageNum * pageSize + pageSize - 1;
-        for (int i = first; i <= last && i < tempList.size(); i++) {
-            resultList.add(new ArticleInfo(tempList.get(i)));
-        }
-
-        //包装分页数据
-        Pageable pageable = PageRequest.of(pageNum, pageSize);
-        Page<ArticleInfo> page = new PageImpl<>(resultList, pageable, tempList.size());
-
-        map.put("page", page);
 
         return map;
     }
 
     @ApiOperation(value = "根据专辑id，获取单个专辑中的文章列表以及该专辑的相关信息（分页展示）", produces = "application/json")
-    @GetMapping("/album")
-    public Map getOne(@RequestParam Integer albumId,
-                      @RequestParam(name = "pageNum", defaultValue = "0") int pageNum,
-                      @RequestParam(name = "pageSize", defaultValue = "10") int pageSize) {
+    @GetMapping("/album/articleList")
+    public Map getArticleList(@RequestParam Integer albumId,
+                              @RequestParam(name = "pageNum", defaultValue = "0") int pageNum,
+                              @RequestParam(name = "pageSize", defaultValue = "10") int pageSize) {
         Map map = new HashMap();
-        Album album = albumService.findAlbumById(albumId);
-        if(album==null){
-            logger.info("id为"+albumId+"的专辑不存在！");
-            map.put("error","id为"+albumId+"的专辑不存在！");
+        try {
+            Album album = albumService.findAlbumById(albumId);
+            if (album == null) {
+                logger.info("id为" + albumId + "的专辑不存在！");
+                map.put("error", "id为" + albumId + "的专辑不存在！");
+                return map;
+            }
+            List<Article> tempList = album.getArticleList();
+            List<ArticleInfo> resultList = new ArrayList<>();
+
+            // 按标题升序排序
+            Collections.sort(tempList, (o1, o2) -> Collator.getInstance(Locale.CHINESE).compare(o1.getTitle(), o2.getTitle()));
+
+            //获取所求页数的专辑数据
+            int first = pageNum * pageSize;
+            int last = pageNum * pageSize + pageSize - 1;
+            for (int i = first; i <= last && i < tempList.size(); i++) {
+                resultList.add(new ArticleInfo(tempList.get(i)));
+            }
+
+            //包装分页数据
+            Pageable pageable = PageRequest.of(pageNum, pageSize);
+            Page<ArticleInfo> page = new PageImpl<>(resultList, pageable, tempList.size());
+
+
+            map.put("albumInfo", album);
+            map.put("page", page);
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            logger.info("获取与该专辑中的文章列表失败！！（后端发生某些错误）");
+            map.put("error", "获取相关文章列表失败！！（后端发生某些错误）");
+            e.printStackTrace();
             return map;
         }
-        List<Article> tempList = album.getArticleList();
-        List<ArticleInfo> resultList = new ArrayList<>();
+        return map;
+    }
 
-        // 按标题升序排序
-        Collections.sort(tempList, (o1, o2) -> Collator.getInstance(Locale.CHINESE).compare(o1.getTitle(),o2.getTitle()));
-
-        //获取所求页数的专辑数据
-        int first = pageNum * pageSize;
-        int last = pageNum * pageSize + pageSize - 1;
-        for (int i = first; i <= last && i < tempList.size(); i++) {
-            resultList.add(new ArticleInfo(tempList.get(i)));
+    @ApiOperation(value = "根据专辑id，获取单个专辑中的相关信息", produces = "application/json")
+    @GetMapping("/album")
+    public Map getOne(@RequestParam Integer albumId) {
+        Map map = new HashMap();
+        Album album = albumService.findAlbumById(albumId);
+        if (album == null) {
+            logger.info("id为" + albumId + "的专辑不存在！");
+            map.put("error", "id为" + albumId + "的专辑不存在！");
+            return map;
         }
-
-        //包装分页数据
-        Pageable pageable = PageRequest.of(pageNum, pageSize);
-        Page<ArticleInfo> page = new PageImpl<>(resultList, pageable, tempList.size());
-
-
-        map.put("albumInfo",album);
-        map.put("page",page);
+        map.put("album", album);
         return map;
     }
 

@@ -11,7 +11,9 @@ import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author xp
@@ -75,14 +77,17 @@ public class ArticleServiceImpl implements ArticleService {
     @Override
     public List<Article> findAllByTagLike(String[] tagList) {
         List<Article> articleList = new ArrayList<>();
+        Set<Article> set = new HashSet<>();//使用集合Set，自带去重功能
+
         for (String tag : tagList) {
             List<Article> tempList = articleRepository.findAllByTagLike("%" + tag + "%");
-
-            //这样合并去重需要重写对象的equals()方法
-            articleList.remove(tempList);
-            articleList.addAll(tempList);
+            set.addAll(tempList);
         }
-        return articleList;
+            //这样合并去重需要重写对象的equals()方法,但是发现不重写也可以
+//            articleList.removeAll(tempList);
+//            articleList.addAll(tempList);
+
+        return new ArrayList<>(set);
     }
 
     @Override

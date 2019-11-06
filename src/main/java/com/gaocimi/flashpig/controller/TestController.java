@@ -1,9 +1,12 @@
 package com.gaocimi.flashpig.controller;
 
+import com.gaocimi.flashpig.entity.Article;
 import com.gaocimi.flashpig.result.ResponseResult;
+import com.gaocimi.flashpig.service.ArticleService;
 import com.gaocimi.flashpig.utils.xp.MyUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -18,6 +21,9 @@ import java.util.Map;
 @ResponseResult
 @Api(value = "测试controller", description = "测试一些功能")
 public class TestController {
+
+    @Autowired
+    ArticleService articleService;
 
     @ApiOperation(value = "时间测试", produces = "application/json")
     @GetMapping("/timeTest")
@@ -54,9 +60,13 @@ public class TestController {
         return date;
     }
 
-    @ApiOperation(value = "字符串测试", produces = "application/json")
+    @ApiOperation(value = "对象比较测试", produces = "application/json")
     @GetMapping("/stringTest")
-    public int TestString(String str1,String str2) {
-        return str1.compareTo(str2);
+    public boolean TestString(Integer a,Integer b) {
+
+        Article article1 = articleService.findArticleById(a);
+        Article article2 = articleService.findArticleById(b);
+
+        return article1.equals(article2);
     }
 }
