@@ -1,6 +1,7 @@
 package com.gaocimi.flashpig.service;
 
 import java.util.List;
+
 import com.gaocimi.flashpig.entity.Article;
 import com.gaocimi.flashpig.entity.Article;
 import org.springframework.data.domain.Page;
@@ -22,7 +23,13 @@ public interface ArticleService {
 
     public void delete(int id);
 
-    public Page<Article> findAll(int pageNum,int pageSize);
+    public List<Article> findAllByTagLike(String[] tagList);
+
+    public List<Article> findAllByTitleLike(String title);
+
+    public List<Article> findAllByContentLike(String content);
+
+    public Page<Article> findAll(int pageNum, int pageSize);
 
     /**
      * 分页获取待审核的发型文章

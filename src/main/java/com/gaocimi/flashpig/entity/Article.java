@@ -161,4 +161,9 @@ public class Article {
     public void setStatus(Integer status) {
         this.status = status;
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        return (obj instanceof Article) && (this.id != null )&& (this.id.equals(((Article)obj).getId()));
+    }
 }

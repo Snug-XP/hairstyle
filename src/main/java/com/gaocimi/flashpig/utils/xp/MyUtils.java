@@ -1,6 +1,7 @@
 package com.gaocimi.flashpig.utils.xp;
 
 import com.gaocimi.flashpig.controller.HairstylistController;
+import com.gaocimi.flashpig.entity.Article;
 import com.gaocimi.flashpig.entity.Hairstylist;
 import com.gaocimi.flashpig.entity.User;
 import com.gaocimi.flashpig.entity.UserToHairstylist;
@@ -8,7 +9,12 @@ import com.gaocimi.flashpig.model.HairstylistInfo;
 import com.gaocimi.flashpig.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -152,13 +158,6 @@ public class MyUtils {
 
 
 
-
-
-
-
-
-
-
     /**
      * @return 返回与今天相差的天数（例：明天为-1，今天为0，昨天为1）
      */
@@ -178,6 +177,25 @@ public class MyUtils {
         Long days = nowTime.getTime() / 86400000 - date.getTime() / 86400000;//与当前时刻相差的天数
         return days;
     }
+
+
+    public static Page<Object> getPage(List<Object> list , int pageNum,int pageSize){
+        int first = pageNum * pageSize;
+        int last = pageNum * pageSize + pageSize - 1;
+
+        List<Object> resultList = new ArrayList<>();
+
+        for (int i = first; i <= last && i < list.size(); i++) {
+            resultList.add(list.get(i));
+        }
+
+        //包装分页数据
+        Pageable pageable = PageRequest.of(pageNum, pageSize);
+        Page<Object> page = new PageImpl<>(resultList, pageable, list.size());
+
+        return page;
+    }
+
 
 
 }

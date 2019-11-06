@@ -29,9 +29,9 @@ public class Album {
     private String title;
 
     /**
-     * 该专辑的介绍
+     * 标签、关键词
      */
-    private String introduction;
+    private String tag;
 
     /**
      * 专辑的（头像）图片url
@@ -54,5 +54,34 @@ public class Album {
             inverseJoinColumns={@JoinColumn(name="article_id", referencedColumnName="id")})
     @ManyToMany(fetch = FetchType.LAZY)
     public List<Article> articleList;
+
+
+    public String[] getTag() {
+        if(tag==null)
+            return null;
+        return tag.split(",");
+    }
+
+    public void setTag(String tag) {
+        this.tag = tag;
+    }
+
+    public void setTag(List<String> tagList) {
+        this.tag = "";
+        for (String tag : tagList) {
+            this.tag += "," + tag;
+        }
+        if (this.tag.length() > 0)
+            this.tag = this.tag.substring(1);
+    }
+
+    public void addTag(List<String> tagList) {
+        for (String tag : tagList) {
+            if (this.tag == null || this.tag.length() == 0)
+                this.tag = tag;
+            else
+                this.tag += "," + tag;
+        }
+    }
 
 }

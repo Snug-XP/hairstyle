@@ -4,6 +4,7 @@ import com.gaocimi.flashpig.entity.*;
 import com.gaocimi.flashpig.model.ArticleInfo;
 import com.gaocimi.flashpig.result.ResponseResult;
 import com.gaocimi.flashpig.service.*;
+import com.gaocimi.flashpig.utils.xp.MyUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.slf4j.Logger;
@@ -33,6 +34,8 @@ public class AlbumController {
     @Autowired
     AlbumService albumService;
     @Autowired
+    ArticleService articleService;
+    @Autowired
     HairstylistService hairstylistService;
     @Autowired
     UserService userService;
@@ -43,7 +46,8 @@ public class AlbumController {
 
     @ApiOperation(value = "管理员创建专辑")
     @PostMapping("/administrator/addAlbum")
-    public Map addAlbum(@RequestParam String myOpenid, @RequestParam String title, @RequestParam String introduction, @RequestParam String imgUrl) {
+    public Map addAlbum(@RequestParam String myOpenid, @RequestParam String title,@RequestParam String imgUrl,
+                        @RequestParam(value = "tagList", required = false) List<String> tagList) {
         Map map = new HashMap();
         try {
             Administrator administrator = administratorService.findAdministratorByOpenid(myOpenid);
@@ -57,7 +61,7 @@ public class AlbumController {
 
             album.setAdministrator(administrator);
             album.setTitle(title);
-            album.setIntroduction(introduction);
+            album.setTag(tagList);
             album.setImgUrl(imgUrl);
             album.setCreateTime(new Date(System.currentTimeMillis()));
             albumService.save(album);
@@ -73,7 +77,7 @@ public class AlbumController {
         }
     }
 
-    @ApiOperation(value = "删除专辑")
+    @ApiOperation(value = "根据专辑id，删除专辑")
     @DeleteMapping("/album")
     public Map deleteAlbum(@RequestParam String myOpenid, @RequestParam Integer albumId) {
         Map map = new HashMap();
@@ -108,31 +112,83 @@ public class AlbumController {
         return map;
     }
 
-    @ApiOperation(value = "修改专辑")
-    @PutMapping("/album")
-    public int updateAlbum(@Validated Album albums) {
-        albumService.edit(albums);
-        return 200;
-    }
+//    @ApiOperation(value = "修改专辑")
+//    @PutMapping("/album")
+//    public int updateAlbum(@Validated Album albums) {
+//        albumService.edit(albums);
+//        return 200;
+//    }
 
-
-    @ApiOperation(value = "获取单个专辑中的文章列表以及该专辑的相关信息", produces = "application/json")
-    @GetMapping("/album")
-    public Map getOne(@RequestParam Integer albumId) {
+    @ApiOperation(value = "根据专辑id，获取该专辑标签相关的所有文章列表（分页展示）")
+    @GetMapping("/album/getArticleByTagList")
+    public Map getAllByTagList(@RequestParam Integer albumId,
+                               @RequestParam(name = "pageNum", defaultValue = "0") int pageNum,
+                               @RequestParam(name = "pageSize", defaultValue = "10") int pageSize
+    ) {
         Map map = new HashMap();
         Album album = albumService.findAlbumById(albumId);
-        List<Article> articleList = album.getArticleList();
-        List<ArticleInfo> showList = new ArrayList<>();
+        if(album==null){
+            logger.info("id为"+albumId+"的专辑不存在！");
+            map.put("error","id为"+albumId+"的专辑不存在！");
+            return map;
+        }
+        List<Article> tempList = articleService.findAllByTagLike(album.getTag());
+        List<ArticleInfo> resultList = new ArrayList<>();
 
-        for (Article article : articleList){
-            showList.add(new ArticleInfo(article));
+        if(tempList.size()==0)
+        {
+            map.put("message","未找到相关标签的文章");
+            return map;
         }
 
+        //获取所求页数的专辑数据
+        int first = pageNum * pageSize;
+        int last = pageNum * pageSize + pageSize - 1;
+        for (int i = first; i <= last && i < tempList.size(); i++) {
+            resultList.add(new ArticleInfo(tempList.get(i)));
+        }
+
+        //包装分页数据
+        Pageable pageable = PageRequest.of(pageNum, pageSize);
+        Page<ArticleInfo> page = new PageImpl<>(resultList, pageable, tempList.size());
+
+        map.put("page", page);
+
+        return map;
+    }
+
+    @ApiOperation(value = "根据专辑id，获取单个专辑中的文章列表以及该专辑的相关信息（分页展示）", produces = "application/json")
+    @GetMapping("/album")
+    public Map getOne(@RequestParam Integer albumId,
+                      @RequestParam(name = "pageNum", defaultValue = "0") int pageNum,
+                      @RequestParam(name = "pageSize", defaultValue = "10") int pageSize) {
+        Map map = new HashMap();
+        Album album = albumService.findAlbumById(albumId);
+        if(album==null){
+            logger.info("id为"+albumId+"的专辑不存在！");
+            map.put("error","id为"+albumId+"的专辑不存在！");
+            return map;
+        }
+        List<Article> tempList = album.getArticleList();
+        List<ArticleInfo> resultList = new ArrayList<>();
+
         // 按标题升序排序
-        Collections.sort(showList, (o1, o2) -> Collator.getInstance(Locale.CHINESE).compare(o1.getTitle(),o2.getTitle()));
+        Collections.sort(tempList, (o1, o2) -> Collator.getInstance(Locale.CHINESE).compare(o1.getTitle(),o2.getTitle()));
+
+        //获取所求页数的专辑数据
+        int first = pageNum * pageSize;
+        int last = pageNum * pageSize + pageSize - 1;
+        for (int i = first; i <= last && i < tempList.size(); i++) {
+            resultList.add(new ArticleInfo(tempList.get(i)));
+        }
+
+        //包装分页数据
+        Pageable pageable = PageRequest.of(pageNum, pageSize);
+        Page<ArticleInfo> page = new PageImpl<>(resultList, pageable, tempList.size());
+
 
         map.put("albumInfo",album);
-        map.put("articleList",showList);
+        map.put("page",page);
         return map;
     }
 

@@ -72,6 +72,29 @@ public class ArticleServiceImpl implements ArticleService {
         return articlePage;
     }
 
+    @Override
+    public List<Article> findAllByTagLike(String[] tagList) {
+        List<Article> articleList = new ArrayList<>();
+        for (String tag : tagList) {
+            List<Article> tempList = articleRepository.findAllByTagLike("%" + tag + "%");
+
+            //这样合并去重需要重写对象的equals()方法
+            articleList.remove(tempList);
+            articleList.addAll(tempList);
+        }
+        return articleList;
+    }
+
+    @Override
+    public List<Article> findAllByTitleLike(String title) {
+        return articleRepository.findAllByTitleLike("%" + title + "%");
+    }
+
+    @Override
+    public List<Article> findAllByContentLike(String content) {
+        return articleRepository.findAllByContentLike("%" + content + "%");
+    }
+
 
     /**
      * 分页获取待审核的发型文章
@@ -80,7 +103,8 @@ public class ArticleServiceImpl implements ArticleService {
      * @param pageSize 每页大小
      * @return
      */
-    public Page<Article> findPendingList(int pageNum, int pageSize){
+    @Override
+    public Page<Article> findPendingList(int pageNum, int pageSize) {
         int first = pageNum * pageSize;
         int last = pageNum * pageSize + pageSize - 1;
 
