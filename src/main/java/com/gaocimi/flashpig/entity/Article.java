@@ -23,10 +23,6 @@ public class Article {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    /**
-     * 标签、关键词
-     */
-    private String tag;
 
     /**
      * 标题
@@ -47,6 +43,12 @@ public class Article {
      * 发型文章的状态（“0”表示审核中，“1”表示审核通过，“-1”表示审核失败）
      */
     private Integer status;
+
+    /**
+     * 标签、关键词
+     */
+    private String tag;
+
 
     /**
      * 发表该文章的发型师； 定义名为create_by的外键列，该外键引用hairstylist表的主键(openid)列,采用懒加载
