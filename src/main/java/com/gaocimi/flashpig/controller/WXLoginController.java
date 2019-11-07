@@ -46,7 +46,7 @@ public class WXLoginController {
     @PostMapping("/wxLogin")
     public Map wxLogin(String code,
                        @RequestParam(value = "rawData", required = false) String rawData,
-                       @RequestParam(value = "name", required = false, defaultValue = "未知姓名") String name,
+                       @RequestParam(value = "name", required = false) String name,
                        @RequestParam(value = "pictureUrl", required = false) String pictureUrl,
                        @RequestParam(value = "sex", required = false, defaultValue = "0") Integer sex,
                        @RequestParam(value = "phoneNum", required = false) String phoneNum) throws WxErrorException {

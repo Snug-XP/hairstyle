@@ -319,4 +319,54 @@ public class AlbumController {
             return map;
         }
     }
+
+    @ApiOperation(value = "将选择的文章列表加入某专辑", notes = "权限：仅管理员")
+    @PostMapping("/album/addArticleListToAlbum")
+    public Map addArticleListToAlbum(@RequestParam String myOpenid, @RequestParam List<Integer> articleIdList, @RequestParam Integer albumId) {
+        Map map = new HashMap();
+        List<Integer> idList = new ArrayList<>();
+        try {
+            Administrator administrator = administratorService.findAdministratorByOpenid(myOpenid);
+            if ((administrator == null)) {
+                logger.info("非管理员操作（addArticleListToAlbum）！！");
+                map.put("error", "对不起，你不是管理员，无权操作！！");
+                return map;
+            }
+            Album album = albumService.findAlbumById(albumId);
+            if (album == null) {
+                logger.info("id为" + albumId + "的专辑不存在！（addArticleListToAlbum）");
+                map.put("error", "id为" + albumId + "的专辑不存在！！");
+                return map;
+            }
+
+            List<Article> articleList = album.getArticleList();
+            for (Integer articleId : articleIdList) {
+                Article article = articleService.findArticleById(articleId);
+                if (article == null) {
+                    logger.info("id为" + articleId + "的文章不存在！（addArticleListToAlbum）");
+                    continue;
+                }
+                //...这边可以使用集合来优化
+                if (album.existArticle(articleId)) {
+                    logger.info("该专辑(id=" + albumId + ")已收录该发型文章(id=" + articleId + ")，不需要重复收录");
+                    continue;
+                }
+                idList.add(articleId);
+                articleList.add(article);
+            }
+            album.setArticleList(articleList);
+            albumService.edit(album);
+
+            logger.info("id为" + albumId + "的专辑（title：" + album.getTitle() + "）新收录了" + idList.size() + "个发型文章（idList：" + idList + "）");
+            map.put("message", "收录成功!( + " + idList.size() + ")");
+
+        } catch (
+                Exception e) {
+            logger.info("后端发生异常\n");
+            map.put("error", "抱歉，后端发生异常!!");
+            e.printStackTrace();
+        }
+
+        return map;
+    }
 }

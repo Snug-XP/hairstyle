@@ -84,4 +84,13 @@ public class Album {
         }
     }
 
+    public boolean existArticle(int articleId){
+        for (Article a : articleList) {
+            if (a.getId() == articleId) {
+                return true;
+            }
+        }
+        return false;
+    }
+
 }
