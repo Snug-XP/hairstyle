@@ -339,7 +339,6 @@ public class AlbumController {
                 return map;
             }
 
-            List<Article> articleList = album.getArticleList();
             for (Integer articleId : articleIdList) {
                 Article article = articleService.findArticleById(articleId);
                 if (article == null) {
@@ -352,9 +351,8 @@ public class AlbumController {
                     continue;
                 }
                 idList.add(articleId);
-                articleList.add(article);
+                album.articleList.add(article);
             }
-            album.setArticleList(articleList);
             albumService.edit(album);
 
             logger.info("id为" + albumId + "的专辑（title：" + album.getTitle() + "）新收录了" + idList.size() + "个发型文章（idList：" + idList + "）");

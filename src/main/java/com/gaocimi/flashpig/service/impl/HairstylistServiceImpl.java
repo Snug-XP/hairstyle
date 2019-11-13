@@ -73,19 +73,30 @@ public class HairstylistServiceImpl implements HairstylistService {
     }
 
     /**
-     * 分页获取正在注册的发型师用户
+     * 分页获取获取待审核或审核已通过的发型师用户（可选定省、市、县以及商铺名的范围）
      *
      * @param pageNum  页数（第几页）
      * @param pageSize 每页大小
      * @return
      */
     @Override
-    public Page<Hairstylist> findRegisterList(int pageNum, int pageSize) {
+    public Page<Hairstylist> findRegisterList(Integer status, String province, String city,
+                                              String district, String shopName, int pageNum, int pageSize) {
 
         int first = pageNum * pageSize;
         int last = pageNum * pageSize + pageSize - 1;
 
-        List<Hairstylist> hairstylists = hairstylistRepository.findAllByApplyStatus(0);
+        List<Hairstylist> hairstylists = null;
+        if (province == null && shopName == null)
+            hairstylists = hairstylistRepository.findAllByApplyStatus(status);
+        else if (province != null) {
+            if (shopName != null)
+                hairstylists = hairstylistRepository.findAllByApplyStatusAndShopNameLikeAndProvinceAndCityAndDistrict(status, "%" + shopName + "%", province, city, district);
+            else
+                hairstylists = hairstylistRepository.findAllByApplyStatusAndProvinceAndCityAndDistrict(status, province, city, district);
+        } else {
+            hairstylists = hairstylistRepository.findAllByApplyStatusAndShopNameLike(status, "%" + shopName + "%");
+        }
         List<Hairstylist> resultList = new ArrayList<>();
 
         for (int i = first; i <= last && i < hairstylists.size(); i++) {
@@ -106,8 +117,8 @@ public class HairstylistServiceImpl implements HairstylistService {
      * @return
      */
     @Override
-    public List<Hairstylist> getHairstylistsByRadius(Double longitude,Double latitude, Double radius) {
-        List<Hairstylist> hairstylists = hairstylistRepository.findAllByLongitudeBetweenAndLatitudeBetween(longitude-radius,longitude+radius,latitude-radius,latitude+radius);
+    public List<Hairstylist> getHairstylistsByRadius(Double longitude, Double latitude, Double radius) {
+        List<Hairstylist> hairstylists = hairstylistRepository.findAllByLongitudeBetweenAndLatitudeBetween(longitude - radius, longitude + radius, latitude - radius, latitude + radius);
         return hairstylists;
     }
 
@@ -116,12 +127,12 @@ public class HairstylistServiceImpl implements HairstylistService {
      * 获取某点的经纬度半径范围内并且商铺名包含关键字的发型师列表
      *
      * @param shopName 商铺名关键字
-     * @param radius 半径范围
+     * @param radius   半径范围
      * @return
      */
     @Override
-    public List<Hairstylist> getHairstylistsByRadiusAndShopName(Double longitude,Double latitude, Double radius,String shopName) {
-        List<Hairstylist> hairstylists = hairstylistRepository.findAllByLongitudeBetweenAndLatitudeBetweenAndShopName(longitude-radius,longitude+radius,latitude-radius,latitude+radius,shopName);
+    public List<Hairstylist> getHairstylistsByRadiusAndShopName(Double longitude, Double latitude, Double radius, String shopName) {
+        List<Hairstylist> hairstylists = hairstylistRepository.findAllByLongitudeBetweenAndLatitudeBetweenAndShopName(longitude - radius, longitude + radius, latitude - radius, latitude + radius, shopName);
         return hairstylists;
     }
 

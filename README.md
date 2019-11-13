@@ -22,6 +22,8 @@ oss配置可能过期，需要重新设置
 - 命令kill -9 （pid号）  可关闭对应pid的服务
 - 执行一下命令实时查看运行日志 tail -f catalina.out
 
-windows中查看指定端口的占用情况
-C:\>netstat -aon|findstr "9050"
+windows中:
+查看指定端口的占用情况 C:\>netstat -aon|findstr "9050"
+
+查看服务：services.msc
 

@@ -83,7 +83,7 @@ public class ArticleServiceImpl implements ArticleService {
             List<Article> tempList = articleRepository.findAllByTagLike("%" + tag + "%");
             set.addAll(tempList);
         }
-            //这样合并去重需要重写对象的equals()方法,但是发现不重写也可以
+        //这样合并去重需要重写对象的equals()方法,但是发现不重写也可以
 //            articleList.removeAll(tempList);
 //            articleList.addAll(tempList);
 
@@ -102,18 +102,18 @@ public class ArticleServiceImpl implements ArticleService {
 
 
     /**
-     * 分页获取待审核的发型文章
+     * 分页获取待审核或者审核通过的文章的发型文章
      *
      * @param pageNum  页数（第几页）
      * @param pageSize 每页大小
      * @return
      */
     @Override
-    public Page<Article> findPendingList(int pageNum, int pageSize) {
+    public Page<Article> findAllByStatus(int status, int pageNum, int pageSize) {
         int first = pageNum * pageSize;
         int last = pageNum * pageSize + pageSize - 1;
 
-        List<Article> articles = articleRepository.findAllByStatus(0);
+        List<Article> articles = articleRepository.findAllByStatus(status);
         List<Article> resultList = new ArrayList<>();
 
         for (int i = first; i <= last && i < articles.size(); i++) {

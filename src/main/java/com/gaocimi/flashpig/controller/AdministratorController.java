@@ -19,6 +19,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 
@@ -40,15 +41,20 @@ class AdministratorController {
     @Autowired
     ArticleService articleService;
 
-    @ApiOperation(value = "获取正在注册的发型师信息列表(分页展示)", notes = "仅管理员有权限", produces = "application/json")
-    @GetMapping("/Administrator/hairstylist/getRegisterList")
-    public Map getRegisterList(@RequestParam String myOpenid,
+    @ApiOperation(value = "获取待审核或审核已通过的发型师信息列表(分页展示)（status=0表示“待审核”status=1表示“审核通过”，status=-1表示“审核未通过”，可选定省、市、县以及商铺名的范围）", notes = "仅管理员有权限")
+    @GetMapping("/Administrator/getHairstylists")
+    public Map getHairstylists(@RequestParam String myOpenid,
+                               @RequestParam Integer status,
+                               @RequestParam(name = "province",required = false) String province,
+                               @RequestParam(name = "city",required = false) String city,
+                               @RequestParam(name = "district",required = false) String district,
+                               @RequestParam(name = "shopName",required = false) String shopName,
                                @RequestParam(name = "pageNum", defaultValue = "0") int pageNum,
                                @RequestParam(name = "pageSize", defaultValue = "10") int pageSize) {
         Map map = new HashMap();
         try {
             if (administratorService.isExist(myOpenid)) {
-                Page<Hairstylist> page = hairstylistService.findRegisterList(pageNum, pageSize);
+                Page<Hairstylist> page = hairstylistService.findRegisterList(status,province,city,district,shopName,pageNum, pageSize);
                 map.put("page", page);
                 logger.info("获取发型师列表信息成功！");
                 return map;
@@ -126,7 +132,7 @@ class AdministratorController {
         Map map = new HashMap();
         try {
             if (administratorService.isExist(myOpenid)) {
-                Page<Article> page = articleService.findPendingList(pageNum, pageSize);
+                Page<Article> page = articleService.findAllByStatus(0,pageNum, pageSize);
                 map.put("page", page);
                 logger.info("获取待审核的文章列表信息成功！");
                 return map;

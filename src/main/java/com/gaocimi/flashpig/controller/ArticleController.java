@@ -47,7 +47,7 @@ public class ArticleController {
 
     @ApiOperation(value = "添加发型文章")
     @PostMapping("/hairstylist/addArticle")
-    public Map addArticle(@RequestParam String myOpenid,@RequestParam String title,@RequestParam String content,
+    public Map addArticle(@RequestParam String myOpenid, @RequestParam String title, @RequestParam String content,
                           @RequestParam(value = "tagList", required = false) List<String> tagList,
                           @RequestParam(value = "imgUrlList", required = false) List<String> imgUrlList) {
         Map map = new HashMap();
@@ -65,7 +65,7 @@ public class ArticleController {
             article.setTitle(title);
             article.setContent(content);
             article.setCreateTime(new Date(System.currentTimeMillis()));
-            if(administratorService.isExist(myOpenid))
+            if (administratorService.isExist(myOpenid))
                 article.setStatus(1);//设置发型文章状态为审核通过
             else
                 article.setStatus(0);//设置发型文章状态为审核中
@@ -93,7 +93,7 @@ public class ArticleController {
 
     @ApiOperation(value = "删除发型文章", notes = "权限：仅文章的发布者或管理员")
     @DeleteMapping("/article")
-    public Map deleteArticle(@RequestParam String myOpenid,@RequestParam Integer articleId) {
+    public Map deleteArticle(@RequestParam String myOpenid, @RequestParam Integer articleId) {
 
         Map map = new HashMap();
         try {
@@ -118,9 +118,9 @@ public class ArticleController {
                 return map;
             }
 
-            logger.info("id为"+hairstylist.getId()+"的发型师“"+hairstylist.getHairstylistName()+"”删除了id为"+articleId+"的文章（Title:"+article.getTitle()+"）");
+            logger.info("id为" + hairstylist.getId() + "的发型师“" + hairstylist.getHairstylistName() + "”删除了id为" + articleId + "的文章（Title:" + article.getTitle() + "）");
             articleService.delete(articleId);
-            map.put("message","删除成功！");
+            map.put("message", "删除成功！");
             return map;
         } catch (Exception e) {
             logger.error(e.getMessage());
@@ -163,7 +163,7 @@ public class ArticleController {
             article.setTag(tagList);
             article.setTitle(title);
             article.setContent(content);
-            if(administratorService.isExist(myOpenid))
+            if (administratorService.isExist(myOpenid))
                 article.setStatus(1);//设置发型文章状态为审核通过
             else
                 article.setStatus(0);//设置发型文章状态为审核中
@@ -181,7 +181,7 @@ public class ArticleController {
 
                 imageUrlService.save(imageUrl);
             }
-            logger.info("id为"+hairstylist.getId()+"的发型师“"+hairstylist.getHairstylistName()+"”修改了id为"+articleId+"的文章");
+            logger.info("id为" + hairstylist.getId() + "的发型师“" + hairstylist.getHairstylistName() + "”修改了id为" + articleId + "的文章");
             map.put("message", "文章修改成功！");
             return map;
         } catch (Exception e) {
@@ -211,9 +211,9 @@ public class ArticleController {
             List<Article> tempArticleList = hairstylist.getArticleList();
             List<Article> resultList = new ArrayList<>();
 
-            if(tempArticleList==null||tempArticleList.size()==0){
+            if (tempArticleList == null || tempArticleList.size() == 0) {
                 logger.info("你还没有创建过发型文章哦~");
-                map.put("message","你还没有创建过发型文章哦~");
+                map.put("message", "你还没有创建过发型文章哦~");
                 return map;
             }
 
@@ -250,8 +250,6 @@ public class ArticleController {
     }
 
 
-
-
     @ApiOperation(value = "获取单个文章信息", produces = "application/json")
     @GetMapping("/article/getOne")
     public Article getOne(@RequestParam Integer articleId) {
@@ -263,7 +261,7 @@ public class ArticleController {
     public Page<Article> getAllByPage(@RequestParam(name = "pageNum", defaultValue = "0") int pageNum,
                                       @RequestParam(name = "pageSize", defaultValue = "10") int pageSize
     ) {
-        Page<Article> page = articleService.findAll(pageNum, pageSize);
+        Page<Article> page = articleService.findAllByStatus(1, pageNum, pageSize);
         return page;
     }
 

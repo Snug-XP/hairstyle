@@ -487,7 +487,7 @@ public class HairstylistController {
                         hairstylistImageUrl.setImageUrl(imageList.get(i));
                         hairstylistImageUrlService.save(hairstylistImageUrl);
                     }
-                    logger.info("发型师用户 " + hairstylist.getHairstylistName() + "（" + myOpenid + "）保存了" + imageSize + "(实际上还要减去重复个数)张个人照片图片： " + imageList);
+                    logger.info("发型师用户 " + hairstylist.getHairstylistName() + "（" + myOpenid + "）保存了" + imageSize + "(实际上还要减去重复个数)张个人作品图片： " + imageList);
                     map.put("messgae", "保存成功！");
                 } else {
                     map.put("error", "请选择图片！！");

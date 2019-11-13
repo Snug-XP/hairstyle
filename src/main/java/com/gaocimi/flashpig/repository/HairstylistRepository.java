@@ -22,8 +22,17 @@ public interface HairstylistRepository extends JpaRepository<Hairstylist, Intege
 
     public List<Hairstylist> findAllByApplyStatus(Integer status);
 
-    public List<Hairstylist> findAllByLongitudeBetweenAndLatitudeBetween(Double longitudeLow,Double longitudeHigh ,Double LatitudeLow,Double LatitudeHigh);
+    public List<Hairstylist> findAllByApplyStatusAndShopNameLike(Integer status, String shopName);
 
-    public List<Hairstylist> findAllByLongitudeBetweenAndLatitudeBetweenAndShopName(Double longitudeLow, Double longitudeHigh , Double LatitudeLow, Double LatitudeHigh, String shopName);
+    public List<Hairstylist> findAllByApplyStatusAndProvinceAndCityAndDistrict(Integer status, String province, String city, String district);
+
+    public List<Hairstylist> findAllByApplyStatusAndShopNameLikeAndProvinceAndCityAndDistrict(Integer status, String shopName,
+                                                                                              String province, String city, String district);
+
+    public List<Hairstylist> findAllByLongitudeBetweenAndLatitudeBetween(Double longitudeLow, Double longitudeHigh,
+                                                                         Double LatitudeLow, Double LatitudeHigh);
+
+    public List<Hairstylist> findAllByLongitudeBetweenAndLatitudeBetweenAndShopName(Double longitudeLow, Double longitudeHigh,
+                                                                                    Double LatitudeLow, Double LatitudeHigh, String shopName);
 
 }

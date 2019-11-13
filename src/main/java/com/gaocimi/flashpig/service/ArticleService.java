@@ -32,11 +32,11 @@ public interface ArticleService {
     public Page<Article> findAll(int pageNum, int pageSize);
 
     /**
-     * 分页获取待审核的发型文章
+     * 分页获取待审核或者审核通过的文章的发型文章
      *
      * @param pageNum  页数（第几页）
      * @param pageSize 每页大小
      * @return
      */
-    public Page<Article> findPendingList(int pageNum, int pageSize);
+    public Page<Article> findAllByStatus(int status, int pageNum, int pageSize);
 }
