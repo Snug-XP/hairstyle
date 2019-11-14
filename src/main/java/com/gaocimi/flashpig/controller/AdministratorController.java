@@ -6,7 +6,7 @@ import com.gaocimi.flashpig.entity.*;
 import com.gaocimi.flashpig.result.ResponseResult;
 import com.gaocimi.flashpig.service.AdministratorService;
 import com.gaocimi.flashpig.service.ArticleService;
-import com.gaocimi.flashpig.service.HairstylistService;
+import com.gaocimi.flashpig.service.ShopService;
 import com.gaocimi.flashpig.service.ShopService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -30,14 +30,14 @@ import java.util.Map;
 @ResponseResult
 @Api(value = "管理端操作", description = "")
 class AdministratorController {
-    protected static final Logger logger = LoggerFactory.getLogger(HairstylistController.class);
+    protected static final Logger logger = LoggerFactory.getLogger(ShopController.class);
 
     @Autowired
     AdministratorService administratorService;
     @Autowired
     ShopService shopService;
     @Autowired
-    HairstylistService hairstylistService;
+    ShopService hairstylistService;
     @Autowired
     ArticleService articleService;
 
@@ -73,49 +73,49 @@ class AdministratorController {
     }
 
 
-    @ApiOperation(value = "同意或拒绝发型师的注册（decide=1表示同意，decide=-1表示不同意）", notes = "仅管理员有权限", produces = "application/json")
-    @PostMapping("/Administrator/hairstylist/approveOrReject")
-    public Map approveOrReject(@RequestParam String myOpenid, int hairstylistId, int decide) {
+    @ApiOperation(value = "同意或拒绝门店的注册（decide=1表示同意，decide=-1表示不同意）", notes = "仅管理员有权限", produces = "application/json")
+    @PostMapping("/Administrator/shop/approveOrReject")
+    public Map approveOrReject(@RequestParam String myOpenid, int shopId, int decide) {
         Map map = new HashMap();
         try {
             Administrator administrator = administratorService.findAdministratorByOpenid(myOpenid);
             if (administrator != null) {
 
-                Hairstylist hairstylist = hairstylistService.findHairstylistById(hairstylistId);
-                if (hairstylist == null) {
-                    map.put("error", "所操作的发型师不存在！！");
-                    logger.info("所操作的发型师不存在！！");
+                Shop shop = shopService.findShopById(shopId);
+                if (shop == null) {
+                    map.put("error", "所操作的门店不存在！！");
+                    logger.info("所操作的门店不存在！！");
                     return map;
                 }
 
 
                 switch (decide) {
                     case 1:
-                        hairstylist.setApplyStatus(1);
-                        hairstylistService.edit(hairstylist);
-                        logger.info("管理员“" + administrator.getName() + "”(id=" + administrator.getId() + ")同意id为" + hairstylist.getId() + "的发型师“" + hairstylist.getHairstylistName() + "”的注册");
-                        map.put("message", "同意该发型师注册，操作成功");
+                        shop.setApplyStatus(1);
+                        shopService.edit(shop);
+                        logger.info("管理员“" + administrator.getName() + "”(id=" + administrator.getId() + ")同意id为" + shop.getId() + "的发型师“" + shop.getShopName() + "”的注册");
+                        map.put("message", "同意该门店注册，操作成功");
                         break;
                     case -1:
-                        hairstylist.setApplyStatus(-1);
-                        hairstylistService.edit(hairstylist);
-                        logger.info("管理员“" + administrator.getName() + "”(id=" + administrator.getId() + ")拒绝id为" + hairstylist.getId() + "的发型师“" + hairstylist.getHairstylistName() + "”的注册！");
-                        map.put("message", "拒绝该发型师注册，操作成功");
+                        shop.setApplyStatus(-1);
+                        shopService.edit(shop);
+                        logger.info("管理员“" + administrator.getName() + "”(id=" + administrator.getId() + ")拒绝id为" + shop.getId() + "的门店“" + shop.getShopName() + "”的注册！");
+                        map.put("message", "拒绝该门店注册，操作成功");
                         //...有时间再加一下拒绝理由模版消息
                         break;
                     default:
                         map.put("error", "decide的值错误（同意为1，拒绝为-1）！！");
-                        logger.info("同意或拒绝发型师注册的decide的值错误！！");
+                        logger.info("同意或拒绝门店注册的decide(="+decide+")的值错误！！");
                         break;
 
                 }
             } else {
-                logger.info("同意或拒绝发型师注册操作息失败！！（没有权限！！）");
+                logger.info("同意或拒绝门店注册操作失败！！（没有权限！！）");
                 map.put("error", "操作失败！！（没有权限！！）");
             }
         } catch (Exception e) {
             logger.error(e.getMessage());
-            logger.info("同意或拒绝发型师注册操作失败！！（后端发生某些错误）");
+            logger.info("同意或拒绝门店注册操作失败！！（后端发生某些错误）");
             map.put("error", "操作失败！！（后端发生某些错误）");
             e.printStackTrace();
 

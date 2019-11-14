@@ -38,57 +38,75 @@ public class ShopController {
     @Autowired
     AdministratorService administratorService;
 
-
-
-
-
-
-
-
-
-
     @ApiOperation(value = "门店登录")
     @PostMapping("/shop/login")
-    public Map shopLogin(@RequestParam String openid,@RequestParam String phone,@RequestParam String password){
+    public Map shopLogin(@RequestParam String openid, @RequestParam String phone, @RequestParam String password) {
         Map map = new HashMap();
 
         Shop shop = shopService.findShopByPhone(phone);
-        if(shop==null){
-            logger.info("账号（"+phone+"）不存在!");
-            map.put("error","账号（"+phone+"）不存在!");
+        if (shop == null) {
+            logger.info("账号（" + phone + "）不存在!");
+            map.put("error", "账号不存在!");
             return map;
         }
-        if(!shop.getProvince().equals(password)){
-            logger.info("登录密码错误!（phone："+phone+" ，wrongPassword:"+password+",rightpassword:"+shop.getPassword()+"）");
-            map.put("error","密码错误！！");
+        if (!shop.getPassword().equals(password)) {
+            logger.info("登录密码错误!（phone：" + phone + " ，wrongPassword:" + password + ",rightpassword:" + shop.getPassword() + "）");
+            map.put("error", "密码错误！！");
             return map;
+        }
+
+        if (shop.getApplyStatus() == 0) {
+            logger.info("账号（" + phone + "）正在审核中!");
+            map.put("message", "正在审核中!");
+            return map;
+        } else if (shop.getApplyStatus() == -1) {
+            logger.info("账号（" + phone + "）审核未通过!，请重新注册");
+            map.put("message", "审核未通过!，请重新注册");
+            return map;
+        }
+
+        if (shop.getApplyStatus() != 1) {
+            logger.info("账号（" + phone + "）状态异常！！暂时禁止登录");
+            map.put("error", "账号状态异常！！暂时禁止登录");
+            return map;
+        }
+
+        //去除该微信用户在其他门店的登录标记（一个微信仅允许登录一个门店账户）
+        Shop shop1 = shopService.findShopByOpenid(openid);
+        while (shop1 != null) {
+            shop1.setOpenid(null);
+            shopService.edit(shop1);
+            shop1 = shopService.findShopByOpenid(openid);
         }
 
         shop.setOpenid(openid);
         shopService.edit(shop);
-        logger.info("门店“"+shop.getShopName()+"”（id="+shop.getId()+"）登录成功！");
-        map.put("message","登陆成功!");
+        logger.info("门店“" + shop.getShopName() + "”（id=" + shop.getId() + "）登录成功！");
+
+
+        map.put("shop", shop);
+        map.put("message", "登陆成功!");
         return map;
     }
 
 
     @ApiOperation(value = "门店退出登录")
     @GetMapping("/shop/exit")
-    public Map exit( @RequestParam String myOpenid) {
+    public Map exit(@RequestParam String myOpenid) {
         Map map = new HashMap();
         try {
             Shop shop = shopService.findShopByOpenid(myOpenid);
-            if ( shop == null || shop.getApplyStatus() != 1) {
+            if (shop == null || shop.getApplyStatus() != 1) {
                 map.put("message", "已退出！");
                 return map;
             } else {
                 shop.setOpenid(null);
                 shopService.edit(shop);
-                logger.info("门店“"+shop.getShopName()+"”（id="+shop.getId()+"）退出登录！");
+                logger.info("门店“" + shop.getShopName() + "”（id=" + shop.getId() + "）退出登录！");
                 map.put("message", "已退出！");
                 return map;
             }
-        }catch (Exception e) {
+        } catch (Exception e) {
             logger.info("获取个人的顾客预约数情况列表失败！！（后端发生某些错误）\n\n");
             map.put("error", "操作失败！！（后端发生某些错误）");
             e.printStackTrace();
@@ -97,14 +115,9 @@ public class ShopController {
     }
 
 
-
-
-
-
-
     @ApiOperation(value = "门店注册申请")
     @PostMapping("/shop/register/apply")
-    public Map addShop(HttpServletRequest request, @RequestParam String openid,
+    public Map addShop(HttpServletRequest request,
                        @RequestParam(value = "shopName", required = false) String shopName,
                        @RequestParam(value = "phone", required = false) String phone,
                        @RequestParam(value = "password", required = false) String password,
@@ -126,31 +139,30 @@ public class ShopController {
             return map;
         }
 
-        Shop shop = shopService.findShopByOpenid(openid);
+        Shop shop = shopService.findShopByPhone(phone);
         try {
             if (shop != null) {
                 //之前有申请过
 
                 //之前申请失败了，删除记录
                 if (shop.getApplyStatus() == -1) {
-                    logger.info("删除" + shop.getShopName() + "之前申请失败的记录,并重新申请\n");
+                    logger.info("删除“" + shop.getShopName() + "”（id="+shop.getId()+"）之前申请失败的记录,并重新申请\n");
                     shopService.delete(shop.getId());
                 } else {
                     logger.info(shop.getShopName() + "重复申请！！你的申请正在审核中或者已通过，无需重复提交！！");
-                    map.put("message", "你的申请正在审核中或者已通过，无需重复提交！！");
+                    map.put("message", "您的申请正在审核中或者已通过，无需重复提交！！");
                     return map;
                 }
             }
 
             shop = new Shop();
 
-            if(!MyUtils.isMobileNO(phone)){
-                logger.info("电话号码（"+phone+"）不合法！！");
-                map.put("error","电话号码（"+phone+"）不合法！！");
+            if (!MyUtils.isMobileNO(phone)) {
+                logger.info("电话号码（" + phone + "）不合法！！");
+                map.put("error", "电话号码（" + phone + "）不合法！！");
                 return map;
             }
 
-            shop.setOpenid(openid);
             shop.setShopName(shopName);
             shop.setPhone(phone);
             shop.setPassword(password);
@@ -164,10 +176,9 @@ public class ShopController {
             shop.setLatitude(latitude);
 
 
-
             shopService.save(shop);
 
-           
+
         } catch (Exception e) {
             e.printStackTrace();
             logger.info("传入的数据：" + JSONObject.toJSON(request.getParameterMap()) + "\n");
@@ -232,7 +243,7 @@ public class ShopController {
                 logger.info("该门店不存在（修改信息）！！");
                 logger.info("传入的数据：" + JSONObject.toJSON(request.getParameterMap()) + "\n");
 
-                map.put("error", "门店不存在！！");
+                map.put("error", "未登录！！");
                 return map;
             }
 
@@ -240,10 +251,16 @@ public class ShopController {
 
                 if (shopName != null)
                     shop.setShopName(shopName);
-                if (phone != null){
-                    if(!MyUtils.isMobileNO(phone)){
-                        logger.info("电话号码（"+phone+"）不合法！！");
-                        map.put("error","电话号码（"+phone+"）不合法！！");
+                if (phone != null) {
+                    if (!MyUtils.isMobileNO(phone)) {
+                        logger.info("电话号码（" + phone + "）不合法！！");
+                        map.put("error", "电话号码（" + phone + "）不合法！！");
+                        return map;
+                    }
+                    Shop shop1 = shopService.findShopByPhone(phone);
+                    if (shop1.getId()!=shop.getId()){
+                        logger.info("该电话号码已被注册！！（修改门店信息）");
+                        map.put("error","该电话号码已被注册!!");
                         return map;
                     }
                     shop.setPhone(phone);
@@ -428,7 +445,7 @@ public class ShopController {
                 }
                 map.put("resultList", resultList);
                 map.put("sumNum", resultList.size());
-                
+
                 return map;
             }
         } catch (Exception e) {
@@ -473,7 +490,7 @@ public class ShopController {
                 }
                 map.put("resultList", resultList);
                 map.put("sumNum", resultList.size());
-                
+
                 return map;
             }
         } catch (Exception e) {
