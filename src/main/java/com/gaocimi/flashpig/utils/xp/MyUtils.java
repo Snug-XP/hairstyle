@@ -18,6 +18,8 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * 自己的工具类
@@ -179,6 +181,10 @@ public class MyUtils {
     }
 
 
+    /**
+     * 将列表分页，返回分页内容
+     * @return
+     */
     public static Page<Object> getPage(List<Object> list , int pageNum,int pageSize){
         int first = pageNum * pageSize;
         int last = pageNum * pageSize + pageSize - 1;
@@ -196,6 +202,23 @@ public class MyUtils {
         return page;
     }
 
-
+    /**
+     * 判断电话号码是否符合格式
+     * @param mobiles 11位电话号码
+     * @return
+     */
+    public static boolean isMobileNO(String mobiles) {
+        boolean flag = false;
+        try {
+            //13********* ,15********,18*********
+            Pattern p = Pattern
+                    .compile("^((13[0-9])|(15[^4,\\D])|(18[0,5-9]))\\d{8}$");
+            Matcher m = p.matcher(mobiles);
+            flag = m.matches();
+        } catch (Exception e) {
+            flag = false;
+        }
+        return flag;
+    }
 
 }
