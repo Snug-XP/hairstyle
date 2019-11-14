@@ -32,7 +32,6 @@ public interface ShopRepository extends JpaRepository<Shop, Integer>, JpaSpecifi
     public List<Shop> findAllByLongitudeBetweenAndLatitudeBetween(Double longitudeLow, Double longitudeHigh,
                                                                          Double LatitudeLow, Double LatitudeHigh);
 
-    public List<Shop> findAllByLongitudeBetweenAndLatitudeBetweenAndShopName(Double longitudeLow, Double longitudeHigh,
-                                                                                    Double LatitudeLow, Double LatitudeHigh, String shopName);
+    public List<Shop> findAllByShopNameLike(String shopName);
 
 }

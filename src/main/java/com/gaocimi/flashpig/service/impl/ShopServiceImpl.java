@@ -81,7 +81,7 @@ public class ShopServiceImpl implements ShopService {
      */
     @Override
     public Page<Shop> findRegisterList(Integer status, String province, String city,
-                                              String district, String shopName, int pageNum, int pageSize) {
+                                       String district, String shopName, int pageNum, int pageSize) {
 
         int first = pageNum * pageSize;
         int last = pageNum * pageSize + pageSize - 1;
@@ -124,15 +124,14 @@ public class ShopServiceImpl implements ShopService {
 
 
     /**
-     * 获取某点的经纬度半径范围内并且门店名包含关键字的门店列表
+     * 根据店名关键字查找相关门店列表
      *
      * @param shopName 门店名关键字
-     * @param radius   半径范围
      * @return
      */
     @Override
-    public List<Shop> getShopsByRadiusAndShopName(Double longitude, Double latitude, Double radius, String shopName) {
-        List<Shop> shops = shopRepository.findAllByLongitudeBetweenAndLatitudeBetweenAndShopName(longitude - radius, longitude + radius, latitude - radius, latitude + radius, shopName);
+    public List<Shop> getShopsByShopNameLike(String shopName) {
+        List<Shop> shops = shopRepository.findAllByShopNameLike("%" + shopName + "%");
         return shops;
     }
 

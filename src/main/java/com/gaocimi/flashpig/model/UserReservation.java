@@ -26,8 +26,8 @@ public class UserReservation {
     /**预约的发型师姓名*/
     private String hairstylistName;
 
-    /**预约的发型师姓名*/
-    private String shopName;
+    /**预约的发型师所在门店*/
+    private ShopSimpleInfo shop;
 
     /**预约时间*/
     private Date bookTime;
@@ -44,7 +44,7 @@ public class UserReservation {
         setHairstylistId(order.getHairstylist().getId());
         setImgUrl(order.getHairstylist().getPersonalPhotoUrl());
         setHairstylistName(order.getHairstylist().getHairstylistName());
-        setShopName(order.getHairstylist().getShopName());
+        setShop(order.getHairstylist().getShopSimpleInfo());
         setBookTime(order.getBookTime());
         setStatus(order.getStatus());
         setServiceName(order.getServiceName());

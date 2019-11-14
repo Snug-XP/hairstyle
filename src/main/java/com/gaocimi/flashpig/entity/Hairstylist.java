@@ -1,6 +1,7 @@
 package com.gaocimi.flashpig.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.gaocimi.flashpig.model.ShopSimpleInfo;
 import com.gaocimi.flashpig.utils.xp.MyUtils;
 
 import javax.persistence.*;
@@ -14,7 +15,7 @@ import java.util.*;
  */
 @Entity
 @Table(name = "hairstylist")
-@JsonIgnoreProperties(value = {"articleList", "getCurrentMonthOrderSum", "allOperationalData", "loyalUserRecordList", "haircutOrderList", "hairstylistImageUrlList", "hairServiceList", "recordToUserList", "userList", "handler", "hibernateLazyInitializer", "fieldHandler"})
+@JsonIgnoreProperties(value = {"shop","articleList", "getCurrentMonthOrderSum", "allOperationalData", "loyalUserRecordList", "haircutOrderList", "hairstylistImageUrlList", "hairServiceList", "recordToUserList", "userList", "handler", "hibernateLazyInitializer", "fieldHandler"})
 public class Hairstylist {
 
     @Id
@@ -46,40 +47,10 @@ public class Hairstylist {
      */
     private String personalProfile;
 
-    /**
-     * 门店名称
-     */
-    private String shopName;
-
-    /**
-     * 门店所在省份
-     */
-    private String province;
-
-    /**
-     * 门店所在城市
-     */
-    private String city;
-
-    /**
-     * 门店所在区县
-     */
-    private String district;
-
-    /**
-     * 门店详细地址
-     */
-    private String address;
-
-    /**
-     * 门店经度，对于两个接近赤道的点，在纬度相等的情况下： 经度每隔0.00001度，距离相差约1米；每隔0.0001度，距离相差约10米；每隔0.001度，距离相差约100米；
-     */
-    private Double longitude;
-
-    /**
-     * 门店纬度，对于两个接近赤道的点，在经度相等的情况下： 纬度每隔0.00001度，距离相差约1.1米；每隔0.0001度，距离相差约11米；每隔0.001度，距离相差约111米；
-     */
-    private Double latitude;
+    /**该发型师所在门店； 定义名为shop_id的外键列，该外键引用shop表的主键(id)列,采用懒加载*/
+    @ManyToOne(targetEntity = Shop.class, fetch = FetchType.LAZY)
+    @JoinColumn(name = "shop_id", nullable = false)
+    public Shop shop;
 
     /**
      * 可预约时间点，用逗号隔开整点时间点，例如（19:00 20:00 21:00）记为（19,20,21）
@@ -206,60 +177,16 @@ public class Hairstylist {
         this.personalProfile = personalProfile;
     }
 
-    public String getShopName() {
-        return shopName;
+    public Shop getShop() {
+        return shop;
     }
 
-    public void setShopName(String shopName) {
-        this.shopName = shopName;
+    public void setShop(Shop shop) {
+        this.shop = shop;
     }
 
-    public String getProvince() {
-        return province;
-    }
-
-    public void setProvince(String province) {
-        this.province = province;
-    }
-
-    public String getCity() {
-        return city;
-    }
-
-    public void setCity(String city) {
-        this.city = city;
-    }
-
-    public String getDistrict() {
-        return district;
-    }
-
-    public void setDistrict(String district) {
-        this.district = district;
-    }
-
-    public String getAddress() {
-        return address;
-    }
-
-    public void setAddress(String address) {
-        this.address = address;
-    }
-
-    public Double getLongitude() {
-        return longitude;
-    }
-
-    public void setLongitude(Double longitude) {
-        this.longitude = longitude;
-    }
-
-    public Double getLatitude() {
-        return latitude;
-    }
-
-    public void setLatitude(Double latitude) {
-        this.latitude = latitude;
+    public ShopSimpleInfo getShopSimpleInfo() {
+        return new ShopSimpleInfo(shop);
     }
 
     public String getAvailableTime() {

@@ -24,8 +24,9 @@ public class Shop {
     private Integer id;
 
     /**
-     * 对应的微信openid
+     * 记录本次登录的微信的openid
      */
+    @Column(name = "temp_openid")
     private String openid;
 
     /**
@@ -141,6 +142,32 @@ public class Shop {
     public int getOrderSum(){
         regulateOrderSum();
         return orderSum;
+    }
+
+    /**
+     * 获取发型师在本月的完成订单数
+     *
+     * @return 本月的完成订单数
+     */
+    public int getCurrentMonthOrderSum() {
+        int count = 0;
+        for(Hairstylist hairstylist : hairstylists)
+            count += hairstylist.getCurrentMonthOrderSum();
+        return count;
+    }
+
+    /**
+     * 获取发型师今天的预约订单数
+     *
+     * @return 今天的预约订单数
+     */
+    public int getTodayOrderSum() {
+        int todayOrderCount = 0;//今日预约人数
+
+        for(Hairstylist hairstylist : hairstylists)
+            todayOrderCount += hairstylist.getTodayOrderSum();
+
+        return todayOrderCount;
     }
 
 

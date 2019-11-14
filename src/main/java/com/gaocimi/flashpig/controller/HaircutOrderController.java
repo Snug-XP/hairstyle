@@ -512,7 +512,6 @@ public class HaircutOrderController {
             List<UserReservation> resultList = new ArrayList<>();
 
             if(tempOrderList==null||tempOrderList.size()==0){
-                logger.info("你还没有进行预约过哦~");
                 map.put("message","你还没有进行预约过哦~");
                 return map;
             }

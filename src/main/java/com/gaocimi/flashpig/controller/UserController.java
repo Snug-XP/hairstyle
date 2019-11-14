@@ -118,7 +118,7 @@ public class UserController {
             }
             UserToHairstylist userToHairstylist = new UserToHairstylist(user,hairstylist);
             userToHairstylistService.save(userToHairstylist);
-            logger.info("id为"+user.getId()+"的用户收藏了id为"+hairstylist.getId()+"的发型师“"+hairstylist.getHairstylistName()+"”");
+            logger.info("id为"+user.getId()+"的用户“"+user.getName()+"”收藏了id为"+hairstylist.getId()+"的发型师“"+hairstylist.getHairstylistName()+"”");
             map.put("message","收藏成功！");
 
         }catch (Exception e){

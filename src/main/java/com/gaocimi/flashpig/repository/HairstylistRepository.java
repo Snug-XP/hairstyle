@@ -9,7 +9,7 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import java.util.List;
 
 //参考https://www.cnblogs.com/ityouknow/p/5891443.html
-public interface HairstylistRepository extends JpaRepository<Hairstylist, Integer>, JpaSpecificationExecutor<Hairstylist> {
+public interface HairstylistRepository extends JpaRepository<Hairstylist, Integer> {
 
     Hairstylist findById(int id);
 
@@ -19,20 +19,5 @@ public interface HairstylistRepository extends JpaRepository<Hairstylist, Intege
 
     //分页
     public Page<Hairstylist> findAll(Pageable pageable);
-
-    public List<Hairstylist> findAllByApplyStatus(Integer status);
-
-    public List<Hairstylist> findAllByApplyStatusAndShopNameLike(Integer status, String shopName);
-
-    public List<Hairstylist> findAllByApplyStatusAndProvinceAndCityAndDistrict(Integer status, String province, String city, String district);
-
-    public List<Hairstylist> findAllByApplyStatusAndShopNameLikeAndProvinceAndCityAndDistrict(Integer status, String shopName,
-                                                                                              String province, String city, String district);
-
-    public List<Hairstylist> findAllByLongitudeBetweenAndLatitudeBetween(Double longitudeLow, Double longitudeHigh,
-                                                                         Double LatitudeLow, Double LatitudeHigh);
-
-    public List<Hairstylist> findAllByLongitudeBetweenAndLatitudeBetweenAndShopName(Double longitudeLow, Double longitudeHigh,
-                                                                                    Double LatitudeLow, Double LatitudeHigh, String shopName);
 
 }

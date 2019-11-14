@@ -45,12 +45,11 @@ public interface ShopService {
 
 
     /**
-     * 获取某点的经纬度半径范围内并且门店名包含关键字的门店列表
+     * 根据店名关键字查找相关门店列表
      *
      * @param shopName 门店名关键字
-     * @param radius   半径范围
      * @return
      */
-    public List<Shop> getShopsByRadiusAndShopName(Double longitude, Double latitude, Double radius, String shopName);
+    public List<Shop> getShopsByShopNameLike(String shopName);
 
 }

@@ -4,7 +4,6 @@ import com.alibaba.fastjson.JSONObject;
 import com.gaocimi.flashpig.entity.*;
 import com.gaocimi.flashpig.model.CountUser;
 import com.gaocimi.flashpig.model.RankingData;
-import com.gaocimi.flashpig.model.UserReservation;
 import com.gaocimi.flashpig.result.ResponseResult;
 import com.gaocimi.flashpig.service.*;
 import com.gaocimi.flashpig.utils.xp.MyUtils;
@@ -17,10 +16,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpRequest;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import springfox.documentation.spring.web.json.Json;
 
 import javax.servlet.http.HttpServletRequest;
 import java.text.DateFormat;
@@ -41,6 +37,8 @@ public class HairstylistController {
     @Autowired
     HairstylistService hairstylistService;
     @Autowired
+    ShopService shopService;
+    @Autowired
     HairServiceService hairServiceService;
     @Autowired
     HairstylistImageUrlService hairstylistImageUrlService;
@@ -57,15 +55,7 @@ public class HairstylistController {
                               @RequestParam(value = "hairstylistName", required = false) String hairstylistName,
                               @RequestParam(value = "personalPhotoUrl", required = false) String personalPhotoUrl,
                               @RequestParam(value = "personalPhone", required = false) String personalPhone,
-                              @RequestParam(value = "personalProfile", required = false) String personalProfile,
-                              @RequestParam(value = "shopName", required = false) String shopName,
-                              @RequestParam(value = "province", required = false) String province,
-                              @RequestParam(value = "city", required = false) String city,
-                              @RequestParam(value = "district", required = false) String district,
-                              @RequestParam(value = "address", required = false) String address,
                               @RequestParam(value = "attention", required = false) String attention,
-                              @RequestParam(value = "longitude", required = false) Double longitude,
-                              @RequestParam(value = "latitude", required = false) Double latitude,
                               @RequestParam(value = "timeList", required = false) List<String> timeList,
                               @RequestParam(value = "hairService", required = false) List<String> hairService,
                               @RequestParam(value = "description", required = false) List<String> description,
@@ -74,7 +64,7 @@ public class HairstylistController {
         Map map = new HashMap();
 
 
-        if (hairstylistName ==null||personalPhone==null||personalPhotoUrl ==null||personalProfile ==null||shopName ==null||province ==null||city ==null||district ==null||address ==null||longitude ==null||latitude ==null)
+        if (hairstylistName ==null||personalPhone==null||personalPhotoUrl ==null)
         {
             logger.info("请完整填写个人资料!(发型师注册申请)");
             logger.info("传入的数据："+JSONObject.toJSON(request.getParameterMap())+"\n");
@@ -104,13 +94,6 @@ public class HairstylistController {
             hairstylist.setHairstylistName(hairstylistName);
             hairstylist.setPersonalPhotoUrl(personalPhotoUrl);
             hairstylist.setPersonalPhone(personalPhone);
-            hairstylist.setShopName(shopName);
-            hairstylist.setProvince(province);
-            hairstylist.setCity(city);
-            hairstylist.setDistrict(district);
-            hairstylist.setAddress(address);
-            hairstylist.setLongitude(longitude);
-            hairstylist.setLatitude(latitude);
 
             hairstylist.setAttention(attention);
 
@@ -211,14 +194,7 @@ public class HairstylistController {
                                  @RequestParam(value = "hairstylistName", required = false) String hairstylistName,
                                  @RequestParam(value = "personalPhotoUrl", required = false) String personalPhotoUrl,
                                  @RequestParam(value = "personalProfile", required = false) String personalProfile,
-                                 @RequestParam(value = "shopName", required = false) String shopName,
-                                 @RequestParam(value = "province", required = false) String province,
-                                 @RequestParam(value = "city", required = false) String city,
-                                 @RequestParam(value = "district", required = false) String district,
-                                 @RequestParam(value = "address", required = false) String address,
-                                 @RequestParam(value = "attention", required = false) String attention,
-                                 @RequestParam(value = "longitude", required = false) Double longitude,
-                                 @RequestParam(value = "latitude", required = false) Double latitude) {
+                                 @RequestParam(value = "attention", required = false) String attention) {
         Map map = new HashMap();
         try {
             Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
@@ -238,22 +214,8 @@ public class HairstylistController {
                     hairstylist.setPersonalPhotoUrl(personalPhotoUrl);
                 if (personalProfile != null)
                     hairstylist.setPersonalProfile(personalProfile);
-                if (shopName != null)
-                    hairstylist.setShopName(shopName);
-                if (province != null)
-                    hairstylist.setProvince(province);
-                if (city != null)
-                    hairstylist.setCity(city);
-                if (district != null)
-                    hairstylist.setDistrict(district);
-                if (address != null)
-                    hairstylist.setAddress(address);
                 if (attention != null)
                     hairstylist.setAttention(attention);
-                if (longitude != null)
-                    hairstylist.setLongitude(longitude);
-                if (latitude != null)
-                    hairstylist.setLatitude(latitude);
 
                 hairstylistService.edit(hairstylist);
 
@@ -320,7 +282,7 @@ public class HairstylistController {
 
     @ApiOperation(value = "分页获取所有发型师列表", notes = "仅管理员有权限", produces = "application/json")
     @GetMapping("/hairstylists/getAll")
-    public Map getairstylistsPage(@RequestParam String myOpenid,
+    public Map getHairstylistsPage(@RequestParam String myOpenid,
                                   @RequestParam(name = "pageNum", defaultValue = "0") int pageNum,
                                   @RequestParam(name = "pageSize", defaultValue = "10") int pageSize) {
         Map map = new HashMap();
@@ -708,8 +670,7 @@ public class HairstylistController {
                 map.put("error", "对不起，你还不是发型师用户，无权操作！！");
                 return map;
             } else {
-                Double radius = 0.001;//0.001经纬度相对大概100米
-                List<Hairstylist> hairstylists = hairstylistService.getHairstylistsByRadiusAndShopName(hairstylist.getLongitude(), hairstylist.getLatitude(), radius, hairstylist.getShopName());
+                List<Hairstylist> hairstylists = hairstylist.shop.getHairstylists();
                 // 按完成订单数倒序排序
                 Collections.sort(hairstylists, (o1, o2) -> {
                     if (o1.getOrderSum() < o2.getOrderSum()) {
@@ -727,7 +688,7 @@ public class HairstylistController {
                     Hairstylist h = hairstylists.get(i);
                     RankingData data = new RankingData(i + 1, h, h.getOrderSum());
                     resultList.add(data);
-                    if (data.getHairstylistId() == hairstylist.getId())
+                    if (data.getId() == hairstylist.getId())
                         myRankings = i + 1;//获取我的排名
                 }
                 map.put("resultList", resultList);
@@ -755,8 +716,8 @@ public class HairstylistController {
                 map.put("error", "对不起，你还不是发型师用户，无权操作！！");
                 return map;
             } else {
-                Double radius = 0.001;//0.001经纬度相对大概100米
-                List<Hairstylist> hairstylists = hairstylistService.getHairstylistsByRadiusAndShopName(hairstylist.getLongitude(), hairstylist.getLatitude(), radius, hairstylist.getShopName());
+                List<Hairstylist> hairstylists = hairstylist.shop.getHairstylists();
+
                 // 按今日预约的订单数倒序排序
                 Collections.sort(hairstylists, (o1, o2) -> {
                     if (o1.getTodayOrderSum() < o2.getTodayOrderSum()) {
@@ -774,7 +735,7 @@ public class HairstylistController {
                     Hairstylist h = hairstylists.get(i);
                     RankingData data = new RankingData(i + 1, h, h.getTodayOrderSum());
                     resultList.add(data);
-                    if (data.getHairstylistId() == hairstylist.getId())
+                    if (data.getId() == hairstylist.getId())
                         myRankings = i + 1;//获取我的排名
                 }
                 map.put("resultList", resultList);
@@ -802,8 +763,8 @@ public class HairstylistController {
                 map.put("error", "对不起，你还不是发型师用户，无权操作！！");
                 return map;
             } else {
-                Double radius = 0.001;//0.001经纬度相对大概100米
-                List<Hairstylist> hairstylists = hairstylistService.getHairstylistsByRadiusAndShopName(hairstylist.getLongitude(), hairstylist.getLatitude(), radius, hairstylist.getShopName());
+                List<Hairstylist> hairstylists = hairstylist.shop.getHairstylists();
+
                 // 按完成订单数倒序排序
                 Collections.sort(hairstylists, (o1, o2) -> {
                     if (o1.getCurrentMonthOrderSum() < o2.getCurrentMonthOrderSum()) {
@@ -821,7 +782,7 @@ public class HairstylistController {
                     Hairstylist h = hairstylists.get(i);
                     RankingData data = new RankingData(i + 1, h, h.getCurrentMonthOrderSum());
                     resultList.add(data);
-                    if (data.getHairstylistId() == hairstylist.getId())
+                    if (data.getId() == hairstylist.getId())
                         myRankings = i + 1;//获取我的排名
                 }
                 map.put("resultList", resultList);
@@ -838,7 +799,7 @@ public class HairstylistController {
         }
     }
 
-    @ApiOperation(value = "获取区域排行 - 全部")
+    @ApiOperation(value = "获取区域(经纬度相差0.001的)排行 - 全部")
     @GetMapping("/hairstylist/getRegionalRanking/all")
     public Map getRegionalRankingAll(@RequestParam String myOpenid,
                                      @RequestParam(name = "pageNum", defaultValue = "0") int pageNum,
@@ -852,7 +813,14 @@ public class HairstylistController {
                 return map;
             } else {
                 Double radius = 0.001;//0.001经纬度相对大概100米
-                List<Hairstylist> hairstylists = hairstylistService.getHairstylistsByRadius(hairstylist.getLongitude(), hairstylist.getLatitude(), radius);
+                List<Hairstylist> hairstylists = new ArrayList<>();
+                Shop shop = hairstylist.getShop();
+                List<Shop> shopList = shopService.getShopsByRadius(shop.getLongitude(), shop.getLatitude(), radius);
+
+                for(Shop shop1 : shopList){
+                    hairstylists.addAll(shop1.hairstylists);
+                }
+
                 // 按完成订单数倒序排序
                 Collections.sort(hairstylists, (o1, o2) -> {
                     if (o1.getOrderSum() < o2.getOrderSum()) {
@@ -871,7 +839,7 @@ public class HairstylistController {
                     Hairstylist h = hairstylists.get(i);
                     RankingData data = new RankingData(i + 1, h, h.getOrderSum());
                     tempList.add(data);
-                    if (data.getHairstylistId() == hairstylist.getId())
+                    if (data.getId() == hairstylist.getId())
                         myRankings = i + 1;//获取我的排名
                 }
 
@@ -899,7 +867,7 @@ public class HairstylistController {
         }
     }
 
-    @ApiOperation(value = "获取区域排行 - 今天")
+    @ApiOperation(value = "获取区域排行(经纬度相差0.001的) - 今天")
     @GetMapping("/hairstylist/getRegionalRanking/today")
     public Map getRegionalRankingToday(@RequestParam String myOpenid,
                                        @RequestParam(name = "pageNum", defaultValue = "0") int pageNum,
@@ -913,7 +881,14 @@ public class HairstylistController {
                 return map;
             } else {
                 Double radius = 0.001;//0.001经纬度相对大概100米
-                List<Hairstylist> hairstylists = hairstylistService.getHairstylistsByRadius(hairstylist.getLongitude(), hairstylist.getLatitude(), radius);
+                List<Hairstylist> hairstylists = new ArrayList<>();
+                Shop shop = hairstylist.getShop();
+                List<Shop> shopList = shopService.getShopsByRadius(shop.getLongitude(), shop.getLatitude(), radius);
+
+                for(Shop shop1 : shopList){
+                    hairstylists.addAll(shop1.hairstylists);
+                }
+
                 // 按今日预约的订单数倒序排序
                 Collections.sort(hairstylists, (o1, o2) -> {
                     if (o1.getTodayOrderSum() < o2.getTodayOrderSum()) {
@@ -932,7 +907,7 @@ public class HairstylistController {
                     Hairstylist h = hairstylists.get(i);
                     RankingData data = new RankingData(i + 1, h, h.getTodayOrderSum());
                     tempList.add(data);
-                    if (data.getHairstylistId() == hairstylist.getId())
+                    if (data.getId() == hairstylist.getId())
                         myRankings = i + 1;//获取我的排名
                 }
 
@@ -960,7 +935,7 @@ public class HairstylistController {
         }
     }
 
-    @ApiOperation(value = "获取区域排行 - 本月")
+    @ApiOperation(value = "获取区域排行(经纬度相差0.001的) - 本月")
     @GetMapping("/hairstylist/getRegionalRanking/month")
     public Map getRegionalRankingMonth(@RequestParam String myOpenid,
                                        @RequestParam(name = "pageNum", defaultValue = "0") int pageNum,
@@ -974,7 +949,14 @@ public class HairstylistController {
                 return map;
             } else {
                 Double radius = 0.001;//0.001经纬度相对大概100米
-                List<Hairstylist> hairstylists = hairstylistService.getHairstylistsByRadius(hairstylist.getLongitude(), hairstylist.getLatitude(), radius);
+                List<Hairstylist> hairstylists = new ArrayList<>();
+                Shop shop = hairstylist.getShop();
+                List<Shop> shopList = shopService.getShopsByRadius(shop.getLongitude(), shop.getLatitude(), radius);
+
+                for(Shop shop1 : shopList){
+                    hairstylists.addAll(shop1.hairstylists);
+                }
+
                 // 按完成订单数倒序排序
                 Collections.sort(hairstylists, (o1, o2) -> {
                     if (o1.getCurrentMonthOrderSum() < o2.getCurrentMonthOrderSum()) {
@@ -993,7 +975,7 @@ public class HairstylistController {
                     Hairstylist h = hairstylists.get(i);
                     RankingData data = new RankingData(i + 1, h, h.getCurrentMonthOrderSum());
                     tempList.add(data);
-                    if (data.getHairstylistId() == hairstylist.getId())
+                    if (data.getId() == hairstylist.getId())
                         myRankings = i + 1;//获取我的排名
                 }
 

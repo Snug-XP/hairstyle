@@ -289,7 +289,7 @@ public class ArticleController {
             }
             UserToArticle userToArticle = new UserToArticle(user, article);
             userToArticleService.save(userToArticle);
-            logger.info("id为" + user.getId() + "的用户收藏了id为" + article.getId() + "的文章（title：" + article.getTitle() + "）");
+            logger.info("id为" + user.getId() + "的用户“"+user.getName()+"”收藏了id为" + article.getId() + "的文章（title：" + article.getTitle() + "）");
             map.put("message", "收藏成功！");
 
         } catch (Exception e) {
