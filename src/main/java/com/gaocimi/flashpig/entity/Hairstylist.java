@@ -312,7 +312,7 @@ public class Hairstylist {
     }
 
     /**
-     * 根据自己的订单列表（中的已完成）数量进行校正
+     * 校正已完成订单数量 - 根据自己的订单列表（中的已完成）数量进行校正
      */
     public void regulateOrderSum() {
         int count = 0;

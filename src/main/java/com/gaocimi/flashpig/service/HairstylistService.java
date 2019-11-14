@@ -27,7 +27,7 @@ public interface HairstylistService {
     public Page<Hairstylist> findAll(int pageNum, int pageSize);
 
     /**
-     * 分页获取获取待审核或审核已通过的发型师用户（可选定省、市、县以及商铺名的范围）
+     * 分页获取获取待审核或审核已通过的发型师用户（可选定省、市、县以及门店名的范围）
      *
      * @param pageNum  页数（第几页）
      * @param pageSize 每页大小
@@ -45,9 +45,9 @@ public interface HairstylistService {
 
 
     /**
-     * 获取某点的经纬度半径范围内并且商铺名包含关键字的发型师列表
+     * 获取某点的经纬度半径范围内并且门店名包含关键字的发型师列表
      *
-     * @param shopName 商铺名关键字
+     * @param shopName 门店名关键字
      * @param radius   半径范围
      * @return
      */
