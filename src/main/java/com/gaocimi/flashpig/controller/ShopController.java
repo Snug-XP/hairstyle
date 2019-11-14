@@ -5,6 +5,7 @@ import com.gaocimi.flashpig.entity.*;
 import com.gaocimi.flashpig.model.RankingData;
 import com.gaocimi.flashpig.result.ResponseResult;
 import com.gaocimi.flashpig.service.*;
+import com.gaocimi.flashpig.utils.xp.MyUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.slf4j.Logger;
@@ -36,6 +37,70 @@ public class ShopController {
     HairServiceService hairServiceService;
     @Autowired
     AdministratorService administratorService;
+
+
+
+
+
+
+
+
+
+
+    @ApiOperation(value = "门店登录")
+    @PostMapping("/shop/login")
+    public Map shopLogin(@RequestParam String openid,@RequestParam String phone,@RequestParam String password){
+        Map map = new HashMap();
+
+        Shop shop = shopService.findShopByPhone(phone);
+        if(shop==null){
+            logger.info("账号（"+phone+"）不存在!");
+            map.put("error","账号（"+phone+"）不存在!");
+            return map;
+        }
+        if(!shop.getProvince().equals(password)){
+            logger.info("登录密码错误!（phone："+phone+" ，wrongPassword:"+password+",rightpassword:"+shop.getPassword()+"）");
+            map.put("error","密码错误！！");
+            return map;
+        }
+
+        shop.setOpenid(openid);
+        shopService.edit(shop);
+        logger.info("门店“"+shop.getShopName()+"”（id="+shop.getId()+"）登录成功！");
+        map.put("message","登陆成功!");
+        return map;
+    }
+
+
+    @ApiOperation(value = "门店退出登录")
+    @GetMapping("/shop/exit")
+    public Map exit( @RequestParam String myOpenid) {
+        Map map = new HashMap();
+        try {
+            Shop shop = shopService.findShopByOpenid(myOpenid);
+            if ( shop == null || shop.getApplyStatus() != 1) {
+                map.put("message", "已退出！");
+                return map;
+            } else {
+                shop.setOpenid(null);
+                shopService.edit(shop);
+                logger.info("门店“"+shop.getShopName()+"”（id="+shop.getId()+"）退出登录！");
+                map.put("message", "已退出！");
+                return map;
+            }
+        }catch (Exception e) {
+            logger.info("获取个人的顾客预约数情况列表失败！！（后端发生某些错误）\n\n");
+            map.put("error", "操作失败！！（后端发生某些错误）");
+            e.printStackTrace();
+            return map;
+        }
+    }
+
+
+
+
+
+
 
     @ApiOperation(value = "门店注册申请")
     @PostMapping("/shop/register/apply")
@@ -78,6 +143,12 @@ public class ShopController {
             }
 
             shop = new Shop();
+
+            if(!MyUtils.isMobileNO(phone)){
+                logger.info("电话号码（"+phone+"）不合法！！");
+                map.put("error","电话号码（"+phone+"）不合法！！");
+                return map;
+            }
 
             shop.setOpenid(openid);
             shop.setShopName(shopName);
@@ -169,8 +240,14 @@ public class ShopController {
 
                 if (shopName != null)
                     shop.setShopName(shopName);
-                if (phone != null)
+                if (phone != null){
+                    if(!MyUtils.isMobileNO(phone)){
+                        logger.info("电话号码（"+phone+"）不合法！！");
+                        map.put("error","电话号码（"+phone+"）不合法！！");
+                        return map;
+                    }
                     shop.setPhone(phone);
+                }
                 if (password != null)
                     shop.setPassword(password);
                 if (shopPhotoUrl != null)
@@ -211,7 +288,7 @@ public class ShopController {
     }
 
 
-    @ApiOperation(value = "根据门店openid,获取单个门店信息（包括总预约人数和今日预约人数）", produces = "application/json")
+    @ApiOperation(value = "根据门店临时登录微信的openid,获取单个门店信息（包括总预约人数和今日预约人数）", produces = "application/json")
     @GetMapping("/shop")
     public Map getOne(@RequestParam String myOpenid) {
         Map map = new HashMap();
@@ -252,7 +329,7 @@ public class ShopController {
     }
 
     @ApiOperation(value = "分页获取所有门店列表", notes = "仅管理员有权限", produces = "application/json")
-    @GetMapping("/hairstylists/getAll")
+    @GetMapping("/shop/getAll")
     public Map getShopsPage(@RequestParam String myOpenid,
                             @RequestParam(name = "pageNum", defaultValue = "0") int pageNum,
                             @RequestParam(name = "pageSize", defaultValue = "10") int pageSize) {

@@ -198,7 +198,7 @@ public class PushTemplateMessageController {
 
         //设置模版信息（keyword1：类型，keyword2：内容）
         WxMaTemplateData reservationNum = new WxMaTemplateData("keyword1", order.getReservationNum());
-        WxMaTemplateData shop = new WxMaTemplateData("keyword2", order.hairstylist.getShopName());
+        WxMaTemplateData shop = new WxMaTemplateData("keyword2", order.hairstylist.shop.getShopName());
         WxMaTemplateData address = new WxMaTemplateData("keyword3", order.getAddress());
         WxMaTemplateData bookTime = new WxMaTemplateData("keyword4", order.getBookTime().toString());
         WxMaTemplateData hairstylistPhone = new WxMaTemplateData("keyword5", order.hairstylist.getPersonalPhone());
@@ -232,7 +232,7 @@ public class PushTemplateMessageController {
         //设置模版信息（keyword1：类型，keyword2：内容）
         WxMaTemplateData reservationNum = new WxMaTemplateData("keyword1", order.getReservationNum());
         WxMaTemplateData creatTime = new WxMaTemplateData("keyword2", order.getCreateTime().toString());
-        WxMaTemplateData shop = new WxMaTemplateData("keyword3", order.hairstylist.getShopName());
+        WxMaTemplateData shop = new WxMaTemplateData("keyword3", order.hairstylist.shop.getShopName());
         WxMaTemplateData bookTime = new WxMaTemplateData("keyword4", order.getBookTime().toString());
         WxMaTemplateData address = new WxMaTemplateData("keyword5", order.getAddress());
         WxMaTemplateData hairstylistName = new WxMaTemplateData("keyword6", order.hairstylist.getHairstylistName());
@@ -289,7 +289,7 @@ public class PushTemplateMessageController {
         WxMaTemplateData reservationNum = new WxMaTemplateData("keyword1", order.getReservationNum());
         WxMaTemplateData tips = new WxMaTemplateData("keyword2", "您的订单已完成，可以前往小程序对本次服务进行评价哦；或者您对本次订单有疑问的话，请联系下方相关人员电话");
         WxMaTemplateData serviceName = new WxMaTemplateData("keyword3", order.getServiceName());
-        WxMaTemplateData shop = new WxMaTemplateData("keyword4", order.hairstylist.getShopName());
+        WxMaTemplateData shop = new WxMaTemplateData("keyword4", order.hairstylist.shop.getShopName());
         WxMaTemplateData address = new WxMaTemplateData("keyword5", order.getAddress());
         WxMaTemplateData hairstylistPhone = new WxMaTemplateData("keyword6", order.hairstylist.getPersonalPhone());
         WxMaTemplateData orderStatus = new WxMaTemplateData("keyword7", statusString );

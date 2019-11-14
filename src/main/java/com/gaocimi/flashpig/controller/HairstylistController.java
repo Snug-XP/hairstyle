@@ -87,6 +87,11 @@ public class HairstylistController {
                     return map;
                 }
             }
+            if(!MyUtils.isMobileNO(personalPhone)){
+                logger.info("电话号码（"+personalPhone+"）不合法！！");
+                map.put("error","电话号码（"+personalPhone+"）不合法！！");
+                return map;
+            }
 
             hairstylist = new Hairstylist();
 
@@ -193,6 +198,7 @@ public class HairstylistController {
     public Map updateHairstylist(HttpServletRequest request,@RequestParam String myOpenid,
                                  @RequestParam(value = "hairstylistName", required = false) String hairstylistName,
                                  @RequestParam(value = "personalPhotoUrl", required = false) String personalPhotoUrl,
+                                 @RequestParam(value = "personalPhone", required = false) String personalPhone,
                                  @RequestParam(value = "personalProfile", required = false) String personalProfile,
                                  @RequestParam(value = "attention", required = false) String attention) {
         Map map = new HashMap();
@@ -212,6 +218,14 @@ public class HairstylistController {
                     hairstylist.setHairstylistName(hairstylistName);
                 if (personalPhotoUrl != null)
                     hairstylist.setPersonalPhotoUrl(personalPhotoUrl);
+                if (personalPhone != null) {
+                    if(!MyUtils.isMobileNO(personalPhone)){
+                        logger.info("电话号码（"+personalPhone+"）不合法！！");
+                        map.put("error","电话号码（"+personalPhone+"）不合法！！");
+                        return map;
+                    }
+                    hairstylist.setPersonalPhone(personalPhone);
+                }
                 if (personalProfile != null)
                     hairstylist.setPersonalProfile(personalProfile);
                 if (attention != null)

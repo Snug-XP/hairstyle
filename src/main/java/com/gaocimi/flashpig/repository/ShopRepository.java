@@ -13,6 +13,8 @@ public interface ShopRepository extends JpaRepository<Shop, Integer>, JpaSpecifi
 
     Shop findById(int id);
 
+    Shop findByPhone(String phone);
+
     Shop findByOpenid(String openid);
 
     void deleteById(int id);

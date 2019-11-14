@@ -16,6 +16,8 @@ public interface ShopService {
 
     public Shop findShopById(int id);
 
+    public Shop findShopByPhone(String phone);
+
     public Shop findShopByOpenid(String openid);
 
     public void save(Shop shop);

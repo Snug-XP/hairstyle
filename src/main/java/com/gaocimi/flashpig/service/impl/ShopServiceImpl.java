@@ -36,6 +36,10 @@ public class ShopServiceImpl implements ShopService {
     }
 
     @Override
+    public Shop findShopByPhone(String phone){return shopRepository.findByPhone(phone);}
+
+
+    @Override
     public Shop findShopByOpenid(String openid) {
         return shopRepository.findByOpenid(openid);
     }
