@@ -23,7 +23,7 @@ public class RankingData {
     public RankingData(int index, Shop shop, int oederSum) {
         this.index = index;
         this.id = shop.getId();
-        this.photoUrl = shop.getShopPhotoUrl();
+        this.photoUrl = shop.getLogoUrl();
         this.name = shop.getShopName();
         this.oederSum = oederSum;
     }

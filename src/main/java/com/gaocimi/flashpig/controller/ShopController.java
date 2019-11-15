@@ -40,7 +40,7 @@ public class ShopController {
 
     @ApiOperation(value = "门店登录")
     @PostMapping("/shop/login")
-    public Map shopLogin(@RequestParam String openid, @RequestParam String phone, @RequestParam String password) {
+    public Map shopLogin(@RequestParam String myOpenid, @RequestParam String phone, @RequestParam String password) {
         Map map = new HashMap();
 
         Shop shop = shopService.findShopByPhone(phone);
@@ -72,14 +72,14 @@ public class ShopController {
         }
 
         //去除该微信用户在其他门店的登录标记（一个微信仅允许登录一个门店账户）
-        Shop shop1 = shopService.findShopByOpenid(openid);
+        Shop shop1 = shopService.findShopByOpenid(myOpenid);
         while (shop1 != null) {
             shop1.setOpenid(null);
             shopService.edit(shop1);
-            shop1 = shopService.findShopByOpenid(openid);
+            shop1 = shopService.findShopByOpenid(myOpenid);
         }
 
-        shop.setOpenid(openid);
+        shop.setOpenid(myOpenid);
         shopService.edit(shop);
         logger.info("门店“" + shop.getShopName() + "”（id=" + shop.getId() + "）登录成功！");
 
@@ -97,7 +97,7 @@ public class ShopController {
         try {
             Shop shop = shopService.findShopByOpenid(myOpenid);
             if (shop == null || shop.getApplyStatus() != 1) {
-                map.put("message", "已退出！");
+                map.put("message", "当前未处于登录状态！");
                 return map;
             } else {
                 shop.setOpenid(null);
@@ -121,7 +121,7 @@ public class ShopController {
                        @RequestParam(value = "shopName", required = false) String shopName,
                        @RequestParam(value = "phone", required = false) String phone,
                        @RequestParam(value = "password", required = false) String password,
-                       @RequestParam(value = "shopPhotoUrl", required = false) String shopPhotoUrl,
+                       @RequestParam(value = "logoUrl", required = false) String logoUrl,
                        @RequestParam(value = "operatingLicensePictureUrl", required = false) String operatingLicensePictureUrl,
                        @RequestParam(value = "province", required = false) String province,
                        @RequestParam(value = "city", required = false) String city,
@@ -132,7 +132,7 @@ public class ShopController {
         Map map = new HashMap();
 
 
-        if (shopPhotoUrl == null || phone == null || password == null || shopPhotoUrl == null || operatingLicensePictureUrl == null || shopName == null || province == null || city == null || district == null || address == null || longitude == null || latitude == null) {
+        if (logoUrl == null || phone == null || password == null || logoUrl == null || operatingLicensePictureUrl == null || shopName == null || province == null || city == null || district == null || address == null || longitude == null || latitude == null) {
             logger.info("请完整填写个人资料!(门店注册申请)");
             logger.info("传入的数据：" + JSONObject.toJSON(request.getParameterMap()) + "\n");
             map.put("message", "请完整填写个人资料！");
@@ -146,7 +146,7 @@ public class ShopController {
 
                 //之前申请失败了，删除记录
                 if (shop.getApplyStatus() == -1) {
-                    logger.info("删除“" + shop.getShopName() + "”（id="+shop.getId()+"）之前申请失败的记录,并重新申请\n");
+                    logger.info("删除“" + shop.getShopName() + "”（id=" + shop.getId() + "）之前申请失败的记录,并重新申请\n");
                     shopService.delete(shop.getId());
                 } else {
                     logger.info(shop.getShopName() + "重复申请！！你的申请正在审核中或者已通过，无需重复提交！！");
@@ -166,7 +166,7 @@ public class ShopController {
             shop.setShopName(shopName);
             shop.setPhone(phone);
             shop.setPassword(password);
-            shop.setShopPhotoUrl(shopPhotoUrl);
+            shop.setLogoUrl(logoUrl);
             shop.setOperatingLicensePictureUrl(operatingLicensePictureUrl);
             shop.setProvince(province);
             shop.setCity(city);
@@ -188,48 +188,48 @@ public class ShopController {
         logger.info("传入的数据：" + JSONObject.toJSON(request.getParameterMap()) + "\n");
         logger.info("id为" + shop.getId() + "的门店“" + shop.getShopName() + "”提交申请成功！");
 
-        map.put("message", "门店提交申请成功！");
+        map.put("message", "提交申请成功！");
         return map;
     }
 
-    @ApiOperation(value = "根据门店id，删除门店", notes = "权限：门店本人或管理员")
+    @ApiOperation(value = "根据门店id，注销门店", notes = "权限：门店本人或管理员")
     @DeleteMapping("/shop")
     public Map deleteShop(@RequestParam String myOpenid, @RequestParam Integer shopId) {
         Map map = new HashMap();
         try {
             if (shopService.findShopById(shopId) == null) {
-                logger.info("要删除的门店不存在！！");
+                logger.info("要注销的门店不存在！！");
                 map.put("error", "该门店不存在！！");
                 return map;
             }
             Shop shop = shopService.findShopById(shopId);
             if (myOpenid.equals(shop.getOpenid()) || administratorService.isExist(myOpenid)) {
                 shopService.delete(shopId);
-                logger.info("删除门店" + shop.getShopName() + "成功！");
-                map.put("message", "删除门店" + shop.getShopName() + "成功！");
+                logger.info("注销门店“" + shop.getShopName() + "”(" + shopId + ")成功！");
+                map.put("message", "注销门店“" + shop.getShopName() + "”成功！");
                 return map;
             } else {
-                logger.info("删除门店" + shop.getShopName() + "失败！！（没有权限！！）");
-                map.put("error", "删除门店" + shop.getShopName() + "失败！！（没有权限！！）");
+                logger.info("注销门店“" + shop.getShopName() + "”(" + shopId + ")失败！！（没有权限！！）");
+                map.put("error", "注销门店“" + shop.getShopName() + "”失败！！（没有权限！！）");
                 return map;
             }
         } catch (Exception e) {
             logger.error(e.getMessage());
-            logger.info("删除门店失败！（后端发生某些错误）");
-            map.put("error", "删除门店失败！（后端发生某些错误）");
+            logger.info("注销门店失败！（后端发生某些错误）");
+            map.put("error", "注销门店失败！（后端发生某些错误）");
             e.printStackTrace();
             return map;
         }
 
     }
 
-    @ApiOperation(value = "修改门店信息", notes = "权限：门店本人")
+    @ApiOperation(value = "根据当前登录的微信用户的openid，修改门店信息", notes = "权限：门店本人")
     @PutMapping("/shop")
     public Map updateShop(HttpServletRequest request, @RequestParam String myOpenid,
                           @RequestParam(value = "shopName", required = false) String shopName,
                           @RequestParam(value = "phone", required = false) String phone,
                           @RequestParam(value = "password", required = false) String password,
-                          @RequestParam(value = "shopPhotoUrl", required = false) String shopPhotoUrl,
+                          @RequestParam(value = "iconUrl", required = false) String iconUrl,
                           @RequestParam(value = "province", required = false) String province,
                           @RequestParam(value = "city", required = false) String city,
                           @RequestParam(value = "district", required = false) String district,
@@ -258,17 +258,17 @@ public class ShopController {
                         return map;
                     }
                     Shop shop1 = shopService.findShopByPhone(phone);
-                    if (shop1.getId()!=shop.getId()){
+                    if (shop1.getId() != shop.getId()) {
                         logger.info("该电话号码已被注册！！（修改门店信息）");
-                        map.put("error","该电话号码已被注册!!");
+                        map.put("error", "该电话号码已被注册!!");
                         return map;
                     }
                     shop.setPhone(phone);
                 }
                 if (password != null)
                     shop.setPassword(password);
-                if (shopPhotoUrl != null)
-                    shop.setShopPhotoUrl(shopPhotoUrl);
+                if (iconUrl != null)
+                    shop.setLogoUrl(iconUrl);
                 if (province != null)
                     shop.setProvince(province);
                 if (city != null)
@@ -305,7 +305,7 @@ public class ShopController {
     }
 
 
-    @ApiOperation(value = "根据门店临时登录微信的openid,获取单个门店信息（包括总预约人数和今日预约人数）", produces = "application/json")
+    @ApiOperation(value = "根据门店临时登录微信的openid,获取单个门店信息", produces = "application/json")
     @GetMapping("/shop")
     public Map getOne(@RequestParam String myOpenid) {
         Map map = new HashMap();
@@ -327,7 +327,7 @@ public class ShopController {
         }
     }
 
-    @ApiOperation(value = "根据门店id(不是openid),获取单个门店信息（包括总预约人数和今日预约人数）", produces = "application/json")
+    @ApiOperation(value = "根据门店id(不是openid),获取单个门店信息", produces = "application/json")
     @GetMapping("/getShopById")
     public Map getOneById(@RequestParam Integer shopId) {
         Map map = new HashMap();
@@ -345,7 +345,7 @@ public class ShopController {
         }
     }
 
-    @ApiOperation(value = "分页获取所有门店列表", notes = "仅管理员有权限", produces = "application/json")
+    @ApiOperation(value = "分页获取所有(审核通过的)门店列表", notes = "仅管理员有权限", produces = "application/json")
     @GetMapping("/shop/getAll")
     public Map getShopsPage(@RequestParam String myOpenid,
                             @RequestParam(name = "pageNum", defaultValue = "0") int pageNum,
@@ -353,7 +353,7 @@ public class ShopController {
         Map map = new HashMap();
         try {
             if (administratorService.isExist(myOpenid)) {
-                Page<Shop> page = shopService.findAll(pageNum, pageSize);
+                Page<Shop> page = shopService.findAllByStatus(1,pageNum, pageSize);
                 map.put("page", page);
                 logger.info("获取门店列表信息成功！");
                 return map;
@@ -550,7 +550,7 @@ public class ShopController {
                 Page<RankingData> page = new PageImpl<>(resultList, pageable, tempList.size());
 
                 map.put("page", page);
-                map.put("sumNum", tempList.size());
+                map.put("sumNum", shops.size());
                 map.put("myRankings", myRankings);
 
                 return map;
@@ -612,7 +612,7 @@ public class ShopController {
                 Page<RankingData> page = new PageImpl<>(resultList, pageable, tempList.size());
 
                 map.put("page", page);
-                map.put("sumNum", tempList.size());
+                map.put("sumNum", shops.size());
                 map.put("myRankings", myRankings);
 
 
@@ -675,7 +675,7 @@ public class ShopController {
                 Page<RankingData> page = new PageImpl<>(resultList, pageable, tempList.size());
 
                 map.put("page", page);
-                map.put("sumNum", tempList.size());
+                map.put("sumNum", shops.size());
                 map.put("myRankings", myRankings);
 
                 return map;

@@ -51,7 +51,7 @@ public class HairstylistController {
 
     @ApiOperation(value = "发型师注册申请")
     @PostMapping("/hairstylist/register/apply")
-    public Map addHairstylist(HttpServletRequest request,@RequestParam String openid,
+    public Map addHairstylist(HttpServletRequest request, @RequestParam String openid,
                               @RequestParam(value = "hairstylistName", required = false) String hairstylistName,
                               @RequestParam(value = "personalPhotoUrl", required = false) String personalPhotoUrl,
                               @RequestParam(value = "personalPhone", required = false) String personalPhone,
@@ -64,11 +64,10 @@ public class HairstylistController {
         Map map = new HashMap();
 
 
-        if (hairstylistName ==null||personalPhone==null||personalPhotoUrl ==null)
-        {
+        if (hairstylistName == null || personalPhone == null || personalPhotoUrl == null) {
             logger.info("请完整填写个人资料!(发型师注册申请)");
-            logger.info("传入的数据："+JSONObject.toJSON(request.getParameterMap())+"\n");
-            map.put("message","请完整填写个人资料！");
+            logger.info("传入的数据：" + JSONObject.toJSON(request.getParameterMap()) + "\n");
+            map.put("message", "请完整填写个人资料！");
             return map;
         }
 
@@ -87,9 +86,9 @@ public class HairstylistController {
                     return map;
                 }
             }
-            if(!MyUtils.isMobileNO(personalPhone)){
-                logger.info("电话号码（"+personalPhone+"）不合法！！");
-                map.put("error","电话号码（"+personalPhone+"）不合法！！");
+            if (!MyUtils.isMobileNO(personalPhone)) {
+                logger.info("电话号码（" + personalPhone + "）不合法！！");
+                map.put("error", "电话号码（" + personalPhone + "）不合法！！");
                 return map;
             }
 
@@ -138,7 +137,7 @@ public class HairstylistController {
             if (imageList != null) {
                 int imageSize = imageList.size();
                 for (int i = 0; i < imageSize; i++) {
-                    if(hairstylistImageUrlService.findByImgUrl(imageList.get(i))!=null){
+                    if (hairstylistImageUrlService.findByImgUrl(imageList.get(i)) != null) {
                         logger.info("存在相同的个人作品图片，本次图片不上传");
                         continue;
                     }
@@ -151,42 +150,42 @@ public class HairstylistController {
             }
         } catch (Exception e) {
             e.printStackTrace();
-            logger.info("传入的数据："+JSONObject.toJSON(request.getParameterMap())+"\n");
+            logger.info("传入的数据：" + JSONObject.toJSON(request.getParameterMap()) + "\n");
             map.put("error", "发型师提交申请失败！请检查输入数据（也有可能后端发生错误）");
             return map;
         }
-        logger.info("传入的数据："+JSONObject.toJSON(request.getParameterMap())+"\n");
+        logger.info("传入的数据：" + JSONObject.toJSON(request.getParameterMap()) + "\n");
         logger.info("id为" + hairstylist.getId() + "的发型师“" + hairstylist.getHairstylistName() + "”提交申请成功！");
 
-        map.put("message", "发型师提交申请成功！");
+        map.put("message", "提交申请成功！");
         return map;
     }
 
-    @ApiOperation(value = "根据发型师id，删除发型师", notes = "权限：发型师本人或管理员")
+    @ApiOperation(value = "根据发型师id，注销发型师", notes = "权限：发型师本人或管理员")
     @DeleteMapping("/hairstylist")
-    public Map deleteHairstylist(@RequestParam String myOpenid,@RequestParam Integer hairstylistId) {
+    public Map deleteHairstylist(@RequestParam String myOpenid, @RequestParam Integer hairstylistId) {
         Map map = new HashMap();
         try {
             if (hairstylistService.findHairstylistById(hairstylistId) == null) {
-                logger.info("要删除的发型师用户不存在！！");
+                logger.info("要注销的发型师用户不存在！！");
                 map.put("error", "该用户不存在！！");
                 return map;
             }
             Hairstylist hairstylist = hairstylistService.findHairstylistById(hairstylistId);
             if (myOpenid.equals(hairstylist.getOpenid()) || administratorService.isExist(myOpenid)) {
                 hairstylistService.delete(hairstylistId);
-                logger.info("删除用户" + hairstylist.getHairstylistName() + "成功！");
-                map.put("message", "删除用户" + hairstylist.getHairstylistName() + "成功！");
+                logger.info("注销发型师“" + hairstylist.getHairstylistName() + "”(id="+hairstylistId+")成功！");
+                map.put("message", "注销发型师“" + hairstylist.getHairstylistName() + "”成功！");
                 return map;
             } else {
-                logger.info("删除用户" + hairstylist.getHairstylistName() + "失败！！（没有权限！！）");
-                map.put("error", "删除用户" + hairstylist.getHairstylistName() + "失败！！（没有权限！！）");
+                logger.info("注销发型师“" + hairstylist.getHairstylistName() + "”(id="+hairstylistId+")失败！！（没有权限！！）");
+                map.put("error", "注销发型师“" + hairstylist.getHairstylistName() + "”失败！！（没有权限！！）");
                 return map;
             }
         } catch (Exception e) {
             logger.error(e.getMessage());
-            logger.info("删除发型师失败！（后端发生某些错误）");
-            map.put("error", "删除发型师失败！（后端发生某些错误）");
+            logger.info("注销发型师失败！（后端发生某些错误）");
+            map.put("error", "注销发型师失败！（后端发生某些错误）");
             e.printStackTrace();
             return map;
         }
@@ -195,7 +194,7 @@ public class HairstylistController {
 
     @ApiOperation(value = "发型师修改个人信息", notes = "权限：发型师本人")
     @PutMapping("/hairstylist")
-    public Map updateHairstylist(HttpServletRequest request,@RequestParam String myOpenid,
+    public Map updateHairstylist(HttpServletRequest request, @RequestParam String myOpenid,
                                  @RequestParam(value = "hairstylistName", required = false) String hairstylistName,
                                  @RequestParam(value = "personalPhotoUrl", required = false) String personalPhotoUrl,
                                  @RequestParam(value = "personalPhone", required = false) String personalPhone,
@@ -206,7 +205,7 @@ public class HairstylistController {
             Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
             if (hairstylist == null) {
                 logger.info("该发型师用户不存在（修改信息）！！");
-                logger.info("传入的数据："+JSONObject.toJSON(request.getParameterMap())+"\n");
+                logger.info("传入的数据：" + JSONObject.toJSON(request.getParameterMap()) + "\n");
 
                 map.put("error", "发型师用户不存在！！");
                 return map;
@@ -219,9 +218,9 @@ public class HairstylistController {
                 if (personalPhotoUrl != null)
                     hairstylist.setPersonalPhotoUrl(personalPhotoUrl);
                 if (personalPhone != null) {
-                    if(!MyUtils.isMobileNO(personalPhone)){
-                        logger.info("电话号码（"+personalPhone+"）不合法！！");
-                        map.put("error","电话号码（"+personalPhone+"）不合法！！");
+                    if (!MyUtils.isMobileNO(personalPhone)) {
+                        logger.info("电话号码（" + personalPhone + "）不合法！！");
+                        map.put("error", "电话号码（" + personalPhone + "）不合法！！");
                         return map;
                     }
                     hairstylist.setPersonalPhone(personalPhone);
@@ -235,12 +234,12 @@ public class HairstylistController {
 
 
                 logger.info("发型师用户 " + hairstylist.getHairstylistName() + "（" + myOpenid + "）重新修改了基本信息");
-                logger.info("传入的数据："+JSONObject.toJSON(request.getParameterMap())+"\n");
+                logger.info("传入的数据：" + JSONObject.toJSON(request.getParameterMap()) + "\n");
                 map.put("message", "发型师信息修改成功！");
                 return map;
             } else {
                 logger.info("发型师信息修改失败！！（没有权限！！）");
-                logger.info("传入的数据："+JSONObject.toJSON(request.getParameterMap())+"\n");
+                logger.info("传入的数据：" + JSONObject.toJSON(request.getParameterMap()) + "\n");
                 map.put("error", "发型师信息修改失败！！（没有权限！！）");
                 return map;
             }
@@ -297,8 +296,8 @@ public class HairstylistController {
     @ApiOperation(value = "分页获取所有发型师列表", notes = "仅管理员有权限", produces = "application/json")
     @GetMapping("/hairstylists/getAll")
     public Map getHairstylistsPage(@RequestParam String myOpenid,
-                                  @RequestParam(name = "pageNum", defaultValue = "0") int pageNum,
-                                  @RequestParam(name = "pageSize", defaultValue = "10") int pageSize) {
+                                   @RequestParam(name = "pageNum", defaultValue = "0") int pageNum,
+                                   @RequestParam(name = "pageSize", defaultValue = "10") int pageSize) {
         Map map = new HashMap();
         try {
             if (administratorService.isExist(myOpenid)) {
@@ -454,7 +453,7 @@ public class HairstylistController {
                 if (imageList != null) {
                     int imageSize = imageList.size();
                     for (int i = 0; i < imageSize; i++) {
-                        if(hairstylistImageUrlService.findByImgUrl(imageList.get(i))!=null){
+                        if (hairstylistImageUrlService.findByImgUrl(imageList.get(i)) != null) {
                             logger.info("存在相同的个人作品图片，本次图片不上传");
                             continue;
                         }
@@ -481,7 +480,7 @@ public class HairstylistController {
 
     @ApiOperation(value = "根据图片对应id,删除个人作品图片url")
     @DeleteMapping("/hairstylist/deleteImageUrlList")
-    public Map deleteImageUrlList(@RequestParam String myOpenid,@RequestParam Integer id) {
+    public Map deleteImageUrlList(@RequestParam String myOpenid, @RequestParam Integer id) {
         Map map = new HashMap();
         try {
             Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
@@ -706,7 +705,7 @@ public class HairstylistController {
                         myRankings = i + 1;//获取我的排名
                 }
                 map.put("resultList", resultList);
-                map.put("sumNum", resultList.size());
+                map.put("sumNum", hairstylists.size());
                 map.put("myRankings", myRankings);
                 return map;
             }
@@ -753,7 +752,7 @@ public class HairstylistController {
                         myRankings = i + 1;//获取我的排名
                 }
                 map.put("resultList", resultList);
-                map.put("sumNum", resultList.size());
+                map.put("sumNum", hairstylists.size());
                 map.put("myRankings", myRankings);
                 return map;
             }
@@ -800,7 +799,7 @@ public class HairstylistController {
                         myRankings = i + 1;//获取我的排名
                 }
                 map.put("resultList", resultList);
-                map.put("sumNum", resultList.size());
+                map.put("sumNum", hairstylists.size());
                 map.put("myRankings", myRankings);
                 return map;
             }
@@ -831,7 +830,7 @@ public class HairstylistController {
                 Shop shop = hairstylist.getShop();
                 List<Shop> shopList = shopService.getShopsByRadius(shop.getLongitude(), shop.getLatitude(), radius);
 
-                for(Shop shop1 : shopList){
+                for (Shop shop1 : shopList) {
                     hairstylists.addAll(shop1.hairstylists);
                 }
 
@@ -868,7 +867,7 @@ public class HairstylistController {
                 Page<RankingData> page = new PageImpl<>(resultList, pageable, tempList.size());
 
                 map.put("page", page);
-                map.put("sumNum", tempList.size());
+                map.put("sumNum", hairstylists.size());
                 map.put("myRankings", myRankings);
                 return map;
             }
@@ -899,7 +898,7 @@ public class HairstylistController {
                 Shop shop = hairstylist.getShop();
                 List<Shop> shopList = shopService.getShopsByRadius(shop.getLongitude(), shop.getLatitude(), radius);
 
-                for(Shop shop1 : shopList){
+                for (Shop shop1 : shopList) {
                     hairstylists.addAll(shop1.hairstylists);
                 }
 
@@ -936,7 +935,7 @@ public class HairstylistController {
                 Page<RankingData> page = new PageImpl<>(resultList, pageable, tempList.size());
 
                 map.put("page", page);
-                map.put("sumNum", tempList.size());
+                map.put("sumNum", hairstylists.size());
                 map.put("myRankings", myRankings);
                 return map;
             }
@@ -967,7 +966,7 @@ public class HairstylistController {
                 Shop shop = hairstylist.getShop();
                 List<Shop> shopList = shopService.getShopsByRadius(shop.getLongitude(), shop.getLatitude(), radius);
 
-                for(Shop shop1 : shopList){
+                for (Shop shop1 : shopList) {
                     hairstylists.addAll(shop1.hairstylists);
                 }
 
@@ -1004,7 +1003,7 @@ public class HairstylistController {
                 Page<RankingData> page = new PageImpl<>(resultList, pageable, tempList.size());
 
                 map.put("page", page);
-                map.put("sumNum", tempList.size());
+                map.put("sumNum", hairstylists.size());
                 map.put("myRankings", myRankings);
                 return map;
             }

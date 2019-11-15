@@ -1,6 +1,7 @@
 package com.gaocimi.flashpig.service.impl;
 
 import com.gaocimi.flashpig.entity.Shop;
+import com.gaocimi.flashpig.entity.Shop;
 import com.gaocimi.flashpig.repository.ShopRepository;
 import com.gaocimi.flashpig.service.ShopService;
 import org.slf4j.Logger;
@@ -139,6 +140,31 @@ public class ShopServiceImpl implements ShopService {
         return shops;
     }
 
+    /**
+     * 分页获取待审核或者审核通过的文章的发型文章
+     *
+     * @param pageNum  页数（第几页）
+     * @param pageSize 每页大小
+     * @return
+     */
+    @Override
+    public Page<Shop> findAllByStatus(int status, int pageNum, int pageSize) {
+        int first = pageNum * pageSize;
+        int last = pageNum * pageSize + pageSize - 1;
+
+        List<Shop> shops = shopRepository.findAllByApplyStatus(status);
+        List<Shop> resultList = new ArrayList<>();
+
+        for (int i = first; i <= last && i < shops.size(); i++) {
+            resultList.add(shops.get(i));
+        }
+
+        //包装分页数据
+        Pageable pageable = PageRequest.of(pageNum, pageSize);
+        Page<Shop> page = new PageImpl<>(resultList, pageable, shops.size());
+
+        return page;
+    }
 
 }
 

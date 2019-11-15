@@ -54,4 +54,5 @@ public interface ShopService {
      */
     public List<Shop> getShopsByShopNameLike(String shopName);
 
+    Page<Shop> findAllByStatus(int status, int pageNum, int pageSize);
 }

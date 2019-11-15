@@ -45,9 +45,9 @@ public class Shop {
     private String password;
 
     /**
-     * 门店照片url
+     * 门店标志图片url
      */
-    private String shopPhotoUrl;
+    private String logoUrl;
 
     /**
      * 该门店经营执照的图片url
