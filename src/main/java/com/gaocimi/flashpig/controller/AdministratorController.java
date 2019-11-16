@@ -1,12 +1,10 @@
 package com.gaocimi.flashpig.controller;
 
 
-import cn.binarywang.wx.miniapp.api.WxMaService;
 import com.gaocimi.flashpig.entity.*;
 import com.gaocimi.flashpig.result.ResponseResult;
 import com.gaocimi.flashpig.service.AdministratorService;
 import com.gaocimi.flashpig.service.ArticleService;
-import com.gaocimi.flashpig.service.ShopService;
 import com.gaocimi.flashpig.service.ShopService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -17,7 +15,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 
@@ -42,8 +39,8 @@ class AdministratorController {
     ArticleService articleService;
 
     @ApiOperation(value = "获取待审核或审核已通过的门店信息列表(分页展示)（status=0表示“待审核”status=1表示“审核通过”，status=-1表示“审核未通过”，可选定省、市、县以及门店名的范围）", notes = "仅管理员有权限")
-    @GetMapping("/Administrator/getShopList")
-    public Map getShopList(@RequestParam String myOpenid,
+    @GetMapping("/Administrator/getRegisterShopList")
+    public Map getRegisterShopList(@RequestParam String myOpenid,
                                @RequestParam Integer status,
                                @RequestParam(name = "province",required = false) String province,
                                @RequestParam(name = "city",required = false) String city,
@@ -54,7 +51,7 @@ class AdministratorController {
         Map map = new HashMap();
         try {
             if (administratorService.isExist(myOpenid)) {
-                Page<Shop> page = shopService.findRegisterList(status,province,city,district,shopName,pageNum, pageSize);
+                Page<Shop> page = shopService.findRegisterShopList(status,province,city,district,shopName,pageNum, pageSize);
                 map.put("page", page);
                 logger.info("获取门店列表信息成功！");
                 return map;

@@ -185,11 +185,11 @@ public class MyUtils {
      * 将列表分页，返回分页内容
      * @return
      */
-    public static Page<Object> getPage(List<Object> list , int pageNum,int pageSize){
-        int first = pageNum * pageSize;
-        int last = pageNum * pageSize + pageSize - 1;
+    public static <T> Page<T> getPage(List<T> list , int pageNum, int pageSize){
+        int first = pageNum * pageSize;//该页第一个元素位置
+        int last = pageNum * pageSize + pageSize - 1;//该页最后一个元素位置
 
-        List<Object> resultList = new ArrayList<>();
+        List<T> resultList = new ArrayList<>();
 
         for (int i = first; i <= last && i < list.size(); i++) {
             resultList.add(list.get(i));
@@ -197,7 +197,7 @@ public class MyUtils {
 
         //包装分页数据
         Pageable pageable = PageRequest.of(pageNum, pageSize);
-        Page<Object> page = new PageImpl<>(resultList, pageable, list.size());
+        Page<T> page = new PageImpl<>(resultList, pageable, list.size());
 
         return page;
     }

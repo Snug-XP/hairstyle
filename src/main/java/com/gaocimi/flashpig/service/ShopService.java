@@ -35,7 +35,7 @@ public interface ShopService {
      * @param pageSize 每页大小
      * @return
      */
-    public Page<Shop> findRegisterList(Integer status, String province, String city, String district, String shopName, int pageNum, int pageSize);
+    public Page<Shop> findRegisterShopList(Integer status, String province, String city, String district, String shopName, int pageNum, int pageSize);
 
     /**
      * 获取某点的经纬度半径范围内的门店列表

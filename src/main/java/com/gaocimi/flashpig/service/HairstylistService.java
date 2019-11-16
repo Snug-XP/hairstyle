@@ -26,6 +26,7 @@ public interface HairstylistService {
 
     public Page<Hairstylist> findAll(int pageNum, int pageSize);
 
+    //...添加通过status获取发型师
 
 
 }

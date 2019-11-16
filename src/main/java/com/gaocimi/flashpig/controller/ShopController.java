@@ -34,7 +34,7 @@ public class ShopController {
     @Autowired
     ShopService shopService;
     @Autowired
-    HairServiceService hairServiceService;
+    HairstylistService hairstylistService;
     @Autowired
     AdministratorService administratorService;
 
@@ -353,7 +353,7 @@ public class ShopController {
         Map map = new HashMap();
         try {
             if (administratorService.isExist(myOpenid)) {
-                Page<Shop> page = shopService.findAllByStatus(1,pageNum, pageSize);
+                Page<Shop> page = shopService.findAllByStatus(1, pageNum, pageSize);
                 map.put("page", page);
                 logger.info("获取门店列表信息成功！");
                 return map;
@@ -687,6 +687,97 @@ public class ShopController {
             e.printStackTrace();
             return map;
         }
+    }
+
+
+    @ApiOperation(value = "获取待审核或审核已通过的发型师信息列表(分页展示)（status=0表示“待审核”status=1表示“审核通过”，status=-1表示“审核未通过”", notes = "仅门店临时登录的微信openid有权限")
+    @GetMapping("/shop/getRegisterHairstylists")
+    public Map getRegisterHairstylists(@RequestParam String myOpenid,
+                                       @RequestParam Integer status,
+                                       @RequestParam(name = "pageNum", defaultValue = "0") int pageNum,
+                                       @RequestParam(name = "pageSize", defaultValue = "10") int pageSize) {
+        Map map = new HashMap();
+        try {
+
+            Shop shop = shopService.findShopByOpenid(myOpenid);
+            if (shop == null) {
+                logger.info("未登录操作（获取待审核或审核已通过的发型师）");
+                map.put("error", "请先登录！！");
+                return map;
+            }
+
+            List<Hairstylist> tempList = shop.getHairstylists();
+            List<Hairstylist> resultList = new ArrayList<>();
+
+            for( Hairstylist hairstylist : tempList){
+                if(hairstylist.getApplyStatus()==status)
+                    resultList.add(hairstylist);
+            }
+
+            Page<Hairstylist> page = MyUtils.getPage(resultList,pageNum,pageSize);
+            map.put("page", page);
+            return map;
+        } catch ( Exception e) {
+            logger.error(e.getMessage());
+            logger.info("获取正在注册的发型师列表失败！！（后端发生某些错误）");
+            map.put("error", "获取正在注册的发型师列表失败！！（后端发生某些错误）");
+            e.printStackTrace();
+            return map;
+        }
+
+    }
+
+
+    @ApiOperation(value = "同意或拒绝发型师的注册（decide=1表示同意，decide=-1表示不同意）", notes = "仅门店临时登录的微信openid有权限")
+    @PostMapping("/shop/hairstylist/approveOrReject")
+    public Map approveOrReject(@RequestParam String myOpenid, int hairstylistId, int decide) {
+        Map map = new HashMap();
+        try {
+            Shop shop = shopService.findShopByOpenid(myOpenid);
+            if (shop == null) {
+                logger.info("未登录操作（同意或拒绝发型师的注册）");
+                map.put("error", "请先登录！！");
+                return map;
+            }
+
+            Hairstylist hairstylist = hairstylistService.findHairstylistById(hairstylistId);
+            if (hairstylist == null) {
+                map.put("error", "所操作的发型师不存在！！");
+                logger.info("所操作的发型师不存在！！");
+                return map;
+            }
+
+
+            switch (decide) {
+                case 1:
+                    hairstylist.setApplyStatus(1);
+                    hairstylistService.edit(hairstylist);
+                    logger.info("门店“" + shop.getShopName() + "”(id=" + shop.getId() + ")同意id为" + hairstylist.getId() + "的发型师“" + hairstylist.getHairstylistName() + "”的注册");
+                    map.put("message", "同意该门店注册，操作成功");
+                    break;
+                case -1:
+                    hairstylist.setApplyStatus(-1);
+                    hairstylistService.edit(hairstylist);
+                    logger.info("门店“" + shop.getShopName() + "”(id=" + shop.getId() + ")拒绝id为" + hairstylist.getId() + "的发型师“" + hairstylist.getHairstylistName() + "”的注册");
+                    map.put("message", "拒绝该门店注册，操作成功");
+                    //...有时间再加一下拒绝理由模版消息
+                    break;
+                default:
+                    logger.info("同意或拒绝门店注册的decide(=" + decide + ")的值错误！！");
+                    map.put("error", "decide的值错误（同意为1，拒绝为-1）！！");
+                    break;
+
+            }
+
+
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            logger.info("同意或拒绝门店注册操作失败！！（后端发生某些错误）");
+            map.put("error", "操作失败！！（后端发生某些错误）");
+            e.printStackTrace();
+
+        }
+        return map;
     }
 
 

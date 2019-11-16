@@ -85,8 +85,8 @@ public class ShopServiceImpl implements ShopService {
      * @return
      */
     @Override
-    public Page<Shop> findRegisterList(Integer status, String province, String city,
-                                       String district, String shopName, int pageNum, int pageSize) {
+    public Page<Shop> findRegisterShopList(Integer status, String province, String city,
+                                           String district, String shopName, int pageNum, int pageSize) {
 
         int first = pageNum * pageSize;
         int last = pageNum * pageSize + pageSize - 1;
