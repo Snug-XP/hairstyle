@@ -423,8 +423,8 @@ public class HairstylistController {
     }
 
     @ApiOperation(value = "根据图片对应id,删除个人作品图片url")
-    @DeleteMapping("/hairstylist/deleteImageUrlList")
-    public Map deleteImageUrlList(@RequestParam String myOpenid, @RequestParam Integer id) {
+    @DeleteMapping("/hairstylist/deleteImageUrl")
+    public Map deleteImageUrl(@RequestParam String myOpenid, @RequestParam Integer id) {
         Map map = new HashMap();
         try {
             Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);

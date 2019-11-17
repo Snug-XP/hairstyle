@@ -37,6 +37,8 @@ public class ShopController {
     HairstylistService hairstylistService;
     @Autowired
     AdministratorService administratorService;
+    @Autowired
+    ShopImageUrlService shopImageUrlService;
 
     @ApiOperation(value = "门店登录")
     @PostMapping("/shop/login")
@@ -791,6 +793,7 @@ public class ShopController {
             }
 
             hairstylist.setShop(null);
+            hairstylist.setSettledTime(null);
             hairstylist.setApplyStatus(0);
             hairstylistService.edit(hairstylist);
 
@@ -805,7 +808,112 @@ public class ShopController {
             e.printStackTrace();
             return map;
         }
+    }
 
+
+    @ApiOperation(value = "获取门店场景图片url列表")
+    @GetMapping("/shop/getImageUrlList")
+    public Map getImageUrlList(@RequestParam String myOpenid) {
+        Map map = new HashMap();
+        try {
+            Shop shop = shopService.findShopByOpenid(myOpenid);
+            if (shop == null) {
+                logger.info("非门店登录用户操作！！（获取门店场景图片url列表）");
+                map.put("error", "请先登录！");
+                return map;
+            }
+            map.put("imageUrlList", shop.shopImageUrlList);
+            return map;
+
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            logger.info("获取门店场景图片操作失败！！（后端发生某些错误）\n\n");
+            map.put("error", "操作失败！！（后端发生某些错误）");
+            e.printStackTrace();
+            return map;
+        }
+    }
+
+    @ApiOperation(value = "添加门店场景图片url列表")
+    @PostMapping("/shop/addImageUrlList")
+    public Map addImageUrlList(@RequestParam String myOpenid,
+                               @RequestParam(value = "imageList", required = false) List<String> imageList) {
+        Map map = new HashMap();
+        try {
+            Shop shop = shopService.findShopByOpenid(myOpenid);
+            if (shop == null) {
+                logger.info("非门店登录用户操作！！（添加门店场景图片url列表）");
+                map.put("error", "请先登录！");
+                return map;
+            } else {
+
+                //下面保存该理发师的作品url
+                if (imageList == null) {
+                    map.put("error", "请选择图片！！");
+                    return map;
+                }
+
+                int imageSize = imageList.size();
+                for (int i = 0; i < imageSize; i++) {
+                    if (shopImageUrlService.findByImgUrl(imageList.get(i)) != null) {
+                        logger.info("存在相同的门店场景图片，本次图片不上传");
+                        continue;
+                    }
+                    ShopImageUrl shopImageUrl = new ShopImageUrl();
+                    shopImageUrl.setShop(shop);
+                    shopImageUrl.setImageUrl(imageList.get(i));
+                    shopImageUrlService.save(shopImageUrl);
+                }
+                logger.info("门店“" + shop.getShopName() + "”（id=" + shop.getId() + "）保存了" + imageSize + "(实际上还要减去重复个数)张门店场景图片： \n" + imageList);
+                map.put("messgae", "保存成功！");
+
+                return map;
+            }
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            logger.info("添加门店场景图片url列表操作失败！！（后端发生某些错误）");
+            map.put("error", "操作失败！！（后端发生某些错误）");
+            e.printStackTrace();
+            return map;
+        }
+    }
+
+    @ApiOperation(value = "根据图片对应id,删除门店场景图片url")
+    @DeleteMapping("/shop/deleteImageUrl")
+    public Map deleteImageUrl(@RequestParam String myOpenid, @RequestParam Integer id) {
+        Map map = new HashMap();
+        try {
+            Shop shop = shopService.findShopByOpenid(myOpenid);
+            if (shop == null) {
+                logger.info("非门店登录用户操作！！（删除门店场景图片url）");
+                map.put("error", "请先登录！");
+                return map;
+            } else {
+                ShopImageUrl imageUrl = shopImageUrlService.findShopImageUrlById(id);
+                if (imageUrl == null) {
+                    logger.info("要删除的图片不存在！");
+                    map.put("error", "图片不存在！");
+                    return map;
+                }
+                //判断该图片是不是该用户的
+                if (myOpenid.equals(imageUrl.getShop().getOpenid())) {
+                    shopImageUrlService.delete(id);
+                    logger.info("门店“" + shop.getShopName() + "”（id=" + shop.getId() + "）删除了图片 " + imageUrl.getImageUrl());
+                    map.put("message", "删除成功！");
+                    return map;
+                } else {
+                    logger.info("删除门店场景图片url失败 - 没有权限");
+                    map.put("error", "对不起，删除失败(没有权限)");
+                    return map;
+                }
+            }
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            logger.info("删除门店场景图片url操作失败！！（后端发生某些错误）");
+            map.put("error", "操作失败！！（后端发生某些错误）");
+            e.printStackTrace();
+            return map;
+        }
     }
 
 
