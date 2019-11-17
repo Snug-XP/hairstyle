@@ -213,7 +213,7 @@ public class HairstylistController {
     }
 
     @ApiOperation(value = "发型师申请入驻门店")
-    @DeleteMapping("/hairstylist/applySettled")
+    @DeleteMapping("/hairstylist/shop/applySettled")
     public Map applySettled(@RequestParam String myOpenid, @RequestParam Integer shopId) {
         Map map = new HashMap();
         try {
@@ -224,15 +224,39 @@ public class HairstylistController {
                 return map;
             }
             Shop shop = shopService.findShopById(shopId);
-            if(shop==null){
+            if (shop == null) {
                 logger.info("未找到所选门店！！（申请入驻门店）");
                 map.put("error", "无效的门店！！");
                 return map;
             }
+            if (hairstylist.getShop()!=null) {
+                switch (hairstylist.getApplyStatus()) {
+                    case 1:
+                        if(hairstylist.getShop().getId()==shopId) {
+                            logger.info(hairstylist.getHairstylistName() + "的申请已通过！无需重复提交");
+                            map.put("error", "你的申请已通过，无需重复提交！！");
+                        }else{
+                            logger.info(hairstylist.getHairstylistName() + "已经入驻门店“"+hairstylist.getShop()+"”(id="+hairstylist.getShop().getId()+")，不可再申请入驻其他门店");
+                            map.put("error","你已经入驻门店“"+hairstylist.getShop()+"”，不可再申请入驻其他门店！！");
+                        }
+                        return map;
+                    case 0:
+                        logger.info(hairstylist.getHairstylistName() + "重复申请！！你的申请正在审核中，禁止同时提交多个申请！！");
+                        map.put("error", "你的申请正在审核中，禁止同时提交多个申请！！");
+                        return map;
+                    case -1:
+                        logger.info(hairstylist.getHairstylistName() + "之前的申请审核未通过，将删除原申请并重新提交本次申请！！");
+                        break;
+                    default:
+                        logger.info(hairstylist.getHairstylistName() + "之前的申请状态异常!!（状态标志为“"+hairstylist.getApplyStatus()+"”）将清除记录并重新提交本次申请");
+                        break;
+                }
+            }
             hairstylist.setShop(shop);
+            hairstylist.setApplyStatus(0);
             hairstylistService.edit(hairstylist);
-            logger.info("发型师“"+hairstylist.getHairstylistName()+"”（id="+hairstylist.getId()+"）提交了对门店“"+shop.getShopName()+"”（id="+shop.getId()+"）的入驻申请");
-            map.put("message","提交申请成功!");
+            logger.info("发型师“" + hairstylist.getHairstylistName() + "”（id=" + hairstylist.getId() + "）提交了对门店“" + shop.getShopName() + "”（id=" + shop.getId() + "）的入驻申请");
+            map.put("message", "提交申请成功!");
             return map;
         } catch (Exception e) {
             logger.error(e.getMessage());
@@ -241,9 +265,7 @@ public class HairstylistController {
             e.printStackTrace();
             return map;
         }
-
     }
-
 
 
     @ApiOperation(value = "根据发型师openid,获取单个发型师信息（包括总预约人数和今日预约人数）- 用于发型师首页", produces = "application/json")
