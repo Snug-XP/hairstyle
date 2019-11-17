@@ -14,7 +14,7 @@ import java.util.*;
  */
 @Entity
 @Table(name = "shop")
-@JsonIgnoreProperties(value = {"hairstylistsByStatus","hairstylists", "handler", "hibernateLazyInitializer", "fieldHandler"})
+@JsonIgnoreProperties(value = {"openid","password","hairstylistsByStatus","hairstylists", "handler", "hibernateLazyInitializer", "fieldHandler"})
 @Data
 public class Shop {
 
