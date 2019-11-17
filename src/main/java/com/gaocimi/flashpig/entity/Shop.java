@@ -109,6 +109,12 @@ public class Shop {
     @OneToMany(targetEntity = Hairstylist.class, mappedBy = "shop")
     public List<Hairstylist> hairstylists;
 
+    /**
+     * 门店上传的场景图片列表； 定义该Shop实体所有关联的ShopImageUrl实体； 指定mappedBy属性表明该Shop实体不控制关联关系
+     */
+    @OneToMany(targetEntity = ShopImageUrl.class, mappedBy = "shop")
+    public List<ShopImageUrl> shopImageUrlList;
+
 
     /**
      * 收藏该门店的用户（即粉丝）提交的对该门店的收藏记录列表； 定义该Shop实体所有关联的UserToShop实体； 指定mappedBy属性表明该Shop实体不控制关联关系
