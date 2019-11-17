@@ -76,7 +76,7 @@ public class Hairstylist {
     /**
      * 发型师入驻门店的时间
      */
-    private String settledTime;
+    private Date settledTime;
 
     /**
      * 完成订单总数
@@ -84,7 +84,7 @@ public class Hairstylist {
     private Integer orderSum;
 
     /**
-     * 发型师申请状态（0表示申请中，1表示申请通过, -1表示申请失败）
+     * 发型师入驻门店的申请状态（0表示申请中，1表示申请通过, -1表示申请失败）
      */
     private Integer applyStatus;
 
@@ -180,10 +180,6 @@ public class Hairstylist {
         return point;
     }
 
-    public void setPoint(Double point) {
-        this.point = point;
-    }
-
     /**
      * 根据自己的订单列表（已完成且有评分的）进行校正
      */
@@ -217,6 +213,19 @@ public class Hairstylist {
     public Integer getOrderSum() {
         regulateOrderSum();
         return orderSum;
+    }
+
+    /**
+     * 获取入驻本门店后的总订单数
+     */
+    public int getOrderSumAfterSettledTime() {
+        int count = 0;
+        for (HaircutOrder order : haircutOrderList) {
+            if (order.getStatus() == 2&&order.getBookTime().after(this.settledTime)) {
+                count++;
+            }
+        }
+        return count;
     }
 
 
@@ -363,6 +372,22 @@ public class Hairstylist {
     }
 
     /**
+     * 获取发型师在本月(且处于入驻门店之后)的完成订单数
+     *
+     * @return 入驻门店之后本月的完成订单数
+     */
+    public int getCurrentMonthOrderSumAfterSettledTime() {
+        int count = 0;
+        Date month = MyUtils.getFirstDayOfMonth(new Date(System.currentTimeMillis()));//获取今天所在月的第一天的日期Date(时间为00:00:00)
+        for (HaircutOrder order : haircutOrderList) {
+            if (order.getStatus() == 2 && order.getBookTime().after(this.settledTime) && order.getBookTime().after(month)) {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    /**
      * 获取发型师今天的预约订单数
      *
      * @return 今天的预约订单数
@@ -437,4 +462,6 @@ public class Hairstylist {
         }
         return false;
     }
+
+
 }

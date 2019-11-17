@@ -333,6 +333,8 @@ public class ShopController {
         Map map = new HashMap();
         try {
             Shop shop = shopService.findShopById(shopId);
+            shop.regulateOrderSum();//根据所有订单进行数据校正
+            shopService.edit(shop);//更新到数据库
 
             map.put("shop", shop);//总预约人数和今日预约人数已经在Shop的get方法里面，会直接被当做属性放进去
             return map;
@@ -738,6 +740,8 @@ public class ShopController {
 
             switch (decide) {
                 case 1:
+                    Date date = new Date(System.currentTimeMillis());
+                    hairstylist.setSettledTime(date);//设置发型师入驻门店的时间
                     hairstylist.setApplyStatus(1);
                     hairstylistService.edit(hairstylist);
                     logger.info("门店“" + shop.getShopName() + "”(id=" + shop.getId() + ")同意id为" + hairstylist.getId() + "的发型师“" + hairstylist.getHairstylistName() + "”的注册");

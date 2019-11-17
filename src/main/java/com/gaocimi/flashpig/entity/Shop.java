@@ -1,7 +1,6 @@
 package com.gaocimi.flashpig.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.gaocimi.flashpig.utils.xp.MyUtils;
 import lombok.Data;
 
 import javax.persistence.*;
@@ -129,12 +128,12 @@ public class Shop {
     }
 
     /**
-     * 校正已完成订单数量 - 根据门店所有发型师的已完成订单数量进行校正
+     * 校正已完成订单数量 - 根据门店所有发型师入驻门店后的已完成订单数量进行校正
      */
     public void regulateOrderSum() {
         int count = 0;
         for(Hairstylist hairstylist : hairstylists){
-            count += hairstylist.getOrderSum();
+            count += hairstylist.getOrderSumAfterSettledTime();
         }
         this.orderSum = count;
     }
@@ -152,7 +151,7 @@ public class Shop {
     public int getCurrentMonthOrderSum() {
         int count = 0;
         for(Hairstylist hairstylist : hairstylists)
-            count += hairstylist.getCurrentMonthOrderSum();
+            count += hairstylist.getCurrentMonthOrderSumAfterSettledTime();
         return count;
     }
 
