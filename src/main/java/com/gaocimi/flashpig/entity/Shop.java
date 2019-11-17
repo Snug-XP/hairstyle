@@ -14,7 +14,7 @@ import java.util.*;
  */
 @Entity
 @Table(name = "shop")
-@JsonIgnoreProperties(value = {"openid","password","hairstylistsByStatus","hairstylists", "handler", "hibernateLazyInitializer", "fieldHandler"})
+@JsonIgnoreProperties(value = {"openid", "password", "hairstylistsByStatus", "hairstylists", "handler", "hibernateLazyInitializer", "fieldHandler"})
 @Data
 public class Shop {
 
@@ -134,17 +134,18 @@ public class Shop {
     }
 
     /**
-     * 校正已完成订单数量 - 根据门店所有发型师入驻门店后的已完成订单数量进行校正
+     * 校正已完成订单数量 - 根据门店所有已入驻发型师（在入驻后）的已完成订单数量进行校正
      */
     public void regulateOrderSum() {
         int count = 0;
-        for(Hairstylist hairstylist : hairstylists){
-            count += hairstylist.getOrderSumAfterSettledTime();
+        for (Hairstylist hairstylist : hairstylists) {
+            if (hairstylist.getApplyStatus() == 1)
+                count += hairstylist.getOrderSumAfterSettledTime();
         }
         this.orderSum = count;
     }
 
-    public int getOrderSum(){
+    public int getOrderSum() {
         regulateOrderSum();
         return orderSum;
     }
@@ -156,8 +157,11 @@ public class Shop {
      */
     public int getCurrentMonthOrderSum() {
         int count = 0;
-        for(Hairstylist hairstylist : hairstylists)
-            count += hairstylist.getCurrentMonthOrderSumAfterSettledTime();
+
+        //选取已入驻的发型师统计（在入驻后的）月完成订单
+        for (Hairstylist hairstylist : hairstylists)
+            if (hairstylist.getApplyStatus() == 1)
+                count += hairstylist.getCurrentMonthOrderSumAfterSettledTime();
         return count;
     }
 
@@ -169,32 +173,29 @@ public class Shop {
     public int getTodayOrderSum() {
         int todayOrderCount = 0;//今日预约人数
 
-        for(Hairstylist hairstylist : this.hairstylists)
+        for (Hairstylist hairstylist : this.hairstylists)
             todayOrderCount += hairstylist.getTodayOrderSum();
 
         return todayOrderCount;
     }
 
-    public List<Hairstylist> getHairstylistsByStatus(int status){
+    public List<Hairstylist> getHairstylistsByStatus(int status) {
         List<Hairstylist> resultList = new ArrayList<>();
-        for(Hairstylist h : this.hairstylists){
-            if(h.getApplyStatus()==status){
+        for (Hairstylist h : this.hairstylists) {
+            if (h.getApplyStatus() == status) {
                 resultList.add(h);
             }
         }
         return resultList;
     }
 
-    public Hairstylist isExistHairstylist(int hairstylistId){
-        for(Hairstylist h : hairstylists){
-            if(h.getId()==hairstylistId)
+    public Hairstylist isExistHairstylist(int hairstylistId) {
+        for (Hairstylist h : hairstylists) {
+            if (h.getId() == hairstylistId)
                 return h;
         }
         return null;
     }
-
-
-
 
 
 }

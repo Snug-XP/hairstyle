@@ -49,7 +49,7 @@ public class RecordHairstylisToUserController {
             User user = userService.findUserById(userId);
             if ( hairstylist == null ) {
                 logger.info("非发型师用户操作（发型师新增对顾客的备注）！！");
-                map.put("error", "对不起，你还不是发型师用户，无权操作！！");
+                map.put("error", "对不起，你不是发型师用户，无权操作！！");
                 return map;
             } else if (user == null) {
                 logger.info("备注对象（普通用户）不存在！！");
@@ -101,7 +101,7 @@ public class RecordHairstylisToUserController {
             Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
             if ( hairstylist == null) {
                 logger.info("非发型师用户操作！！");
-                map.put("error", "对不起，你还不是发型师用户，无权操作！！");
+                map.put("error", "对不起，你不是发型师用户，无权操作！！");
                 return map;
             } else {
                 List<RecordHairstylisToUser> tempRecordList = hairstylist.recordToUserList;
@@ -166,7 +166,7 @@ public class RecordHairstylisToUserController {
             Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
             if ( hairstylist == null) {
                 logger.info("非发型师用户操作！！");
-                map.put("error", "对不起，你还不是发型师用户，无权操作！！");
+                map.put("error", "对不起，你不是发型师用户，无权操作！！");
                 return map;
             }
 
@@ -209,7 +209,7 @@ public class RecordHairstylisToUserController {
             Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
             if ( hairstylist == null) {
                 logger.info("非发型师用户操作！！");
-                map.put("error", "对不起，你还不是发型师用户，无权操作！！");
+                map.put("error", "对不起，你不是发型师用户，无权操作！！");
                 return map;
             }
 

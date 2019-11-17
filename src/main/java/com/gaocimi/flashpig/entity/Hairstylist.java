@@ -52,7 +52,8 @@ public class Hairstylist {
     private String personalProfile;
 
     /**
-     * 该发型师所在门店； 定义名为shop_id的外键列，该外键引用shop表的主键(id)列,采用懒加载
+     * 该发型师所在门店； 定义名为shop_id的外键列，该外键引用shop表的主键(id)列,采用懒加载。
+     * 只有当门店不为空且applyStatus为1时，才能说明该发型师入驻了该门店
      */
     @ManyToOne(targetEntity = Shop.class, fetch = FetchType.LAZY)
     @JoinColumn(name = "shop_id", nullable = false)
@@ -146,6 +147,7 @@ public class Hairstylist {
 
     public List<String> getAvailableTime() {
 
+        if(this.availableTime==null||this.availableTime.length()<1) return null;
         DateFormat df3 = new SimpleDateFormat("HH:mm:ss");
         ;//只显示出时时分秒（12:43:37）的格式
         List<String> timeList = new ArrayList<>();
@@ -221,7 +223,7 @@ public class Hairstylist {
     public int getOrderSumAfterSettledTime() {
         int count = 0;
         for (HaircutOrder order : haircutOrderList) {
-            if (order.getStatus() == 2&&order.getBookTime().after(this.settledTime)) {
+            if (order.getStatus() == 2&&( this.settledTime==null||order.getBookTime().after(this.settledTime) ) ){
                 count++;
             }
         }
@@ -380,7 +382,7 @@ public class Hairstylist {
         int count = 0;
         Date month = MyUtils.getFirstDayOfMonth(new Date(System.currentTimeMillis()));//获取今天所在月的第一天的日期Date(时间为00:00:00)
         for (HaircutOrder order : haircutOrderList) {
-            if (order.getStatus() == 2 && order.getBookTime().after(this.settledTime) && order.getBookTime().after(month)) {
+            if (order.getStatus() == 2 && (this.settledTime==null||order.getBookTime().after(this.settledTime) )&& order.getBookTime().after(month)) {
                 count++;
             }
         }

@@ -42,7 +42,7 @@ public class HairServiceController {
             Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
             if (hairstylist == null) {
                 logger.info("非发型师用户操作！！");
-                map.put("error", "对不起，你还不是发型师用户，无权操作！！");
+                map.put("error", "对不起，你不是发型师用户，无权操作！！");
                 return map;
             }
             if (hairstylist.getApplyStatus() != 1) {
@@ -82,7 +82,7 @@ public class HairServiceController {
             Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
             if (hairstylist == null) {
                 logger.info("非发型师用户操作！！");
-                map.put("error", "对不起，你还不是发型师用户，无权操作！！");
+                map.put("error", "对不起，你不是发型师用户，无权操作！！");
                 return map;
             }
             if (hairstylist.getApplyStatus() != 1) {
@@ -154,7 +154,7 @@ public class HairServiceController {
             Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
             if (hairstylist == null) {
                 logger.info("非发型师用户操作！！");
-                map.put("error", "对不起，你还不是发型师用户，无权操作！！");
+                map.put("error", "对不起，你不是发型师用户，无权操作！！");
                 return map;
             }
             if (hairstylist.getApplyStatus() != 1) {
