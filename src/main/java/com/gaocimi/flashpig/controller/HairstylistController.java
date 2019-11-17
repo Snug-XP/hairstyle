@@ -186,12 +186,12 @@ public class HairstylistController {
     public Map deleteHairstylist(@RequestParam String myOpenid, @RequestParam Integer hairstylistId) {
         Map map = new HashMap();
         try {
-            if (hairstylistService.findHairstylistById(hairstylistId) == null) {
+            Hairstylist hairstylist = hairstylistService.findHairstylistById(hairstylistId);
+            if (hairstylist == null) {
                 logger.info("要注销的发型师用户不存在！！");
                 map.put("error", "该用户不存在！！");
                 return map;
             }
-            Hairstylist hairstylist = hairstylistService.findHairstylistById(hairstylistId);
             if (myOpenid.equals(hairstylist.getOpenid()) || administratorService.isExist(myOpenid)) {
                 hairstylistService.delete(hairstylistId);
                 logger.info("注销发型师“" + hairstylist.getHairstylistName() + "”(id=" + hairstylistId + ")成功！");
@@ -211,6 +211,39 @@ public class HairstylistController {
         }
 
     }
+
+    @ApiOperation(value = "发型师申请入驻门店")
+    @DeleteMapping("/hairstylist/applySettled")
+    public Map applySettled(@RequestParam String myOpenid, @RequestParam Integer shopId) {
+        Map map = new HashMap();
+        try {
+            Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
+            if (hairstylist == null) {
+                logger.info("非发型师用户操作（申请入驻门店）！！");
+                map.put("error", "对不起，你还不是发型师用户，无权操作！！");
+                return map;
+            }
+            Shop shop = shopService.findShopById(shopId);
+            if(shop==null){
+                logger.info("未找到所选门店！！（申请入驻门店）");
+                map.put("error", "无效的门店！！");
+                return map;
+            }
+            hairstylist.setShop(shop);
+            hairstylistService.edit(hairstylist);
+            logger.info("发型师“"+hairstylist.getHairstylistName()+"”（id="+hairstylist.getId()+"）提交了对门店“"+shop.getShopName()+"”（id="+shop.getId()+"）的入驻申请");
+            map.put("message","提交申请成功!");
+            return map;
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            logger.info("注销发型师失败！（后端发生某些错误）");
+            map.put("error", "注销发型师失败！（后端发生某些错误）");
+            e.printStackTrace();
+            return map;
+        }
+
+    }
+
 
 
     @ApiOperation(value = "根据发型师openid,获取单个发型师信息（包括总预约人数和今日预约人数）- 用于发型师首页", produces = "application/json")

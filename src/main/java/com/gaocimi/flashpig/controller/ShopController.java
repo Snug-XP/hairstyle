@@ -134,7 +134,7 @@ public class ShopController {
         Map map = new HashMap();
 
 
-        if (logoUrl == null || phone == null || password == null || logoUrl == null || operatingLicensePictureUrl == null || shopName == null || province == null || city == null || district == null || address == null || longitude == null || latitude == null) {
+        if (shopName == null || phone == null || password == null || logoUrl == null || operatingLicensePictureUrl == null || province == null || city == null || district == null || address == null || longitude == null || latitude == null) {
             logger.info("请完整填写个人资料!(门店注册申请)");
             logger.info("传入的数据：" + JSONObject.toJSON(request.getParameterMap()) + "\n");
             map.put("message", "请完整填写个人资料！");
