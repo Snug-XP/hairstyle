@@ -49,18 +49,13 @@ public class HairstylistController {
     @Autowired
     UserService userService;
 
-    @ApiOperation(value = "发型师注册申请")
-    @PostMapping("/hairstylist/register/apply")
+    @ApiOperation(value = "发型师注册")
+    @PostMapping("/hairstylist/register")
     public Map addHairstylist(HttpServletRequest request, @RequestParam String openid,
                               @RequestParam(value = "hairstylistName", required = false) String hairstylistName,
                               @RequestParam(value = "personalPhotoUrl", required = false) String personalPhotoUrl,
                               @RequestParam(value = "personalPhone", required = false) String personalPhone,
-                              @RequestParam(value = "attention", required = false) String attention,
-                              @RequestParam(value = "timeList", required = false) List<String> timeList,
-                              @RequestParam(value = "hairService", required = false) List<String> hairService,
-                              @RequestParam(value = "description", required = false) List<String> description,
-                              @RequestParam(value = "price", required = false) List<Double> price,
-                              @RequestParam(value = "imageList", required = false) List<String> imageList) {
+                              @RequestParam(value = "personalProfile", required = false) String personalProfile) {
         Map map = new HashMap();
 
 
@@ -71,21 +66,21 @@ public class HairstylistController {
             return map;
         }
 
-        Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(openid);
         try {
+            Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(openid);
             if (hairstylist != null) {
-                //之前有申请过
-
-                //之前申请失败了，删除记录
-                if (hairstylist.getApplyStatus() == -1) {
-                    logger.info("删除" + hairstylist.getHairstylistName() + "之前申请失败的记录,并重新申请\n");
-                    hairstylistService.delete(hairstylist.getId());
-                } else {
-                    logger.info(hairstylist.getHairstylistName() + "重复申请！！你的申请正在审核中或者已通过，无需重复提交！！");
-                    map.put("message", "你的申请正在审核中或者已通过，无需重复提交！！");
-                    return map;
-                }
+                logger.info(hairstylist.getHairstylistName() + "重复申请！！你的申请已通过，无需重复提交！！");
+                map.put("message", "你的申请已通过，无需重复提交！！");
+                return map;
             }
+
+            hairstylist = hairstylistService.findHairstylistByPhone(personalPhone);
+            if (hairstylist != null) {
+                logger.info(hairstylist.getHairstylistName() + "个人电话重复的注册！！");
+                map.put("message", "该电话已绑定发型师，不可重复注册！！");
+                return map;
+            }
+
             if (!MyUtils.isMobileNO(personalPhone)) {
                 logger.info("电话号码（" + personalPhone + "）不合法！！");
                 map.put("error", "电话号码（" + personalPhone + "）不合法！！");
@@ -98,67 +93,92 @@ public class HairstylistController {
             hairstylist.setHairstylistName(hairstylistName);
             hairstylist.setPersonalPhotoUrl(personalPhotoUrl);
             hairstylist.setPersonalPhone(personalPhone);
-
-            hairstylist.setAttention(attention);
+            hairstylist.setPersonalProfile(personalProfile);
 
 
             hairstylistService.save(hairstylist);
+            logger.info("传入的数据：" + JSONObject.toJSON(request.getParameterMap()) + "\n");
+            logger.info("发型师“" + hairstylist.getHairstylistName() + "”（id=" + hairstylist.getId() + "）注册成功！");
 
-            hairstylist = hairstylistService.findHairstylistByOpenid(hairstylist.getOpenid());//重新从数据库获取刚进去的数据（主要为了取得id）
-
-            setTime(hairstylist.getOpenid(), timeList);//跳转方法 设置可预约时间
-
-
-            //下面保存该理发师的服务项目
-            if (hairService != null) {
-                int serviceSize = hairService.size();
-                if (serviceSize != price.size()) {
-                    logger.info("服务与价格不匹配！！");
-                    map.put("error", "服务与价格不匹配！！");
-                    return map;
-                }
-                if (serviceSize != description.size()) {
-                    logger.info("服务与描述不匹配！！");
-                    map.put("error", "服务与描述不匹配！！");
-                    return map;
-                }
-                for (int i = 0; i < serviceSize; i++) {
-                    HairService hairService1 = new HairService();
-                    hairService1.setHairstylist(hairstylist);
-                    hairService1.setServiceName(hairService.get(i));
-                    hairService1.setDescription(description.get(i));
-                    hairService1.setPrice(price.get(i));
-                    hairServiceService.save(hairService1);
-                }
-                logger.info("hairService有" + serviceSize + "个： " + hairService);
-            }
-
-            //下面保存该理发师的作品url
-            if (imageList != null) {
-                int imageSize = imageList.size();
-                for (int i = 0; i < imageSize; i++) {
-                    if (hairstylistImageUrlService.findByImgUrl(imageList.get(i)) != null) {
-                        logger.info("存在相同的个人作品图片，本次图片不上传");
-                        continue;
-                    }
-                    HairstylistImageUrl hairstylistImageUrl = new HairstylistImageUrl();
-                    hairstylistImageUrl.setHairstylist(hairstylist);
-                    hairstylistImageUrl.setImageUrl(imageList.get(i));
-                    hairstylistImageUrlService.save(hairstylistImageUrl);
-                }
-                logger.info("imageList有" + imageSize + "(实际上还要减去重复个数)个： " + imageList);
-            }
+            map.put("message", "注册成功！");
+            return map;
         } catch (Exception e) {
             e.printStackTrace();
             logger.info("传入的数据：" + JSONObject.toJSON(request.getParameterMap()) + "\n");
             map.put("error", "发型师提交申请失败！请检查输入数据（也有可能后端发生错误）");
             return map;
         }
-        logger.info("传入的数据：" + JSONObject.toJSON(request.getParameterMap()) + "\n");
-        logger.info("id为" + hairstylist.getId() + "的发型师“" + hairstylist.getHairstylistName() + "”提交申请成功！");
 
-        map.put("message", "提交申请成功！");
-        return map;
+    }
+
+    @ApiOperation(value = "发型师修改个人信息", notes = "权限：发型师本人")
+    @PutMapping("/hairstylist")
+    public Map updateHairstylist(HttpServletRequest request, @RequestParam String myOpenid,
+                                 @RequestParam(value = "hairstylistName", required = false) String hairstylistName,
+                                 @RequestParam(value = "personalPhotoUrl", required = false) String personalPhotoUrl,
+                                 @RequestParam(value = "personalPhone", required = false) String personalPhone,
+                                 @RequestParam(value = "personalProfile", required = false) String personalProfile) {
+        Map map = new HashMap();
+        try {
+            Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
+            if (hairstylist == null) {
+                logger.info("该发型师用户不存在（修改信息）！！");
+                logger.info("传入的数据：" + JSONObject.toJSON(request.getParameterMap()) + "\n");
+
+                map.put("error", "发型师用户不存在！！");
+                return map;
+            }
+
+            if (myOpenid.equals(hairstylist.getOpenid()) || administratorService.isExist(myOpenid)) {
+
+                if (hairstylistName != null)
+                    hairstylist.setHairstylistName(hairstylistName);
+                if (personalPhotoUrl != null)
+                    hairstylist.setPersonalPhotoUrl(personalPhotoUrl);
+                if (personalPhone != null) {
+                    Hairstylist h = hairstylistService.findHairstylistByPhone(personalPhone);
+                    if (h != null) {
+
+                        if (h.getPersonalPhone().equals(personalPhone)) {
+                            map.put("message", "电话号码未修改");
+                        } else {
+                            logger.info(hairstylist.getHairstylistName() + "个人电话重复！！(发型师修改个人信息)");
+                            map.put("error", "该电话已绑定发型师！！");
+                            return map;
+                        }
+                    }
+
+                    if (!MyUtils.isMobileNO(personalPhone)) {
+                        logger.info("电话号码（" + personalPhone + "）不合法！！");
+                        map.put("error", "电话号码（" + personalPhone + "）不合法！！");
+                        return map;
+                    }
+
+                    hairstylist.setPersonalPhone(personalPhone);
+                }
+                if (personalProfile != null)
+                    hairstylist.setPersonalProfile(personalProfile);
+
+                hairstylistService.edit(hairstylist);
+
+
+                logger.info("发型师用户 " + hairstylist.getHairstylistName() + "（" + myOpenid + "）重新修改了基本信息");
+                logger.info("传入的数据：" + JSONObject.toJSON(request.getParameterMap()) + "\n");
+                map.put("message", "信息修改成功！");
+                return map;
+            } else {
+                logger.info("发型师信息修改失败！！（没有权限！！）");
+                logger.info("传入的数据：" + JSONObject.toJSON(request.getParameterMap()) + "\n");
+                map.put("error", "发型师信息修改失败！！（没有权限！！）");
+                return map;
+            }
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            logger.info("发型师信息修改失败！！（后端发生某些错误）");
+            map.put("error", "发型师信息修改失败！！（后端发生某些错误）");
+            e.printStackTrace();
+            return map;
+        }
     }
 
     @ApiOperation(value = "根据发型师id，注销发型师", notes = "权限：发型师本人或管理员")
@@ -192,66 +212,6 @@ public class HairstylistController {
 
     }
 
-    @ApiOperation(value = "发型师修改个人信息", notes = "权限：发型师本人")
-    @PutMapping("/hairstylist")
-    public Map updateHairstylist(HttpServletRequest request, @RequestParam String myOpenid,
-                                 @RequestParam(value = "hairstylistName", required = false) String hairstylistName,
-                                 @RequestParam(value = "personalPhotoUrl", required = false) String personalPhotoUrl,
-                                 @RequestParam(value = "personalPhone", required = false) String personalPhone,
-                                 @RequestParam(value = "personalProfile", required = false) String personalProfile,
-                                 @RequestParam(value = "attention", required = false) String attention) {
-        Map map = new HashMap();
-        try {
-            Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
-            if (hairstylist == null) {
-                logger.info("该发型师用户不存在（修改信息）！！");
-                logger.info("传入的数据：" + JSONObject.toJSON(request.getParameterMap()) + "\n");
-
-                map.put("error", "发型师用户不存在！！");
-                return map;
-            }
-
-            if (myOpenid.equals(hairstylist.getOpenid()) || administratorService.isExist(myOpenid)) {
-
-                if (hairstylistName != null)
-                    hairstylist.setHairstylistName(hairstylistName);
-                if (personalPhotoUrl != null)
-                    hairstylist.setPersonalPhotoUrl(personalPhotoUrl);
-                if (personalPhone != null) {
-                    if (!MyUtils.isMobileNO(personalPhone)) {
-                        logger.info("电话号码（" + personalPhone + "）不合法！！");
-                        map.put("error", "电话号码（" + personalPhone + "）不合法！！");
-                        return map;
-                    }
-                    hairstylist.setPersonalPhone(personalPhone);
-                }
-                if (personalProfile != null)
-                    hairstylist.setPersonalProfile(personalProfile);
-                if (attention != null)
-                    hairstylist.setAttention(attention);
-
-                hairstylistService.edit(hairstylist);
-
-
-                logger.info("发型师用户 " + hairstylist.getHairstylistName() + "（" + myOpenid + "）重新修改了基本信息");
-                logger.info("传入的数据：" + JSONObject.toJSON(request.getParameterMap()) + "\n");
-                map.put("message", "发型师信息修改成功！");
-                return map;
-            } else {
-                logger.info("发型师信息修改失败！！（没有权限！！）");
-                logger.info("传入的数据：" + JSONObject.toJSON(request.getParameterMap()) + "\n");
-                map.put("error", "发型师信息修改失败！！（没有权限！！）");
-                return map;
-            }
-        } catch (Exception e) {
-            logger.error(e.getMessage());
-            logger.info("发型师信息修改失败！！（后端发生某些错误）");
-            map.put("error", "发型师信息修改失败！！（后端发生某些错误）");
-            e.printStackTrace();
-            return map;
-        }
-    }
-
 
     @ApiOperation(value = "根据发型师openid,获取单个发型师信息（包括总预约人数和今日预约人数）- 用于发型师首页", produces = "application/json")
     @GetMapping("/hairstylist")
@@ -267,7 +227,6 @@ public class HairstylistController {
             map = getOneById(hairstylist.getId());
             return map;
         } catch (Exception e) {
-            logger.error(e.getMessage());
             logger.info("获取发型师信息失败！！（后端发生某些错误）");
             map.put("error", "获取发型师信息失败！！（后端发生某些错误）");
             e.printStackTrace();
@@ -285,7 +244,6 @@ public class HairstylistController {
             map.put("hairstylist", hairstylist);//总预约人数和今日预约人数已经在Hairstylist的get方法里面，会直接被当做属性放进去
             return map;
         } catch (Exception e) {
-            logger.error(e.getMessage());
             logger.info("获取发型师信息失败！！（后端发生某些错误）");
             map.put("error", "获取发型师信息失败！！（后端发生某些错误）");
             e.printStackTrace();
@@ -299,9 +257,9 @@ public class HairstylistController {
                                    @RequestParam(name = "pageSize", defaultValue = "10") int pageSize) {
         Map map = new HashMap();
         try {
-            Page<Hairstylist> page = hairstylistService.findAllByStatus(1,pageNum, pageSize);
+            Page<Hairstylist> page = hairstylistService.findAllByStatus(1, pageNum, pageSize);
             map.put("page", page);
-            logger.info("获取发型师列表信息成功！::"+map);
+            logger.info("获取发型师列表信息成功！::" + map);
             return map;
         } catch (Exception e) {
             logger.error(e.getMessage());
@@ -319,24 +277,24 @@ public class HairstylistController {
         Map map = new HashMap();
         try {
             Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
-            if (hairstylist == null || hairstylist.getApplyStatus() != 1) {
+            if (hairstylist == null) {
                 logger.info("非发型师用户操作（设置可预约时间）！！");
                 map.put("error", "对不起，你还不是发型师用户，无权操作！！");
                 return map;
-            } else {
-                String str = "";
-                for (String time : timeList) {
-                    if (str.length() > 0)
-                        str = str + "," + time;
-                    else
-                        str = "" + time;
-                }
-                hairstylist.setAvailableTime(str);
-                hairstylistService.edit(hairstylist);
-                logger.info("发型师用户 " + hairstylist.getHairstylistName() + "（" + myOpenid + "）重新设置了可预约时间:" + timeList.toString());
-                map.put("message", "可预约时间设置成功");
+            }
+
+            if (hairstylist.getApplyStatus() != 1) {
+                logger.info("非入驻发型师用户操作（设置可预约时间）！！");
+                map.put("error", "对不起，你还没有入驻门店，不可操作！！");
                 return map;
             }
+
+            hairstylist.setAvailableTime(timeList);
+            hairstylistService.edit(hairstylist);
+            logger.info("发型师用户 " + hairstylist.getHairstylistName() + "（" + myOpenid + "）重新设置了可预约时间:" + timeList.toString());
+            map.put("message", "可预约时间设置成功");
+            return map;
+
         } catch (Exception e) {
             logger.error(e.getMessage());
             logger.info("设置可预约时间操作失败！！（后端发生某些错误）");
@@ -375,28 +333,18 @@ public class HairstylistController {
         Map map = new HashMap();
         try {
             Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
-            if (hairstylist == null || hairstylist.getApplyStatus() != 1) {
-                logger.info("所查询的发型师不存在！！");
+            if (hairstylist == null) {
+                logger.info("所查询的发型师不存在！！（获取发型师的可预约时间）");
                 map.put("error", "该发型师不存在！");
                 return map;
             }
-
-            DateFormat df3 = new SimpleDateFormat("HH:mm:ss");
-            ;//只显示出时时分秒（12:43:37）的格式
-            List<String> timeList = new ArrayList<>();
-            String[] availableTime = hairstylist.getAvailableTime().split(",");
-            for (String str : availableTime) {
-                int hour;
-                try {
-                    hour = Integer.parseInt(str);
-                    timeList.add(df3.format(MyUtils.getTime(hour)));
-                } catch (Exception e) {
-                    logger.info("可预约时间转换失败（数据为：" + str + "）");
-                    map.put("error", "获取可预约时间失败！---可预约时间转换失败（数据为：" + str + "）");
-                    return map;
-                }
+            if (hairstylist.getApplyStatus() != 1) {
+                logger.info("所查询的发型师还没有入驻门店（获取发型师的可预约时间）！！");
+                map.put("error", "该发型师还没有入驻门店，暂时没有可预约时间！！");
+                return map;
             }
-            map.put("availableTimeList", timeList);
+
+            map.put("availableTimeList", hairstylist.getAvailableTime());
             return map;
         } catch (Exception e) {
             logger.error(e.getMessage());
@@ -413,14 +361,14 @@ public class HairstylistController {
         Map map = new HashMap();
         try {
             Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
-            if (hairstylist == null || hairstylist.getApplyStatus() != 1) {
+            if (hairstylist == null) {
                 logger.info("非发型师用户操作！！");
                 map.put("error", "对不起，你还不是发型师用户，无权操作！！");
                 return map;
-            } else {
-                map.put("imageUrlList", hairstylist.hairstylistImageUrlList);
-                return map;
             }
+            map.put("imageUrlList", hairstylist.hairstylistImageUrlList);
+            return map;
+
         } catch (Exception e) {
             logger.error(e.getMessage());
             logger.info("获取个人作品图片操作失败！！（后端发生某些错误）\n\n");
@@ -437,29 +385,32 @@ public class HairstylistController {
         Map map = new HashMap();
         try {
             Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
-            if (hairstylist == null || hairstylist.getApplyStatus() != 1) {
+            if (hairstylist == null) {
                 logger.info("非发型师用户操作！！");
                 map.put("error", "对不起，你还不是发型师用户，无权操作！！");
                 return map;
             } else {
+
                 //下面保存该理发师的作品url
-                if (imageList != null) {
-                    int imageSize = imageList.size();
-                    for (int i = 0; i < imageSize; i++) {
-                        if (hairstylistImageUrlService.findByImgUrl(imageList.get(i)) != null) {
-                            logger.info("存在相同的个人作品图片，本次图片不上传");
-                            continue;
-                        }
-                        HairstylistImageUrl hairstylistImageUrl = new HairstylistImageUrl();
-                        hairstylistImageUrl.setHairstylist(hairstylist);
-                        hairstylistImageUrl.setImageUrl(imageList.get(i));
-                        hairstylistImageUrlService.save(hairstylistImageUrl);
-                    }
-                    logger.info("发型师用户 " + hairstylist.getHairstylistName() + "（" + myOpenid + "）保存了" + imageSize + "(实际上还要减去重复个数)张个人作品图片： " + imageList);
-                    map.put("messgae", "保存成功！");
-                } else {
+                if (imageList == null) {
                     map.put("error", "请选择图片！！");
+                    return map;
                 }
+
+                int imageSize = imageList.size();
+                for (int i = 0; i < imageSize; i++) {
+                    if (hairstylistImageUrlService.findByImgUrl(imageList.get(i)) != null) {
+                        logger.info("存在相同的个人作品图片，本次图片不上传");
+                        continue;
+                    }
+                    HairstylistImageUrl hairstylistImageUrl = new HairstylistImageUrl();
+                    hairstylistImageUrl.setHairstylist(hairstylist);
+                    hairstylistImageUrl.setImageUrl(imageList.get(i));
+                    hairstylistImageUrlService.save(hairstylistImageUrl);
+                }
+                logger.info("发型师用户 " + hairstylist.getHairstylistName() + "（id=" + hairstylist.getId() + "）保存了" + imageSize + "(实际上还要减去重复个数)张个人作品图片： \n" + imageList);
+                map.put("messgae", "保存成功！");
+
                 return map;
             }
         } catch (Exception e) {
@@ -477,7 +428,7 @@ public class HairstylistController {
         Map map = new HashMap();
         try {
             Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
-            if (hairstylist == null || hairstylist.getApplyStatus() != 1) {
+            if (hairstylist == null) {
                 logger.info("非发型师用户操作！！");
                 map.put("error", "非发型师用户操作！！");
                 return map;
@@ -515,7 +466,7 @@ public class HairstylistController {
         Map map = new HashMap();
         try {
             Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
-            if (hairstylist == null || hairstylist.getApplyStatus() != 1) {
+            if (hairstylist == null) {
                 logger.info("非发型师用户操作！！");
                 map.put("error", "对不起，你还不是发型师用户，无权操作！！");
                 return map;
@@ -562,7 +513,7 @@ public class HairstylistController {
         Map map = new HashMap();
         try {
             Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
-            if (hairstylist == null || hairstylist.getApplyStatus() != 1) {
+            if (hairstylist == null) {
                 logger.info("非发型师用户操作！！");
                 map.put("error", "对不起，你还不是发型师用户，无权操作！！");
                 return map;
@@ -591,7 +542,7 @@ public class HairstylistController {
             }
             map.put("resultList", resultList);
             if (resultList.size() == 0)
-                map.put("message", "你目前没有忠实（粉丝）顾客!");
+                map.put("message", "你目前没有忠实顾客!");
             return map;
         } catch (Exception e) {
             logger.error(e.getMessage());
@@ -608,7 +559,7 @@ public class HairstylistController {
         Map map = new HashMap();
         try {
             Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
-            if (hairstylist == null || hairstylist.getApplyStatus() != 1) {
+            if (hairstylist == null) {
                 logger.info("非发型师用户操作！！");
                 map.put("error", "对不起，你还不是发型师用户，无权操作！！");
                 return map;
@@ -671,37 +622,42 @@ public class HairstylistController {
         Map map = new HashMap();
         try {
             Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
-            if (hairstylist == null || hairstylist.getApplyStatus() != 1) {
+            if (hairstylist == null) {
                 logger.info("非发型师用户操作！！");
                 map.put("error", "对不起，你还不是发型师用户，无权操作！！");
                 return map;
-            } else {
-                List<Hairstylist> hairstylists = hairstylist.shop.getHairstylists();
-                // 按完成订单数倒序排序
-                Collections.sort(hairstylists, (o1, o2) -> {
-                    if (o1.getOrderSum() < o2.getOrderSum()) {
-                        return 1;
-                    } else if ((o1.getOrderSum() > o2.getOrderSum())) {
-                        return -1;
-                    }
-                    return 0; //相等为0
-                });
-
-                List<RankingData> resultList = new ArrayList<>();
-                int myRankings = -1;//我的排名
-
-                for (int i = 0; i < hairstylists.size(); i++) {
-                    Hairstylist h = hairstylists.get(i);
-                    RankingData data = new RankingData(i + 1, h, h.getOrderSum());
-                    resultList.add(data);
-                    if (data.getId() == hairstylist.getId())
-                        myRankings = i + 1;//获取我的排名
-                }
-                map.put("resultList", resultList);
-                map.put("sumNum", hairstylists.size());
-                map.put("myRankings", myRankings);
+            }
+            if (hairstylist.getApplyStatus() != 1) {
+                logger.info("非入驻发型师用户操作（获取店内排行 - 全部）！！");
+                map.put("error", "你还没有入驻门店！！");
                 return map;
             }
+
+            List<Hairstylist> hairstylists = hairstylist.shop.getHairstylists();
+            // 按完成订单数倒序排序
+            Collections.sort(hairstylists, (o1, o2) -> {
+                if (o1.getOrderSum() < o2.getOrderSum()) {
+                    return 1;
+                } else if ((o1.getOrderSum() > o2.getOrderSum())) {
+                    return -1;
+                }
+                return 0; //相等为0
+            });
+
+            List<RankingData> resultList = new ArrayList<>();
+            int myRankings = -1;//我的排名
+
+            for (int i = 0; i < hairstylists.size(); i++) {
+                Hairstylist h = hairstylists.get(i);
+                RankingData data = new RankingData(i + 1, h, h.getOrderSum());
+                resultList.add(data);
+                if (data.getId() == hairstylist.getId())
+                    myRankings = i + 1;//获取我的排名
+            }
+            map.put("resultList", resultList);
+            map.put("sumNum", hairstylists.size());
+            map.put("myRankings", myRankings);
+            return map;
         } catch (Exception e) {
             logger.error(e.getMessage());
             logger.info("获取店内排行列表失败！！（后端发生某些错误）\n\n");
@@ -717,38 +673,43 @@ public class HairstylistController {
         Map map = new HashMap();
         try {
             Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
-            if (hairstylist == null || hairstylist.getApplyStatus() != 1) {
+            if (hairstylist == null) {
                 logger.info("非发型师用户操作！！");
                 map.put("error", "对不起，你还不是发型师用户，无权操作！！");
                 return map;
-            } else {
-                List<Hairstylist> hairstylists = hairstylist.shop.getHairstylists();
-
-                // 按今日预约的订单数倒序排序
-                Collections.sort(hairstylists, (o1, o2) -> {
-                    if (o1.getTodayOrderSum() < o2.getTodayOrderSum()) {
-                        return 1;
-                    } else if ((o1.getTodayOrderSum() > o2.getTodayOrderSum())) {
-                        return -1;
-                    }
-                    return 0; //相等为0
-                });
-
-                List<RankingData> resultList = new ArrayList<>();
-                int myRankings = -1;//我的排名
-
-                for (int i = 0; i < hairstylists.size(); i++) {
-                    Hairstylist h = hairstylists.get(i);
-                    RankingData data = new RankingData(i + 1, h, h.getTodayOrderSum());
-                    resultList.add(data);
-                    if (data.getId() == hairstylist.getId())
-                        myRankings = i + 1;//获取我的排名
-                }
-                map.put("resultList", resultList);
-                map.put("sumNum", hairstylists.size());
-                map.put("myRankings", myRankings);
+            }
+            if (hairstylist.getApplyStatus() != 1) {
+                logger.info("非入驻发型师用户操作（获取店内排行 - 今天）！！");
+                map.put("error", "你还没有入驻门店！！");
                 return map;
             }
+
+            List<Hairstylist> hairstylists = hairstylist.shop.getHairstylists();
+
+            // 按今日预约的订单数倒序排序
+            Collections.sort(hairstylists, (o1, o2) -> {
+                if (o1.getTodayOrderSum() < o2.getTodayOrderSum()) {
+                    return 1;
+                } else if ((o1.getTodayOrderSum() > o2.getTodayOrderSum())) {
+                    return -1;
+                }
+                return 0; //相等为0
+            });
+
+            List<RankingData> resultList = new ArrayList<>();
+            int myRankings = -1;//我的排名
+
+            for (int i = 0; i < hairstylists.size(); i++) {
+                Hairstylist h = hairstylists.get(i);
+                RankingData data = new RankingData(i + 1, h, h.getTodayOrderSum());
+                resultList.add(data);
+                if (data.getId() == hairstylist.getId())
+                    myRankings = i + 1;//获取我的排名
+            }
+            map.put("resultList", resultList);
+            map.put("sumNum", hairstylists.size());
+            map.put("myRankings", myRankings);
+            return map;
         } catch (Exception e) {
             logger.error(e.getMessage());
             logger.info("获取店内排行列表失败！！（后端发生某些错误）\n\n");
@@ -764,38 +725,43 @@ public class HairstylistController {
         Map map = new HashMap();
         try {
             Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
-            if (hairstylist == null || hairstylist.getApplyStatus() != 1) {
+            if (hairstylist == null) {
                 logger.info("非发型师用户操作！！");
                 map.put("error", "对不起，你还不是发型师用户，无权操作！！");
                 return map;
-            } else {
-                List<Hairstylist> hairstylists = hairstylist.shop.getHairstylists();
-
-                // 按完成订单数倒序排序
-                Collections.sort(hairstylists, (o1, o2) -> {
-                    if (o1.getCurrentMonthOrderSum() < o2.getCurrentMonthOrderSum()) {
-                        return 1;
-                    } else if ((o1.getCurrentMonthOrderSum() > o2.getCurrentMonthOrderSum())) {
-                        return -1;
-                    }
-                    return 0; //相等为0
-                });
-
-                List<RankingData> resultList = new ArrayList<>();
-                int myRankings = -1;//我的排名
-
-                for (int i = 0; i < hairstylists.size(); i++) {
-                    Hairstylist h = hairstylists.get(i);
-                    RankingData data = new RankingData(i + 1, h, h.getCurrentMonthOrderSum());
-                    resultList.add(data);
-                    if (data.getId() == hairstylist.getId())
-                        myRankings = i + 1;//获取我的排名
-                }
-                map.put("resultList", resultList);
-                map.put("sumNum", hairstylists.size());
-                map.put("myRankings", myRankings);
+            }
+            if (hairstylist.getApplyStatus() != 1) {
+                logger.info("非入驻发型师用户操作（获取店内排行 - 本月）！！");
+                map.put("error", "你还没有入驻门店！！");
                 return map;
             }
+
+            List<Hairstylist> hairstylists = hairstylist.shop.getHairstylists();
+
+            // 按完成订单数倒序排序
+            Collections.sort(hairstylists, (o1, o2) -> {
+                if (o1.getCurrentMonthOrderSum() < o2.getCurrentMonthOrderSum()) {
+                    return 1;
+                } else if ((o1.getCurrentMonthOrderSum() > o2.getCurrentMonthOrderSum())) {
+                    return -1;
+                }
+                return 0; //相等为0
+            });
+
+            List<RankingData> resultList = new ArrayList<>();
+            int myRankings = -1;//我的排名
+
+            for (int i = 0; i < hairstylists.size(); i++) {
+                Hairstylist h = hairstylists.get(i);
+                RankingData data = new RankingData(i + 1, h, h.getCurrentMonthOrderSum());
+                resultList.add(data);
+                if (data.getId() == hairstylist.getId())
+                    myRankings = i + 1;//获取我的排名
+            }
+            map.put("resultList", resultList);
+            map.put("sumNum", hairstylists.size());
+            map.put("myRankings", myRankings);
+            return map;
         } catch (Exception e) {
             logger.error(e.getMessage());
             logger.info("获取店内排行列表失败！！（后端发生某些错误）\n\n");
@@ -813,57 +779,62 @@ public class HairstylistController {
         Map map = new HashMap();
         try {
             Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
-            if (hairstylist == null || hairstylist.getApplyStatus() != 1) {
+            if (hairstylist == null) {
                 logger.info("非发型师用户操作！！");
                 map.put("error", "对不起，你还不是发型师用户，无权操作！！");
                 return map;
-            } else {
-                Double radius = 0.001;//0.001经纬度相对大概100米
-                List<Hairstylist> hairstylists = new ArrayList<>();
-                Shop shop = hairstylist.getShop();
-                List<Shop> shopList = shopService.getShopsByRadius(shop.getLongitude(), shop.getLatitude(), radius);
-
-                for (Shop shop1 : shopList) {
-                    hairstylists.addAll(shop1.hairstylists);
-                }
-
-                // 按完成订单数倒序排序
-                Collections.sort(hairstylists, (o1, o2) -> {
-                    if (o1.getOrderSum() < o2.getOrderSum()) {
-                        return 1;
-                    } else if ((o1.getOrderSum() > o2.getOrderSum())) {
-                        return -1;
-                    }
-                    return 0; //相等为0
-                });
-
-                List<RankingData> tempList = new ArrayList<>();
-                List<RankingData> resultList = new ArrayList<>();
-                int myRankings = -1;//我的排名
-
-                for (int i = 0; i < hairstylists.size(); i++) {
-                    Hairstylist h = hairstylists.get(i);
-                    RankingData data = new RankingData(i + 1, h, h.getOrderSum());
-                    tempList.add(data);
-                    if (data.getId() == hairstylist.getId())
-                        myRankings = i + 1;//获取我的排名
-                }
-
-                int first = pageNum * pageSize;
-                int last = pageNum * pageSize + pageSize - 1;
-                for (int i = first; i <= last && i < tempList.size(); i++) {
-                    resultList.add(tempList.get(i));
-                }
-
-                //包装分页数据
-                Pageable pageable = PageRequest.of(pageNum, pageSize);
-                Page<RankingData> page = new PageImpl<>(resultList, pageable, tempList.size());
-
-                map.put("page", page);
-                map.put("sumNum", hairstylists.size());
-                map.put("myRankings", myRankings);
+            }
+            if (hairstylist.getApplyStatus() != 1) {
+                logger.info("非入驻发型师用户操作（获取区域排行 - 全部）！！");
+                map.put("error", "你还没有入驻门店，无权操作");
                 return map;
             }
+
+            Double radius = 0.001;//0.001经纬度相对大概100米
+            List<Hairstylist> hairstylists = new ArrayList<>();
+            Shop shop = hairstylist.getShop();
+            List<Shop> shopList = shopService.getShopsByRadius(shop.getLongitude(), shop.getLatitude(), radius);
+
+            for (Shop shop1 : shopList) {
+                hairstylists.addAll(shop1.hairstylists);
+            }
+
+            // 按完成订单数倒序排序
+            Collections.sort(hairstylists, (o1, o2) -> {
+                if (o1.getOrderSum() < o2.getOrderSum()) {
+                    return 1;
+                } else if ((o1.getOrderSum() > o2.getOrderSum())) {
+                    return -1;
+                }
+                return 0; //相等为0
+            });
+
+            List<RankingData> tempList = new ArrayList<>();
+            List<RankingData> resultList = new ArrayList<>();
+            int myRankings = -1;//我的排名
+
+            for (int i = 0; i < hairstylists.size(); i++) {
+                Hairstylist h = hairstylists.get(i);
+                RankingData data = new RankingData(i + 1, h, h.getOrderSum());
+                tempList.add(data);
+                if (data.getId() == hairstylist.getId())
+                    myRankings = i + 1;//获取我的排名
+            }
+
+            int first = pageNum * pageSize;
+            int last = pageNum * pageSize + pageSize - 1;
+            for (int i = first; i <= last && i < tempList.size(); i++) {
+                resultList.add(tempList.get(i));
+            }
+
+            //包装分页数据
+            Pageable pageable = PageRequest.of(pageNum, pageSize);
+            Page<RankingData> page = new PageImpl<>(resultList, pageable, tempList.size());
+
+            map.put("page", page);
+            map.put("sumNum", hairstylists.size());
+            map.put("myRankings", myRankings);
+            return map;
         } catch (Exception e) {
             logger.error(e.getMessage());
             logger.info("获取区域排行列表失败！！（后端发生某些错误）\n\n");
@@ -881,57 +852,62 @@ public class HairstylistController {
         Map map = new HashMap();
         try {
             Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
-            if (hairstylist == null || hairstylist.getApplyStatus() != 1) {
+            if (hairstylist == null) {
                 logger.info("非发型师用户操作！！");
                 map.put("error", "对不起，你还不是发型师用户，无权操作！！");
                 return map;
-            } else {
-                Double radius = 0.001;//0.001经纬度相对大概100米
-                List<Hairstylist> hairstylists = new ArrayList<>();
-                Shop shop = hairstylist.getShop();
-                List<Shop> shopList = shopService.getShopsByRadius(shop.getLongitude(), shop.getLatitude(), radius);
-
-                for (Shop shop1 : shopList) {
-                    hairstylists.addAll(shop1.hairstylists);
-                }
-
-                // 按今日预约的订单数倒序排序
-                Collections.sort(hairstylists, (o1, o2) -> {
-                    if (o1.getTodayOrderSum() < o2.getTodayOrderSum()) {
-                        return 1;
-                    } else if ((o1.getTodayOrderSum() > o2.getTodayOrderSum())) {
-                        return -1;
-                    }
-                    return 0; //相等为0
-                });
-
-                List<RankingData> tempList = new ArrayList<>();
-                List<RankingData> resultList = new ArrayList<>();
-                int myRankings = -1;//我的排名
-
-                for (int i = 0; i < hairstylists.size(); i++) {
-                    Hairstylist h = hairstylists.get(i);
-                    RankingData data = new RankingData(i + 1, h, h.getTodayOrderSum());
-                    tempList.add(data);
-                    if (data.getId() == hairstylist.getId())
-                        myRankings = i + 1;//获取我的排名
-                }
-
-                int first = pageNum * pageSize;
-                int last = pageNum * pageSize + pageSize - 1;
-                for (int i = first; i <= last && i < tempList.size(); i++) {
-                    resultList.add(tempList.get(i));
-                }
-
-                //包装分页数据
-                Pageable pageable = PageRequest.of(pageNum, pageSize);
-                Page<RankingData> page = new PageImpl<>(resultList, pageable, tempList.size());
-
-                map.put("page", page);
-                map.put("sumNum", hairstylists.size());
-                map.put("myRankings", myRankings);
+            }
+            if (hairstylist.getApplyStatus() != 1) {
+                logger.info("非入驻发型师用户操作（获取区域排行 - 今天）！！");
+                map.put("error", "你还没有入驻门店，无权操作");
                 return map;
             }
+
+            Double radius = 0.001;//0.001经纬度相对大概100米
+            List<Hairstylist> hairstylists = new ArrayList<>();
+            Shop shop = hairstylist.getShop();
+            List<Shop> shopList = shopService.getShopsByRadius(shop.getLongitude(), shop.getLatitude(), radius);
+
+            for (Shop shop1 : shopList) {
+                hairstylists.addAll(shop1.hairstylists);
+            }
+
+            // 按今日预约的订单数倒序排序
+            Collections.sort(hairstylists, (o1, o2) -> {
+                if (o1.getTodayOrderSum() < o2.getTodayOrderSum()) {
+                    return 1;
+                } else if ((o1.getTodayOrderSum() > o2.getTodayOrderSum())) {
+                    return -1;
+                }
+                return 0; //相等为0
+            });
+
+            List<RankingData> tempList = new ArrayList<>();
+            List<RankingData> resultList = new ArrayList<>();
+            int myRankings = -1;//我的排名
+
+            for (int i = 0; i < hairstylists.size(); i++) {
+                Hairstylist h = hairstylists.get(i);
+                RankingData data = new RankingData(i + 1, h, h.getTodayOrderSum());
+                tempList.add(data);
+                if (data.getId() == hairstylist.getId())
+                    myRankings = i + 1;//获取我的排名
+            }
+
+            int first = pageNum * pageSize;
+            int last = pageNum * pageSize + pageSize - 1;
+            for (int i = first; i <= last && i < tempList.size(); i++) {
+                resultList.add(tempList.get(i));
+            }
+
+            //包装分页数据
+            Pageable pageable = PageRequest.of(pageNum, pageSize);
+            Page<RankingData> page = new PageImpl<>(resultList, pageable, tempList.size());
+
+            map.put("page", page);
+            map.put("sumNum", hairstylists.size());
+            map.put("myRankings", myRankings);
+            return map;
         } catch (Exception e) {
             logger.error(e.getMessage());
             logger.info("获取区域排行列表失败！！（后端发生某些错误）\n\n");
@@ -949,57 +925,62 @@ public class HairstylistController {
         Map map = new HashMap();
         try {
             Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
-            if (hairstylist == null || hairstylist.getApplyStatus() != 1) {
+            if (hairstylist == null) {
                 logger.info("非发型师用户操作！！");
                 map.put("error", "对不起，你还不是发型师用户，无权操作！！");
                 return map;
-            } else {
-                Double radius = 0.001;//0.001经纬度相对大概100米
-                List<Hairstylist> hairstylists = new ArrayList<>();
-                Shop shop = hairstylist.getShop();
-                List<Shop> shopList = shopService.getShopsByRadius(shop.getLongitude(), shop.getLatitude(), radius);
-
-                for (Shop shop1 : shopList) {
-                    hairstylists.addAll(shop1.hairstylists);
-                }
-
-                // 按完成订单数倒序排序
-                Collections.sort(hairstylists, (o1, o2) -> {
-                    if (o1.getCurrentMonthOrderSum() < o2.getCurrentMonthOrderSum()) {
-                        return 1;
-                    } else if ((o1.getCurrentMonthOrderSum() > o2.getCurrentMonthOrderSum())) {
-                        return -1;
-                    }
-                    return 0; //相等为0
-                });
-
-                List<RankingData> tempList = new ArrayList<>();
-                List<RankingData> resultList = new ArrayList<>();
-                int myRankings = -1;//我的排名
-
-                for (int i = 0; i < hairstylists.size(); i++) {
-                    Hairstylist h = hairstylists.get(i);
-                    RankingData data = new RankingData(i + 1, h, h.getCurrentMonthOrderSum());
-                    tempList.add(data);
-                    if (data.getId() == hairstylist.getId())
-                        myRankings = i + 1;//获取我的排名
-                }
-
-                int first = pageNum * pageSize;
-                int last = pageNum * pageSize + pageSize - 1;
-                for (int i = first; i <= last && i < tempList.size(); i++) {
-                    resultList.add(tempList.get(i));
-                }
-
-                //包装分页数据
-                Pageable pageable = PageRequest.of(pageNum, pageSize);
-                Page<RankingData> page = new PageImpl<>(resultList, pageable, tempList.size());
-
-                map.put("page", page);
-                map.put("sumNum", hairstylists.size());
-                map.put("myRankings", myRankings);
+            }
+            if (hairstylist.getApplyStatus() != 1) {
+                logger.info("非入驻发型师用户操作（获取区域排行 - 本月）！！");
+                map.put("error", "你还没有入驻门店，无权操作");
                 return map;
             }
+
+            Double radius = 0.001;//0.001经纬度相对大概100米
+            List<Hairstylist> hairstylists = new ArrayList<>();
+            Shop shop = hairstylist.getShop();
+            List<Shop> shopList = shopService.getShopsByRadius(shop.getLongitude(), shop.getLatitude(), radius);
+
+            for (Shop shop1 : shopList) {
+                hairstylists.addAll(shop1.hairstylists);
+            }
+
+            // 按完成订单数倒序排序
+            Collections.sort(hairstylists, (o1, o2) -> {
+                if (o1.getCurrentMonthOrderSum() < o2.getCurrentMonthOrderSum()) {
+                    return 1;
+                } else if ((o1.getCurrentMonthOrderSum() > o2.getCurrentMonthOrderSum())) {
+                    return -1;
+                }
+                return 0; //相等为0
+            });
+
+            List<RankingData> tempList = new ArrayList<>();
+            List<RankingData> resultList = new ArrayList<>();
+            int myRankings = -1;//我的排名
+
+            for (int i = 0; i < hairstylists.size(); i++) {
+                Hairstylist h = hairstylists.get(i);
+                RankingData data = new RankingData(i + 1, h, h.getCurrentMonthOrderSum());
+                tempList.add(data);
+                if (data.getId() == hairstylist.getId())
+                    myRankings = i + 1;//获取我的排名
+            }
+
+            int first = pageNum * pageSize;
+            int last = pageNum * pageSize + pageSize - 1;
+            for (int i = first; i <= last && i < tempList.size(); i++) {
+                resultList.add(tempList.get(i));
+            }
+
+            //包装分页数据
+            Pageable pageable = PageRequest.of(pageNum, pageSize);
+            Page<RankingData> page = new PageImpl<>(resultList, pageable, tempList.size());
+
+            map.put("page", page);
+            map.put("sumNum", hairstylists.size());
+            map.put("myRankings", myRankings);
+            return map;
         } catch (Exception e) {
             logger.error(e.getMessage());
             logger.info("获取区域排行列表失败！！（后端发生某些错误）\n\n");

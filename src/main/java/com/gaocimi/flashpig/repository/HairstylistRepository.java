@@ -16,12 +16,13 @@ public interface HairstylistRepository extends JpaRepository<Hairstylist, Intege
 
     Hairstylist findByOpenid(String openid);
 
+    Hairstylist findByPersonalPhone(String phone);
+
     void deleteById(int id);
 
     //分页
     public Page<Hairstylist> findAll(Pageable pageable);
 
     public Page<Hairstylist> findAllByApplyStatus(Integer status,Pageable pageable);
-
 
 }

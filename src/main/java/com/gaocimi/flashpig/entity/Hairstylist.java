@@ -3,8 +3,11 @@ package com.gaocimi.flashpig.entity;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.gaocimi.flashpig.model.ShopSimpleInfo;
 import com.gaocimi.flashpig.utils.xp.MyUtils;
+import lombok.Data;
 
 import javax.persistence.*;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -16,6 +19,7 @@ import java.util.*;
 @Entity
 @Table(name = "hairstylist")
 @JsonIgnoreProperties(value = {"shop", "articleList", "getCurrentMonthOrderSum", "allOperationalData", "loyalUserRecordList", "haircutOrderList", "hairstylistImageUrlList", "hairServiceList", "recordToUserList", "userList", "handler", "hibernateLazyInitializer", "fieldHandler"})
+@Data
 public class Hairstylist {
 
     @Id
@@ -60,19 +64,19 @@ public class Hairstylist {
     private String availableTime;
 
     /**
-     * 预约须知
-     */
-    private String attention;
-
-    /**
      * 用户评分
      */
     private Double point;
 
     /**
-     * 入驻时间
+     * 发型师账户创建时间
      */
     private Date createTime;
+
+    /**
+     * 发型师入驻门店的时间
+     */
+    private String settledTime;
 
     /**
      * 完成订单总数
@@ -83,6 +87,7 @@ public class Hairstylist {
      * 发型师申请状态（0表示申请中，1表示申请通过, -1表示申请失败）
      */
     private Integer applyStatus;
+
 
     /**
      * 发型师上传的图片列表； 定义该Hairstylist实体所有关联的HairstylistImageUrl实体； 指定mappedBy属性表明该Hairstylist实体不控制关联关系
@@ -125,67 +130,12 @@ public class Hairstylist {
     public Hairstylist() {
         Date date = new Date(System.currentTimeMillis());
 
+        setApplyStatus(0);
         setCreateTime(date);//设置注册时间
-        setApplyStatus(0);//设置申请状态为申请中
         setOrderSum(0);//根据自己的订单列表（中的已完成）数量进行校正,注册时没有订单，所以为0
         setPoint(-1.0);
     }
 
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    public String getOpenid() {
-        return openid;
-    }
-
-    public void setOpenid(String openid) {
-        this.openid = openid;
-    }
-
-    public String getHairstylistName() {
-        return hairstylistName;
-    }
-
-    public void setHairstylistName(String hairstylistName) {
-        this.hairstylistName = hairstylistName;
-    }
-
-    public String getPersonalPhone() {
-        return personalPhone;
-    }
-
-    public void setPersonalPhone(String personalPhone) {
-        this.personalPhone = personalPhone;
-    }
-
-    public String getPersonalPhotoUrl() {
-        return personalPhotoUrl;
-    }
-
-    public void setPersonalPhotoUrl(String personalPhotoUrl) {
-        this.personalPhotoUrl = personalPhotoUrl;
-    }
-
-    public String getPersonalProfile() {
-        return personalProfile;
-    }
-
-    public void setPersonalProfile(String personalProfile) {
-        this.personalProfile = personalProfile;
-    }
-
-    public Shop getShop() {
-        return shop;
-    }
-
-    public void setShop(Shop shop) {
-        this.shop = shop;
-    }
 
     public ShopSimpleInfo getShopSimpleInfo() {
         if (shop == null)
@@ -194,20 +144,35 @@ public class Hairstylist {
             return new ShopSimpleInfo(shop);
     }
 
-    public String getAvailableTime() {
-        return availableTime;
+    public List<String> getAvailableTime() {
+
+        DateFormat df3 = new SimpleDateFormat("HH:mm:ss");
+        ;//只显示出时时分秒（12:43:37）的格式
+        List<String> timeList = new ArrayList<>();
+        String[] availableTime = this.availableTime.split(",");
+        for (String str : availableTime) {
+            int hour;
+            try {
+                hour = Integer.parseInt(str);
+                timeList.add(df3.format(MyUtils.getTime(hour)));
+            } catch (Exception e) {
+                System.out.println("可预约时间转换失败（数据为：" + str + "）");
+                return null;
+            }
+        }
+
+        return timeList;
     }
 
-    public void setAvailableTime(String availableTime) {
-        this.availableTime = availableTime;
-    }
-
-    public String getAttention() {
-        return attention;
-    }
-
-    public void setAttention(String attention) {
-        this.attention = attention;
+    public void setAvailableTime(List<String> timeList) {
+        String str = "";
+        for (String time : timeList) {
+            if (str.length() > 0)
+                str = str + "," + time;
+            else
+                str = "" + time;
+        }
+        this.availableTime = str;
     }
 
     public Double getPoint() {
@@ -235,13 +200,6 @@ public class Hairstylist {
             this.point = sumPoint / count;
     }
 
-    public Date getCreateTime() {
-        return createTime;
-    }
-
-    public void setCreateTime(Date createTime) {
-        this.createTime = createTime;
-    }
 
     /**
      * 校正已完成订单数量 - 根据自己的订单列表（中的已完成）数量进行校正
@@ -261,65 +219,8 @@ public class Hairstylist {
         return orderSum;
     }
 
-    public void setOrderSum(Integer orderSum) {
-        this.orderSum = orderSum;
-    }
 
-    public Integer getApplyStatus() {
-        return applyStatus;
-    }
 
-    public void setApplyStatus(Integer applyStatus) {
-        this.applyStatus = applyStatus;
-    }
-
-    public List<HairstylistImageUrl> getHairstylistImageUrlList() {
-        return hairstylistImageUrlList;
-    }
-
-    public void setHairstylistImageUrlList(List<HairstylistImageUrl> hairstylistImageUrlList) {
-        this.hairstylistImageUrlList = hairstylistImageUrlList;
-    }
-
-    public List<HairService> getHairServiceList() {
-        return hairServiceList;
-    }
-
-    public void setHairServiceList(List<HairService> hairServiceList) {
-        this.hairServiceList = hairServiceList;
-    }
-
-    public List<HaircutOrder> getHaircutOrderList() {
-        return haircutOrderList;
-    }
-
-    public void setHaircutOrderList(List<HaircutOrder> haircutOrderList) {
-        this.haircutOrderList = haircutOrderList;
-    }
-
-    public List<RecordHairstylisToUser> getRecordToUserList() {
-        return recordToUserList;
-    }
-
-    public void setRecordToUserList(List<RecordHairstylisToUser> recordToUserList) {
-        this.recordToUserList = recordToUserList;
-    }
-
-    public List<UserToHairstylist> getLoyalUserRecordList() {
-        return loyalUserRecordList;
-    }
-
-    public void setLoyalUserRecordList(List<UserToHairstylist> loyalUserRecordList) {
-        this.loyalUserRecordList = loyalUserRecordList;
-    }
-
-    public List<Article> getArticleList() {
-        return articleList;
-    }
-
-    public void setArticleList(List<Article> articleList) {
-        this.articleList = articleList;
-    }
 
     /**************下面是一些关于发型师数据统计相关的方法*******************************************************************/
 

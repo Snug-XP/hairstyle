@@ -18,6 +18,8 @@ public interface HairstylistService {
 
     public Hairstylist findHairstylistByOpenid(String openid);
 
+    public Hairstylist findHairstylistByPhone(String phone);
+
     public void save(Hairstylist hairstylist);
 
     public void edit(Hairstylist hairstylist);

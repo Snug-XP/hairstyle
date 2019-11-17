@@ -41,6 +41,11 @@ public class HairstylistServiceImpl implements HairstylistService {
     }
 
     @Override
+    public Hairstylist findHairstylistByPhone(String phone) {
+        return hairstylistRepository.findByPersonalPhone(phone);
+    }
+
+    @Override
     public void save(Hairstylist hairstylist) {
         hairstylistRepository.save(hairstylist);
     }

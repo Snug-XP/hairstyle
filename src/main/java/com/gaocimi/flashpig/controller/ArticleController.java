@@ -53,9 +53,15 @@ public class ArticleController {
         Map map = new HashMap();
         try {
             Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
-            if ((hairstylist == null || hairstylist.getApplyStatus() != 1) && (!administratorService.isExist(myOpenid))) {
+            if (hairstylist == null  && (!administratorService.isExist(myOpenid))) {
                 logger.info("非发型师用户或管理员操作（添加文章）！！");
                 map.put("error", "对不起，你不是发型师或管理员，无权操作！！");
+                return map;
+            }
+
+            if (hairstylist.getApplyStatus() != 1) {
+                logger.info("非入驻发型师用户操作（添加发型文章）！！");
+                map.put("error", "对不起，你还没有入驻门店，不可操作！！");
                 return map;
             }
 
@@ -105,7 +111,7 @@ public class ArticleController {
             }
 
             Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
-            if ((hairstylist == null || hairstylist.getApplyStatus() != 1) && (!administratorService.isExist(myOpenid))) {
+            if ((hairstylist == null) && (!administratorService.isExist(myOpenid))) {
                 logger.info("非发型师用户或管理员操作（删除文章）！！");
                 map.put("error", "对不起，你不是发型师或管理员，无权操作！！");
                 return map;
@@ -148,9 +154,15 @@ public class ArticleController {
             }
 
             Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
-            if (hairstylist == null || hairstylist.getApplyStatus() != 1) {
+            if (hairstylist == null ) {
                 logger.info("非发型师用户操作（修改文章）！！");
                 map.put("error", "对不起，你不是发型师，无权操作！！");
+                return map;
+            }
+
+            if (hairstylist.getApplyStatus() != 1) {
+                logger.info("非入驻发型师用户操作（修改发型文章）！！");
+                map.put("error", "对不起，你还没有入驻门店，不可操作！！");
                 return map;
             }
 
@@ -202,8 +214,8 @@ public class ArticleController {
         Map map = new HashMap();
         try {
             Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
-            if ((hairstylist == null || hairstylist.getApplyStatus() != 1) && (!administratorService.isExist(myOpenid))) {
-                logger.info("非发型师用户或管理员操作（删除文章）！！");
+            if (hairstylist == null ) {
+                logger.info("非发型师用户或管理员操作（获取自己的发型文章列表）！！");
                 map.put("error", "对不起，你不是发型师或管理员，无权操作！！");
                 return map;
             }
