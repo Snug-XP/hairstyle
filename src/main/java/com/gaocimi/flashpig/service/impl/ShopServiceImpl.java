@@ -91,9 +91,13 @@ public class ShopServiceImpl implements ShopService {
         int first = pageNum * pageSize;
         int last = pageNum * pageSize + pageSize - 1;
 
+        //包装分页数据
+        Sort sort = new Sort(Sort.Direction.ASC, "createTime");  //按申请时间升序
+        Pageable pageable = PageRequest.of(pageNum, pageSize, sort);
+
         List<Shop> shops = null;
         if (province == null && shopName == null)
-            shops = shopRepository.findAllByApplyStatus(status);
+            return shopRepository.findAllByApplyStatus(status,pageable);
         else if (province != null) {
             if (shopName != null)
                 shops = shopRepository.findAllByApplyStatusAndShopNameLikeAndProvinceAndCityAndDistrict(status, "%" + shopName + "%", province, city, district);
@@ -108,8 +112,7 @@ public class ShopServiceImpl implements ShopService {
             resultList.add(shops.get(i));
         }
 
-        //包装分页数据
-        Pageable pageable = PageRequest.of(pageNum, pageSize);
+
         Page<Shop> page = new PageImpl<>(resultList, pageable, shops.size());
 
         return page;
@@ -149,21 +152,10 @@ public class ShopServiceImpl implements ShopService {
      */
     @Override
     public Page<Shop> findAllByStatus(int status, int pageNum, int pageSize) {
-        int first = pageNum * pageSize;
-        int last = pageNum * pageSize + pageSize - 1;
+        Sort sort = new Sort(Sort.Direction.ASC, "createTime");  //按申请时间升序
+        Pageable pageable = PageRequest.of(pageNum, pageSize, sort);
 
-        List<Shop> shops = shopRepository.findAllByApplyStatus(status);
-        List<Shop> resultList = new ArrayList<>();
-
-        for (int i = first; i <= last && i < shops.size(); i++) {
-            resultList.add(shops.get(i));
-        }
-
-        //包装分页数据
-        Pageable pageable = PageRequest.of(pageNum, pageSize);
-        Page<Shop> page = new PageImpl<>(resultList, pageable, shops.size());
-
-        return page;
+        return shopRepository.findAllByApplyStatus(status,pageable);
     }
 
 }

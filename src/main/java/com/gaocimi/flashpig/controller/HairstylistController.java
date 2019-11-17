@@ -174,11 +174,11 @@ public class HairstylistController {
             Hairstylist hairstylist = hairstylistService.findHairstylistById(hairstylistId);
             if (myOpenid.equals(hairstylist.getOpenid()) || administratorService.isExist(myOpenid)) {
                 hairstylistService.delete(hairstylistId);
-                logger.info("注销发型师“" + hairstylist.getHairstylistName() + "”(id="+hairstylistId+")成功！");
+                logger.info("注销发型师“" + hairstylist.getHairstylistName() + "”(id=" + hairstylistId + ")成功！");
                 map.put("message", "注销发型师“" + hairstylist.getHairstylistName() + "”成功！");
                 return map;
             } else {
-                logger.info("注销发型师“" + hairstylist.getHairstylistName() + "”(id="+hairstylistId+")失败！！（没有权限！！）");
+                logger.info("注销发型师“" + hairstylist.getHairstylistName() + "”(id=" + hairstylistId + ")失败！！（没有权限！！）");
                 map.put("error", "注销发型师“" + hairstylist.getHairstylistName() + "”失败！！（没有权限！！）");
                 return map;
             }
@@ -293,23 +293,16 @@ public class HairstylistController {
         }
     }
 
-    @ApiOperation(value = "分页获取所有发型师列表", notes = "仅管理员有权限", produces = "application/json")
+    @ApiOperation(value = "分页获取所有发型师列表", produces = "application/json")
     @GetMapping("/hairstylists/getAll")
-    public Map getHairstylistsPage(@RequestParam String myOpenid,
-                                   @RequestParam(name = "pageNum", defaultValue = "0") int pageNum,
+    public Map getHairstylistsPage(@RequestParam(name = "pageNum", defaultValue = "0") int pageNum,
                                    @RequestParam(name = "pageSize", defaultValue = "10") int pageSize) {
         Map map = new HashMap();
         try {
-            if (administratorService.isExist(myOpenid)) {
-                Page<Hairstylist> page = hairstylistService.findAll(pageNum, pageSize);
-                map.put("page", page);
-                logger.info("获取发型师列表信息成功！");
-                return map;
-            } else {
-                logger.info("获取发型师信息失败！！（没有权限！！）");
-                map.put("error", "获取发型师信息失败！！（没有权限！！）");
-                return map;
-            }
+            Page<Hairstylist> page = hairstylistService.findAllByStatus(1,pageNum, pageSize);
+            map.put("page", page);
+            logger.info("获取发型师列表信息成功！::"+map);
+            return map;
         } catch (Exception e) {
             logger.error(e.getMessage());
             logger.info("获取发型师列表信息失败！！（后端发生某些错误）");

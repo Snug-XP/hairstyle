@@ -10,8 +10,10 @@ public class ShopSimpleInfo {
     private String address;
 
     public ShopSimpleInfo(Shop shop) {
-        this.id = shop.getId();
-        this.shopName = shop.getShopName();
-        this.address = shop.getProvince() + " " + shop.getCity() + " " + shop.getDistrict() + " " + shop.getAddress();
+        if(shop!=null) {
+            this.id = shop.getId();
+            this.shopName = shop.getShopName();
+            this.address = shop.getProvince() + " " + shop.getCity() + " " + shop.getDistrict() + " " + shop.getAddress();
+        }
     }
 }

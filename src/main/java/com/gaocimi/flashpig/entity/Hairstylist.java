@@ -15,7 +15,7 @@ import java.util.*;
  */
 @Entity
 @Table(name = "hairstylist")
-@JsonIgnoreProperties(value = {"shop","articleList", "getCurrentMonthOrderSum", "allOperationalData", "loyalUserRecordList", "haircutOrderList", "hairstylistImageUrlList", "hairServiceList", "recordToUserList", "userList", "handler", "hibernateLazyInitializer", "fieldHandler"})
+@JsonIgnoreProperties(value = {"shop", "articleList", "getCurrentMonthOrderSum", "allOperationalData", "loyalUserRecordList", "haircutOrderList", "hairstylistImageUrlList", "hairServiceList", "recordToUserList", "userList", "handler", "hibernateLazyInitializer", "fieldHandler"})
 public class Hairstylist {
 
     @Id
@@ -47,7 +47,9 @@ public class Hairstylist {
      */
     private String personalProfile;
 
-    /**该发型师所在门店； 定义名为shop_id的外键列，该外键引用shop表的主键(id)列,采用懒加载*/
+    /**
+     * 该发型师所在门店； 定义名为shop_id的外键列，该外键引用shop表的主键(id)列,采用懒加载
+     */
     @ManyToOne(targetEntity = Shop.class, fetch = FetchType.LAZY)
     @JoinColumn(name = "shop_id", nullable = false)
     public Shop shop;
@@ -186,7 +188,10 @@ public class Hairstylist {
     }
 
     public ShopSimpleInfo getShopSimpleInfo() {
-        return new ShopSimpleInfo(shop);
+        if (shop == null)
+            return null;
+        else
+            return new ShopSimpleInfo(shop);
     }
 
     public String getAvailableTime() {
@@ -363,7 +368,7 @@ public class Hairstylist {
         List<Integer> newCustomerNum = new ArrayList<>();
         List<Integer> newLoyalCustomerNum = new ArrayList<>();
         //获取第0~6天前的数据
-        for (int i = 6; i >=0; i--) {
+        for (int i = 6; i >= 0; i--) {
             data = getOperationalData(MyUtils.stepDay(today, -i), MyUtils.stepDay(today, -i + 1));
             reservationNum.add((Integer) data.get("reservationNum"));
             newCustomerNum.add((Integer) data.get("newCustomerNum"));
@@ -377,7 +382,7 @@ public class Hairstylist {
         newLoyalCustomerNum = new ArrayList<>();
 
         //获取第0~3周前的数据
-        for (int i = 3; i >=0; i--) {
+        for (int i = 3; i >= 0; i--) {
             data = getOperationalData(MyUtils.stepWeek(week, -i), MyUtils.stepWeek(week, -i + 1));
             reservationNum.add((Integer) data.get("reservationNum"));
             newCustomerNum.add((Integer) data.get("newCustomerNum"));
@@ -391,7 +396,7 @@ public class Hairstylist {
         newLoyalCustomerNum = new ArrayList<>();
 
         //获取第0~5月前的数据
-        for (int i = 5; i >=0; i--) {
+        for (int i = 5; i >= 0; i--) {
             data = getOperationalData(MyUtils.stepMonth(month, -i), MyUtils.stepMonth(month, -i + 1));
             reservationNum.add((Integer) data.get("reservationNum"));
             newCustomerNum.add((Integer) data.get("newCustomerNum"));

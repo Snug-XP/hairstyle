@@ -345,23 +345,16 @@ public class ShopController {
         }
     }
 
-    @ApiOperation(value = "分页获取所有(审核通过的)门店列表", notes = "仅管理员有权限", produces = "application/json")
+    @ApiOperation(value = "分页获取所有(审核通过的)门店列表", produces = "application/json")
     @GetMapping("/shop/getAll")
-    public Map getShopsPage(@RequestParam String myOpenid,
-                            @RequestParam(name = "pageNum", defaultValue = "0") int pageNum,
+    public Map getShopsPage(@RequestParam(name = "pageNum", defaultValue = "0") int pageNum,
                             @RequestParam(name = "pageSize", defaultValue = "10") int pageSize) {
         Map map = new HashMap();
         try {
-            if (administratorService.isExist(myOpenid)) {
-                Page<Shop> page = shopService.findAllByStatus(1, pageNum, pageSize);
-                map.put("page", page);
-                logger.info("获取门店列表信息成功！");
-                return map;
-            } else {
-                logger.info("获取门店信息失败！！（没有权限！！）");
-                map.put("error", "获取门店信息失败！！（没有权限！！）");
-                return map;
-            }
+            Page<Shop> page = shopService.findAllByStatus(1, pageNum, pageSize);
+            map.put("page", page);
+            logger.info("获取门店列表信息成功！");
+            return map;
         } catch (Exception e) {
             logger.error(e.getMessage());
             logger.info("获取门店列表信息失败！！（后端发生某些错误）");
@@ -691,8 +684,8 @@ public class ShopController {
 
 
     @ApiOperation(value = "获取待审核或审核已通过的发型师信息列表(分页展示)（status=0表示“待审核”status=1表示“审核通过”，status=-1表示“审核未通过”", notes = "仅门店临时登录的微信openid有权限")
-    @GetMapping("/shop/getRegisterHairstylists")
-    public Map getRegisterHairstylists(@RequestParam String myOpenid,
+    @GetMapping("/shop/getHairstylistsByStatus")
+    public Map getHairstylistsByStatus(@RequestParam String myOpenid,
                                        @RequestParam Integer status,
                                        @RequestParam(name = "pageNum", defaultValue = "0") int pageNum,
                                        @RequestParam(name = "pageSize", defaultValue = "10") int pageSize) {
@@ -706,18 +699,13 @@ public class ShopController {
                 return map;
             }
 
-            List<Hairstylist> tempList = shop.getHairstylists();
-            List<Hairstylist> resultList = new ArrayList<>();
+            List<Hairstylist> resultList = shop.getHairstylistsByStatus(status);
 
-            for( Hairstylist hairstylist : tempList){
-                if(hairstylist.getApplyStatus()==status)
-                    resultList.add(hairstylist);
-            }
+            Page<Hairstylist> page = MyUtils.getPage(resultList, pageNum, pageSize);
 
-            Page<Hairstylist> page = MyUtils.getPage(resultList,pageNum,pageSize);
             map.put("page", page);
             return map;
-        } catch ( Exception e) {
+        } catch (Exception e) {
             logger.error(e.getMessage());
             logger.info("获取正在注册的发型师列表失败！！（后端发生某些错误）");
             map.put("error", "获取正在注册的发型师列表失败！！（后端发生某些错误）");
@@ -778,6 +766,42 @@ public class ShopController {
 
         }
         return map;
+    }
+
+    @ApiOperation(value = "根据发型师id，将发型师从本门店中移除", notes = "权限：门店当前登录的微信用户")
+    @DeleteMapping("/shop/removeHairstylist")
+    public Map removeHairstylist(@RequestParam String myOpenid, @RequestParam Integer hairstylistId) {
+        Map map = new HashMap();
+        try {
+            Shop shop = shopService.findShopByOpenid(myOpenid);
+            if (shop == null) {
+                logger.info("未登录操作（同意或拒绝发型师的注册）");
+                map.put("error", "请先登录！！");
+                return map;
+            }
+
+            Hairstylist hairstylist = shop.isExistHairstylist(hairstylistId);
+            if (hairstylist == null) {
+                map.put("error", "门店内不存在该发型师！！");
+                return map;
+            }
+
+            hairstylist.setShop(null);
+            hairstylist.setApplyStatus(0);
+            hairstylistService.edit(hairstylist);
+
+            logger.info("门店“" + shop.getShopName() + "”(id=" + shop.getId() + ")移除了发型师“" + hairstylist.getHairstylistName() + "”(id=" + hairstylist.getId() + ")");
+            map.put("message", "移除该发型师成功！");
+            return map;
+
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            logger.info("注销发型师失败！（后端发生某些错误）");
+            map.put("error", "注销发型师失败！（后端发生某些错误）");
+            e.printStackTrace();
+            return map;
+        }
+
     }
 
 

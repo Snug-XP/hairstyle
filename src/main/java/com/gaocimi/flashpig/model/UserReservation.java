@@ -39,15 +39,17 @@ public class UserReservation {
     private String serviceName;
 
     public UserReservation(HaircutOrder order) {
-        setOrderId(order.getId());
-        setReservationNum(order.getReservationNum());
-        setHairstylistId(order.getHairstylist().getId());
-        setImgUrl(order.getHairstylist().getPersonalPhotoUrl());
-        setHairstylistName(order.getHairstylist().getHairstylistName());
-        setShop(order.getHairstylist().getShopSimpleInfo());
-        setBookTime(order.getBookTime());
-        setStatus(order.getStatus());
-        setServiceName(order.getServiceName());
+        if(order!=null) {
+            setOrderId(order.getId());
+            setReservationNum(order.getReservationNum());
+            setHairstylistId(order.getHairstylist().getId());
+            setImgUrl(order.getHairstylist().getPersonalPhotoUrl());
+            setHairstylistName(order.getHairstylist().getHairstylistName());
+            setShop(order.getHairstylist().getShopSimpleInfo());
+            setBookTime(order.getBookTime());
+            setStatus(order.getStatus());
+            setServiceName(order.getServiceName());
+        }
     }
 
 }

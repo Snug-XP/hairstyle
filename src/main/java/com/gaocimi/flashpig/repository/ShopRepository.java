@@ -22,7 +22,7 @@ public interface ShopRepository extends JpaRepository<Shop, Integer>, JpaSpecifi
     //分页
     public Page<Shop> findAll(Pageable pageable);
 
-    public List<Shop> findAllByApplyStatus(Integer status);
+    public Page<Shop> findAllByApplyStatus(Integer status , Pageable pageable);
 
     public List<Shop> findAllByApplyStatusAndShopNameLike(Integer status, String shopName);
 

@@ -58,7 +58,7 @@ public class HairstylistServiceImpl implements HairstylistService {
     // 分页获得列表
     @Override
     public Page<Hairstylist> findAll(int pageNum, int pageSize) {
-        Sort sort = new Sort(Sort.Direction.DESC, "id");  //降序
+        Sort sort = new Sort(Sort.Direction.ASC, "id");  //升序
         Pageable pageable = PageRequest.of(pageNum, pageSize, sort);
 
         Page<Hairstylist> hairstylistPage = null;
@@ -72,6 +72,14 @@ public class HairstylistServiceImpl implements HairstylistService {
         return hairstylistPage;
     }
 
+
+    @Override
+    public Page<Hairstylist> findAllByStatus(int status, int pageNum, int pageSize){
+
+        Sort sort = new Sort(Sort.Direction.ASC, "createTime");  //按申请时间升序
+        Pageable pageable = PageRequest.of(pageNum, pageSize, sort);
+        return hairstylistRepository.findAllByApplyStatus(status, pageable);
+    }
 }
 
 

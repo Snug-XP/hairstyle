@@ -1,19 +1,26 @@
 package com.gaocimi.flashpig.controller;
 
 import com.gaocimi.flashpig.entity.Article;
+import com.gaocimi.flashpig.entity.Hairstylist;
+import com.gaocimi.flashpig.entity.Shop;
 import com.gaocimi.flashpig.result.ResponseResult;
 import com.gaocimi.flashpig.service.ArticleService;
+import com.gaocimi.flashpig.service.HairstylistService;
+import com.gaocimi.flashpig.service.ShopService;
 import com.gaocimi.flashpig.utils.xp.MyUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.*;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 
@@ -24,6 +31,10 @@ public class TestController {
 
     @Autowired
     ArticleService articleService;
+    @Autowired
+    HairstylistService hairstylistService;
+    @Autowired
+    ShopService shopService;
 
     @ApiOperation(value = "时间测试", produces = "application/json")
     @GetMapping("/timeTest")
@@ -68,5 +79,18 @@ public class TestController {
         Article article2 = articleService.findArticleById(b);
 
         return article1.equals(article2);
+    }
+
+    @ApiOperation(value = "分页测试", produces = "application/json")
+    @GetMapping("/pageTest")
+    public Page TestPage(@RequestParam(name = "pageNum", defaultValue = "0") int pageNum,
+                         @RequestParam(name = "pageSize", defaultValue = "10") int pageSize) {
+
+        List<Hairstylist> list = hairstylistService.getHairstylistList();
+        //包装分页数据
+        Sort sort = new Sort(Sort.Direction.ASC, "createTime");  //按申请时间升序
+        Pageable pageable = PageRequest.of(pageNum, pageSize, sort);
+        Page<Hairstylist> page = new PageImpl<>(list, pageable, 5*list.size());
+        return page;
     }
 }

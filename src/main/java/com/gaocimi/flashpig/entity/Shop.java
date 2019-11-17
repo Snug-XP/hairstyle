@@ -15,7 +15,7 @@ import java.util.*;
  */
 @Entity
 @Table(name = "shop")
-@JsonIgnoreProperties(value = {"hairstylists", "handler", "hibernateLazyInitializer", "fieldHandler"})
+@JsonIgnoreProperties(value = {"hairstylistsByStatus","hairstylists", "handler", "hibernateLazyInitializer", "fieldHandler"})
 @Data
 public class Shop {
 
@@ -145,7 +145,7 @@ public class Shop {
     }
 
     /**
-     * 获取发型师在本月的完成订单数
+     * 获取门店在本月的完成订单数
      *
      * @return 本月的完成订单数
      */
@@ -157,18 +157,39 @@ public class Shop {
     }
 
     /**
-     * 获取发型师今天的预约订单数
+     * 获取门店今天的预约订单数
      *
      * @return 今天的预约订单数
      */
     public int getTodayOrderSum() {
         int todayOrderCount = 0;//今日预约人数
 
-        for(Hairstylist hairstylist : hairstylists)
+        for(Hairstylist hairstylist : this.hairstylists)
             todayOrderCount += hairstylist.getTodayOrderSum();
 
         return todayOrderCount;
     }
+
+    public List<Hairstylist> getHairstylistsByStatus(int status){
+        List<Hairstylist> resultList = new ArrayList<>();
+        for(Hairstylist h : this.hairstylists){
+            if(h.getApplyStatus()==status){
+                resultList.add(h);
+            }
+        }
+        return resultList;
+    }
+
+    public Hairstylist isExistHairstylist(int hairstylistId){
+        for(Hairstylist h : hairstylists){
+            if(h.getId()==hairstylistId)
+                return h;
+        }
+        return null;
+    }
+
+
+
 
 
 }
