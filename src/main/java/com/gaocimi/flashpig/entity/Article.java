@@ -1,6 +1,7 @@
 package com.gaocimi.flashpig.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.gaocimi.flashpig.model.HairstylistInfo;
 import lombok.Data;
 
 import javax.persistence.*;
@@ -17,6 +18,7 @@ import java.util.List;
 @Entity
 @Table(name = "article")
 @JsonIgnoreProperties(value = {"hairstylist", "userRecordList", "handler", "hibernateLazyInitializer", "fieldHandler"})
+@Data
 public class Article {
 
     @Id
@@ -70,13 +72,6 @@ public class Article {
     @OneToMany(targetEntity = ArticleImageUrl.class, mappedBy = "article")
     public List<ArticleImageUrl> articleImageUrlList;
 
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
 
     public String[] getTag() {
         if(tag==null)
@@ -106,60 +101,9 @@ public class Article {
         }
     }
 
-    public String getContent() {
-        return content;
+    public HairstylistInfo getHairstylist(){
+        return new HairstylistInfo(this.hairstylist);
     }
 
-    public void setContent(String content) {
-        this.content = content;
-    }
-
-    public Date getCreateTime() {
-        return createTime;
-    }
-
-    public void setCreateTime(Date createTime) {
-        this.createTime = createTime;
-    }
-
-    public Hairstylist getHairstylist() {
-        return hairstylist;
-    }
-
-    public void setHairstylist(Hairstylist hairstylist) {
-        this.hairstylist = hairstylist;
-    }
-
-    public List<UserToArticle> getUserRecordList() {
-        return userRecordList;
-    }
-
-    public void setUserRecordList(List<UserToArticle> userRecordList) {
-        this.userRecordList = userRecordList;
-    }
-
-    public List<ArticleImageUrl> getArticleImageUrlList() {
-        return articleImageUrlList;
-    }
-
-    public void setArticleImageUrlList(List<ArticleImageUrl> articleImageUrlList) {
-        this.articleImageUrlList = articleImageUrlList;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public Integer getStatus() {
-        return status;
-    }
-
-    public void setStatus(Integer status) {
-        this.status = status;
-    }
 
 }

@@ -178,6 +178,9 @@ public class Shop {
 
         return todayOrderCount;
     }
+    public List<Hairstylist> getHairstylists() {
+        return getHairstylistsByStatus(1);
+    }
 
     public List<Hairstylist> getHairstylistsByStatus(int status) {
         List<Hairstylist> resultList = new ArrayList<>();

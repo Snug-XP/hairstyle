@@ -416,4 +416,60 @@ public class ArticleController {
             return map;
         }
     }
+
+
+//    @ApiOperation(value = "普通用户获取被推荐的文章列表")
+//    @GetMapping("/article/getRecommendedList")
+//    public Map getRecommendedList(@RequestParam String myOpenid,
+//                                     @RequestParam(name = "pageNum", defaultValue = "0") int pageNum,
+//                                     @RequestParam(name = "pageSize", defaultValue = "10") int pageSize) {
+//        Map map = new HashMap();
+//        try {
+//
+//            User user = userService.findUserByOpenid(myOpenid);
+//            if (user == null) {
+//                logger.info("（" + myOpenid + "）该用户不存在！");
+//                map.put("error", "无效的用户！！");
+//                return map;
+//            }
+//            List<Article> tempArticleList = articleService.getRecommendedListBy();
+//            List<UserToArticle> resultArticleList = new ArrayList<>();
+//
+//            if (tempArticleList == null) {
+//                logger.info("你还没有收藏文章哦~");
+//                map.put("message", "你还没有收藏文章哦~");
+//                return map;
+//            }
+//
+//            // 按时间倒序排序
+//            Collections.sort(tempArticleList, (o1, o2) -> {
+//                if (o2.getCreateTime().after(o1.getCreateTime())) {
+//                    return 1;
+//                } else if (o1.getCreateTime().after(o2.getCreateTime())) {
+//                    return -1;
+//                }
+//                return 0; //相等为0
+//            });
+//
+//            //获取所求页数的文章数据
+//            int first = pageNum * pageSize;
+//            int last = pageNum * pageSize + pageSize - 1;
+//            for (int i = first; i <= last && i < tempArticleList.size(); i++) {
+//                resultArticleList.add(tempArticleList.get(i).article);
+//            }
+//
+//            //包装分页数据
+//            Pageable pageable = PageRequest.of(pageNum, pageSize);
+//            Page<Article> page = new PageImpl<>(resultArticleList, pageable, tempArticleList.size());
+//
+//            map.put("page", page);
+//            return map;
+//        } catch (Exception e) {
+//            logger.error(e.getMessage());
+//            logger.info("获取自己收藏的文章列表失败！！（后端发生某些错误）");
+//            map.put("error", "获取收藏列表失败！！（后端发生某些错误）");
+//            e.printStackTrace();
+//            return map;
+//        }
+//    }
 }

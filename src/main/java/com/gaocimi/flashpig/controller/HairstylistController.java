@@ -69,14 +69,14 @@ public class HairstylistController {
         try {
             Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(openid);
             if (hairstylist != null) {
-                logger.info("“"+hairstylist.getHairstylistName() + "”重复申请！！你的申请已通过，无需重复提交！！");
+                logger.info("“" + hairstylist.getHairstylistName() + "”重复申请！！你的申请已通过，无需重复提交！！");
                 map.put("message", "你的申请已通过，无需重复提交！！");
                 return map;
             }
 
             hairstylist = hairstylistService.findHairstylistByPhone(personalPhone);
             if (hairstylist != null) {
-                logger.info("“"+hairstylist.getHairstylistName() + "”个人电话重复的注册！！");
+                logger.info("“" + hairstylist.getHairstylistName() + "”个人电话重复的注册！！");
                 map.put("message", "该电话已绑定发型师，不可重复注册！！");
                 return map;
             }
@@ -142,7 +142,7 @@ public class HairstylistController {
                         if (h.getPersonalPhone().equals(personalPhone)) {
                             map.put("message", "电话号码未修改");
                         } else {
-                            logger.info("“"+hairstylist.getHairstylistName() + "”个人电话重复！！(发型师修改个人信息)");
+                            logger.info("“" + hairstylist.getHairstylistName() + "”个人电话重复！！(发型师修改个人信息)");
                             map.put("error", "该电话已绑定发型师！！");
                             return map;
                         }
@@ -233,22 +233,22 @@ public class HairstylistController {
                 switch (hairstylist.getApplyStatus()) {
                     case 1:
                         if (hairstylist.getShop().getId() == shopId) {
-                            logger.info("“"+hairstylist.getHairstylistName() + "”的申请已通过！无需重复提交");
+                            logger.info("“" + hairstylist.getHairstylistName() + "”的申请已通过！无需重复提交");
                             map.put("error", "你的申请已通过，无需重复提交！！");
                         } else {
-                            logger.info("“"+hairstylist.getHairstylistName() + "”已经入驻门店“" + hairstylist.getShop() + "”(id=" + hairstylist.getShop().getId() + ")，不可再申请入驻其他门店");
+                            logger.info("“" + hairstylist.getHairstylistName() + "”已经入驻门店“" + hairstylist.getShop() + "”(id=" + hairstylist.getShop().getId() + ")，不可再申请入驻其他门店");
                             map.put("error", "你已经入驻门店“" + hairstylist.getShop() + "”，不可再申请入驻其他门店！！");
                         }
                         return map;
                     case 0:
-                        logger.info("“"+hairstylist.getHairstylistName() + "”重复申请！！你的申请正在审核中，禁止同时提交多个申请！！");
+                        logger.info("“" + hairstylist.getHairstylistName() + "”重复申请！！你的申请正在审核中，禁止同时提交多个申请！！");
                         map.put("error", "你的申请正在审核中，禁止同时提交多个申请！！");
                         return map;
                     case -1:
-                        logger.info("“"+hairstylist.getHairstylistName() + "”之前的申请审核未通过，将删除原申请并重新提交本次申请！！");
+                        logger.info("“" + hairstylist.getHairstylistName() + "”之前的申请审核未通过，将删除原申请并重新提交本次申请！！");
                         break;
                     default:
-                        logger.info("“"+hairstylist.getHairstylistName() + "”之前的申请状态异常!!（状态标志为“" + hairstylist.getApplyStatus() + "”）将清除记录并重新提交本次申请");
+                        logger.info("“" + hairstylist.getHairstylistName() + "”之前的申请状态异常!!（状态标志为“" + hairstylist.getApplyStatus() + "”）将清除记录并重新提交本次申请");
                         break;
                 }
             }
@@ -279,13 +279,13 @@ public class HairstylistController {
                 return map;
             }
             if (hairstylist.getShop() == null) {
-                logger.info("“"+hairstylist.getHairstylistName() + "”没有正在审核的入驻申请！取消申请失败");
+                logger.info("“" + hairstylist.getHairstylistName() + "”没有正在审核的入驻申请！取消申请失败");
                 map.put("error", "你目前没有正在审核的入驻申请！！");
                 return map;
             }
             if (hairstylist.getShop() != null) {
                 if (hairstylist.getApplyStatus() == 1) {
-                    logger.info("“"+hairstylist.getHairstylistName() + "”的申请已通过！取消申请失败");
+                    logger.info("“" + hairstylist.getHairstylistName() + "”的申请已通过！取消申请失败");
                     map.put("error", "你的申请已通过，取消失败！！");
                     return map;
                 }
@@ -319,7 +319,7 @@ public class HairstylistController {
             }
             Shop shop = hairstylist.getShop();
             if (shop == null || hairstylist.getApplyStatus() != 1) {
-                logger.info("“"+hairstylist.getHairstylistName() + "”当前没有入驻门店（发型师退出当前门店）");
+                logger.info("“" + hairstylist.getHairstylistName() + "”当前没有入驻门店（发型师退出当前门店）");
                 map.put("error", "你目前没有入驻的门店！！");
                 return map;
             }
@@ -1116,7 +1116,43 @@ public class HairstylistController {
         }
     }
 
+    @ApiOperation(value = "根据经纬度获取推荐的发型师",notes = "从附近门店（经纬度相差0.01即约附近1公里左右）中随机选取一位发型师")
+    @GetMapping("/user/getHairstylistRecommendedList")
+    public Map getHairstylistRecommendedList(@RequestParam Double longitude,
+                                             @RequestParam Double latitude) {
+        Map map = new HashMap();
+        try {
 
+            Double radius = 0.01;
+            List<Shop> shopList = shopService.getShopsByRadius(longitude,latitude,radius);
+            List<Hairstylist> tempHairstylists = new ArrayList<>();
+            List<UserToHairstylist> resultList = new ArrayList<>();
+
+            if (shopList == null||shopList.size()==0) {
+                logger.info("附近没有门店~（经度："+longitude+"  维度："+latitude+"  ）");
+                map.put("message", "附近没有门店~");
+                return map;
+            }
+
+            for(Shop shop : shopList){
+                tempHairstylists.addAll(shop.getHairstylistsByStatus(1));
+            }
+
+            int index = (int) (Math.random()*(tempHairstylists.size()));
+            Hairstylist hairstylist = tempHairstylists.get(index);
+//            System.out.println("tempHairstylists.size()="+tempHairstylists.size()+",index = "+index);
+
+            map.put("hairstylist", hairstylist);
+            map.put("distance",MyUtils.getDistance(latitude,longitude,hairstylist.shop.getLatitude(),hairstylist.shop.getLongitude()));
+            return map;
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            logger.info("获取自己收藏的文章列表失败！！（后端发生某些错误）");
+            map.put("error", "获取收藏列表失败！！（后端发生某些错误）");
+            e.printStackTrace();
+            return map;
+        }
+    }
 //    @ApiOperation(value = "获取店内排行")
 //    @GetMapping("/hairstylist/getInStoreRanking")
 //    public Map getInStoreRanking( @RequestParam String myOpenid) {

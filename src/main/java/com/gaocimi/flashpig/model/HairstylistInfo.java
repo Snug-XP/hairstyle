@@ -24,6 +24,15 @@ public class HairstylistInfo {
         this.point = collectionRecord.hairstylist.getPoint();
         this.recordCreatTime =collectionRecord.getCreateTime();
     }
+
+    public HairstylistInfo(Hairstylist hairstylist) {
+        this.hairstylistId = hairstylist.getId();
+        this.name = hairstylist.getHairstylistName();
+        this.shop = hairstylist.getShopSimpleInfo();
+        this.personalPhotoUrl = hairstylist.getPersonalPhotoUrl();
+        this.point = hairstylist.getPoint();
+        this.recordCreatTime =hairstylist.getCreateTime();
+    }
     public HairstylistInfo(){
         super();
     }
