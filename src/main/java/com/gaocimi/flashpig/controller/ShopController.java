@@ -197,33 +197,31 @@ public class ShopController {
     @ApiOperation(value = "门店认证")
     @PostMapping("/shop/certify")
     public Map certify(@RequestParam String myOpenid,
-                       @RequestParam(value = "operatingLicensePictureUrl", required = false) String operatingLicensePictureUrl){
+                       @RequestParam(value = "operatingLicensePictureUrl", required = false) String operatingLicensePictureUrl) {
         Map map = new HashMap();
+        Shop shop = shopService.findShopByOpenid(myOpenid);
         try {
-            Shop shop = shopService.findShopByOpenid(myOpenid);
-            if (myOpenid.equals(shop.getOpenid())) {
-                if(shop.getApplyStatus()==1){
-                    logger.info("门店“" + shop.getShopName() + "”(" + shop.getId() + ")门店认证已通过！无需再次认证！");
-                    map.put("message", "该门店认证已通过！无需再次认证！");
-                    return map;
-                }
-                if(shop.getOperatingLicensePictureUrl()!=null||shop.getOperatingLicensePictureUrl().length()>1){
-                    logger.info("门店“" + shop.getShopName() + "”(" + shop.getId() + ")已提交过认证申请！禁止重复认证！");
-                    map.put("error", "已提交过认证申请！禁止重复认证！");
-                    return map;
-                }
-                shop.setOperatingLicensePictureUrl(operatingLicensePictureUrl);
-                shopService.edit(shop);
-                logger.info("门店“" + shop.getShopName() + "”(" + shop.getId() + ")提交了门店认证申请！");
-                map.put("message", "已提交认证申请！");
-                return map;
-            } else {
-                logger.info("门店“" + shop.getShopName() + "”(" + shop.getId() + ")提交门店认证申请失败！（没有权限！！）");
-                map.put("error", "提交失败！！（没有权限！！）");
+            if (shop == null) {
+                logger.info("未登录操作！！");
+                map.put("error", "请先登录！！");
                 return map;
             }
+            if (shop.getApplyStatus() == 1) {
+                logger.info("门店“" + shop.getShopName() + "”(" + shop.getId() + ")门店认证已通过！无需再次认证！");
+                map.put("message", "该门店认证已通过！无需再次认证！");
+                return map;
+            }
+            if (shop.getOperatingLicensePictureUrl() != null && shop.getOperatingLicensePictureUrl().length() > 1) {
+                logger.info("门店“" + shop.getShopName() + "”(" + shop.getId() + ")已提交过认证申请！禁止重复认证！");
+                map.put("error", "已提交过认证申请！禁止重复认证！");
+                return map;
+            }
+            shop.setOperatingLicensePictureUrl(operatingLicensePictureUrl);
+            shopService.edit(shop);
+            logger.info("门店“" + shop.getShopName() + "”(" + shop.getId() + ")提交了门店认证申请！");
+            map.put("message", "已提交认证申请！");
+            return map;
         } catch (Exception e) {
-            logger.error(e.getMessage());
             logger.info("提交门店认证申请失败！（后端发生某些错误）");
             map.put("error", "提交门店认证申请失败！（后端发生某些错误）");
             e.printStackTrace();
@@ -232,20 +230,25 @@ public class ShopController {
     }
 
 
-    @ApiOperation(value = "取消门店的认证")
+    @ApiOperation(value = "根据门店id，取消门店的认证(未认证的将取消删除认证的申请)")
     @PostMapping("/shop/decertify")
-    public Map decertify(@RequestParam String myOpenid ){
+    public Map decertify(@RequestParam String myOpenid, @RequestParam Integer shopId) {
         Map map = new HashMap();
-        Shop shop = shopService.findShopByOpenid(myOpenid);
+        Shop shop = shopService.findShopById(shopId);
         try {
+            if (shop == null) {
+                logger.info("要取消认证的门店不存在！！");
+                map.put("error", "该门店不存在！！");
+                return map;
+            }
             if (myOpenid.equals(shop.getOpenid()) || administratorService.isExist(myOpenid)) {
 
-                if(shop.getOperatingLicensePictureUrl()==null||shop.getOperatingLicensePictureUrl().length()<1){
+                if (shop.getOperatingLicensePictureUrl() == null || shop.getOperatingLicensePictureUrl().length() < 1) {
                     logger.info("门店“" + shop.getShopName() + "”(" + shop.getId() + ")还没有认证申请！（门店取消认证）");
                     map.put("message", "未提交过认证申请！");
                     return map;
                 }
-                if(shop.getApplyStatus()==1)
+                if (shop.getApplyStatus() == 1)
                     logger.info("门店“" + shop.getShopName() + "”(" + shop.getId() + ")门店认证已通过！将取消认证！");
                 shop.setOperatingLicensePictureUrl(null);
                 shop.setApplyStatus(0);
@@ -272,13 +275,13 @@ public class ShopController {
     @DeleteMapping("/shop")
     public Map deleteShop(@RequestParam String myOpenid, @RequestParam Integer shopId) {
         Map map = new HashMap();
+        Shop shop = shopService.findShopById(shopId);
         try {
-            if (shopService.findShopById(shopId) == null) {
+            if (shop == null) {
                 logger.info("要注销的门店不存在！！");
                 map.put("error", "该门店不存在！！");
                 return map;
             }
-            Shop shop = shopService.findShopById(shopId);
             if (myOpenid.equals(shop.getOpenid()) || administratorService.isExist(myOpenid)) {
                 shopService.delete(shopId);
                 logger.info("注销门店“" + shop.getShopName() + "”(" + shopId + ")成功！");
@@ -450,7 +453,7 @@ public class ShopController {
             Shop shop = shopService.findShopByOpenid(myOpenid);
             if (shop == null || shop.getApplyStatus() != 1) {
                 logger.info("未登录操作！！");
-                map.put("error", "对不起，你还未登录，无权操作！！");
+                map.put("error", "请先登录！！");
                 return map;
             } else {
                 List<Hairstylist> hairstylists = shop.getHairstylists();
@@ -493,7 +496,7 @@ public class ShopController {
             Shop shop = shopService.findShopByOpenid(myOpenid);
             if (shop == null || shop.getApplyStatus() != 1) {
                 logger.info("未登录操作！！");
-                map.put("error", "对不起，你还未登录，无权操作！！");
+                map.put("error", "请先登录！！");
                 return map;
             } else {
                 List<Hairstylist> hairstylists = shop.getHairstylists();
@@ -536,7 +539,7 @@ public class ShopController {
             Shop shop = shopService.findShopByOpenid(myOpenid);
             if (shop == null || shop.getApplyStatus() != 1) {
                 logger.info("未登录操作！！");
-                map.put("error", "对不起，你还未登录，无权操作！！");
+                map.put("error", "请先登录！！");
                 return map;
             } else {
                 List<Hairstylist> hairstylists = shop.getHairstylists();
@@ -583,7 +586,7 @@ public class ShopController {
             Shop shop = shopService.findShopByOpenid(myOpenid);
             if (shop == null || shop.getApplyStatus() != 1) {
                 logger.info("未登录操作！！");
-                map.put("error", "对不起，你还未登录，无权操作！！");
+                map.put("error", "请先登录！！");
                 return map;
             } else {
                 Double radius = 0.001;//0.001经纬度相对大概100米
@@ -645,7 +648,7 @@ public class ShopController {
             Shop shop = shopService.findShopByOpenid(myOpenid);
             if (shop == null || shop.getApplyStatus() != 1) {
                 logger.info("未登录操作！！");
-                map.put("error", "对不起，你还未登录，无权操作！！");
+                map.put("error", "请先登录！！");
                 return map;
             } else {
                 Double radius = 0.001;//0.001经纬度相对大概100米
@@ -708,7 +711,7 @@ public class ShopController {
             Shop shop = shopService.findShopByOpenid(myOpenid);
             if (shop == null || shop.getApplyStatus() != 1) {
                 logger.info("未登录操作！！");
-                map.put("error", "对不起，你还未登录，无权操作！！");
+                map.put("error", "请先登录！！");
                 return map;
             } else {
                 Double radius = 0.001;//0.001经纬度相对大概100米
@@ -812,18 +815,18 @@ public class ShopController {
                 logger.info("所操作的发型师不存在！！");
                 return map;
             }
-            if(hairstylist.getShop()==null||hairstylist.getShop().getId()!=shop.getId()){
+            if (hairstylist.getShop() == null || hairstylist.getShop().getId() != shop.getId()) {
                 logger.info("该发型师没有入驻本店的申请！！");
                 map.put("error", "该发型师没有入驻本店的申请！！");
                 return map;
             }
-            if(hairstylist.getShop().getId()==shop.getId()){
-                if(hairstylist.getApplyStatus()==1) {
+            if (hairstylist.getShop().getId() == shop.getId()) {
+                if (hairstylist.getApplyStatus() == 1) {
                     logger.info("该发型师入驻申请已通过，无需重复审核");
                     map.put("error", "该发型师入驻申请已通过，无需重复审核！");
                     return map;
                 }
-                if(hairstylist.getApplyStatus()==-1) {
+                if (hairstylist.getApplyStatus() == -1) {
                     logger.info("该发型师入驻申请已被拒绝，无需重复审核");
                     map.put("error", "该发型师入驻申请已被拒绝，无需重复审核！");
                     return map;
@@ -1016,7 +1019,7 @@ public class ShopController {
 //            Shop shop = shopService.findShopByOpenid(myOpenid);
 //            if ( shop == null || shop.getApplyStatus() != 1) {
 //                logger.info("未登录操作！！");
-//                map.put("error", "对不起，你还未登录，无权操作！！");
+//                map.put("error", "请先登录！！");
 //                return map;
 //            } else {
 //
