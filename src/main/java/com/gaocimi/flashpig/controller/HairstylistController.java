@@ -3,6 +3,7 @@ package com.gaocimi.flashpig.controller;
 import com.alibaba.fastjson.JSONObject;
 import com.gaocimi.flashpig.entity.*;
 import com.gaocimi.flashpig.model.CountUser;
+import com.gaocimi.flashpig.model.HairstylistInfo;
 import com.gaocimi.flashpig.model.RankingData;
 import com.gaocimi.flashpig.result.ResponseResult;
 import com.gaocimi.flashpig.service.*;
@@ -1140,9 +1141,10 @@ public class HairstylistController {
 
             int index = (int) (Math.random()*(tempHairstylists.size()));
             Hairstylist hairstylist = tempHairstylists.get(index);
+            HairstylistInfo hairstylistInfo = new HairstylistInfo(tempHairstylists.get(index));
 //            System.out.println("tempHairstylists.size()="+tempHairstylists.size()+",index = "+index);
 
-            map.put("hairstylist", hairstylist);
+            map.put("hairstylist", hairstylistInfo);
             map.put("distance",MyUtils.getDistance(latitude,longitude,hairstylist.shop.getLatitude(),hairstylist.shop.getLongitude()));
             return map;
         } catch (Exception e) {

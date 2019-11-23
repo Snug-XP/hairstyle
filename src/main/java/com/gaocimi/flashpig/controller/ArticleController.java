@@ -419,8 +419,8 @@ public class ArticleController {
 
 
 //    @ApiOperation(value = "普通用户获取被推荐的文章列表")
-//    @GetMapping("/article/getRecommendedList")
-//    public Map getRecommendedList(@RequestParam String myOpenid,
+//    @GetMapping("/article/getRecommendList")
+//    public Map getRecommendList(@RequestParam String myOpenid,
 //                                     @RequestParam(name = "pageNum", defaultValue = "0") int pageNum,
 //                                     @RequestParam(name = "pageSize", defaultValue = "10") int pageSize) {
 //        Map map = new HashMap();
@@ -432,7 +432,7 @@ public class ArticleController {
 //                map.put("error", "无效的用户！！");
 //                return map;
 //            }
-//            List<Article> tempArticleList = articleService.getRecommendedListBy();
+//            List<Article> tempArticleList = articleService.getRecommendListBy();
 //            List<UserToArticle> resultArticleList = new ArrayList<>();
 //
 //            if (tempArticleList == null) {

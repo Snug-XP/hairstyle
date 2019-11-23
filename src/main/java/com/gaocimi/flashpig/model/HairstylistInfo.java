@@ -31,7 +31,7 @@ public class HairstylistInfo {
         this.shop = hairstylist.getShopSimpleInfo();
         this.personalPhotoUrl = hairstylist.getPersonalPhotoUrl();
         this.point = hairstylist.getPoint();
-        this.recordCreatTime =hairstylist.getCreateTime();
+        this.recordCreatTime =null;
     }
     public HairstylistInfo(){
         super();

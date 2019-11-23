@@ -117,7 +117,7 @@ public class ShopController {
     }
 
 
-    @ApiOperation(value = "门店注册申请")
+    @ApiOperation(value = "门店注册")
     @PostMapping("/shop/register/apply")
     public Map addShop(HttpServletRequest request,
                        @RequestParam(value = "shopName", required = false) String shopName,
@@ -134,7 +134,7 @@ public class ShopController {
         Map map = new HashMap();
 
 
-        if (shopName == null || phone == null || password == null || logoUrl == null || operatingLicensePictureUrl == null || province == null || city == null || district == null || address == null || longitude == null || latitude == null) {
+        if (shopName == null || phone == null || password == null || logoUrl == null || province == null || city == null || district == null || address == null || longitude == null || latitude == null) {
             logger.info("请完整填写个人资料!(门店注册申请)");
             logger.info("传入的数据：" + JSONObject.toJSON(request.getParameterMap()) + "\n");
             map.put("message", "请完整填写个人资料！");
@@ -193,6 +193,80 @@ public class ShopController {
         map.put("message", "提交申请成功！");
         return map;
     }
+
+    @ApiOperation(value = "门店认证")
+    @PostMapping("/shop/certify")
+    public Map certify(@RequestParam String myOpenid,
+                       @RequestParam(value = "operatingLicensePictureUrl", required = false) String operatingLicensePictureUrl){
+        Map map = new HashMap();
+        try {
+            Shop shop = shopService.findShopByOpenid(myOpenid);
+            if (myOpenid.equals(shop.getOpenid())) {
+                if(shop.getApplyStatus()==1){
+                    logger.info("门店“" + shop.getShopName() + "”(" + shop.getId() + ")门店认证已通过！无需再次认证！");
+                    map.put("message", "该门店认证已通过！无需再次认证！");
+                    return map;
+                }
+                if(shop.getOperatingLicensePictureUrl()!=null||shop.getOperatingLicensePictureUrl().length()>1){
+                    logger.info("门店“" + shop.getShopName() + "”(" + shop.getId() + ")已提交过认证申请！禁止重复认证！");
+                    map.put("error", "已提交过认证申请！禁止重复认证！");
+                    return map;
+                }
+                shop.setOperatingLicensePictureUrl(operatingLicensePictureUrl);
+                shopService.edit(shop);
+                logger.info("门店“" + shop.getShopName() + "”(" + shop.getId() + ")提交了门店认证申请！");
+                map.put("message", "已提交认证申请！");
+                return map;
+            } else {
+                logger.info("门店“" + shop.getShopName() + "”(" + shop.getId() + ")提交门店认证申请失败！（没有权限！！）");
+                map.put("error", "提交失败！！（没有权限！！）");
+                return map;
+            }
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            logger.info("提交门店认证申请失败！（后端发生某些错误）");
+            map.put("error", "提交门店认证申请失败！（后端发生某些错误）");
+            e.printStackTrace();
+            return map;
+        }
+    }
+
+
+    @ApiOperation(value = "取消门店的认证")
+    @PostMapping("/shop/decertify")
+    public Map decertify(@RequestParam String myOpenid ){
+        Map map = new HashMap();
+        Shop shop = shopService.findShopByOpenid(myOpenid);
+        try {
+            if (myOpenid.equals(shop.getOpenid()) || administratorService.isExist(myOpenid)) {
+
+                if(shop.getOperatingLicensePictureUrl()==null||shop.getOperatingLicensePictureUrl().length()<1){
+                    logger.info("门店“" + shop.getShopName() + "”(" + shop.getId() + ")还没有认证申请！（门店取消认证）");
+                    map.put("message", "未提交过认证申请！");
+                    return map;
+                }
+                if(shop.getApplyStatus()==1)
+                    logger.info("门店“" + shop.getShopName() + "”(" + shop.getId() + ")门店认证已通过！将取消认证！");
+                shop.setOperatingLicensePictureUrl(null);
+                shop.setApplyStatus(0);
+                shopService.edit(shop);
+                logger.info("门店“" + shop.getShopName() + "”(" + shop.getId() + ")取消认证成功！");
+                map.put("message", "取消认证申请成功！");
+                return map;
+            } else {
+                logger.info("门店“" + shop.getShopName() + "”(" + shop.getId() + ")取消认证申请失败！（没有权限！！）");
+                map.put("error", "取消认证失败！！（没有权限！！）");
+                return map;
+            }
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            logger.info("门店“" + shop.getShopName() + "”(" + shop.getId() + ")取消认证申请失败！（后端发生某些错误）");
+            map.put("error", "操作失败！（后端发生某些错误）");
+            e.printStackTrace();
+            return map;
+        }
+    }
+
 
     @ApiOperation(value = "根据门店id，注销门店", notes = "权限：门店本人或管理员")
     @DeleteMapping("/shop")
