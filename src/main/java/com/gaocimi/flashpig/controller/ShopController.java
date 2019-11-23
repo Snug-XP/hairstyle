@@ -57,21 +57,21 @@ public class ShopController {
             return map;
         }
 
-        if (shop.getApplyStatus() == 0) {
-            logger.info("账号（" + phone + "）正在审核中!");
-            map.put("message", "正在审核中!");
-            return map;
-        } else if (shop.getApplyStatus() == -1) {
-            logger.info("账号（" + phone + "）审核未通过!，请重新入驻申请");
-            map.put("message", "审核未通过!，请重新注册");
-            return map;
-        }
-
-        if (shop.getApplyStatus() != 1) {
-            logger.info("账号（" + phone + "）状态异常！！暂时禁止登录");
-            map.put("error", "账号状态异常！！暂时禁止登录");
-            return map;
-        }
+//        if (shop.getApplyStatus() == 0) {
+//            logger.info("账号（" + phone + "）正在审核中!");
+//            map.put("message", "正在审核中!");
+//            return map;
+//        } else if (shop.getApplyStatus() == -1) {
+//            logger.info("账号（" + phone + "）审核未通过!，请重新入驻申请");
+//            map.put("message", "审核未通过!，请重新注册");
+//            return map;
+//        }
+//
+//        if (shop.getApplyStatus() != 1) {
+//            logger.info("账号（" + phone + "）状态异常！！暂时禁止登录");
+//            map.put("error", "账号状态异常！！暂时禁止登录");
+//            return map;
+//        }
 
         //去除该微信用户在其他门店的登录标记（一个微信仅允许登录一个门店账户）
         Shop shop1 = shopService.findShopByOpenid(myOpenid);
@@ -451,34 +451,39 @@ public class ShopController {
         Map map = new HashMap();
         try {
             Shop shop = shopService.findShopByOpenid(myOpenid);
-            if (shop == null || shop.getApplyStatus() != 1) {
+            if (shop == null) {
                 logger.info("未登录操作！！");
                 map.put("error", "请先登录！！");
                 return map;
-            } else {
-                List<Hairstylist> hairstylists = shop.getHairstylists();
-
-                // 按完成订单数倒序排序
-                Collections.sort(hairstylists, (o1, o2) -> {
-                    if (o1.getOrderSum() < o2.getOrderSum()) {
-                        return 1;
-                    } else if ((o1.getOrderSum() > o2.getOrderSum())) {
-                        return -1;
-                    }
-                    return 0; //相等为0
-                });
-
-                List<RankingData> resultList = new ArrayList<>();
-
-                for (int i = 0; i < hairstylists.size(); i++) {
-                    Hairstylist h = hairstylists.get(i);
-                    RankingData data = new RankingData(i + 1, h, h.getOrderSum());
-                    resultList.add(data);
-                }
-                map.put("resultList", resultList);
-                map.put("sumNum", resultList.size());
+            }
+            if (shop.getApplyStatus() != 1) {
+                logger.info("未认证的门店操作！！（获取店内排行 - 全部）");
+                map.put("error", "请先进行门店认证！");
                 return map;
             }
+            List<Hairstylist> hairstylists = shop.getHairstylists();
+
+            // 按完成订单数倒序排序
+            Collections.sort(hairstylists, (o1, o2) -> {
+                if (o1.getOrderSum() < o2.getOrderSum()) {
+                    return 1;
+                } else if ((o1.getOrderSum() > o2.getOrderSum())) {
+                    return -1;
+                }
+                return 0; //相等为0
+            });
+
+            List<RankingData> resultList = new ArrayList<>();
+
+            for (int i = 0; i < hairstylists.size(); i++) {
+                Hairstylist h = hairstylists.get(i);
+                RankingData data = new RankingData(i + 1, h, h.getOrderSum());
+                resultList.add(data);
+            }
+            map.put("resultList", resultList);
+            map.put("sumNum", resultList.size());
+            return map;
+
         } catch (Exception e) {
             logger.error(e.getMessage());
             logger.info("获取店内排行列表失败！！（后端发生某些错误）\n\n");
@@ -494,34 +499,38 @@ public class ShopController {
         Map map = new HashMap();
         try {
             Shop shop = shopService.findShopByOpenid(myOpenid);
-            if (shop == null || shop.getApplyStatus() != 1) {
+            if (shop == null) {
                 logger.info("未登录操作！！");
                 map.put("error", "请先登录！！");
                 return map;
-            } else {
-                List<Hairstylist> hairstylists = shop.getHairstylists();
-                // 按今日预约的订单数倒序排序
-                Collections.sort(hairstylists, (o1, o2) -> {
-                    if (o1.getTodayOrderSum() < o2.getTodayOrderSum()) {
-                        return 1;
-                    } else if ((o1.getTodayOrderSum() > o2.getTodayOrderSum())) {
-                        return -1;
-                    }
-                    return 0; //相等为0
-                });
-
-                List<RankingData> resultList = new ArrayList<>();
-
-                for (int i = 0; i < hairstylists.size(); i++) {
-                    Hairstylist h = hairstylists.get(i);
-                    RankingData data = new RankingData(i + 1, h, h.getTodayOrderSum());
-                    resultList.add(data);
-                }
-                map.put("resultList", resultList);
-                map.put("sumNum", resultList.size());
-
+            }
+            if (shop.getApplyStatus() != 1) {
+                logger.info("未认证的门店操作！！（获取店内排行 - 今天）");
+                map.put("error", "请先进行门店认证！");
                 return map;
             }
+            List<Hairstylist> hairstylists = shop.getHairstylists();
+            // 按今日预约的订单数倒序排序
+            Collections.sort(hairstylists, (o1, o2) -> {
+                if (o1.getTodayOrderSum() < o2.getTodayOrderSum()) {
+                    return 1;
+                } else if ((o1.getTodayOrderSum() > o2.getTodayOrderSum())) {
+                    return -1;
+                }
+                return 0; //相等为0
+            });
+
+            List<RankingData> resultList = new ArrayList<>();
+
+            for (int i = 0; i < hairstylists.size(); i++) {
+                Hairstylist h = hairstylists.get(i);
+                RankingData data = new RankingData(i + 1, h, h.getTodayOrderSum());
+                resultList.add(data);
+            }
+            map.put("resultList", resultList);
+            map.put("sumNum", resultList.size());
+
+            return map;
         } catch (Exception e) {
             logger.error(e.getMessage());
             logger.info("获取店内排行列表失败！！（后端发生某些错误）\n\n");
@@ -537,36 +546,40 @@ public class ShopController {
         Map map = new HashMap();
         try {
             Shop shop = shopService.findShopByOpenid(myOpenid);
-            if (shop == null || shop.getApplyStatus() != 1) {
+            if (shop == null) {
                 logger.info("未登录操作！！");
                 map.put("error", "请先登录！！");
                 return map;
-            } else {
-                List<Hairstylist> hairstylists = shop.getHairstylists();
-
-                // 按完成订单数倒序排序
-                Collections.sort(hairstylists, (o1, o2) -> {
-                    if (o1.getCurrentMonthOrderSum() < o2.getCurrentMonthOrderSum()) {
-                        return 1;
-                    } else if ((o1.getCurrentMonthOrderSum() > o2.getCurrentMonthOrderSum())) {
-                        return -1;
-                    }
-                    return 0; //相等为0
-                });
-
-                List<RankingData> resultList = new ArrayList<>();
-                int myRankings = -1;//我的排名
-
-                for (int i = 0; i < hairstylists.size(); i++) {
-                    Hairstylist h = hairstylists.get(i);
-                    RankingData data = new RankingData(i + 1, h, h.getCurrentMonthOrderSum());
-                    resultList.add(data);
-                }
-                map.put("resultList", resultList);
-                map.put("sumNum", resultList.size());
-
+            }
+            if (shop.getApplyStatus() != 1) {
+                logger.info("未认证的门店操作！！（获取店内排行 - 本月）");
+                map.put("error", "请先进行门店认证！");
                 return map;
             }
+            List<Hairstylist> hairstylists = shop.getHairstylists();
+
+            // 按完成订单数倒序排序
+            Collections.sort(hairstylists, (o1, o2) -> {
+                if (o1.getCurrentMonthOrderSum() < o2.getCurrentMonthOrderSum()) {
+                    return 1;
+                } else if ((o1.getCurrentMonthOrderSum() > o2.getCurrentMonthOrderSum())) {
+                    return -1;
+                }
+                return 0; //相等为0
+            });
+
+            List<RankingData> resultList = new ArrayList<>();
+            int myRankings = -1;//我的排名
+
+            for (int i = 0; i < hairstylists.size(); i++) {
+                Hairstylist h = hairstylists.get(i);
+                RankingData data = new RankingData(i + 1, h, h.getCurrentMonthOrderSum());
+                resultList.add(data);
+            }
+            map.put("resultList", resultList);
+            map.put("sumNum", resultList.size());
+
+            return map;
         } catch (Exception e) {
             logger.error(e.getMessage());
             logger.info("获取店内排行列表失败！！（后端发生某些错误）\n\n");
@@ -584,51 +597,55 @@ public class ShopController {
         Map map = new HashMap();
         try {
             Shop shop = shopService.findShopByOpenid(myOpenid);
-            if (shop == null || shop.getApplyStatus() != 1) {
+            if (shop == null) {
                 logger.info("未登录操作！！");
                 map.put("error", "请先登录！！");
                 return map;
-            } else {
-                Double radius = 0.001;//0.001经纬度相对大概100米
-                List<Shop> shops = shopService.getShopsByRadius(shop.getLongitude(), shop.getLatitude(), radius);
-                // 按完成订单数倒序排序
-                Collections.sort(shops, (o1, o2) -> {
-                    if (o1.getOrderSum() < o2.getOrderSum()) {
-                        return 1;
-                    } else if ((o1.getOrderSum() > o2.getOrderSum())) {
-                        return -1;
-                    }
-                    return 0; //相等为0
-                });
-
-                List<RankingData> tempList = new ArrayList<>();
-                List<RankingData> resultList = new ArrayList<>();
-                int myRankings = -1;//我的排名
-
-                for (int i = 0; i < shops.size(); i++) {
-                    Shop s = shops.get(i);
-                    RankingData data = new RankingData(i + 1, s, s.getOrderSum());
-                    tempList.add(data);
-                    if (data.getId() == shop.getId())
-                        myRankings = i + 1;//获取我的排名
-                }
-
-                int first = pageNum * pageSize;
-                int last = pageNum * pageSize + pageSize - 1;
-                for (int i = first; i <= last && i < tempList.size(); i++) {
-                    resultList.add(tempList.get(i));
-                }
-
-                //包装分页数据
-                Pageable pageable = PageRequest.of(pageNum, pageSize);
-                Page<RankingData> page = new PageImpl<>(resultList, pageable, tempList.size());
-
-                map.put("page", page);
-                map.put("sumNum", shops.size());
-                map.put("myRankings", myRankings);
-
+            }
+            if (shop.getApplyStatus() != 1) {
+                logger.info("未认证的门店操作！！（获取区域排行 - 全部）");
+                map.put("error", "请先进行门店认证！");
                 return map;
             }
+            Double radius = 0.001;//0.001经纬度相对大概100米
+            List<Shop> shops = shopService.getShopsByRadius(shop.getLongitude(), shop.getLatitude(), radius);
+            // 按完成订单数倒序排序
+            Collections.sort(shops, (o1, o2) -> {
+                if (o1.getOrderSum() < o2.getOrderSum()) {
+                    return 1;
+                } else if ((o1.getOrderSum() > o2.getOrderSum())) {
+                    return -1;
+                }
+                return 0; //相等为0
+            });
+
+            List<RankingData> tempList = new ArrayList<>();
+            List<RankingData> resultList = new ArrayList<>();
+            int myRankings = -1;//我的排名
+
+            for (int i = 0; i < shops.size(); i++) {
+                Shop s = shops.get(i);
+                RankingData data = new RankingData(i + 1, s, s.getOrderSum());
+                tempList.add(data);
+                if (data.getId() == shop.getId())
+                    myRankings = i + 1;//获取我的排名
+            }
+
+            int first = pageNum * pageSize;
+            int last = pageNum * pageSize + pageSize - 1;
+            for (int i = first; i <= last && i < tempList.size(); i++) {
+                resultList.add(tempList.get(i));
+            }
+
+            //包装分页数据
+            Pageable pageable = PageRequest.of(pageNum, pageSize);
+            Page<RankingData> page = new PageImpl<>(resultList, pageable, tempList.size());
+
+            map.put("page", page);
+            map.put("sumNum", shops.size());
+            map.put("myRankings", myRankings);
+
+            return map;
         } catch (Exception e) {
             logger.error(e.getMessage());
             logger.info("获取区域排行列表失败！！（后端发生某些错误）\n\n");
@@ -646,52 +663,57 @@ public class ShopController {
         Map map = new HashMap();
         try {
             Shop shop = shopService.findShopByOpenid(myOpenid);
-            if (shop == null || shop.getApplyStatus() != 1) {
+            if (shop == null) {
                 logger.info("未登录操作！！");
                 map.put("error", "请先登录！！");
                 return map;
-            } else {
-                Double radius = 0.001;//0.001经纬度相对大概100米
-                List<Shop> shops = shopService.getShopsByRadius(shop.getLongitude(), shop.getLatitude(), radius);
-                // 按今日预约的订单数倒序排序
-                Collections.sort(shops, (o1, o2) -> {
-                    if (o1.getTodayOrderSum() < o2.getTodayOrderSum()) {
-                        return 1;
-                    } else if ((o1.getTodayOrderSum() > o2.getTodayOrderSum())) {
-                        return -1;
-                    }
-                    return 0; //相等为0
-                });
-
-                List<RankingData> tempList = new ArrayList<>();
-                List<RankingData> resultList = new ArrayList<>();
-                int myRankings = -1;//我的排名
-
-                for (int i = 0; i < shops.size(); i++) {
-                    Shop s = shops.get(i);
-                    RankingData data = new RankingData(i + 1, s, s.getTodayOrderSum());
-                    tempList.add(data);
-                    if (data.getId() == shop.getId())
-                        myRankings = i + 1;//获取我的排名
-                }
-
-                int first = pageNum * pageSize;
-                int last = pageNum * pageSize + pageSize - 1;
-                for (int i = first; i <= last && i < tempList.size(); i++) {
-                    resultList.add(tempList.get(i));
-                }
-
-                //包装分页数据
-                Pageable pageable = PageRequest.of(pageNum, pageSize);
-                Page<RankingData> page = new PageImpl<>(resultList, pageable, tempList.size());
-
-                map.put("page", page);
-                map.put("sumNum", shops.size());
-                map.put("myRankings", myRankings);
-
-
+            }
+            if (shop.getApplyStatus() != 1) {
+                logger.info("未认证的门店操作！！（获取区域排行 - 今天）");
+                map.put("error", "请先进行门店认证！");
                 return map;
             }
+
+            Double radius = 0.001;//0.001经纬度相对大概100米
+            List<Shop> shops = shopService.getShopsByRadius(shop.getLongitude(), shop.getLatitude(), radius);
+            // 按今日预约的订单数倒序排序
+            Collections.sort(shops, (o1, o2) -> {
+                if (o1.getTodayOrderSum() < o2.getTodayOrderSum()) {
+                    return 1;
+                } else if ((o1.getTodayOrderSum() > o2.getTodayOrderSum())) {
+                    return -1;
+                }
+                return 0; //相等为0
+            });
+
+            List<RankingData> tempList = new ArrayList<>();
+            List<RankingData> resultList = new ArrayList<>();
+            int myRankings = -1;//我的排名
+
+            for (int i = 0; i < shops.size(); i++) {
+                Shop s = shops.get(i);
+                RankingData data = new RankingData(i + 1, s, s.getTodayOrderSum());
+                tempList.add(data);
+                if (data.getId() == shop.getId())
+                    myRankings = i + 1;//获取我的排名
+            }
+
+            int first = pageNum * pageSize;
+            int last = pageNum * pageSize + pageSize - 1;
+            for (int i = first; i <= last && i < tempList.size(); i++) {
+                resultList.add(tempList.get(i));
+            }
+
+            //包装分页数据
+            Pageable pageable = PageRequest.of(pageNum, pageSize);
+            Page<RankingData> page = new PageImpl<>(resultList, pageable, tempList.size());
+
+            map.put("page", page);
+            map.put("sumNum", shops.size());
+            map.put("myRankings", myRankings);
+
+
+            return map;
         } catch (Exception e) {
             logger.error(e.getMessage());
             logger.info("获取区域排行列表失败！！（后端发生某些错误）\n\n");
@@ -709,51 +731,56 @@ public class ShopController {
         Map map = new HashMap();
         try {
             Shop shop = shopService.findShopByOpenid(myOpenid);
-            if (shop == null || shop.getApplyStatus() != 1) {
+            if (shop == null) {
                 logger.info("未登录操作！！");
                 map.put("error", "请先登录！！");
                 return map;
-            } else {
-                Double radius = 0.001;//0.001经纬度相对大概100米
-                List<Shop> shops = shopService.getShopsByRadius(shop.getLongitude(), shop.getLatitude(), radius);
-                // 按今日预约的订单数倒序排序
-                Collections.sort(shops, (o1, o2) -> {
-                    if (o1.getCurrentMonthOrderSum() < o2.getCurrentMonthOrderSum()) {
-                        return 1;
-                    } else if ((o1.getCurrentMonthOrderSum() > o2.getCurrentMonthOrderSum())) {
-                        return -1;
-                    }
-                    return 0; //相等为0
-                });
-
-                List<RankingData> tempList = new ArrayList<>();
-                List<RankingData> resultList = new ArrayList<>();
-                int myRankings = -1;//我的排名
-
-                for (int i = 0; i < shops.size(); i++) {
-                    Shop s = shops.get(i);
-                    RankingData data = new RankingData(i + 1, s, s.getCurrentMonthOrderSum());
-                    tempList.add(data);
-                    if (data.getId() == shop.getId())
-                        myRankings = i + 1;//获取我的排名
-                }
-
-                int first = pageNum * pageSize;
-                int last = pageNum * pageSize + pageSize - 1;
-                for (int i = first; i <= last && i < tempList.size(); i++) {
-                    resultList.add(tempList.get(i));
-                }
-
-                //包装分页数据
-                Pageable pageable = PageRequest.of(pageNum, pageSize);
-                Page<RankingData> page = new PageImpl<>(resultList, pageable, tempList.size());
-
-                map.put("page", page);
-                map.put("sumNum", shops.size());
-                map.put("myRankings", myRankings);
-
+            }
+            if (shop.getApplyStatus() != 1) {
+                logger.info("未认证的门店操作！！（获取区域排行 - 本月）");
+                map.put("error", "请先进行门店认证！");
                 return map;
             }
+
+            Double radius = 0.001;//0.001经纬度相对大概100米
+            List<Shop> shops = shopService.getShopsByRadius(shop.getLongitude(), shop.getLatitude(), radius);
+            // 按今日预约的订单数倒序排序
+            Collections.sort(shops, (o1, o2) -> {
+                if (o1.getCurrentMonthOrderSum() < o2.getCurrentMonthOrderSum()) {
+                    return 1;
+                } else if ((o1.getCurrentMonthOrderSum() > o2.getCurrentMonthOrderSum())) {
+                    return -1;
+                }
+                return 0; //相等为0
+            });
+
+            List<RankingData> tempList = new ArrayList<>();
+            List<RankingData> resultList = new ArrayList<>();
+            int myRankings = -1;//我的排名
+
+            for (int i = 0; i < shops.size(); i++) {
+                Shop s = shops.get(i);
+                RankingData data = new RankingData(i + 1, s, s.getCurrentMonthOrderSum());
+                tempList.add(data);
+                if (data.getId() == shop.getId())
+                    myRankings = i + 1;//获取我的排名
+            }
+
+            int first = pageNum * pageSize;
+            int last = pageNum * pageSize + pageSize - 1;
+            for (int i = first; i <= last && i < tempList.size(); i++) {
+                resultList.add(tempList.get(i));
+            }
+
+            //包装分页数据
+            Pageable pageable = PageRequest.of(pageNum, pageSize);
+            Page<RankingData> page = new PageImpl<>(resultList, pageable, tempList.size());
+
+            map.put("page", page);
+            map.put("sumNum", shops.size());
+            map.put("myRankings", myRankings);
+
+            return map;
         } catch (Exception e) {
             logger.error(e.getMessage());
             logger.info("获取区域排行列表失败！！（后端发生某些错误）\n\n");
