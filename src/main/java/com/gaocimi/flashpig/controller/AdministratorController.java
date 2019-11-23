@@ -41,17 +41,17 @@ class AdministratorController {
     @ApiOperation(value = "获取待审核或审核已通过的门店信息列表(分页展示)（status=0表示“待审核”status=1表示“审核通过”，status=-1表示“审核未通过”，可选定省、市、县以及门店名的范围）", notes = "仅管理员有权限")
     @GetMapping("/Administrator/getRegisterShopList")
     public Map getRegisterShopList(@RequestParam String myOpenid,
-                               @RequestParam Integer status,
-                               @RequestParam(name = "province",required = false) String province,
-                               @RequestParam(name = "city",required = false) String city,
-                               @RequestParam(name = "district",required = false) String district,
-                               @RequestParam(name = "shopName",required = false) String shopName,
-                               @RequestParam(name = "pageNum", defaultValue = "0") int pageNum,
-                               @RequestParam(name = "pageSize", defaultValue = "10") int pageSize) {
+                                   @RequestParam Integer status,
+                                   @RequestParam(name = "province", required = false) String province,
+                                   @RequestParam(name = "city", required = false) String city,
+                                   @RequestParam(name = "district", required = false) String district,
+                                   @RequestParam(name = "shopName", required = false) String shopName,
+                                   @RequestParam(name = "pageNum", defaultValue = "0") int pageNum,
+                                   @RequestParam(name = "pageSize", defaultValue = "10") int pageSize) {
         Map map = new HashMap();
         try {
             if (administratorService.isExist(myOpenid)) {
-                Page<Shop> page = shopService.findRegisterShopList(status,province,city,district,shopName,pageNum, pageSize);
+                Page<Shop> page = shopService.findRegisterShopList(status, province, city, district, shopName, pageNum, pageSize);
                 map.put("page", page);
                 logger.info("获取门店列表信息成功！");
                 return map;
@@ -70,7 +70,7 @@ class AdministratorController {
     }
 
 
-    @ApiOperation(value = "同意或拒绝门店的注册（decide=1表示同意，decide=-1表示不同意）", notes = "仅管理员有权限", produces = "application/json")
+    @ApiOperation(value = "同意或拒绝门店的认证（decide=1表示同意，decide=-1表示不同意）", notes = "仅管理员有权限", produces = "application/json")
     @PostMapping("/Administrator/shop/approveOrReject")
     public Map approveOrReject(@RequestParam String myOpenid, int shopId, int decide) {
         Map map = new HashMap();
@@ -85,34 +85,33 @@ class AdministratorController {
                     return map;
                 }
 
-
                 switch (decide) {
                     case 1:
                         shop.setApplyStatus(1);
                         shopService.edit(shop);
-                        logger.info("管理员“" + administrator.getName() + "”(id=" + administrator.getId() + ")同意id为" + shop.getId() + "的发型师“" + shop.getShopName() + "”的注册");
-                        map.put("message", "同意该门店注册，操作成功");
+                        logger.info("管理员“" + administrator.getName() + "”(id=" + administrator.getId() + ")同意了id为" + shop.getId() + "的发型师“" + shop.getShopName() + "”的认证");
+                        map.put("message", "同意该门店认证，操作成功");
                         break;
                     case -1:
                         shop.setApplyStatus(-1);
                         shopService.edit(shop);
-                        logger.info("管理员“" + administrator.getName() + "”(id=" + administrator.getId() + ")拒绝id为" + shop.getId() + "的门店“" + shop.getShopName() + "”的注册！");
-                        map.put("message", "拒绝该门店注册，操作成功");
+                        logger.info("管理员“" + administrator.getName() + "”(id=" + administrator.getId() + ")拒绝了id为" + shop.getId() + "的门店“" + shop.getShopName() + "”的认证！");
+                        map.put("message", "拒绝该门店认证，操作成功");
                         //...有时间再加一下拒绝理由模版消息
                         break;
                     default:
                         map.put("error", "decide的值错误（同意为1，拒绝为-1）！！");
-                        logger.info("同意或拒绝门店注册的decide(="+decide+")的值错误！！");
+                        logger.info("同意或拒绝门店认证的decide(=" + decide + ")的值错误！！");
                         break;
 
                 }
             } else {
-                logger.info("同意或拒绝门店注册操作失败！！（没有权限！！）");
+                logger.info("同意或拒绝门店认证操作失败！！（没有权限！！）");
                 map.put("error", "操作失败！！（没有权限！！）");
             }
         } catch (Exception e) {
             logger.error(e.getMessage());
-            logger.info("同意或拒绝门店注册操作失败！！（后端发生某些错误）");
+            logger.info("同意或拒绝门店认证操作失败！！（后端发生某些错误）");
             map.put("error", "操作失败！！（后端发生某些错误）");
             e.printStackTrace();
 
@@ -129,7 +128,7 @@ class AdministratorController {
         Map map = new HashMap();
         try {
             if (administratorService.isExist(myOpenid)) {
-                Page<Article> page = articleService.findAllByStatus(0,pageNum, pageSize);
+                Page<Article> page = articleService.findAllByStatus(0, pageNum, pageSize);
                 map.put("page", page);
                 logger.info("获取待审核的文章列表信息成功！");
                 return map;
