@@ -231,7 +231,7 @@ public class ShopController {
 
 
     @ApiOperation(value = "根据门店id，取消门店的认证(未认证的将取消删除认证的申请)")
-    @PostMapping("/shop/decertify")
+    @DeleteMapping("/shop/decertify")
     public Map decertify(@RequestParam String myOpenid, @RequestParam Integer shopId) {
         Map map = new HashMap();
         Shop shop = shopService.findShopById(shopId);
