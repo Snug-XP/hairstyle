@@ -52,9 +52,9 @@ public class HaircutOrderController {
         Map map = new HashMap();
         try {
             Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
-            if (hairstylist == null || hairstylist.getApplyStatus() != 1) {
+            if (hairstylist == null) {
                 logger.info("非发型师用户操作！！");
-                map.put("error", "对不起，你还不是发型师用户，无权操作！！");
+                map.put("error", "对不起，你不是发型师用户，无权操作！！");
                 return map;
             } else {
                 List<HaircutOrder> tempOrderList = hairstylist.haircutOrderList;
@@ -341,9 +341,9 @@ public class HaircutOrderController {
         Map map = new HashMap();
         try {
             Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
-            if (hairstylist == null || hairstylist.getApplyStatus() != 1) {
+            if (hairstylist == null) {
                 logger.info("非发型师用户操作！！");
-                map.put("error", "对不起，你还不是发型师用户，无权操作！！");
+                map.put("error", "对不起，你不是发型师用户，无权操作！！");
                 return map;
             } else {
                 List<HaircutOrder> tempOrderList = hairstylist.haircutOrderList;
@@ -399,9 +399,9 @@ public class HaircutOrderController {
         Map map = new HashMap();
         try {
             Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
-            if (hairstylist == null || hairstylist.getApplyStatus() != 1) {
+            if (hairstylist == null) {
                 logger.info("非发型师用户操作！！");
-                map.put("error", "对不起，你还不是发型师用户，无权操作！！");
+                map.put("error", "对不起，你不是发型师用户，无权操作！！");
                 return map;
             } else {
                 map.put("completedOrderSum", hairstylist.getOrderSum());//已完成订单总数
@@ -512,7 +512,6 @@ public class HaircutOrderController {
             List<UserReservation> resultList = new ArrayList<>();
 
             if(tempOrderList==null||tempOrderList.size()==0){
-                logger.info("你还没有进行预约过哦~");
                 map.put("message","你还没有进行预约过哦~");
                 return map;
             }
@@ -536,7 +535,7 @@ public class HaircutOrderController {
                 return 0; //相等为0
             });
 
-            //获取所求页数的文章数据
+            //获取所求页数的订单列表数据
             int first = pageNum*pageSize;
             int last = pageNum*pageSize+pageSize-1;
             for(int i = first ; i<=last&&i<tempOrderList.size() ; i++){

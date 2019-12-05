@@ -1,6 +1,7 @@
 package com.gaocimi.flashpig.repository;
 
 import com.gaocimi.flashpig.entity.Hairstylist;
+import com.gaocimi.flashpig.entity.Hairstylist;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -15,15 +16,13 @@ public interface HairstylistRepository extends JpaRepository<Hairstylist, Intege
 
     Hairstylist findByOpenid(String openid);
 
+    Hairstylist findByPersonalPhone(String phone);
+
     void deleteById(int id);
 
     //分页
     public Page<Hairstylist> findAll(Pageable pageable);
 
-    public List<Hairstylist> findAllByApplyStatus(Integer status);
-
-    public List<Hairstylist> findAllByLongitudeBetweenAndLatitudeBetween(Double longitudeLow,Double longitudeHigh ,Double LatitudeLow,Double LatitudeHigh);
-
-    public List<Hairstylist> findAllByLongitudeBetweenAndLatitudeBetweenAndShopName(Double longitudeLow, Double longitudeHigh , Double LatitudeLow, Double LatitudeHigh, String shopName);
+    public Page<Hairstylist> findAllByApplyStatus(Integer status,Pageable pageable);
 
 }

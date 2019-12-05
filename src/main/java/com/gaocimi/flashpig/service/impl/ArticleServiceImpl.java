@@ -11,7 +11,9 @@ import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * @author xp
@@ -72,19 +74,46 @@ public class ArticleServiceImpl implements ArticleService {
         return articlePage;
     }
 
+    @Override
+    public List<Article> findAllByTagLike(String[] tagList) {
+        List<Article> articleList = new ArrayList<>();
+        Set<Article> set = new HashSet<>();//使用集合Set，自带去重功能
+
+        for (String tag : tagList) {
+            List<Article> tempList = articleRepository.findAllByTagLike("%" + tag + "%");
+            set.addAll(tempList);
+        }
+        //这样合并去重需要重写对象的equals()方法,但是发现不重写也可以
+//            articleList.removeAll(tempList);
+//            articleList.addAll(tempList);
+
+        return new ArrayList<>(set);
+    }
+
+    @Override
+    public List<Article> findAllByTitleLike(String title) {
+        return articleRepository.findAllByTitleLike("%" + title + "%");
+    }
+
+    @Override
+    public List<Article> findAllByContentLike(String content) {
+        return articleRepository.findAllByContentLike("%" + content + "%");
+    }
+
 
     /**
-     * 分页获取待审核的发型文章
+     * 分页获取待审核或者审核通过的文章的发型文章
      *
      * @param pageNum  页数（第几页）
      * @param pageSize 每页大小
      * @return
      */
-    public Page<Article> findPendingList(int pageNum, int pageSize){
+    @Override
+    public Page<Article> findAllByStatus(int status, int pageNum, int pageSize) {
         int first = pageNum * pageSize;
         int last = pageNum * pageSize + pageSize - 1;
 
-        List<Article> articles = articleRepository.findAllByStatus(0);
+        List<Article> articles = articleRepository.findAllByStatus(status);
         List<Article> resultList = new ArrayList<>();
 
         for (int i = first; i <= last && i < articles.size(); i++) {

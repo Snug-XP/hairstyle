@@ -1,9 +1,13 @@
 package com.gaocimi.flashpig.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.gaocimi.flashpig.model.ShopSimpleInfo;
 import com.gaocimi.flashpig.utils.xp.MyUtils;
+import lombok.Data;
 
 import javax.persistence.*;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -14,7 +18,8 @@ import java.util.*;
  */
 @Entity
 @Table(name = "hairstylist")
-@JsonIgnoreProperties(value = {"articleList", "getCurrentMonthOrderSum", "allOperationalData", "loyalUserRecordList", "haircutOrderList", "hairstylistImageUrlList", "hairServiceList", "recordToUserList", "userList", "handler", "hibernateLazyInitializer", "fieldHandler"})
+@JsonIgnoreProperties(value = {"openid","shop", "articleList", "getCurrentMonthOrderSum", "allOperationalData", "loyalUserRecordList", "haircutOrderList", "hairstylistImageUrlList", "hairServiceList", "recordToUserList", "userList", "handler", "hibernateLazyInitializer", "fieldHandler"})
+@Data
 public class Hairstylist {
 
     @Id
@@ -47,39 +52,12 @@ public class Hairstylist {
     private String personalProfile;
 
     /**
-     * 门店名称
+     * 该发型师所在门店； 定义名为shop_id的外键列，该外键引用shop表的主键(id)列,采用懒加载。
+     * 只有当门店不为空且applyStatus为1时，才能说明该发型师入驻了该门店
      */
-    private String shopName;
-
-    /**
-     * 门店所在省份
-     */
-    private String province;
-
-    /**
-     * 门店所在城市
-     */
-    private String city;
-
-    /**
-     * 门店所在区县
-     */
-    private String district;
-
-    /**
-     * 门店详细地址
-     */
-    private String address;
-
-    /**
-     * 门店经度，对于两个接近赤道的点，在纬度相等的情况下： 经度每隔0.00001度，距离相差约1米；每隔0.0001度，距离相差约10米；每隔0.001度，距离相差约100米；
-     */
-    private Double longitude;
-
-    /**
-     * 门店纬度，对于两个接近赤道的点，在经度相等的情况下： 纬度每隔0.00001度，距离相差约1.1米；每隔0.0001度，距离相差约11米；每隔0.001度，距离相差约111米；
-     */
-    private Double latitude;
+    @ManyToOne(targetEntity = Shop.class, fetch = FetchType.LAZY)
+    @JoinColumn(name = "shop_id", nullable = false)
+    public Shop shop;
 
     /**
      * 可预约时间点，用逗号隔开整点时间点，例如（19:00 20:00 21:00）记为（19,20,21）
@@ -87,19 +65,19 @@ public class Hairstylist {
     private String availableTime;
 
     /**
-     * 预约须知
-     */
-    private String attention;
-
-    /**
      * 用户评分
      */
     private Double point;
 
     /**
-     * 入驻时间
+     * 发型师账户创建时间
      */
     private Date createTime;
+
+    /**
+     * 发型师入驻门店的时间
+     */
+    private Date settledTime;
 
     /**
      * 完成订单总数
@@ -107,9 +85,10 @@ public class Hairstylist {
     private Integer orderSum;
 
     /**
-     * 发型师申请状态（0表示申请中，1表示申请通过, -1表示申请失败）
+     * 发型师入驻门店的申请状态（0表示申请中，1表示申请通过, -1表示申请失败）
      */
     private Integer applyStatus;
+
 
     /**
      * 发型师上传的图片列表； 定义该Hairstylist实体所有关联的HairstylistImageUrl实体； 指定mappedBy属性表明该Hairstylist实体不控制关联关系
@@ -152,139 +131,55 @@ public class Hairstylist {
     public Hairstylist() {
         Date date = new Date(System.currentTimeMillis());
 
+        setApplyStatus(0);
         setCreateTime(date);//设置注册时间
-        setApplyStatus(0);//设置申请状态为申请中
         setOrderSum(0);//根据自己的订单列表（中的已完成）数量进行校正,注册时没有订单，所以为0
         setPoint(-1.0);
     }
 
-    public Integer getId() {
-        return id;
+
+    public ShopSimpleInfo getShopSimpleInfo() {
+        if (shop == null)
+            return null;
+        else
+            return new ShopSimpleInfo(shop);
     }
 
-    public void setId(Integer id) {
-        this.id = id;
+    public List<String> getAvailableTime() {
+
+        if(this.availableTime==null||this.availableTime.length()<1) return null;
+        DateFormat df3 = new SimpleDateFormat("HH:mm:ss");
+        ;//只显示出时时分秒（12:43:37）的格式
+        List<String> timeList = new ArrayList<>();
+        String[] availableTime = this.availableTime.split(",");
+        for (String str : availableTime) {
+            int hour;
+            try {
+                hour = Integer.parseInt(str);
+                timeList.add(df3.format(MyUtils.getTime(hour)));
+            } catch (Exception e) {
+                System.out.println("可预约时间转换失败（数据为：" + str + "）");
+                return null;
+            }
+        }
+
+        return timeList;
     }
 
-    public String getOpenid() {
-        return openid;
-    }
-
-    public void setOpenid(String openid) {
-        this.openid = openid;
-    }
-
-    public String getHairstylistName() {
-        return hairstylistName;
-    }
-
-    public void setHairstylistName(String hairstylistName) {
-        this.hairstylistName = hairstylistName;
-    }
-
-    public String getPersonalPhone() {
-        return personalPhone;
-    }
-
-    public void setPersonalPhone(String personalPhone) {
-        this.personalPhone = personalPhone;
-    }
-
-    public String getPersonalPhotoUrl() {
-        return personalPhotoUrl;
-    }
-
-    public void setPersonalPhotoUrl(String personalPhotoUrl) {
-        this.personalPhotoUrl = personalPhotoUrl;
-    }
-
-    public String getPersonalProfile() {
-        return personalProfile;
-    }
-
-    public void setPersonalProfile(String personalProfile) {
-        this.personalProfile = personalProfile;
-    }
-
-    public String getShopName() {
-        return shopName;
-    }
-
-    public void setShopName(String shopName) {
-        this.shopName = shopName;
-    }
-
-    public String getProvince() {
-        return province;
-    }
-
-    public void setProvince(String province) {
-        this.province = province;
-    }
-
-    public String getCity() {
-        return city;
-    }
-
-    public void setCity(String city) {
-        this.city = city;
-    }
-
-    public String getDistrict() {
-        return district;
-    }
-
-    public void setDistrict(String district) {
-        this.district = district;
-    }
-
-    public String getAddress() {
-        return address;
-    }
-
-    public void setAddress(String address) {
-        this.address = address;
-    }
-
-    public Double getLongitude() {
-        return longitude;
-    }
-
-    public void setLongitude(Double longitude) {
-        this.longitude = longitude;
-    }
-
-    public Double getLatitude() {
-        return latitude;
-    }
-
-    public void setLatitude(Double latitude) {
-        this.latitude = latitude;
-    }
-
-    public String getAvailableTime() {
-        return availableTime;
-    }
-
-    public void setAvailableTime(String availableTime) {
-        this.availableTime = availableTime;
-    }
-
-    public String getAttention() {
-        return attention;
-    }
-
-    public void setAttention(String attention) {
-        this.attention = attention;
+    public void setAvailableTime(List<String> timeList) {
+        String str = "";
+        for (String time : timeList) {
+            if (str.length() > 0)
+                str = str + "," + time;
+            else
+                str = "" + time;
+        }
+        this.availableTime = str;
     }
 
     public Double getPoint() {
         regulatePoint();
         return point;
-    }
-
-    public void setPoint(Double point) {
-        this.point = point;
     }
 
     /**
@@ -303,16 +198,9 @@ public class Hairstylist {
             this.point = sumPoint / count;
     }
 
-    public Date getCreateTime() {
-        return createTime;
-    }
-
-    public void setCreateTime(Date createTime) {
-        this.createTime = createTime;
-    }
 
     /**
-     * 根据自己的订单列表（中的已完成）数量进行校正
+     * 校正已完成订单数量 - 根据自己的订单列表（中的已完成）数量进行校正
      */
     public void regulateOrderSum() {
         int count = 0;
@@ -329,65 +217,21 @@ public class Hairstylist {
         return orderSum;
     }
 
-    public void setOrderSum(Integer orderSum) {
-        this.orderSum = orderSum;
+    /**
+     * 获取入驻本门店后的总订单数
+     */
+    public int getOrderSumAfterSettledTime() {
+        int count = 0;
+        for (HaircutOrder order : haircutOrderList) {
+            if (order.getStatus() == 2&&( this.settledTime==null||order.getBookTime().after(this.settledTime) ) ){
+                count++;
+            }
+        }
+        return count;
     }
 
-    public Integer getApplyStatus() {
-        return applyStatus;
-    }
 
-    public void setApplyStatus(Integer applyStatus) {
-        this.applyStatus = applyStatus;
-    }
 
-    public List<HairstylistImageUrl> getHairstylistImageUrlList() {
-        return hairstylistImageUrlList;
-    }
-
-    public void setHairstylistImageUrlList(List<HairstylistImageUrl> hairstylistImageUrlList) {
-        this.hairstylistImageUrlList = hairstylistImageUrlList;
-    }
-
-    public List<HairService> getHairServiceList() {
-        return hairServiceList;
-    }
-
-    public void setHairServiceList(List<HairService> hairServiceList) {
-        this.hairServiceList = hairServiceList;
-    }
-
-    public List<HaircutOrder> getHaircutOrderList() {
-        return haircutOrderList;
-    }
-
-    public void setHaircutOrderList(List<HaircutOrder> haircutOrderList) {
-        this.haircutOrderList = haircutOrderList;
-    }
-
-    public List<RecordHairstylisToUser> getRecordToUserList() {
-        return recordToUserList;
-    }
-
-    public void setRecordToUserList(List<RecordHairstylisToUser> recordToUserList) {
-        this.recordToUserList = recordToUserList;
-    }
-
-    public List<UserToHairstylist> getLoyalUserRecordList() {
-        return loyalUserRecordList;
-    }
-
-    public void setLoyalUserRecordList(List<UserToHairstylist> loyalUserRecordList) {
-        this.loyalUserRecordList = loyalUserRecordList;
-    }
-
-    public List<Article> getArticleList() {
-        return articleList;
-    }
-
-    public void setArticleList(List<Article> articleList) {
-        this.articleList = articleList;
-    }
 
     /**************下面是一些关于发型师数据统计相关的方法*******************************************************************/
 
@@ -436,7 +280,7 @@ public class Hairstylist {
         List<Integer> newCustomerNum = new ArrayList<>();
         List<Integer> newLoyalCustomerNum = new ArrayList<>();
         //获取第0~6天前的数据
-        for (int i = 6; i >=0; i--) {
+        for (int i = 6; i >= 0; i--) {
             data = getOperationalData(MyUtils.stepDay(today, -i), MyUtils.stepDay(today, -i + 1));
             reservationNum.add((Integer) data.get("reservationNum"));
             newCustomerNum.add((Integer) data.get("newCustomerNum"));
@@ -450,7 +294,7 @@ public class Hairstylist {
         newLoyalCustomerNum = new ArrayList<>();
 
         //获取第0~3周前的数据
-        for (int i = 3; i >=0; i--) {
+        for (int i = 3; i >= 0; i--) {
             data = getOperationalData(MyUtils.stepWeek(week, -i), MyUtils.stepWeek(week, -i + 1));
             reservationNum.add((Integer) data.get("reservationNum"));
             newCustomerNum.add((Integer) data.get("newCustomerNum"));
@@ -464,7 +308,7 @@ public class Hairstylist {
         newLoyalCustomerNum = new ArrayList<>();
 
         //获取第0~5月前的数据
-        for (int i = 5; i >=0; i--) {
+        for (int i = 5; i >= 0; i--) {
             data = getOperationalData(MyUtils.stepMonth(month, -i), MyUtils.stepMonth(month, -i + 1));
             reservationNum.add((Integer) data.get("reservationNum"));
             newCustomerNum.add((Integer) data.get("newCustomerNum"));
@@ -523,6 +367,22 @@ public class Hairstylist {
         Date month = MyUtils.getFirstDayOfMonth(new Date(System.currentTimeMillis()));//获取今天所在月的第一天的日期Date(时间为00:00:00)
         for (HaircutOrder order : haircutOrderList) {
             if (order.getStatus() == 2 && order.getBookTime().after(month)) {
+                count++;
+            }
+        }
+        return count;
+    }
+
+    /**
+     * 获取发型师在本月(且处于入驻门店之后)的完成订单数
+     *
+     * @return 入驻门店之后本月的完成订单数
+     */
+    public int getCurrentMonthOrderSumAfterSettledTime() {
+        int count = 0;
+        Date month = MyUtils.getFirstDayOfMonth(new Date(System.currentTimeMillis()));//获取今天所在月的第一天的日期Date(时间为00:00:00)
+        for (HaircutOrder order : haircutOrderList) {
+            if (order.getStatus() == 2 && (this.settledTime==null||order.getBookTime().after(this.settledTime) )&& order.getBookTime().after(month)) {
                 count++;
             }
         }
@@ -604,4 +464,6 @@ public class Hairstylist {
         }
         return false;
     }
+
+
 }

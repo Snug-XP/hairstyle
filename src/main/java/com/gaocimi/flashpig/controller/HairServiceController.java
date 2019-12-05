@@ -34,29 +34,35 @@ public class HairServiceController {
 
     @ApiOperation(value = "添加一个发型服务")
     @PostMapping("/hairstylist/addHairService")
-    public Map addHairService(@RequestParam String myOpenid, @RequestParam String serviceName, @RequestParam String description, @RequestParam Double price) {
+    public Map addHairService(@RequestParam String myOpenid, @RequestParam String serviceName,
+                              @RequestParam String description, @RequestParam Double price) {
 
         Map map = new HashMap();
         try {
             Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
-            if (hairstylist == null || hairstylist.getApplyStatus() != 1) {
+            if (hairstylist == null) {
                 logger.info("非发型师用户操作！！");
-                map.put("error", "对不起，你还不是发型师用户，无权操作！！");
-                return map;
-            } else {
-                HairService hairService = new HairService();
-
-                hairService.setHairstylist(hairstylist);
-                hairService.setServiceName(serviceName);
-                hairService.setDescription(description);
-                hairService.setPrice(price);
-
-                hairServiceService.save(hairService);
-
-                logger.info("发型师(" + hairstylist.getHairstylistName() + ")添加服务项目：" + serviceName + "  " + description + "  " + price);
-                map.put("message", "添加成功！");
+                map.put("error", "对不起，你不是发型师用户，无权操作！！");
                 return map;
             }
+            if (hairstylist.getApplyStatus() != 1) {
+                logger.info("非入驻发型师用户操作（添加一个发型服务）！！");
+                map.put("error", "对不起，你还没有入驻门店，不可操作！！");
+                return map;
+            }
+
+            HairService hairService = new HairService();
+
+            hairService.setHairstylist(hairstylist);
+            hairService.setServiceName(serviceName);
+            hairService.setDescription(description);
+            hairService.setPrice(price);
+
+            hairServiceService.save(hairService);
+
+            logger.info("发型师(" + hairstylist.getHairstylistName() + ")添加服务项目：" + serviceName + "  " + description + "  " + price);
+            map.put("message", "添加成功！");
+            return map;
         } catch (Exception e) {
             logger.error(e.getMessage());
             logger.info("添加发型服务失败！！（后端发生某些错误）");
@@ -68,16 +74,23 @@ public class HairServiceController {
 
     @ApiOperation(value = "根据服务项目id，修改个人的服务项目")
     @PostMapping("/hairstylist/editHairService")
-    public Map editHairService(@RequestParam String myOpenid, @RequestParam Integer serviceId, @RequestParam String serviceName, @RequestParam String description, @RequestParam Double price) {
+    public Map editHairService(@RequestParam String myOpenid, @RequestParam Integer serviceId, @RequestParam String serviceName,
+                               @RequestParam String description, @RequestParam Double price) {
 
         Map map = new HashMap();
         try {
             Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
-            if (hairstylist == null || hairstylist.getApplyStatus() != 1) {
+            if (hairstylist == null) {
                 logger.info("非发型师用户操作！！");
-                map.put("error", "对不起，你还不是发型师用户，无权操作！！");
+                map.put("error", "对不起，你不是发型师用户，无权操作！！");
                 return map;
             }
+            if (hairstylist.getApplyStatus() != 1) {
+                logger.info("非入驻发型师用户操作（修改个人的服务项目）！！");
+                map.put("error", "对不起，你还没有入驻门店，不可操作！！");
+                return map;
+            }
+
             HairService hairService = hairServiceService.findHairServiceById(serviceId);
             if (hairService == null) {
                 logger.info("所修改服务项目不存在！");
@@ -118,16 +131,16 @@ public class HairServiceController {
         try {
             Hairstylist hairstylist = hairstylistService.findHairstylistById(hairstylistId);
             if (hairstylist == null) {
-                logger.info("未找到该发型师用户");
+                logger.info("未找到该发型师用户（获取发型师的服务列表）");
                 map.put("error", "未找到该发型师用户！！·");
                 return map;
             }
-            map = getServiceList(hairstylist.getOpenid());
+            map.put("serviceList", hairstylist.hairServiceList);
             return map;
         } catch (Exception e) {
             logger.error(e.getMessage());
-            logger.info("获取发型师信息失败！！（后端发生某些错误）");
-            map.put("error", "获取发型师信息失败！！（后端发生某些错误）");
+            logger.info("获取发型师服务列表失败！！（后端发生某些错误）");
+            map.put("error", "操作失败！！（后端发生某些错误）");
             e.printStackTrace();
             return map;
         }
@@ -139,14 +152,19 @@ public class HairServiceController {
         Map map = new HashMap();
         try {
             Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
-            if (hairstylist == null || hairstylist.getApplyStatus() != 1) {
+            if (hairstylist == null) {
                 logger.info("非发型师用户操作！！");
-                map.put("error", "对不起，你还不是发型师用户，无权操作！！");
-                return map;
-            } else {
-                map.put("serviceList", hairstylist.hairServiceList);
+                map.put("error", "对不起，你不是发型师用户，无权操作！！");
                 return map;
             }
+            if (hairstylist.getApplyStatus() != 1) {
+                logger.info("非入驻发型师用户操作（修改个人的服务项目）！！");
+                map.put("error", "对不起，你还没有入驻门店，不可操作！！");
+                return map;
+            }
+
+            map.put("serviceList", hairstylist.hairServiceList);
+            return map;
         } catch (Exception e) {
             logger.error(e.getMessage());
             logger.info("获取自己的服务列表失败！！（后端发生某些错误）");
@@ -158,13 +176,18 @@ public class HairServiceController {
 
     @ApiOperation(value = "根据服务项目id,删除个人服务项目")
     @DeleteMapping("/hairstylist/deleteService")
-    public Map deleteService(@RequestParam String myOpenid,  @RequestParam Integer serviceId) {
+    public Map deleteService(@RequestParam String myOpenid, @RequestParam Integer serviceId) {
         Map map = new HashMap();
         try {
             Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
-            if (hairstylist == null || hairstylist.getApplyStatus() != 1) {
+            if (hairstylist == null) {
                 logger.info("非发型师用户操作！！");
                 map.put("error", "非发型师用户操作！！");
+                return map;
+            }
+            if (hairstylist.getApplyStatus() != 1) {
+                logger.info("非入驻发型师用户操作（删除个人服务项目）！！");
+                map.put("error", "对不起，你还没有入驻门店，不可操作！！");
                 return map;
             }
             HairService hairService = hairServiceService.findHairServiceById(serviceId);
@@ -197,44 +220,65 @@ public class HairServiceController {
     /**
      * 根据发型师openid，同时修改全部的服务项目列表（目前没用）
      */
-    public Map deleteServiceByHairstylistId(@RequestParam String myOpenid, @RequestParam(value = "hairService", required = false) List<String> hairService,
-                                            @RequestParam(value = "description", required = false) List<String> description,
-                                            @RequestParam(value = "price", required = false) List<Double> price) {
+    @ApiOperation(value = "发型师同时修改个人全部的服务项目列表")
+    @DeleteMapping("/hairstylist/setHaService")
+    public Map setServiceByHairstylistId(@RequestParam String myOpenid,
+                                         @RequestParam(value = "hairService", required = false) List<String> hairService,
+                                         @RequestParam(value = "description", required = false) List<String> description,
+                                         @RequestParam(value = "price", required = false) List<Double> price) {
 
         Map map = new HashMap();
-        Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
-        //下面保存该理发师的服务项目
-        //先删除原来对应的的服务项目
-        hairServiceService.deleteAllByHairstylistId(hairstylist.getId());
-        if (hairService != null) {
-            int serviceSize = hairService.size();
-            if (serviceSize != price.size()) {
-                logger.info("服务与价格数量不匹配！！");
-                map.put("error", "服务与价格不匹配！！");
+        try {
+            Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
+            if (hairstylist == null) {
+                logger.info("非发型师用户操作！！");
+                map.put("error", "非发型师用户操作！！");
                 return map;
             }
-            if (serviceSize != description.size()) {
-                logger.info("服务与描述数量不匹配！！");
-                map.put("error", "服务与描述不匹配！！");
+            if (hairstylist.getApplyStatus() != 1) {
+                logger.info("非入驻发型师用户操作（删除个人服务项目）！！");
+                map.put("error", "对不起，你还没有入驻门店，不可操作！！");
                 return map;
             }
+            //下面保存该理发师的服务项目
+            //先删除原来对应的的服务项目
+            hairServiceService.deleteAllByHairstylistId(hairstylist.getId());
+            if (hairService != null) {
+                int serviceSize = hairService.size();
+                if (serviceSize != price.size()) {
+                    logger.info("服务与价格数量不匹配！！");
+                    map.put("error", "服务与价格不匹配！！");
+                    return map;
+                }
+                if (serviceSize != description.size()) {
+                    logger.info("服务与描述数量不匹配！！");
+                    map.put("error", "服务与描述不匹配！！");
+                    return map;
+                }
 
-            for (int i = 0; i < serviceSize; i++) {
-                HairService hairService1 = new HairService();
-                hairService1.setHairstylist(hairstylist);
-                hairService1.setServiceName(hairService.get(i));
-                hairService1.setDescription(description.get(i));
-                hairService1.setPrice(price.get(i));
-                hairServiceService.save(hairService1);
+                for (int i = 0; i < serviceSize; i++) {
+                    HairService hairService1 = new HairService();
+                    hairService1.setHairstylist(hairstylist);
+                    hairService1.setServiceName(hairService.get(i));
+                    hairService1.setDescription(description.get(i));
+                    hairService1.setPrice(price.get(i));
+                    hairServiceService.save(hairService1);
+                }
+
+                logger.info("hairService有" + serviceSize + "个： " + hairService);
+                map.put("message", "同时修改全部服务项目成功！");
+                return map;
+            } else {
+                //没有新的服务项目传入，说明把原有服务项目都删了
+                logger.info("删除全部服务项目");
+                map.put("message", "删除全部服务项目成功！");
+                return map;
             }
-
-            logger.info("hairService有" + serviceSize + "个： " + hairService);
-            map.put("message", "同时修改全部服务项目成功！");
-            return map;
-        } else {
-            //没有新的服务项目传入，说明把原有服务项目都删了
-            logger.info("删除全部服务项目");
-            map.put("message", "删除全部服务项目成功！");
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            logger.info("设置全部的服务项目列表失败！！（后端发生某些错误）");
+            map.put("error", "操作失败！！（后端发生某些错误）");
+            e.printStackTrace();
             return map;
         }
 

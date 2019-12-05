@@ -47,15 +47,21 @@ public class ArticleController {
 
     @ApiOperation(value = "添加发型文章")
     @PostMapping("/hairstylist/addArticle")
-    public Map addArticle(@RequestParam String myOpenid,@RequestParam String title,@RequestParam String content,
+    public Map addArticle(@RequestParam String myOpenid, @RequestParam String title, @RequestParam String content,
                           @RequestParam(value = "tagList", required = false) List<String> tagList,
                           @RequestParam(value = "imgUrlList", required = false) List<String> imgUrlList) {
         Map map = new HashMap();
         try {
             Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
-            if ((hairstylist == null || hairstylist.getApplyStatus() != 1) && (!administratorService.isExist(myOpenid))) {
+            if (hairstylist == null  && (!administratorService.isExist(myOpenid))) {
                 logger.info("非发型师用户或管理员操作（添加文章）！！");
                 map.put("error", "对不起，你不是发型师或管理员，无权操作！！");
+                return map;
+            }
+
+            if (hairstylist.getApplyStatus() != 1) {
+                logger.info("非入驻发型师用户操作（添加发型文章）！！");
+                map.put("error", "对不起，你还没有入驻门店，不可操作！！");
                 return map;
             }
 
@@ -65,7 +71,7 @@ public class ArticleController {
             article.setTitle(title);
             article.setContent(content);
             article.setCreateTime(new Date(System.currentTimeMillis()));
-            if(administratorService.isExist(myOpenid))
+            if (administratorService.isExist(myOpenid))
                 article.setStatus(1);//设置发型文章状态为审核通过
             else
                 article.setStatus(0);//设置发型文章状态为审核中
@@ -93,7 +99,7 @@ public class ArticleController {
 
     @ApiOperation(value = "删除发型文章", notes = "权限：仅文章的发布者或管理员")
     @DeleteMapping("/article")
-    public Map deleteArticle(@RequestParam String myOpenid,@RequestParam Integer articleId) {
+    public Map deleteArticle(@RequestParam String myOpenid, @RequestParam Integer articleId) {
 
         Map map = new HashMap();
         try {
@@ -105,7 +111,7 @@ public class ArticleController {
             }
 
             Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
-            if ((hairstylist == null || hairstylist.getApplyStatus() != 1) && (!administratorService.isExist(myOpenid))) {
+            if ((hairstylist == null) && (!administratorService.isExist(myOpenid))) {
                 logger.info("非发型师用户或管理员操作（删除文章）！！");
                 map.put("error", "对不起，你不是发型师或管理员，无权操作！！");
                 return map;
@@ -118,9 +124,9 @@ public class ArticleController {
                 return map;
             }
 
-            logger.info("id为"+hairstylist.getId()+"的发型师“"+hairstylist.getHairstylistName()+"”删除了id为"+articleId+"的文章（Title:"+article.getTitle()+"）");
+            logger.info("id为" + hairstylist.getId() + "的发型师“" + hairstylist.getHairstylistName() + "”删除了id为" + articleId + "的文章（Title:" + article.getTitle() + "）");
             articleService.delete(articleId);
-            map.put("message","删除成功！");
+            map.put("message", "删除成功！");
             return map;
         } catch (Exception e) {
             logger.error(e.getMessage());
@@ -148,9 +154,15 @@ public class ArticleController {
             }
 
             Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
-            if (hairstylist == null || hairstylist.getApplyStatus() != 1) {
+            if (hairstylist == null ) {
                 logger.info("非发型师用户操作（修改文章）！！");
                 map.put("error", "对不起，你不是发型师，无权操作！！");
+                return map;
+            }
+
+            if (hairstylist.getApplyStatus() != 1) {
+                logger.info("非入驻发型师用户操作（修改发型文章）！！");
+                map.put("error", "对不起，你还没有入驻门店，不可操作！！");
                 return map;
             }
 
@@ -163,7 +175,7 @@ public class ArticleController {
             article.setTag(tagList);
             article.setTitle(title);
             article.setContent(content);
-            if(administratorService.isExist(myOpenid))
+            if (administratorService.isExist(myOpenid))
                 article.setStatus(1);//设置发型文章状态为审核通过
             else
                 article.setStatus(0);//设置发型文章状态为审核中
@@ -181,7 +193,7 @@ public class ArticleController {
 
                 imageUrlService.save(imageUrl);
             }
-            logger.info("id为"+hairstylist.getId()+"的发型师“"+hairstylist.getHairstylistName()+"”修改了id为"+articleId+"的文章");
+            logger.info("id为" + hairstylist.getId() + "的发型师“" + hairstylist.getHairstylistName() + "”修改了id为" + articleId + "的文章");
             map.put("message", "文章修改成功！");
             return map;
         } catch (Exception e) {
@@ -202,8 +214,8 @@ public class ArticleController {
         Map map = new HashMap();
         try {
             Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
-            if ((hairstylist == null || hairstylist.getApplyStatus() != 1) && (!administratorService.isExist(myOpenid))) {
-                logger.info("非发型师用户或管理员操作（删除文章）！！");
+            if (hairstylist == null ) {
+                logger.info("非发型师用户或管理员操作（获取自己的发型文章列表）！！");
                 map.put("error", "对不起，你不是发型师或管理员，无权操作！！");
                 return map;
             }
@@ -211,9 +223,9 @@ public class ArticleController {
             List<Article> tempArticleList = hairstylist.getArticleList();
             List<Article> resultList = new ArrayList<>();
 
-            if(tempArticleList==null||tempArticleList.size()==0){
+            if (tempArticleList == null || tempArticleList.size() == 0) {
                 logger.info("你还没有创建过发型文章哦~");
-                map.put("message","你还没有创建过发型文章哦~");
+                map.put("message", "你还没有创建过发型文章哦~");
                 return map;
             }
 
@@ -250,8 +262,6 @@ public class ArticleController {
     }
 
 
-
-
     @ApiOperation(value = "获取单个文章信息", produces = "application/json")
     @GetMapping("/article/getOne")
     public Article getOne(@RequestParam Integer articleId) {
@@ -263,7 +273,7 @@ public class ArticleController {
     public Page<Article> getAllByPage(@RequestParam(name = "pageNum", defaultValue = "0") int pageNum,
                                       @RequestParam(name = "pageSize", defaultValue = "10") int pageSize
     ) {
-        Page<Article> page = articleService.findAll(pageNum, pageSize);
+        Page<Article> page = articleService.findAllByStatus(1, pageNum, pageSize);
         return page;
     }
 
@@ -291,7 +301,7 @@ public class ArticleController {
             }
             UserToArticle userToArticle = new UserToArticle(user, article);
             userToArticleService.save(userToArticle);
-            logger.info("id为" + user.getId() + "的用户收藏了id为" + article.getId() + "的文章（title：" + article.getTitle() + "）");
+            logger.info("id为" + user.getId() + "的用户“"+user.getName()+"”收藏了id为" + article.getId() + "的文章（title：" + article.getTitle() + "）");
             map.put("message", "收藏成功！");
 
         } catch (Exception e) {
@@ -343,9 +353,9 @@ public class ArticleController {
             map.put("message", "收录成功！");
 
         } catch (Exception e) {
-            logger.info("后端发生异常：\n");
-            logger.error(e.getMessage());
+            logger.info("后端发生异常\n");
             map.put("error", "抱歉，后端发生异常!!");
+            e.printStackTrace();
         }
 
         return map;
@@ -406,4 +416,60 @@ public class ArticleController {
             return map;
         }
     }
+
+
+//    @ApiOperation(value = "普通用户获取被推荐的文章列表")
+//    @GetMapping("/article/getRecommendList")
+//    public Map getRecommendList(@RequestParam String myOpenid,
+//                                     @RequestParam(name = "pageNum", defaultValue = "0") int pageNum,
+//                                     @RequestParam(name = "pageSize", defaultValue = "10") int pageSize) {
+//        Map map = new HashMap();
+//        try {
+//
+//            User user = userService.findUserByOpenid(myOpenid);
+//            if (user == null) {
+//                logger.info("（" + myOpenid + "）该用户不存在！");
+//                map.put("error", "无效的用户！！");
+//                return map;
+//            }
+//            List<Article> tempArticleList = articleService.getRecommendListBy();
+//            List<UserToArticle> resultArticleList = new ArrayList<>();
+//
+//            if (tempArticleList == null) {
+//                logger.info("你还没有收藏文章哦~");
+//                map.put("message", "你还没有收藏文章哦~");
+//                return map;
+//            }
+//
+//            // 按时间倒序排序
+//            Collections.sort(tempArticleList, (o1, o2) -> {
+//                if (o2.getCreateTime().after(o1.getCreateTime())) {
+//                    return 1;
+//                } else if (o1.getCreateTime().after(o2.getCreateTime())) {
+//                    return -1;
+//                }
+//                return 0; //相等为0
+//            });
+//
+//            //获取所求页数的文章数据
+//            int first = pageNum * pageSize;
+//            int last = pageNum * pageSize + pageSize - 1;
+//            for (int i = first; i <= last && i < tempArticleList.size(); i++) {
+//                resultArticleList.add(tempArticleList.get(i).article);
+//            }
+//
+//            //包装分页数据
+//            Pageable pageable = PageRequest.of(pageNum, pageSize);
+//            Page<Article> page = new PageImpl<>(resultArticleList, pageable, tempArticleList.size());
+//
+//            map.put("page", page);
+//            return map;
+//        } catch (Exception e) {
+//            logger.error(e.getMessage());
+//            logger.info("获取自己收藏的文章列表失败！！（后端发生某些错误）");
+//            map.put("error", "获取收藏列表失败！！（后端发生某些错误）");
+//            e.printStackTrace();
+//            return map;
+//        }
+//    }
 }

@@ -1,6 +1,7 @@
 package com.gaocimi.flashpig.utils.xp;
 
 import com.gaocimi.flashpig.controller.HairstylistController;
+import com.gaocimi.flashpig.entity.Article;
 import com.gaocimi.flashpig.entity.Hairstylist;
 import com.gaocimi.flashpig.entity.User;
 import com.gaocimi.flashpig.entity.UserToHairstylist;
@@ -8,10 +9,17 @@ import com.gaocimi.flashpig.model.HairstylistInfo;
 import com.gaocimi.flashpig.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * 自己的工具类
@@ -63,7 +71,7 @@ public class MyUtils {
     }
 
     /**
-     * @return 获取传入日期所在月的第一天的日期Date(时间为00:00:00)
+     * @return 获取传入日期所在月的第一天的日期Date(时间为00 : 00 : 00)
      */
     public static Date getFirstDayOfMonth(final Date date) {
 
@@ -80,7 +88,7 @@ public class MyUtils {
 
 
     /**
-     * @return 获取传入日期所在周的星期一的日期Date(时间为00:00:00)
+     * @return 获取传入日期所在周的星期一的日期Date(时间为00 : 00 : 00)
      */
     public static Date getFirstDayOfWeek(Date date) {
 
@@ -89,7 +97,7 @@ public class MyUtils {
         // （外国是周天到下一周的周六为一周，即一周中数字1、2、3、4、5、6、7对应星期天、星期一、星期二、..、星期六）
         //  如果今天是星期天(对应数字1)，会获取到下一周的周一，所以将获取到的时间周数减1
         boolean flag = false;
-        if(calendar.get(Calendar.DAY_OF_WEEK)==1) {
+        if (calendar.get(Calendar.DAY_OF_WEEK) == 1) {
             flag = true;
         }
 
@@ -99,8 +107,8 @@ public class MyUtils {
         calendar.set(Calendar.MINUTE, 0);
         calendar.set(Calendar.SECOND, 0);
 
-        if(flag)
-            return stepWeek(calendar.getTime(),-1);
+        if (flag)
+            return stepWeek(calendar.getTime(), -1);
         else
             return calendar.getTime();
     }
@@ -124,7 +132,7 @@ public class MyUtils {
      * 获取在给定的日期加上或减去指定周数后的日期
      *
      * @param sourceDate 原始时间
-     * @param week      要调整的周数，向前为负数，向后为正数
+     * @param week       要调整的周数，向前为负数，向后为正数
      * @return 在给定的日期加上或减去指定周数后的日期
      */
     public static Date stepWeek(Date sourceDate, int week) {
@@ -139,7 +147,7 @@ public class MyUtils {
      * 获取在给定的日期加上或减去指定天数后的日期
      *
      * @param sourceDate 原始时间
-     * @param day      要调整的周数，向前为负数，向后为正数
+     * @param day        要调整的周数，向前为负数，向后为正数
      * @return 在给定的日期加上或减去指定天数后的日期
      */
     public static Date stepDay(Date sourceDate, int day) {
@@ -149,14 +157,6 @@ public class MyUtils {
 
         return c.getTime();
     }
-
-
-
-
-
-
-
-
 
 
     /**
@@ -177,6 +177,80 @@ public class MyUtils {
         Date nowTime = new Date(System.currentTimeMillis());
         Long days = nowTime.getTime() / 86400000 - date.getTime() / 86400000;//与当前时刻相差的天数
         return days;
+    }
+
+
+    /**
+     * 将列表分页，返回分页内容
+     *
+     * @return
+     */
+    public static <T> Page<T> getPage(List<T> list, int pageNum, int pageSize) {
+        int first = pageNum * pageSize;//该页第一个元素位置
+        int last = pageNum * pageSize + pageSize - 1;//该页最后一个元素位置
+
+        List<T> resultList = new ArrayList<>();
+
+        for (int i = first; i <= last && i < list.size(); i++) {
+            resultList.add(list.get(i));
+        }
+
+        //包装分页数据
+        Pageable pageable = PageRequest.of(pageNum, pageSize);
+        Page<T> page = new PageImpl<>(resultList, pageable, list.size());
+
+        return page;
+    }
+
+    /**
+     * 判断电话号码是否符合格式
+     *
+     * @param mobiles 11位电话号码
+     * @return
+     */
+    public static boolean isMobileNO(String mobiles) {
+        boolean flag = false;
+        try {
+            //13********* ,15********,18*********
+            Pattern p = Pattern
+                    .compile("^((13[0-9])|(15[^4,\\D])|(18[0,5-9]))\\d{8}$");
+            Matcher m = p.matcher(mobiles);
+            flag = m.matches();
+        } catch (Exception e) {
+            flag = false;
+        }
+        return flag;
+    }
+
+
+    private static double EARTH_RADIUS = 6378.137;
+
+    private static double rad(double d) {
+        return d * Math.PI / 180.0;
+    }
+
+    /**
+     * 通过经纬度获取距离(单位：米)
+     *
+     * @param lat1
+     * @param lng1
+     * @param lat2
+     * @param lng2
+     * @return
+     */
+    public static double getDistance(double lat1, double lng1, double lat2,
+                                     double lng2) {
+        double radLat1 = rad(lat1);
+        double radLat2 = rad(lat2);
+        double a = radLat1 - radLat2;
+        double b = rad(lng1) - rad(lng2);
+        double s = 2 * Math.asin(Math.sqrt(Math.pow(Math.sin(a / 2), 2)
+                + Math.cos(radLat1) * Math.cos(radLat2)
+                * Math.pow(Math.sin(b / 2), 2)));
+        s = s * EARTH_RADIUS;
+        s = Math.round(s * 10000d) / 10000d;
+        s = s * 1000;
+        return s;
     }
 
 

@@ -1,6 +1,7 @@
 package com.gaocimi.flashpig.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.gaocimi.flashpig.model.HairstylistInfo;
 import lombok.Data;
 
 import javax.persistence.*;
@@ -17,16 +18,13 @@ import java.util.List;
 @Entity
 @Table(name = "article")
 @JsonIgnoreProperties(value = {"hairstylist", "userRecordList", "handler", "hibernateLazyInitializer", "fieldHandler"})
+@Data
 public class Article {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    /**
-     * 标签、关键词
-     */
-    private String tag;
 
     /**
      * 标题
@@ -49,6 +47,12 @@ public class Article {
     private Integer status;
 
     /**
+     * 标签、关键词
+     */
+    private String tag;
+
+
+    /**
      * 发表该文章的发型师； 定义名为create_by的外键列，该外键引用hairstylist表的主键(openid)列,采用懒加载
      */
     @ManyToOne(targetEntity = Hairstylist.class, fetch = FetchType.LAZY)
@@ -68,13 +72,6 @@ public class Article {
     @OneToMany(targetEntity = ArticleImageUrl.class, mappedBy = "article")
     public List<ArticleImageUrl> articleImageUrlList;
 
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
 
     public String[] getTag() {
         if(tag==null)
@@ -89,7 +86,7 @@ public class Article {
     public void setTag(List<String> tagList) {
         this.tag = "";
         for (String tag : tagList) {
-            this.tag += "," + tag;
+            this.tag += "," + tag.trim();
         }
         if (this.tag.length() > 0)
             this.tag = this.tag.substring(1);
@@ -98,65 +95,15 @@ public class Article {
     public void addTag(List<String> tagList) {
         for (String tag : tagList) {
             if (this.tag == null || this.tag.length() == 0)
-                this.tag = tag;
+                this.tag = tag.trim();
             else
-                this.tag += "," + tag;
+                this.tag += "," + tag.trim();
         }
     }
 
-    public String getContent() {
-        return content;
+    public HairstylistInfo getHairstylist(){
+        return new HairstylistInfo(this.hairstylist);
     }
 
-    public void setContent(String content) {
-        this.content = content;
-    }
 
-    public Date getCreateTime() {
-        return createTime;
-    }
-
-    public void setCreateTime(Date createTime) {
-        this.createTime = createTime;
-    }
-
-    public Hairstylist getHairstylist() {
-        return hairstylist;
-    }
-
-    public void setHairstylist(Hairstylist hairstylist) {
-        this.hairstylist = hairstylist;
-    }
-
-    public List<UserToArticle> getUserRecordList() {
-        return userRecordList;
-    }
-
-    public void setUserRecordList(List<UserToArticle> userRecordList) {
-        this.userRecordList = userRecordList;
-    }
-
-    public List<ArticleImageUrl> getArticleImageUrlList() {
-        return articleImageUrlList;
-    }
-
-    public void setArticleImageUrlList(List<ArticleImageUrl> articleImageUrlList) {
-        this.articleImageUrlList = articleImageUrlList;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public Integer getStatus() {
-        return status;
-    }
-
-    public void setStatus(Integer status) {
-        this.status = status;
-    }
 }

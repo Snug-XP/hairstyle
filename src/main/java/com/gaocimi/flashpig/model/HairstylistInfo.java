@@ -11,20 +11,27 @@ import java.util.Date;
 public class HairstylistInfo {
     private int hairstylistId;
     private String name;
-    private String shopNmae;
+    private ShopSimpleInfo shop;
     private String personalPhotoUrl;
-    private String addres;
     private Double point;
     private Date recordCreatTime;
 
     public HairstylistInfo(UserToHairstylist collectionRecord) {
         this.hairstylistId = collectionRecord.hairstylist.getId();
         this.name = collectionRecord.hairstylist.getHairstylistName();
-        this.shopNmae = collectionRecord.hairstylist.getShopName();
+        this.shop = collectionRecord.hairstylist.getShopSimpleInfo();
         this.personalPhotoUrl = collectionRecord.hairstylist.getPersonalPhotoUrl();
-        this.addres = collectionRecord.hairstylist.getAddress();
         this.point = collectionRecord.hairstylist.getPoint();
         this.recordCreatTime =collectionRecord.getCreateTime();
+    }
+
+    public HairstylistInfo(Hairstylist hairstylist) {
+        this.hairstylistId = hairstylist.getId();
+        this.name = hairstylist.getHairstylistName();
+        this.shop = hairstylist.getShopSimpleInfo();
+        this.personalPhotoUrl = hairstylist.getPersonalPhotoUrl();
+        this.point = hairstylist.getPoint();
+        this.recordCreatTime =null;
     }
     public HairstylistInfo(){
         super();

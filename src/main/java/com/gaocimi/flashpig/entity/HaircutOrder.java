@@ -185,6 +185,6 @@ public class HaircutOrder {
     }
 
     public String getAddress() {
-        return hairstylist.getCity()+hairstylist.getDistrict()+hairstylist.getAddress();
+        return hairstylist.shop.getCity()+" "+hairstylist.shop.getDistrict()+" "+hairstylist.shop.getAddress();
     }
 }

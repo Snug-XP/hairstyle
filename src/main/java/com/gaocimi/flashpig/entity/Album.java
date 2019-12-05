@@ -29,9 +29,9 @@ public class Album {
     private String title;
 
     /**
-     * 该专辑的介绍
+     * 标签、关键词
      */
-    private String introduction;
+    private String tag;
 
     /**
      * 专辑的（头像）图片url
@@ -50,9 +50,47 @@ public class Album {
 
     /**该专辑中包含的发型文章*/
     @JoinTable(name="article_to_album",
-            joinColumns={@JoinColumn(name="article_id", referencedColumnName="id")},
-            inverseJoinColumns={@JoinColumn(name="album_id", referencedColumnName="id")})
+            joinColumns={@JoinColumn(name="album_id", referencedColumnName="id")},
+            inverseJoinColumns={@JoinColumn(name="article_id", referencedColumnName="id")})
     @ManyToMany(fetch = FetchType.LAZY)
     public List<Article> articleList;
+
+
+    public String[] getTag() {
+        if(tag==null)
+            return null;
+        return tag.split(",");
+    }
+
+    public void setTag(String tag) {
+        this.tag = tag;
+    }
+
+    public void setTag(List<String> tagList) {
+        this.tag = "";
+        for (String tag : tagList) {
+            this.tag += "," + tag.trim();
+        }
+        if (this.tag.length() > 0)
+            this.tag = this.tag.substring(1);
+    }
+
+    public void addTag(List<String> tagList) {
+        for (String tag : tagList) {
+            if (this.tag == null || this.tag.length() == 0)
+                this.tag = tag.trim();
+            else
+                this.tag += "," + tag.trim();
+        }
+    }
+
+    public boolean existArticle(int articleId){
+        for (Article a : articleList) {
+            if (a.getId() == articleId) {
+                return true;
+            }
+        }
+        return false;
+    }
 
 }
