@@ -67,6 +67,7 @@ public class HairstylistController {
             return map;
         }
 
+
         try {
             Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(openid);
             if (hairstylist != null) {
