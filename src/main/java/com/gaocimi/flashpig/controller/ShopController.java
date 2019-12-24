@@ -52,7 +52,7 @@ public class ShopController {
             return map;
         }
         if (!shop.getPassword().equals(password)) {
-            logger.info("登录密码错误!（phone：" + phone + " ，wrongPassword:" + password + ",rightpassword:" + shop.getPassword() + "）");
+            logger.info("门店“" + shop.getShopName() + "”（id=" + shop.getId() + "）登录密码错误!（phone：" + phone + " ，wrongPassword:" + password + ",rightpassword:" + shop.getPassword() + "）");
             map.put("error", "密码错误！！");
             return map;
         }
@@ -120,6 +120,7 @@ public class ShopController {
     @ApiOperation(value = "门店注册")
     @PostMapping("/shop/register/apply")
     public Map addShop(HttpServletRequest request,
+                       @RequestParam String myOpenid,
                        @RequestParam(value = "shopName", required = false) String shopName,
                        @RequestParam(value = "phone", required = false) String phone,
                        @RequestParam(value = "password", required = false) String password,
@@ -134,7 +135,7 @@ public class ShopController {
         Map map = new HashMap();
 
 
-        if (shopName == null || phone == null || password == null || logoUrl == null || province == null || city == null || district == null || address == null || longitude == null || latitude == null) {
+        if (shopName == null || phone == null || password == null || province == null || city == null || district == null || address == null || longitude == null || latitude == null) {
             logger.info("请完整填写个人资料!(门店注册申请)");
             logger.info("传入的数据：" + JSONObject.toJSON(request.getParameterMap()) + "\n");
             map.put("message", "请完整填写个人资料！");
@@ -164,6 +165,16 @@ public class ShopController {
                 map.put("error", "电话号码（" + phone + "）不合法！！");
                 return map;
             }
+
+            //去除该微信用户在其他门店的登录标记（一个微信仅允许登录一个门店账户）
+            Shop shop1 = shopService.findShopByOpenid(myOpenid);
+            while (shop1 != null) {
+                shop1.setOpenid(null);
+                shopService.edit(shop1);
+                shop1 = shopService.findShopByOpenid(myOpenid);
+            }
+
+            shop.setOpenid(myOpenid);
 
             shop.setShopName(shopName);
             shop.setPhone(phone);
