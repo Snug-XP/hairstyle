@@ -89,6 +89,9 @@ public class Hairstylist {
      */
     private Integer applyStatus;
 
+    /** 发型师的营业状态（0表示未营业，其它状态表示营业中） */
+    private Integer businessStatus;
+
 
     /**
      * 发型师上传的图片列表； 定义该Hairstylist实体所有关联的HairstylistImageUrl实体； 指定mappedBy属性表明该Hairstylist实体不控制关联关系
