@@ -861,22 +861,28 @@ public class ShopController {
                 map.put("error", "该发型师没有入驻本店的申请！！");
                 return map;
             }
-            if (hairstylist.getShop().getId() == shop.getId()) {
-                if (hairstylist.getApplyStatus() == 1) {
-                    logger.info("该发型师入驻申请已通过，无需重复审核");
-                    map.put("error", "该发型师入驻申请已通过，无需重复审核！");
-                    return map;
-                }
-                if (hairstylist.getApplyStatus() == -1) {
-                    logger.info("该发型师入驻申请已被拒绝，无需重复审核");
-                    map.put("error", "该发型师入驻申请已被拒绝，无需重复审核！");
-                    return map;
-                }
-            }
+//            if (hairstylist.getShop().getId() == shop.getId()) {
+//                if (hairstylist.getApplyStatus() == 1) {
+//                    logger.info("该发型师入驻申请已通过，无需重复审核");
+//                    map.put("error", "该发型师入驻申请已通过，无需重复审核！");
+//                    return map;
+//                }
+//                if (hairstylist.getApplyStatus() == -1) {
+//                    logger.info("该发型师入驻申请已被拒绝，无需重复审核");
+//                    map.put("error", "该发型师入驻申请已被拒绝，无需重复审核！");
+//                    return map;
+//                }
+//            }
 
 
             switch (decide) {
                 case 1:
+                    if (hairstylist.getApplyStatus() == 1) {
+                        logger.info("该发型师入驻申请已通过，无需重复审核");
+                        map.put("message", "该发型师入驻申请已通过，无需重复审核！");
+                        return map;
+                    }
+
                     Date date = new Date(System.currentTimeMillis());
                     hairstylist.setSettledTime(date);//设置发型师入驻门店的时间
                     hairstylist.setApplyStatus(1);
@@ -885,6 +891,11 @@ public class ShopController {
                     map.put("message", "同意该发型师的入驻申请，操作成功");
                     break;
                 case -1:
+                    if (hairstylist.getApplyStatus() == -1) {
+                        logger.info("该发型师入驻申请已被拒绝，无需重复审核");
+                        map.put("message", "该发型师入驻申请已被拒绝，无需重复审核！");
+                        return map;
+                    }
                     hairstylist.setApplyStatus(-1);
                     hairstylistService.edit(hairstylist);
                     logger.info("门店“" + shop.getShopName() + "”(id=" + shop.getId() + ")拒绝id为" + hairstylist.getId() + "的发型师“" + hairstylist.getHairstylistName() + "”的入驻申请");
