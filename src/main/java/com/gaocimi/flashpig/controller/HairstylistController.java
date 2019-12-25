@@ -471,6 +471,73 @@ public class HairstylistController {
     }
 
 
+    @ApiOperation(value = "发型师设置公告")
+    @PostMapping("/hairstylist/setProclamation")
+    public Map setProclamation(@RequestParam String myOpenid,
+                       @RequestParam(value = "proclamation") String proclamation) {
+        Map map = new HashMap();
+        try {
+            Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
+            if (hairstylist == null) {
+                logger.info("非发型师用户操作（设置公告）！！");
+                map.put("error", "对不起，你不是发型师用户，无权操作！！");
+                return map;
+            }
+
+            if (hairstylist.getApplyStatus() != 1) {
+                logger.info("非入驻发型师用户操作（设置公告）！！");
+                map.put("error", "对不起，你还没有入驻门店，不可操作！！");
+                return map;
+            }
+
+            hairstylist.setProclamation(proclamation);
+            hairstylistService.edit(hairstylist);
+            logger.info("发型师用户 " + hairstylist.getHairstylistName() + "（id=" + hairstylist.getId() + "）设置了新的公告: " +  proclamation);
+            map.put("message", "设置成功！");
+            return map;
+
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            logger.info("发型师设置公告操作失败！！（后端发生某些错误）");
+            map.put("error", "设置公告操作失败！！（后端发生某些错误）");
+            e.printStackTrace();
+            return map;
+        }
+    }
+
+    @ApiOperation(value = "发型师删除公告")
+    @DeleteMapping("/hairstylist/deleteProclamation")
+    public Map deleteProclamation(@RequestParam String myOpenid) {
+        Map map = new HashMap();
+        try {
+            Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
+            if (hairstylist == null) {
+                logger.info("非发型师用户操作（删除公告）！！");
+                map.put("error", "对不起，你不是发型师用户，无权操作！！");
+                return map;
+            }
+
+            if(hairstylist.getProclamation()==null){
+                map.put("error","你还没有正在发布的公告！");
+                return map;
+            }
+            hairstylist.setProclamation(null);
+            hairstylistService.edit(hairstylist);
+            logger.info("发型师用户 " + hairstylist.getHairstylistName() + "（id=" + hairstylist.getId() + "）删除了 原公告:"+hairstylist.getProclamation());
+            map.put("message", "删除成功！");
+            return map;
+
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            logger.info("发型师删除公告操作失败！！（后端发生某些错误）");
+            map.put("error", "删除公告操作失败！！（后端发生某些错误）");
+            e.printStackTrace();
+            return map;
+        }
+    }
+
+
+
     @ApiOperation(value = "根据发型师id，获取发型师的可预约时间")
     @GetMapping("/getHairstylistTime")
     public Map getHairstylistTime(@RequestParam Integer hairstylistId) {
