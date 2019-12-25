@@ -1188,8 +1188,8 @@ public class HairstylistController {
             return map;
         } catch (Exception e) {
             logger.error(e.getMessage());
-            logger.info("获取自己收藏的文章列表失败！！（后端发生某些错误）");
-            map.put("error", "获取收藏列表失败！！（后端发生某些错误）");
+            logger.info("获取附近发型师失败列表失败！！（后端发生某些错误）");
+            map.put("error", "获取附近发型师失败！！（后端发生某些错误）");
             e.printStackTrace();
             return map;
         }
