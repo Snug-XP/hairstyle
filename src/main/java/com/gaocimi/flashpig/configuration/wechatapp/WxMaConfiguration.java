@@ -6,7 +6,7 @@ import cn.binarywang.wx.miniapp.api.impl.WxMaMsgServiceImpl;
 import cn.binarywang.wx.miniapp.api.impl.WxMaServiceImpl;
 import cn.binarywang.wx.miniapp.bean.WxMaTemplateMessage;
 import cn.binarywang.wx.miniapp.config.WxMaConfig;
-import cn.binarywang.wx.miniapp.config.WxMaInMemoryConfig;
+import cn.binarywang.wx.miniapp.config.impl.WxMaDefaultConfigImpl;
 import com.aliyun.oss.OSSClient;
 import com.gaocimi.flashpig.configuration.SystemConfigProperty;
 import com.github.binarywang.wxpay.config.WxPayConfig;
@@ -32,7 +32,7 @@ public class WxMaConfiguration {
 
     @Bean
     public WxMaConfig maConfig() {
-        WxMaInMemoryConfig config = new WxMaInMemoryConfig();
+        WxMaDefaultConfigImpl config = new WxMaDefaultConfigImpl();
         config.setAppid(this.SystemConfigProperty.getAppid());
         config.setSecret(this.SystemConfigProperty.getSecret());
         config.setToken(this.SystemConfigProperty.getToken());
@@ -86,7 +86,7 @@ public class WxMaConfiguration {
     @Bean
     public WxMaTemplateMessage wxMaTemplateMessage(){
         WxMaTemplateMessage wxMaTemplateMessage=new WxMaTemplateMessage();
-        wxMaTemplateMessage.setColor(this.SystemConfigProperty.getColor());
+//        wxMaTemplateMessage.setColor(this.SystemConfigProperty.getColor());
         wxMaTemplateMessage.setEmphasisKeyword(this.SystemConfigProperty.getEmphasisKeyword());
         wxMaTemplateMessage.setFormId(this.SystemConfigProperty.getFormId());
         wxMaTemplateMessage.setPage(this.SystemConfigProperty.getPage());
