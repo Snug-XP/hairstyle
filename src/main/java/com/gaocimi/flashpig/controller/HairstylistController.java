@@ -397,6 +397,45 @@ public class HairstylistController {
         }
     }
 
+    @ApiOperation(value = "发型师转换营业状态")
+    @PostMapping("/hairstylist/changeBusinessStatus")
+    public Map changeBusinessStatus(@RequestParam String myOpenid) {
+        Map map = new HashMap();
+        try {
+            Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
+            if (hairstylist == null) {
+                logger.info("非发型师用户操作（设置可预约时间）！！");
+                map.put("error", "对不起，你不是发型师用户，无权操作！！");
+                return map;
+            }
+
+            if (hairstylist.getApplyStatus() != 1) {
+                logger.info("非入驻发型师用户操作（设置可预约时间）！！");
+                map.put("error", "对不起，你还没有入驻门店，不可操作！！");
+                return map;
+            }
+
+            if (hairstylist.getBusinessStatus() == 1) {
+                hairstylist.setBusinessStatus(0);
+                map.put("message","暂停营业");
+            } else {
+                hairstylist.setBusinessStatus(1);
+                map.put("message","开始营业");
+            }
+            hairstylistService.edit(hairstylist);
+            logger.info("发型师用户 " + hairstylist.getHairstylistName() + "（id=" + hairstylist.getId() + "）设置了自己的营业状态为:" + hairstylist.getBusinessStatus()+"(0表示暂停营业，1表示营业中)");
+            return map;
+
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            logger.info("转换营业状态操作失败！！（后端发生某些错误）");
+            map.put("error", "转换营业状态操作失败！！（后端发生某些错误）");
+            e.printStackTrace();
+            return map;
+        }
+    }
+
+
     @ApiOperation(value = "发型师设置可预约时间")
     @PostMapping("/hairstylist/setTime")
     public Map setTime(@RequestParam String myOpenid,
@@ -418,7 +457,7 @@ public class HairstylistController {
 
             hairstylist.setAvailableTime(timeList);
             hairstylistService.edit(hairstylist);
-            logger.info("发型师用户 " + hairstylist.getHairstylistName() + "（" + myOpenid + "）重新设置了可预约时间:" + timeList.toString());
+            logger.info("发型师用户 " + hairstylist.getHairstylistName() + "（id=" + hairstylist.getId() + "）重新设置了可预约时间:" + timeList.toString());
             map.put("message", "可预约时间设置成功");
             return map;
 
@@ -1117,7 +1156,7 @@ public class HairstylistController {
         }
     }
 
-    @ApiOperation(value = "根据经纬度获取推荐的发型师",notes = "从附近门店（经纬度相差0.01即约附近1公里左右）中随机选取一位发型师")
+    @ApiOperation(value = "根据经纬度获取推荐的发型师", notes = "从附近门店（经纬度相差0.01即约附近1公里左右）中随机选取一位发型师")
     @GetMapping("/user/getHairstylistRecommendedList")
     public Map getHairstylistRecommendedList(@RequestParam Double longitude,
                                              @RequestParam Double latitude) {
@@ -1125,32 +1164,32 @@ public class HairstylistController {
         try {
 
             Double radius = 0.01;
-            List<Shop> shopList = shopService.getShopsByRadius(longitude,latitude,radius);
+            List<Shop> shopList = shopService.getShopsByRadius(longitude, latitude, radius);
             List<Hairstylist> tempHairstylists = new ArrayList<>();
             List<UserToHairstylist> resultList = new ArrayList<>();
 
-            if (shopList == null||shopList.size()==0) {
-                logger.info("附近没有门店~（经度："+longitude+"  维度："+latitude+"  ）");
+            if (shopList == null || shopList.size() == 0) {
+                logger.info("附近没有门店~（经度：" + longitude + "  维度：" + latitude + "  ）");
                 map.put("message", "附近没有门店~");
                 return map;
             }
 
-            for(Shop shop : shopList){
+            for (Shop shop : shopList) {
                 tempHairstylists.addAll(shop.getHairstylistsByStatus(1));
             }
 
-            int index = (int) (Math.random()*(tempHairstylists.size()));
+            int index = (int) (Math.random() * (tempHairstylists.size()));
             Hairstylist hairstylist = tempHairstylists.get(index);
             HairstylistInfo hairstylistInfo = new HairstylistInfo(tempHairstylists.get(index));
 //            System.out.println("tempHairstylists.size()="+tempHairstylists.size()+",index = "+index);
 
             map.put("hairstylist", hairstylistInfo);
-            map.put("distance",MyUtils.getDistance(latitude,longitude,hairstylist.shop.getLatitude(),hairstylist.shop.getLongitude()));
+            map.put("distance", MyUtils.getDistance(latitude, longitude, hairstylist.shop.getLatitude(), hairstylist.shop.getLongitude()));
             return map;
         } catch (Exception e) {
             logger.error(e.getMessage());
-            logger.info("获取自己收藏的文章列表失败！！（后端发生某些错误）");
-            map.put("error", "获取收藏列表失败！！（后端发生某些错误）");
+            logger.info("获取附近发型师失败列表失败！！（后端发生某些错误）");
+            map.put("error", "获取附近发型师失败！！（后端发生某些错误）");
             e.printStackTrace();
             return map;
         }
