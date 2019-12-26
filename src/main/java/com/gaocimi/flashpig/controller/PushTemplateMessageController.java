@@ -49,7 +49,7 @@ public class PushTemplateMessageController {
 
 
     @ApiOperation(value = "根据订单id，推送模板消息-预约成功的通知（...之后记得关闭url访问）")
-    @PostMapping("/hairstylist/pushSuccessMessage")
+    @PostMapping("/hairstylist/pushSuccessTemplateMessage")
     public Map pushSuccessMessage(@RequestParam Integer orderId) {
 
         Map map = new HashMap();
@@ -88,7 +88,7 @@ public class PushTemplateMessageController {
 
 
     @ApiOperation(value = "根据订单id，推送模板消息-准备前往（...之后记得关闭url访问）")
-    @PostMapping("/hairstylist/pushComingMessage")
+    @PostMapping("/hairstylist/pushComingTemplateMessage")
     public Map pushComingMessage(@RequestParam Integer orderId , @RequestParam Integer remainingNum ) {
 
         Map map = new HashMap();
@@ -132,7 +132,7 @@ public class PushTemplateMessageController {
 
 
     @ApiOperation(value = "根据订单id，推送模板消息-订单已完成（...之后记得关闭url访问）")
-    @PostMapping("/hairstylist/pushCompletedMessage")
+    @PostMapping("/hairstylist/pushCompletedTemplateMessage")
     public Map pushCompletedMessage(@RequestParam Integer orderId) {
         Map map = new HashMap();
 
