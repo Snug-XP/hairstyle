@@ -37,7 +37,8 @@ class AdministratorController {
     ShopService hairstylistService;
     @Autowired
     ArticleService articleService;
-
+    @Autowired
+    PushSubscribeMessageController pushWxMsg;
     @ApiOperation(value = "获取待审核或审核已通过的门店信息列表(分页展示)（status=0表示“待审核”status=1表示“审核通过”，status=-1表示“审核未通过”，可选定省、市、县以及门店名的范围）", notes = "仅管理员有权限")
     @GetMapping("/Administrator/getRegisterShopList")
     public Map getRegisterShopList(@RequestParam String myOpenid,
@@ -91,6 +92,7 @@ class AdministratorController {
                         shopService.edit(shop);
                         logger.info("管理员“" + administrator.getName() + "”(id=" + administrator.getId() + ")同意了id为" + shop.getId() + "的发型师“" + shop.getShopName() + "”的认证");
                         map.put("message", "同意该门店认证，操作成功");
+                        pushWxMsg.pushApplyResultMessage2(shopId);
                         break;
                     case -1:
                         shop.setApplyStatus(-1);
@@ -98,6 +100,7 @@ class AdministratorController {
                         logger.info("管理员“" + administrator.getName() + "”(id=" + administrator.getId() + ")拒绝了id为" + shop.getId() + "的门店“" + shop.getShopName() + "”的认证！");
                         map.put("message", "拒绝该门店认证，操作成功");
                         //...有时间再加一下拒绝理由模版消息
+                        pushWxMsg.pushApplyResultMessage2(shopId);
                         break;
                     default:
                         map.put("error", "decide的值错误（同意为1，拒绝为-1）！！");

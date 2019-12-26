@@ -239,7 +239,7 @@ public class PushSubscribeMessageController {
             return map;
         } catch (Exception e) {
             e.printStackTrace();
-            logger.info("后台发生异常！！(推送审核结果提醒消息)");
+            logger.info("后台发生异常！！(推送发型师审核结果提醒消息)");
             map.put("error", "后台发生异常！！");
             return map;
         }
@@ -352,7 +352,7 @@ public class PushSubscribeMessageController {
             return map;
         } catch (Exception e) {
             e.printStackTrace();
-            logger.info("后台发生异常！！(推送审核结果提醒消息)");
+            logger.info("后台发生异常！！(推送门店审核结果提醒消息)");
             map.put("error", "后台发生异常！！");
             return map;
         }
