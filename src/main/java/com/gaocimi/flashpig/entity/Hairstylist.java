@@ -18,7 +18,7 @@ import java.util.*;
  */
 @Entity
 @Table(name = "hairstylist")
-@JsonIgnoreProperties(value = {"openid","shop", "articleList", "getCurrentMonthOrderSum", "allOperationalData", "loyalUserRecordList", "haircutOrderList", "hairstylistImageUrlList", "hairServiceList", "recordToUserList", "userList", "handler", "hibernateLazyInitializer", "fieldHandler"})
+@JsonIgnoreProperties(value = {"applyTime","applyResult","openid","shop", "articleList", "getCurrentMonthOrderSum", "allOperationalData", "loyalUserRecordList", "haircutOrderList", "hairstylistImageUrlList", "hairServiceList", "recordToUserList", "userList", "handler", "hibernateLazyInitializer", "fieldHandler"})
 @Data
 public class Hairstylist {
 
@@ -94,6 +94,10 @@ public class Hairstylist {
 
     /** 公告 */
     private String  proclamation;
+    /** 发型师提交入驻门店申请的时间 */
+    private String  applyTime;
+    /** 发型师申请入驻门店结果的审核说明 */
+    private String  applyResult;
 
 
     /**
