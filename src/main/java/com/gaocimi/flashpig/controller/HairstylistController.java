@@ -49,6 +49,8 @@ public class HairstylistController {
     RecordHairstylisToUserService recordHairstylisToUserService;
     @Autowired
     UserService userService;
+    @Autowired
+    WxAppletCodeController wxAppletCodeController;
 
     @ApiOperation(value = "发型师注册")
     @PostMapping("/hairstylist/register")
@@ -98,6 +100,7 @@ public class HairstylistController {
 
 
             hairstylistService.save(hairstylist);
+            wxAppletCodeController.appletCodeGeneration(hairstylist.getOpenid(),null,null);//生成自己的小程序码
             logger.info("传入的数据：" + JSONObject.toJSON(request.getParameterMap()) + "\n");
             logger.info("发型师“" + hairstylist.getHairstylistName() + "”（id=" + hairstylist.getId() + "）注册成功！");
 

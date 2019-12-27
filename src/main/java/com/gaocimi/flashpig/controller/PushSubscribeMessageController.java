@@ -36,7 +36,7 @@ import java.util.Map;
 @ResponseResult
 @Api(value = "订阅消息的服务", description = "微信小程序获推送订阅消息给用户")
 public class PushSubscribeMessageController {
-    protected static final Logger logger = LoggerFactory.getLogger(WXLoginController.class);
+    protected static final Logger logger = LoggerFactory.getLogger(WxLoginController.class);
 
     @Autowired
     private WxMaService wxService;
@@ -78,7 +78,7 @@ public class PushSubscribeMessageController {
                 map.put("error", "推送失败：" + e.getMessage());
                 return map;
             }
-            logger.info("推送消息发送成功：", subscribeDataList);
+            logger.info("推送给用户"+order.user.getName()+"(id="+order.user.getId()+")的预约提醒消息发送成功："+ subscribeDataList);
             map.put("message", "推送预约提醒消息成功");
             return map;
         } catch (Exception e) {
@@ -151,7 +151,7 @@ public class PushSubscribeMessageController {
                 map.put("error", "推送失败：" + e.getMessage());
                 return map;
             }
-            logger.info("推送服务评价提醒消息发送成功：", subscribeDataList);
+            logger.info("推送给用户"+order.user.getName()+"(id="+order.user.getId()+")服务评价提醒消息发送成功："+ subscribeDataList);
             map.put("message", "推送服务评价提醒消息成功");
             return map;
         } catch (Exception e) {
@@ -234,7 +234,7 @@ public class PushSubscribeMessageController {
                 map.put("error", "推送失败：" + e.getMessage());
                 return map;
             }
-            logger.info("推送该发型师" + hairstylist.getHairstylistName() + "(id=" + hairstylistId + ")的审核结果消息发送成功：", subscribeDataList);
+            logger.info("推送该发型师" + hairstylist.getHairstylistName() + "(id=" + hairstylistId + ")的审核结果消息发送成功："+ subscribeDataList);
             map.put("message", "推送审核结果提醒消息成功");
             return map;
         } catch (Exception e) {
@@ -347,7 +347,7 @@ public class PushSubscribeMessageController {
                 map.put("error", "推送失败：" + e.getMessage());
                 return map;
             }
-            logger.info("推送该门店" + shop.getShopName() + "(id=" + shopId + ")的审核结果消息发送成功：", subscribeDataList);
+            logger.info("推送该门店" + shop.getShopName() + "(id=" + shopId + ")的审核结果消息发送成功："+subscribeDataList);
             map.put("message", "推送审核结果提醒消息成功");
             return map;
         } catch (Exception e) {

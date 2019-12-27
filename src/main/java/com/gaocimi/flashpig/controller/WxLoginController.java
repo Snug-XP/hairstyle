@@ -4,7 +4,6 @@ import cn.binarywang.wx.miniapp.api.WxMaService;
 import cn.binarywang.wx.miniapp.bean.WxMaJscode2SessionResult;
 import cn.binarywang.wx.miniapp.bean.WxMaPhoneNumberInfo;
 import cn.binarywang.wx.miniapp.bean.WxMaUserInfo;
-import com.gaocimi.flashpig.entity.Hairstylist;
 import com.gaocimi.flashpig.entity.User;
 import com.gaocimi.flashpig.result.ResponseResult;
 import com.gaocimi.flashpig.service.HairstylistService;
@@ -20,7 +19,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
 /**
  * @author xp
@@ -30,9 +28,9 @@ import java.util.UUID;
 @RestController
 @ResponseResult
 @Api(value = "微信用户登录服务", description = "微信小程序获取用户微信号信息进行登录")
-public class WXLoginController {
+public class WxLoginController {
 
-    protected static final Logger logger = LoggerFactory.getLogger(WXLoginController.class);
+    protected static final Logger logger = LoggerFactory.getLogger(WxLoginController.class);
 
     @Autowired
     UserService userService;

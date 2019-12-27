@@ -98,6 +98,8 @@ public class Hairstylist {
     private Date  applyTime;
     /** 发型师申请入驻门店结果的审核说明 */
     private String applyResultDescription;
+    /** 发型师用于推广的跳向自己主页的小程序码的地址 */
+    private String myAppletCodeUrl;
 
 
     /**

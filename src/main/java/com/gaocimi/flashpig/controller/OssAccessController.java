@@ -1,6 +1,7 @@
 package com.gaocimi.flashpig.controller;
 
 import com.aliyun.oss.OSSClient;
+import com.aliyun.oss.OSSException;
 import com.aliyun.oss.common.utils.BinaryUtil;
 import com.aliyun.oss.model.MatchMode;
 import com.aliyun.oss.model.PolicyConditions;
@@ -21,9 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -114,7 +113,7 @@ public class OssAccessController {
     //已经采用了前端从后端获取签名后，在前端直传的方式上传图片，这个方法就没用到了
     @ApiOperation(value = "上传文件")
     @PostMapping("/oss/saveObject")
-    public Map saveObject(MultipartFile file) {
+    public Map saveObject(File file , String fileName) {
         Map map = new HashMap();
 
         // 返回的文件访问路径
@@ -123,15 +122,15 @@ public class OssAccessController {
         try {
 
             //获取文件的原始名字
-            String originalfileName = file.getOriginalFilename();
+            String originalfileName = file.getName();
             // 按日期存储
             //String fileAddress = new Date().toString();
             //重新命名文件
             String suffix = originalfileName.substring(originalfileName.lastIndexOf(".") + 1);
-            String fileName = new java.util.Date().getTime() + "-img." + suffix;
+            fileName = fileName +"."+ suffix;
 
             // 获得文件流
-            InputStream inputStream = file.getInputStream();
+            InputStream inputStream = new FileInputStream(file);
 
             // 上传到OSS
             map.put("result", client.putObject(this.properties.getBucket(), this.properties.getDir() + fileName, inputStream));
@@ -142,6 +141,14 @@ public class OssAccessController {
 
         } catch (IOException e) {
             e.printStackTrace();
+            logger.info("上传文件“"+file.getName()+"”失败！");
+            map.put("error","上传文件“"+file.getName()+"”失败！");
+            return map;
+        }catch ( OSSException e){
+            logger.info("上传文件“"+file.getName()+"”失败！\n"+e.getMessage());
+            map.put("error","上传文件“"+file.getName()+"”失败！"+e.getMessage());
+            e.printStackTrace();
+            return map;
         }
 
         map.put("image_src", url);
