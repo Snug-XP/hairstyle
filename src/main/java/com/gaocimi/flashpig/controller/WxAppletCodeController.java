@@ -54,7 +54,7 @@ public class WxAppletCodeController {
             if (page == null)
                 page = "pages/contentDetail/contentDetail";
             File wxacode = wxService.getQrcodeService().createWxaCodeUnlimit(scene, page);
-            String pathAndName = "hairstylist/" + myOpenid + "/MyAppletCode/appletCode";
+            String pathAndName = "hairstylist/" + hairstylist.getId() + "/MyAppletCode/appletCode";
             map = ossController.saveObject(wxacode, pathAndName);
             if (map.get("image_src") != null) {
                 logger.info("生成发型师“"+hairstylist.getHairstylistName()+"”(id = " + hairstylist.getId() + ")的主页小程序码成功");

@@ -55,7 +55,7 @@ public class Hairstylist {
      * 该发型师所在门店； 定义名为shop_id的外键列，该外键引用shop表的主键(id)列,采用懒加载。
      * 只有当门店不为空且applyStatus为1时，才能说明该发型师入驻了该门店
      */
-    @ManyToOne(targetEntity = Shop.class, fetch = FetchType.LAZY)
+    @ManyToOne(targetEntity = Shop.class, fetch = FetchType.EAGER)
     @JoinColumn(name = "shop_id", nullable = false)
     public Shop shop;
 

@@ -179,6 +179,15 @@ public class MyUtils {
         return days;
     }
 
+    /**获取当前系统时间和下一个整点时间相差的秒数*/
+    public static Long getDifferenceNextHour() {
+        Calendar c = Calendar.getInstance();//加一个小时,设置对应的分和秒为0则得到了下一个整点的时间.
+        c.add(Calendar.HOUR, 1);
+        c.set(Calendar.MINUTE, 0);
+        c.set(Calendar.SECOND, 0);
+        Long diff = (c.getTime().getTime() - System.currentTimeMillis()) / 1000;
+        return diff;
+    }
 
     /**
      * 将列表分页，返回分页内容

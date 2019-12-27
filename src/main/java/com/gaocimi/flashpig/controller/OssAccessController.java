@@ -133,10 +133,10 @@ public class OssAccessController {
             InputStream inputStream = new FileInputStream(file);
 
             // 上传到OSS
-            map.put("result", client.putObject(this.properties.getBucket(), this.properties.getDir() + fileName, inputStream));
+            client.putObject(this.properties.getBucket(), this.properties.getDir() + fileName, inputStream);
 
             url += this.properties.getFileHost() + "/" + this.properties.getDir() + fileName;
-            System.out.println("下载url是:" + url);
+            System.out.println("OSS上传了一个文件，下载url是:" + url);
 
 
         } catch (IOException e) {

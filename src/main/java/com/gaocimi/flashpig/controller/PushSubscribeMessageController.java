@@ -65,7 +65,7 @@ public class PushSubscribeMessageController {
 
             //设置推送消息
             WxMaSubscribeMessage subscribeMessage = WxMaSubscribeMessage.builder()
-                    .toUser(order.user.getOpenid())//要推送的用户openid
+                    .toUser(order.getUser().getOpenid())//要推送的用户openid
                     .templateId("CQgQJU8GbYEaP3h6ImCde5YXsuTubF88mdaz89sUy2M")//推送的模版id（在小程序后台设置）
                     .data(subscribeDataList)//订阅消息
                     .page("pages/homepage/homepage")//要跳转到小程序那个页面
@@ -99,19 +99,21 @@ public class PushSubscribeMessageController {
     private List<WxMaSubscribeData> getComingSubscribeDataList(Integer orderId) {
 
         HaircutOrder order = haircutOrderService.findHaircutOrderById(orderId);
+        Hairstylist hairstylist = order.getHairstylist();
+        Shop shop = hairstylist.getShop();
         DateFormat df2 = DateFormat.getDateTimeInstance();
         String bookTimeString = df2.format(order.getBookTime());
 
 //        logger.info("获取到的预约时间："+bookTimeString);
         List<WxMaSubscribeData> subscribeDataList = new ArrayList<>();
         //设置订阅消息;
-        WxMaSubscribeData shop = new WxMaSubscribeData("thing8", order.getHairstylist().getShop().getShopName());
-        WxMaSubscribeData hairstylist = new WxMaSubscribeData("name5", order.getHairstylist().getHairstylistName());
+        WxMaSubscribeData shopName = new WxMaSubscribeData("thing8", shop.getShopName());
+        WxMaSubscribeData hairstylistName = new WxMaSubscribeData("name5", hairstylist.getHairstylistName());
         WxMaSubscribeData bookTime = new WxMaSubscribeData("time2", bookTimeString);
         WxMaSubscribeData service = new WxMaSubscribeData("thing7", order.getServiceName());
         WxMaSubscribeData tips = new WxMaSubscribeData("thing9", "亲，距离您的预约时间还有60分钟,请准备");
-        subscribeDataList.add(shop);
-        subscribeDataList.add(hairstylist);
+        subscribeDataList.add(shopName);
+        subscribeDataList.add(hairstylistName);
         subscribeDataList.add(bookTime);
         subscribeDataList.add(service);
         subscribeDataList.add(tips);

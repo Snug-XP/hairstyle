@@ -29,6 +29,10 @@ public class HaircutOrderServiceImpl implements HaircutOrderService {
     public List<HaircutOrder> getHaircutOrderList() {
         return haircutOrderRepository.findAll();
     }
+    @Override
+    public List<HaircutOrder> findAllByStatus(Integer status) {
+        return haircutOrderRepository.findAllByStatus(status);
+    }
 
     @Override
     public HaircutOrder findHaircutOrderById(int id) {
