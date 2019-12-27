@@ -264,8 +264,37 @@ public class ArticleController {
 
     @ApiOperation(value = "获取单个文章信息", produces = "application/json")
     @GetMapping("/article/getOne")
-    public Article getOne(@RequestParam Integer articleId) {
-        return articleService.findArticleById(articleId);
+    public Map getOne(@RequestParam String myOpenid,@RequestParam Integer articleId) {
+        Map map = new HashMap();
+        try {
+            User user = userService.findUserByOpenid(myOpenid);
+            Article article = articleService.findArticleById(articleId);
+            if (user == null) {
+                logger.info("（" + myOpenid + "）该用户不存在！");
+                map.put("error", "无效的用户！！");
+                return map;
+            }
+            if (article == null) {
+                logger.info("id为" + articleId + "的文章不存在！");
+                map.put("error", "该文章不存在！！");
+                return map;
+            }
+            if (userToArticleService.findByUserAndArticle(user.getId(), articleId) != null) {
+                map.put("isCollected", "yes");
+                map.put("article",article);
+                return map;
+            }else{
+                map.put("isCollected", "no");
+                map.put("article",article);
+                return map;
+            }
+
+        } catch (Exception e) {
+            logger.info("后端发生异常：\n");
+            map.put("error", "抱歉，后端发生异常!!");
+            e.printStackTrace();
+            return map;
+        }
     }
 
     @ApiOperation(value = "获取所有文章列表（分页展示）")
