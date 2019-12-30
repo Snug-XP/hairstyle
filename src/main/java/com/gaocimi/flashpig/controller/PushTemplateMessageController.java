@@ -8,11 +8,9 @@ import com.gaocimi.flashpig.service.UserFormidService;
 import com.gaocimi.flashpig.service.UserService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import io.swagger.models.auth.In;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -34,7 +32,7 @@ import me.chanjar.weixin.common.error.WxErrorException;
 @ResponseResult
 @Api(value = "模版消息的服务", description = "微信小程序获推送模版消息给用户")
 public class PushTemplateMessageController {
-    protected static final Logger logger = LoggerFactory.getLogger(WXLoginController.class);
+    protected static final Logger logger = LoggerFactory.getLogger(WxLoginController.class);
 
     @Autowired
     private WxMaService wxService;
@@ -49,7 +47,7 @@ public class PushTemplateMessageController {
 
 
     @ApiOperation(value = "根据订单id，推送模板消息-预约成功的通知（...之后记得关闭url访问）")
-    @PostMapping("/hairstylist/pushSuccessMessage")
+    @PostMapping("/hairstylist/pushSuccessTemplateMessage")
     public Map pushSuccessMessage(@RequestParam Integer orderId) {
 
         Map map = new HashMap();
@@ -88,7 +86,7 @@ public class PushTemplateMessageController {
 
 
     @ApiOperation(value = "根据订单id，推送模板消息-准备前往（...之后记得关闭url访问）")
-    @PostMapping("/hairstylist/pushComingMessage")
+    @PostMapping("/hairstylist/pushComingTemplateMessage")
     public Map pushComingMessage(@RequestParam Integer orderId , @RequestParam Integer remainingNum ) {
 
         Map map = new HashMap();
@@ -132,7 +130,7 @@ public class PushTemplateMessageController {
 
 
     @ApiOperation(value = "根据订单id，推送模板消息-订单已完成（...之后记得关闭url访问）")
-    @PostMapping("/hairstylist/pushCompletedMessage")
+    @PostMapping("/hairstylist/pushCompletedTemplateMessage")
     public Map pushCompletedMessage(@RequestParam Integer orderId) {
         Map map = new HashMap();
 

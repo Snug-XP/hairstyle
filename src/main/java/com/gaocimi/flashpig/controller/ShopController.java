@@ -39,6 +39,8 @@ public class ShopController {
     AdministratorService administratorService;
     @Autowired
     ShopImageUrlService shopImageUrlService;
+    @Autowired
+    PushSubscribeMessageController pushWxMsg;
 
     @ApiOperation(value = "门店登录")
     @PostMapping("/shop/login")
@@ -889,6 +891,7 @@ public class ShopController {
                     hairstylistService.edit(hairstylist);
                     logger.info("门店“" + shop.getShopName() + "”(id=" + shop.getId() + ")同意id为" + hairstylist.getId() + "的发型师“" + hairstylist.getHairstylistName() + "”的入驻申请");
                     map.put("message", "同意该发型师的入驻申请，操作成功");
+                    pushWxMsg.pushApplyResultMessage(hairstylistId);
                     break;
                 case -1:
                     if (hairstylist.getApplyStatus() == -1) {
@@ -901,6 +904,7 @@ public class ShopController {
                     logger.info("门店“" + shop.getShopName() + "”(id=" + shop.getId() + ")拒绝id为" + hairstylist.getId() + "的发型师“" + hairstylist.getHairstylistName() + "”的入驻申请");
                     map.put("message", "拒绝该发型师的入驻申请，操作成功");
                     //...有时间再加一下拒绝理由模版消息
+                    pushWxMsg.pushApplyResultMessage(hairstylistId);
                     break;
                 default:
                     logger.info("同意或拒绝该发型师的入驻申请的decide(=" + decide + ")的值错误！！");

@@ -49,6 +49,8 @@ public class HairstylistController {
     RecordHairstylisToUserService recordHairstylisToUserService;
     @Autowired
     UserService userService;
+    @Autowired
+    WxAppletCodeController wxAppletCodeController;
 
     @ApiOperation(value = "发型师注册")
     @PostMapping("/hairstylist/register")
@@ -98,6 +100,7 @@ public class HairstylistController {
 
 
             hairstylistService.save(hairstylist);
+            wxAppletCodeController.appletCodeGeneration(hairstylist.getOpenid(), null, null);//生成自己的小程序码
             logger.info("传入的数据：" + JSONObject.toJSON(request.getParameterMap()) + "\n");
             logger.info("发型师“" + hairstylist.getHairstylistName() + "”（id=" + hairstylist.getId() + "）注册成功！");
 
@@ -351,7 +354,7 @@ public class HairstylistController {
                 map.put("error", "未找到该发型师用户！！");
                 return map;
             }
-            map = getOneById(hairstylist.getId());
+            map.put("hairstylist", hairstylist);//总预约人数和今日预约人数已经在Hairstylist的get方法里面，会直接被当做属性放进去
             return map;
         } catch (Exception e) {
             logger.info("获取发型师信息失败！！（后端发生某些错误）");
@@ -363,13 +366,24 @@ public class HairstylistController {
 
     @ApiOperation(value = "根据发型师id(不是openid),获取单个发型师信息（包括总预约人数和今日预约人数）", produces = "application/json")
     @GetMapping("/getHairstylistById")
-    public Map getOneById(@RequestParam Integer hairstylistId) {
+    public Map getOneById(@RequestParam String myOpenid, @RequestParam Integer hairstylistId) {
         Map map = new HashMap();
         try {
             Hairstylist hairstylist = hairstylistService.findHairstylistById(hairstylistId);
+            User user = userService.findUserByOpenid(myOpenid);
+            if (hairstylist != null) {
 
-            map.put("hairstylist", hairstylist);//总预约人数和今日预约人数已经在Hairstylist的get方法里面，会直接被当做属性放进去
-            return map;
+                if (user.isLoyalToHairstylist(hairstylistId))
+                    map.put("isCollected", "yes");
+                else
+                    map.put("isCollected", "no");
+                map.put("hairstylist", hairstylist);//总预约人数和今日预约人数已经在Hairstylist的get方法里面，会直接被当做属性放进去
+                return map;
+            } else {
+                logger.info("查看的发型师(id=" + hairstylistId + ")不存在！");
+                map.put("error", "查看的发型师不存在!");
+                return map;
+            }
         } catch (Exception e) {
             logger.info("获取发型师信息失败！！（后端发生某些错误）");
             map.put("error", "获取发型师信息失败！！（后端发生某些错误）");
@@ -417,13 +431,13 @@ public class HairstylistController {
 
             if (hairstylist.getBusinessStatus() == 1) {
                 hairstylist.setBusinessStatus(0);
-                map.put("message","暂停营业");
+                map.put("message", "暂停营业");
             } else {
                 hairstylist.setBusinessStatus(1);
-                map.put("message","开始营业");
+                map.put("message", "开始营业");
             }
             hairstylistService.edit(hairstylist);
-            logger.info("发型师用户 " + hairstylist.getHairstylistName() + "（id=" + hairstylist.getId() + "）设置了自己的营业状态为:" + hairstylist.getBusinessStatus()+"(0表示暂停营业，1表示营业中)");
+            logger.info("发型师用户 " + hairstylist.getHairstylistName() + "（id=" + hairstylist.getId() + "）设置了自己的营业状态为:" + hairstylist.getBusinessStatus() + "(0表示暂停营业，1表示营业中)");
             return map;
 
         } catch (Exception e) {
@@ -474,7 +488,7 @@ public class HairstylistController {
     @ApiOperation(value = "发型师设置公告")
     @PostMapping("/hairstylist/setProclamation")
     public Map setProclamation(@RequestParam String myOpenid,
-                       @RequestParam(value = "proclamation") String proclamation) {
+                               @RequestParam(value = "proclamation") String proclamation) {
         Map map = new HashMap();
         try {
             Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
@@ -492,7 +506,7 @@ public class HairstylistController {
 
             hairstylist.setProclamation(proclamation);
             hairstylistService.edit(hairstylist);
-            logger.info("发型师用户 " + hairstylist.getHairstylistName() + "（id=" + hairstylist.getId() + "）设置了新的公告: " +  proclamation);
+            logger.info("发型师用户 " + hairstylist.getHairstylistName() + "（id=" + hairstylist.getId() + "）设置了新的公告: " + proclamation);
             map.put("message", "设置成功！");
             return map;
 
@@ -517,13 +531,13 @@ public class HairstylistController {
                 return map;
             }
 
-            if(hairstylist.getProclamation()==null){
-                map.put("error","你还没有正在发布的公告！");
+            if (hairstylist.getProclamation() == null) {
+                map.put("error", "你还没有正在发布的公告！");
                 return map;
             }
             hairstylist.setProclamation(null);
             hairstylistService.edit(hairstylist);
-            logger.info("发型师用户 " + hairstylist.getHairstylistName() + "（id=" + hairstylist.getId() + "）删除了 原公告:"+hairstylist.getProclamation());
+            logger.info("发型师用户 " + hairstylist.getHairstylistName() + "（id=" + hairstylist.getId() + "）删除了 原公告:" + hairstylist.getProclamation());
             map.put("message", "删除成功！");
             return map;
 
@@ -535,7 +549,6 @@ public class HairstylistController {
             return map;
         }
     }
-
 
 
     @ApiOperation(value = "根据发型师id，获取发型师的可预约时间")

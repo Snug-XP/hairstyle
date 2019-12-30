@@ -18,7 +18,7 @@ import java.util.*;
  */
 @Entity
 @Table(name = "hairstylist")
-@JsonIgnoreProperties(value = {"openid","shop", "articleList", "getCurrentMonthOrderSum", "allOperationalData", "loyalUserRecordList", "haircutOrderList", "hairstylistImageUrlList", "hairServiceList", "recordToUserList", "userList", "handler", "hibernateLazyInitializer", "fieldHandler"})
+@JsonIgnoreProperties(value = {"applyTime","applyResultDescription","openid","shop", "articleList", "getCurrentMonthOrderSum", "allOperationalData", "loyalUserRecordList", "haircutOrderList", "hairstylistImageUrlList", "hairServiceList", "recordToUserList", "userList", "handler", "hibernateLazyInitializer", "fieldHandler"})
 @Data
 public class Hairstylist {
 
@@ -55,7 +55,7 @@ public class Hairstylist {
      * 该发型师所在门店； 定义名为shop_id的外键列，该外键引用shop表的主键(id)列,采用懒加载。
      * 只有当门店不为空且applyStatus为1时，才能说明该发型师入驻了该门店
      */
-    @ManyToOne(targetEntity = Shop.class, fetch = FetchType.LAZY)
+    @ManyToOne(targetEntity = Shop.class, fetch = FetchType.EAGER)
     @JoinColumn(name = "shop_id", nullable = false)
     public Shop shop;
 
@@ -94,6 +94,12 @@ public class Hairstylist {
 
     /** 公告 */
     private String  proclamation;
+    /** 发型师提交入驻门店申请的时间 */
+    private Date  applyTime;
+    /** 发型师申请入驻门店结果的审核说明 */
+    private String applyResultDescription;
+    /** 发型师用于推广的跳向自己主页的小程序码的地址 */
+    private String myAppletCodeUrl;
 
 
     /**

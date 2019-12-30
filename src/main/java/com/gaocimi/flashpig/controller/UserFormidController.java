@@ -28,7 +28,7 @@ import java.util.*;
 @ResponseResult
 @Api(value = "用户的formid的相关操作", description = "对用户的formid的相关操作")
 public class UserFormidController {
-    protected static final Logger logger = LoggerFactory.getLogger(WXLoginController.class);
+    protected static final Logger logger = LoggerFactory.getLogger(WxLoginController.class);
 
     @Autowired
     private HaircutOrderService haircutOrderService;

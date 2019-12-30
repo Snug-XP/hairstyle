@@ -31,12 +31,12 @@ public class HaircutOrder {
     private String userName;
 
     /**提交该订单的用户； 定义名为user_id的外键列，该外键引用user表的主键(id)列,采用懒加载*/
-    @ManyToOne(targetEntity = User.class, fetch = FetchType.LAZY)
+    @ManyToOne(targetEntity = User.class, fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id", nullable = false)
     public User user;
 
-    /**该订单对应的发型师； 定义名为hairstylist_id的外键列，该外键引用hairstylist表的主键(id)列,采用懒加载*/
-    @ManyToOne(targetEntity = Hairstylist.class, fetch = FetchType.LAZY)
+    /**该订单对应的发型师； 定义名为hairstylist_id的外键列，该外键引用hairstylist表的主键(id)列,采用急加载*/
+    @ManyToOne(targetEntity = Hairstylist.class, fetch = FetchType.EAGER)
     @JoinColumn(name = "hairstylist_id", nullable = false)
     public Hairstylist hairstylist;
 

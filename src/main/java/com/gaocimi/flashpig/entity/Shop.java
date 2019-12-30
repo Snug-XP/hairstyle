@@ -14,7 +14,7 @@ import java.util.*;
  */
 @Entity
 @Table(name = "shop")
-@JsonIgnoreProperties(value = {"openid", "password", "hairstylistsByStatus", "hairstylists", "handler", "hibernateLazyInitializer", "fieldHandler"})
+@JsonIgnoreProperties(value = {"applyTime","applyResultDescription","openid", "password", "hairstylistsByStatus", "hairstylists", "handler", "hibernateLazyInitializer", "fieldHandler"})
 @Data
 public class Shop {
 
@@ -99,9 +99,16 @@ public class Shop {
     private Double point;
 
     /**
-     * 门店申请状态（0表示申请中，1表示申请通过, -1表示申请失败）
+     * 门店申请营业认定的状态（0表示申请中，1表示申请通过, -1表示申请失败）
      */
     private Integer applyStatus;
+    /** 门店提交营业认定申请的时间 */
+    private Date  applyTime;
+    /** 门店申请营业认定结果的审核说明 */
+    private String applyResultDescription;
+
+
+
 
     /**
      * 门店拥有的订单列表； 定义该Shop实体所有关联的Hairstylist实体； 指定mappedBy属性表明该Shop实体不控制关联关系
