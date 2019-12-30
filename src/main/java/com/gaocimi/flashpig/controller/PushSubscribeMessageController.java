@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -101,8 +102,8 @@ public class PushSubscribeMessageController {
         HaircutOrder order = haircutOrderService.findHaircutOrderById(orderId);
         Hairstylist hairstylist = order.getHairstylist();
         Shop shop = hairstylist.getShop();
-        DateFormat df2 = DateFormat.getDateTimeInstance();
-        String bookTimeString = df2.format(order.getBookTime());
+        SimpleDateFormat df =new SimpleDateFormat("yyyy年MM月dd日 HH:mm:ss");
+        String bookTimeString = df.format(order.getBookTime());
 
 //        logger.info("获取到的预约时间："+bookTimeString);
         List<WxMaSubscribeData> subscribeDataList = new ArrayList<>();
@@ -174,8 +175,8 @@ public class PushSubscribeMessageController {
     private List<WxMaSubscribeData> getEvaluationSubscribeDataList(Integer orderId) {
 
         HaircutOrder order = haircutOrderService.findHaircutOrderById(orderId);
-        DateFormat df2 = DateFormat.getDateTimeInstance();
-        String bookTimeString = df2.format(order.getBookTime());
+//        SimpleDateFormat df =new SimpleDateFormat("yyyy年MM月dd日 HH:mm:ss");
+//        String bookTimeString = df.format(order.getBookTime());
 
 //        logger.info("获取到的预约时间："+bookTimeString);
         List<WxMaSubscribeData> subscribeDataList = new ArrayList<>();
