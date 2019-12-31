@@ -53,7 +53,7 @@ public class Article {
 
 
     /**
-     * 发表该文章的发型师； 定义名为create_by的外键列，该外键引用hairstylist表的主键(openid)列,采用懒加载
+     * 发表该文章的发型师； 定义名为hairstylist_id的外键列，该外键引用hairstylist表的主键(id)列,采用懒加载
      */
     @ManyToOne(targetEntity = Hairstylist.class, fetch = FetchType.LAZY)
     @JoinColumn(name = "hairstylist_id",nullable = false)
