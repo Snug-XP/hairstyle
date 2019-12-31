@@ -1246,7 +1246,6 @@ public class HairstylistController {
             Double radius = 0.01;
             List<Shop> shopList = shopService.getShopsByRadius(longitude, latitude, radius);
             List<Hairstylist> tempHairstylists = new ArrayList<>();
-            List<UserToHairstylist> resultList = new ArrayList<>();
 
             if (shopList == null || shopList.size() == 0) {
                 logger.info("附近没有门店~（经度：" + longitude + "  维度：" + latitude + "  ）");
@@ -1265,6 +1264,70 @@ public class HairstylistController {
 
             map.put("hairstylist", hairstylistInfo);
             map.put("distance", MyUtils.getDistance(latitude, longitude, hairstylist.shop.getLatitude(), hairstylist.shop.getLongitude()));
+            return map;
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            logger.info("获取附近发型师失败列表失败！！（后端发生某些错误）");
+            map.put("error", "获取附近发型师失败！！（后端发生某些错误）");
+            e.printStackTrace();
+            return map;
+        }
+    }
+
+
+    @ApiOperation(value = "根据经纬度获取周围的发型师", notes = "从附近门店（经纬度相差0.01即约附近1公里左右）中获取发型师列表(按照flag排序：flag=0表示按照发型师的评分降序排序，flag=1表示按发型师已完成订单总数降序排序)")
+    @GetMapping("/user/getLocalHairstylists")
+    public Map getLocalHairstylists(@RequestParam Double longitude,
+                                    @RequestParam Double latitude,@RequestParam Integer flag,
+                                    @RequestParam(name = "pageNum", defaultValue = "0") int pageNum,
+                                    @RequestParam(name = "pageSize", defaultValue = "10") int pageSize) {
+        Map map = new HashMap();
+        try {
+
+            Double radius = 0.01;
+            List<Shop> shopList = shopService.getShopsByRadius(longitude, latitude, radius);
+            List<HairstylistInfo> resultList = new ArrayList<>();
+
+            if (shopList == null || shopList.size() == 0) {
+                logger.info("附近没有门店~（经度：" + longitude + "  维度：" + latitude + "  ）");
+                map.put("message", "附近没有门店~");
+                return map;
+            }
+
+            for (Shop shop : shopList) {
+                for (Hairstylist hairstylist : shop.getHairstylistsByStatus(1))
+                    resultList.add(new HairstylistInfo(hairstylist));
+            }
+
+            switch (flag){
+                case 1:
+                    // 按已完成订单总数倒序排序
+                    Collections.sort(resultList, (r1, r2) -> {
+                        if (r1.getOrderSum() > r2.getOrderSum()) {
+                            return -1;
+                        } else if (r2.getOrderSum() < r1.getOrderSum()) {
+                            return 1;
+                        }
+                        return 0; //相等为0
+                    });break;
+                case 0:
+                    // 按评分倒序排序
+                    Collections.sort(resultList, (r1, r2) -> {
+                        if (r1.getPoint() > r2.getPoint()) {
+                            return -1;
+                        } else if (r2.getPoint() < r1.getPoint()) {
+                            return 1;
+                        }
+                        return 0; //相等为0
+                    });break;
+                default:
+                    map.put("error","flag标记错误："+flag);
+                    return map;
+            }
+
+            Page<HairstylistInfo> page = MyUtils.getPage(resultList, pageNum, pageSize);
+
+            map.put("page", page);
             return map;
         } catch (Exception e) {
             logger.error(e.getMessage());
