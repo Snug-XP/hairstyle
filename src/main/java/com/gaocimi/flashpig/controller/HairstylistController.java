@@ -1265,7 +1265,7 @@ public class HairstylistController {
             int index = (int) (Math.random() * (tempHairstylists.size()));
             Hairstylist hairstylist = tempHairstylists.get(index);
             HairstylistInfo hairstylistInfo = new HairstylistInfo(tempHairstylists.get(index));
-            System.out.println("tempHairstylists.size()="+tempHairstylists.size()+",index = "+index);
+//            System.out.println("tempHairstylists.size()="+tempHairstylists.size()+",index = "+index);
 
             map.put("hairstylist", hairstylistInfo);
             map.put("distance", MyUtils.getDistance(latitude, longitude, hairstylist.shop.getLatitude(), hairstylist.shop.getLongitude()));
