@@ -143,10 +143,10 @@ public class HairstylistController {
                     Hairstylist h = hairstylistService.findHairstylistByPhone(personalPhone);
                     if (h != null) {
 
-                        if (h.getPersonalPhone().equals(personalPhone)) {
+                        if (h.getOpenid().equals(myOpenid)) {
                             map.put("message", "电话号码未修改");
                         } else {
-                            logger.info("“" + hairstylist.getHairstylistName() + "”个人电话重复！！(发型师修改个人信息)");
+                            logger.info("“" + hairstylist.getHairstylistName() + "”(id=" + hairstylist.getId() + ")修改个人电话与" + h.getHairstylistName() + "(id=" + h.getId() + ")重复！！(发型师修改个人信息)");
                             map.put("error", "该电话已绑定发型师！！");
                             return map;
                         }
@@ -168,7 +168,11 @@ public class HairstylistController {
 
                 logger.info("发型师用户 " + hairstylist.getHairstylistName() + "（" + myOpenid + "）重新修改了基本信息");
                 logger.info("传入的数据：" + JSONObject.toJSON(request.getParameterMap()) + "\n");
-                map.put("message", "信息修改成功！");
+                if (map.get("message") != null)
+                    map.put("message", "信息修改成功！(" + map.get("message") + ")");
+                else
+                    map.put("message", "信息修改成功！");
+
                 return map;
             } else {
                 logger.info("发型师信息修改失败！！（没有权限！！）");
@@ -1254,7 +1258,7 @@ public class HairstylistController {
             }
 
             for (Shop shop : shopList) {
-                tempHairstylists.addAll(shop.getHairstylistsByStatusAndBusinessStatus(1,1));
+                tempHairstylists.addAll(shop.getHairstylistsByStatusAndBusinessStatus(1, 1));
             }
 
             if (tempHairstylists == null || tempHairstylists.size() == 0) {
@@ -1283,7 +1287,7 @@ public class HairstylistController {
     @ApiOperation(value = "根据经纬度获取周围的发型师", notes = "从附近门店（经纬度相差0.01即约附近1公里左右）中获取发型师列表(按照flag排序：flag=0表示按照发型师的评分降序排序，flag=1表示按发型师已完成订单总数降序排序)")
     @GetMapping("/user/getLocalHairstylists")
     public Map getLocalHairstylists(@RequestParam Double longitude,
-                                    @RequestParam Double latitude,@RequestParam Integer flag,
+                                    @RequestParam Double latitude, @RequestParam Integer flag,
                                     @RequestParam(name = "pageNum", defaultValue = "0") int pageNum,
                                     @RequestParam(name = "pageSize", defaultValue = "10") int pageSize) {
         Map map = new HashMap();
@@ -1300,7 +1304,7 @@ public class HairstylistController {
             }
 
             for (Shop shop : shopList) {
-                for (Hairstylist hairstylist : shop.getHairstylistsByStatusAndBusinessStatus(1,1))
+                for (Hairstylist hairstylist : shop.getHairstylistsByStatusAndBusinessStatus(1, 1))
                     resultList.add(new HairstylistInfo(hairstylist));
             }
             if (resultList == null || resultList.size() == 0) {
@@ -1309,7 +1313,7 @@ public class HairstylistController {
                 return map;
             }
 
-            switch (flag){
+            switch (flag) {
                 case 1:
                     // 按已完成订单总数倒序排序
                     Collections.sort(resultList, (r1, r2) -> {
@@ -1319,7 +1323,8 @@ public class HairstylistController {
                             return 1;
                         }
                         return 0; //相等为0
-                    });break;
+                    });
+                    break;
                 case 0:
                     // 按评分倒序排序
                     Collections.sort(resultList, (r1, r2) -> {
@@ -1329,9 +1334,10 @@ public class HairstylistController {
                             return 1;
                         }
                         return 0; //相等为0
-                    });break;
+                    });
+                    break;
                 default:
-                    map.put("error","flag标记错误："+flag);
+                    map.put("error", "flag标记错误：" + flag);
                     return map;
             }
 
