@@ -38,6 +38,56 @@ public class UserController {
 
 
 
+    @ApiOperation(value = "普通用户设置自己的姓氏和性别")
+    @PostMapping("/user/setLastNameAndSex")
+    public Map setLastNameAndSex(@RequestParam String myOpenid,@RequestParam String lastName ,@RequestParam Integer sex){
+        Map map = new HashMap();
+        try {
+            User user = userService.findUserByOpenid(myOpenid);
+            if(user==null){
+                logger.info("openid为"+myOpenid+"的普通用户不存在！");
+                map.put("error", "无效的用户！！");
+                return map;
+            }
+            user.setLastName(lastName);
+            user.setSex(sex);
+            userService.edit(user);
+            logger.info("用户“"+user.getName()+"”（id="+user.getId()+"）设置了自己的姓氏和性别（lastName="+lastName+",sex="+sex+")");
+            map.put("message", "设置成功！");
+            return map;
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            logger.info("获取自己收藏的发型师列表失败！！（后端发生某些错误）");
+            map.put("error", "获取收藏的发型师失败！！（后端发生某些错误）");
+            e.printStackTrace();
+            return map;
+        }
+    }
+
+
+    @ApiOperation(value = "普通用户获取自己的姓氏")
+    @GetMapping("/user/getLastName")
+    public Map getLastName(@RequestParam String myOpenid){
+        Map map = new HashMap();
+        try {
+            User user = userService.findUserByOpenid(myOpenid);
+            if(user==null){
+                logger.info("openid为"+myOpenid+"的普通用户不存在！");
+                map.put("error", "无效的用户！！");
+                return map;
+            }
+            map.put("lastName", user.getLastName());
+            return map;
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            logger.info("获取自己收藏的发型师列表失败！！（后端发生某些错误）");
+            map.put("error", "获取收藏的发型师失败！！（后端发生某些错误）");
+            e.printStackTrace();
+            return map;
+        }
+    }
+
+
     @ApiOperation(value = "普通用户分页获取自己收藏的发型师列表")
     @GetMapping("/user/getMyHairstylists")
     public Map getMyCollectionByPage(@RequestParam String myOpenid,
@@ -118,7 +168,7 @@ public class UserController {
             }
             UserToHairstylist userToHairstylist = new UserToHairstylist(user,hairstylist);
             userToHairstylistService.save(userToHairstylist);
-            logger.info("id为"+user.getId()+"的用户“"+user.getName()+"”收藏了id为"+hairstylist.getId()+"的发型师“"+hairstylist.getHairstylistName()+"”");
+            logger.info("用户“"+user.getName()+"”（id="+user.getId()+"）收藏了id为"+hairstylist.getId()+"的发型师“"+hairstylist.getHairstylistName()+"”");
             map.put("message","收藏成功！");
 
         }catch (Exception e){

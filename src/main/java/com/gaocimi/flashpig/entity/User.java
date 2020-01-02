@@ -26,6 +26,9 @@ public class User {
     /** 用户姓名*/
     private String name;
 
+    /** 用户姓名*/
+    private String lastName;
+
     /**用户头像url*/
     private String pictureUrl;
 
