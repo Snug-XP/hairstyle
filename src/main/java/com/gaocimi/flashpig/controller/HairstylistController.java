@@ -1257,10 +1257,15 @@ public class HairstylistController {
                 tempHairstylists.addAll(shop.getHairstylistsByStatus(1));
             }
 
+            if (tempHairstylists == null || tempHairstylists.size() == 0) {
+                logger.info("附近没有可预约发型师~（经度：" + longitude + "  维度：" + latitude + "  ）");
+                map.put("message", "附近没有可预约发型师~");
+                return map;
+            }
             int index = (int) (Math.random() * (tempHairstylists.size()));
             Hairstylist hairstylist = tempHairstylists.get(index);
             HairstylistInfo hairstylistInfo = new HairstylistInfo(tempHairstylists.get(index));
-//            System.out.println("tempHairstylists.size()="+tempHairstylists.size()+",index = "+index);
+            System.out.println("tempHairstylists.size()="+tempHairstylists.size()+",index = "+index);
 
             map.put("hairstylist", hairstylistInfo);
             map.put("distance", MyUtils.getDistance(latitude, longitude, hairstylist.shop.getLatitude(), hairstylist.shop.getLongitude()));
