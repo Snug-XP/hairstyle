@@ -49,6 +49,12 @@ public class UserController {
                 map.put("error", "无效的用户！！");
                 return map;
             }
+
+            if(sex!=1&&sex!=2){
+                logger.info("性别标志错误，传入的sex="+sex);
+                map.put("error","性别标志错误(仅允许1或2)");
+                return map;
+            }
             user.setLastName(lastName);
             user.setSex(sex);
             userService.edit(user);
@@ -57,8 +63,8 @@ public class UserController {
             return map;
         } catch (Exception e) {
             logger.error(e.getMessage());
-            logger.info("获取自己收藏的发型师列表失败！！（后端发生某些错误）");
-            map.put("error", "获取收藏的发型师失败！！（后端发生某些错误）");
+            logger.info("设置自己的姓氏和性别失败！！（后端发生某些错误）");
+            map.put("error", "设置自己的姓氏和性别失败！！（后端发生某些错误）");
             e.printStackTrace();
             return map;
         }
@@ -80,8 +86,8 @@ public class UserController {
             return map;
         } catch (Exception e) {
             logger.error(e.getMessage());
-            logger.info("获取自己收藏的发型师列表失败！！（后端发生某些错误）");
-            map.put("error", "获取收藏的发型师失败！！（后端发生某些错误）");
+            logger.info("获取自己的姓氏失败！！（后端发生某些错误）");
+            map.put("error", "获取自己的姓氏失败！！（后端发生某些错误）");
             e.printStackTrace();
             return map;
         }
@@ -144,9 +150,9 @@ public class UserController {
         }
     }
 
-    @ApiOperation(value = "收藏该发型师")
-    @PostMapping("/user/addHairstylistToCollection")
-    public Map addToCollection( @RequestParam String myOpenid,@RequestParam Integer hairstylistId){
+    @ApiOperation(value = "收藏或取消收藏该发型师（转换用户对发型师的收藏关系）")
+    @PostMapping("/user/addOrRemoveHairstylistToCollection")
+    public Map addOrRemoveHairstylistToCollection( @RequestParam String myOpenid,@RequestParam Integer hairstylistId){
         Map map = new HashMap();
         try{
             User user = userService.findUserByOpenid(myOpenid);
@@ -161,12 +167,14 @@ public class UserController {
                 map.put("error","该发型师不存在！！");
                 return map;
             }
-            if(userToHairstylistService.findByUserAndHairstylist(user.getId(),hairstylistId)!=null){
-                logger.info("该用户已收藏该发型师，不需要重复收藏");
-                map.put("message","已收藏该发型师!!");
+            UserToHairstylist userToHairstylist = userToHairstylistService.findByUserAndHairstylist(user.getId(),hairstylistId);
+            if(userToHairstylist !=null){
+                userToHairstylistService.delete(userToHairstylist.getId());
+                logger.info("用户“"+user.getName()+"”（id="+user.getId()+"）取消收藏了id为"+hairstylist.getId()+"的发型师“"+hairstylist.getHairstylistName()+"”");
+                map.put("message","取消收藏成功！");
                 return map;
             }
-            UserToHairstylist userToHairstylist = new UserToHairstylist(user,hairstylist);
+            userToHairstylist = new UserToHairstylist(user,hairstylist);
             userToHairstylistService.save(userToHairstylist);
             logger.info("用户“"+user.getName()+"”（id="+user.getId()+"）收藏了id为"+hairstylist.getId()+"的发型师“"+hairstylist.getHairstylistName()+"”");
             map.put("message","收藏成功！");

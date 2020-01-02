@@ -306,9 +306,9 @@ public class ArticleController {
         return page;
     }
 
-    @ApiOperation(value = "收藏该文章")
-    @PostMapping("/article/addToCollection")
-    public Map addToCollection(@RequestParam String myOpenid, @RequestParam Integer articleId) {
+    @ApiOperation(value = "收藏或取消收藏该发型文章（转换用户对发型文章的收藏关系）")
+    @PostMapping("/article/addOrRemoveCollection")
+    public Map addOrRemoveCollection(@RequestParam String myOpenid, @RequestParam Integer articleId) {
         Map map = new HashMap();
         try {
             User user = userService.findUserByOpenid(myOpenid);
@@ -323,12 +323,14 @@ public class ArticleController {
                 map.put("error", "该文章不存在！！");
                 return map;
             }
-            if (userToArticleService.findByUserAndArticle(user.getId(), articleId) != null) {
-                logger.info("该用户已收藏该文章，不需要重复收藏");
-                map.put("message", "已收藏该文章!!");
+            UserToArticle userToArticle = userToArticleService.findByUserAndArticle(user.getId(), articleId);
+            if ( userToArticle != null) {
+                userToArticleService.delete(userToArticle.getId());
+                logger.info("id为" + user.getId() + "的用户“"+user.getName()+"”取消收藏了id为" + article.getId() + "的文章（title：" + article.getTitle() + "）");
+                map.put("message", "取消收藏成功！");
                 return map;
             }
-            UserToArticle userToArticle = new UserToArticle(user, article);
+            userToArticle = new UserToArticle(user, article);
             userToArticleService.save(userToArticle);
             logger.info("id为" + user.getId() + "的用户“"+user.getName()+"”收藏了id为" + article.getId() + "的文章（title：" + article.getTitle() + "）");
             map.put("message", "收藏成功！");
