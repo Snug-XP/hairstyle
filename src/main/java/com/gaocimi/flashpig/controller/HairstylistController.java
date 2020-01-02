@@ -1254,7 +1254,7 @@ public class HairstylistController {
             }
 
             for (Shop shop : shopList) {
-                tempHairstylists.addAll(shop.getHairstylistsByStatus(1));
+                tempHairstylists.addAll(shop.getHairstylistsByStatusAndBusinessStatus(1,1));
             }
 
             if (tempHairstylists == null || tempHairstylists.size() == 0) {
@@ -1300,8 +1300,13 @@ public class HairstylistController {
             }
 
             for (Shop shop : shopList) {
-                for (Hairstylist hairstylist : shop.getHairstylistsByStatus(1))
+                for (Hairstylist hairstylist : shop.getHairstylistsByStatusAndBusinessStatus(1,1))
                     resultList.add(new HairstylistInfo(hairstylist));
+            }
+            if (resultList == null || resultList.size() == 0) {
+                logger.info("附近没有可预约发型师~（经度：" + longitude + "  维度：" + latitude + "  ）");
+                map.put("message", "附近没有可预约发型师~");
+                return map;
             }
 
             switch (flag){

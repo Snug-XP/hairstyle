@@ -14,7 +14,7 @@ import java.util.*;
  */
 @Entity
 @Table(name = "shop")
-@JsonIgnoreProperties(value = {"applyTime","applyResultDescription","openid", "password", "hairstylistsByStatus", "hairstylists", "handler", "hibernateLazyInitializer", "fieldHandler"})
+@JsonIgnoreProperties(value = {"applyTime", "applyResultDescription", "openid", "password", "hairstylistsByStatus", "hairstylists", "handler", "hibernateLazyInitializer", "fieldHandler"})
 @Data
 public class Shop {
 
@@ -102,12 +102,14 @@ public class Shop {
      * 门店申请营业认定的状态（0表示申请中，1表示申请通过, -1表示申请失败）
      */
     private Integer applyStatus;
-    /** 门店提交营业认定申请的时间 */
-    private Date  applyTime;
-    /** 门店申请营业认定结果的审核说明 */
+    /**
+     * 门店提交营业认定申请的时间
+     */
+    private Date applyTime;
+    /**
+     * 门店申请营业认定结果的审核说明
+     */
     private String applyResultDescription;
-
-
 
 
     /**
@@ -185,6 +187,7 @@ public class Shop {
 
         return todayOrderCount;
     }
+
     public List<Hairstylist> getHairstylists() {
         return getHairstylistsByStatus(1);
     }
@@ -193,6 +196,16 @@ public class Shop {
         List<Hairstylist> resultList = new ArrayList<>();
         for (Hairstylist h : this.hairstylists) {
             if (h.getApplyStatus() == status) {
+                resultList.add(h);
+            }
+        }
+        return resultList;
+    }
+
+    public List<Hairstylist> getHairstylistsByStatusAndBusinessStatus(int status, int businessStatus) {
+        List<Hairstylist> resultList = new ArrayList<>();
+        for (Hairstylist h : this.hairstylists) {
+            if (h.getApplyStatus() == status && h.getBusinessStatus() == businessStatus) {
                 resultList.add(h);
             }
         }
