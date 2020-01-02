@@ -1,6 +1,7 @@
 package com.gaocimi.flashpig.controller;
 
 import cn.binarywang.wx.miniapp.api.WxMaService;
+import cn.binarywang.wx.miniapp.bean.WxMaCodeLineColor;
 import com.gaocimi.flashpig.entity.Hairstylist;
 import com.gaocimi.flashpig.result.ResponseResult;
 import com.gaocimi.flashpig.service.HairstylistService;
@@ -53,7 +54,8 @@ public class WxAppletCodeController {
                 scene = "" + myOpenid;
             if (page == null)
                 page = "pages/contentDetail/contentDetail";
-            File wxacode = wxService.getQrcodeService().createWxaCodeUnlimit(scene, page);
+            WxMaCodeLineColor wxMaCodeLineColor = new WxMaCodeLineColor("0","0","0");
+            File wxacode = wxService.getQrcodeService().createWxaCodeUnlimit(scene, page ,1,false,wxMaCodeLineColor,false);
             String pathAndName = "hairstylist/" + hairstylist.getId() + "/MyAppletCode/appletCode";
             map = ossController.saveObject(wxacode, pathAndName);
             if (map.get("image_src") != null) {
