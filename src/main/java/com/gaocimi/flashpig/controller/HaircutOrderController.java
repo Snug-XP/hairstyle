@@ -580,12 +580,12 @@ public class HaircutOrderController {
             Calendar calendar = Calendar.getInstance();
             calendar.setTime(date);
             //...设计订单的预约号(预约的年月日+0+发型师id+0+服务项目id+0+用户id)
-            String reservationNum = calendar.get(Calendar.YEAR) + "" + calendar.get(Calendar.MONTH) + "" + calendar.get(Calendar.DAY_OF_MONTH) + "0" + hairstylist.getId() + "0" + serviceId + "0" + user.getId();
+            String reservationNum = calendar.get(Calendar.YEAR) + "" + calendar.get(Calendar.MONTH) + "" + calendar.get(Calendar.DAY_OF_MONTH) + "0" + hairstylist.getId() + "0" + user.getId() + "0" + user.getSex();
             order.setReservationNum(reservationNum);
 
             if (haircutOrderService.findByReservationNum(reservationNum) != null) {
-                logger.info("该用户当天已有相同的预约，不可重复预约");
-                map.put("error", "当天已有相同的预约，不可重复预约！");
+                logger.info("该用户当天已有同一发型师的预约，为避免刷单，禁止重复预约！");
+                map.put("error", "当天已有同一发型师的预约，不可重复预约！");
                 return map;
             }
 
