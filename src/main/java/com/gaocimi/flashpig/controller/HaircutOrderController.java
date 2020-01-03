@@ -701,7 +701,8 @@ public class HaircutOrderController {
 
     @ApiOperation(value = "普通用户给该订单的发型师评分")
     @PostMapping("/user/order/rate")
-    public Map rateThisOrder(@RequestParam String myOpenid, @RequestParam Integer orderId, @RequestParam Double point) {
+    public Map rateThisOrder(@RequestParam String myOpenid, @RequestParam Integer orderId, @RequestParam Double point,
+                             @RequestParam(value = "comment",required = false) String comment) {
         Map map = new HashMap();
         try {
 
@@ -736,6 +737,7 @@ public class HaircutOrderController {
 
             //进行评分
             order.setPoint(point);
+            order.setComment(comment);
             haircutOrderService.edit(order);
 
             Hairstylist hairstylist = order.getHairstylist();

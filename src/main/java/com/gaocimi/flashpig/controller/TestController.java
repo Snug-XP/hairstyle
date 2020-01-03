@@ -18,10 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 
 @RestController
@@ -69,6 +66,17 @@ public class TestController {
     public Date getHaircutOrdersPage(String time) throws ParseException {
         Date date = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(time);
         return date;
+    }
+
+    @ApiOperation(value = "****************获取时间的小时数*************************")
+    @GetMapping("/getDataHour")
+    public Map getDataHour() throws ParseException {
+        Map map = new HashMap();
+        Date date = new Date(System.currentTimeMillis());
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        map.put("当前小时数",calendar.get(Calendar.HOUR_OF_DAY));
+        return map;
     }
 
     @ApiOperation(value = "对象比较测试", produces = "application/json")

@@ -108,7 +108,7 @@ public class HairstylistController {
             return map;
         } catch (Exception e) {
             e.printStackTrace();
-            logger.info("传入的数据：" + JSONObject.toJSON(request.getParameterMap()) + "\n");
+            logger.info("发型师提交申请失败！！传入的数据：" + JSONObject.toJSON(request.getParameterMap()) + "\n");
             map.put("error", "发型师提交申请失败！请检查输入数据（也有可能后端发生错误）");
             return map;
         }

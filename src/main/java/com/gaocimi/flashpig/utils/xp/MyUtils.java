@@ -14,6 +14,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -260,6 +261,103 @@ public class MyUtils {
         s = Math.round(s * 10000d) / 10000d;
         s = s * 1000;
         return s;
+    }
+
+
+    /**
+     * 获取时间字符串
+     */
+    public static String getTimeString(Date date) {
+        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.S");//精确到毫秒
+//        SimpleDateFormat df =new SimpleDateFormat("yyyy年MM月dd日 HH:mm:ss");
+
+        return df.format(date);
+    }
+
+    /**
+     * 获取日期年份
+     * @param date 日期
+     * @return
+     */
+    public static String getYear(Date date) {
+        return getTimeString(date).substring(0, 4);
+    }
+    /**
+     * 功能描述：返回月
+     *
+     * @param date
+     *            Date 日期
+     * @return 返回月份
+     */
+    public static int getMonth(Date date) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        return calendar.get(Calendar.MONTH) + 1;
+    }
+
+    /**
+     * 功能描述：返回日期
+     *
+     * @param date
+     *            Date 日期
+     * @return 返回日份
+     */
+    public static int getDay(Date date) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        return calendar.get(Calendar.DAY_OF_MONTH);
+    }
+
+    /**
+     * 功能描述：返回小时
+     *
+     * @param date
+     *            日期
+     * @return 返回小时
+     */
+    public static int getHour(Date date) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        return calendar.get(Calendar.HOUR_OF_DAY);
+    }
+
+    /**
+     * 功能描述：返回分
+     *
+     * @param date
+     *            日期
+     * @return 返回分钟
+     */
+    public static int getMinute(Date date) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        return calendar.get(Calendar.MINUTE);
+    }
+
+    /**
+     * 返回秒钟
+     *
+     * @param date
+     *            Date 日期
+     * @return 返回秒钟
+     */
+    public static int getSecond(Date date) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        return calendar.get(Calendar.SECOND);
+    }
+
+    /**
+     * 功能描述：返回毫
+     *
+     * @param date
+     *            日期
+     * @return 返回毫
+     */
+    public static long getMillis(Date date) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        return calendar.getTimeInMillis();
     }
 
 

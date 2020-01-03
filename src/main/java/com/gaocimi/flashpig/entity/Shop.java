@@ -1,6 +1,7 @@
 package com.gaocimi.flashpig.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.gaocimi.flashpig.utils.xp.MyUtils;
 import lombok.Data;
 
 import javax.persistence.*;
@@ -14,7 +15,7 @@ import java.util.*;
  */
 @Entity
 @Table(name = "shop")
-@JsonIgnoreProperties(value = {"applyTime", "applyResultDescription", "openid", "password", "hairstylistsByStatus", "hairstylists", "handler", "hibernateLazyInitializer", "fieldHandler"})
+@JsonIgnoreProperties(value = {"customerAnalyzeData", "timeRate", "loyalCustomerList", "customerList", "maleAndFemaleInfo", "mostPopularPerson", "maxOrderPerson", "maxPointPerson", "point", "applyTime", "applyResultDescription", "openid", "password", "hairstylistsByStatus", "hairstylists", "handler", "hibernateLazyInitializer", "fieldHandler"})
 @Data
 public class Shop {
 
@@ -139,7 +140,7 @@ public class Shop {
         setCreateTime(date);//设置注册时间
         setApplyStatus(0);//设置申请状态为申请中
         setOrderSum(0);//根据自己的订单列表（中的已完成）数量进行校正,注册时没有订单，所以为0
-        setPoint(-1.0);
+        setPoint(0.0);
     }
 
     /**
@@ -149,7 +150,7 @@ public class Shop {
         int count = 0;
         for (Hairstylist hairstylist : hairstylists) {
             if (hairstylist.getApplyStatus() == 1)
-                count += hairstylist.getOrderSumAfterSettledTime();
+                count += hairstylist.getCompletedOrderSumAfterSettledTime();
         }
         this.orderSum = count;
     }
@@ -220,5 +221,167 @@ public class Shop {
         return null;
     }
 
+    public String getMaxPointPerson() {
+        List<Hairstylist> hairstylistList = getHairstylistsByStatus(1);
+        if (hairstylistList == null || hairstylistList.size() == 0) {
+            return null;
+        }
+        Hairstylist hairstylist = hairstylistList.get(0);
+        for (Hairstylist h : hairstylistList) {
+            if (hairstylist.getPoint() < h.getPoint()) {
+                hairstylist = h;
+            }
+        }
+        return hairstylist.getHairstylistName();
+    }
+
+    public String getMaxOrderPerson() {
+        List<Hairstylist> hairstylistList = getHairstylistsByStatus(1);
+        if (hairstylistList == null || hairstylistList.size() == 0) {
+            return null;
+        }
+        Hairstylist hairstylist = hairstylistList.get(0);
+        for (Hairstylist h : hairstylistList) {
+            if (hairstylist.getOrderSum() < h.getOrderSum()) {
+                hairstylist = h;
+            }
+        }
+        return hairstylist.getHairstylistName();
+    }
+
+    public String getMostPopularPerson() {
+        List<Hairstylist> hairstylistList = getHairstylistsByStatus(1);
+        if (hairstylistList == null || hairstylistList.size() == 0) {
+            return null;
+        }
+        Hairstylist hairstylist = hairstylistList.get(0);
+        for (Hairstylist h : hairstylistList) {
+            if (hairstylist.loyalUserRecordList.size() < h.loyalUserRecordList.size()) {
+                hairstylist = h;
+            }
+        }
+        return hairstylist.getHairstylistName();
+    }
+
+    /**
+     * 获取门店的所有顾客(根据发型师入驻门店后的已完成订单)
+     *
+     * @return 门店的所有顾客
+     */
+    public List<User> getCustomerList() {
+        List<Hairstylist> hairstylistList = getHairstylistsByStatus(1);
+        List<HaircutOrder> orderList = new ArrayList<>();//获取所有该门店的订单
+        List<User> customerList = new ArrayList<>();
+        for (Hairstylist h : hairstylistList) {
+            orderList.addAll(h.getCompletedOrderListAfterSettledTime());
+        }
+        for (HaircutOrder o : orderList) {
+            if (!customerList.contains(o.user))
+                customerList.add(o.user);
+        }
+        return customerList;
+    }
+
+    /**
+     * 获取门店的所有忠实顾客（没有根据发型师入驻时间进行判断）
+     *
+     * @return 门店的所有忠实顾客
+     */
+    public Set<User> getLoyalCustomerList() {
+        List<Hairstylist> hairstylistList = getHairstylistsByStatus(1);
+        Set<User> customerList = new HashSet<>();
+        for (Hairstylist h : hairstylistList) {
+            for (UserToHairstylist record : h.loyalUserRecordList)
+                customerList.add(record.user);
+        }
+        return customerList;
+    }
+
+
+    /**
+     * 获取门店的用户分析数据（预约数量、顾客总数、会员总数、男女比例数据预约时间占比信息）
+     *
+     * @return 门店的用户分析数据
+     */
+    public Map getCustomerAnalyzeData() {
+        Map map = new HashMap();
+        try {
+            int maleCustomerNum = 0;
+            int maleLoyalCustomerNum = 0;
+            int femaleCustomerNum = 0;
+            int femaleLoyalCustomerNum = 0;
+            List<User> customerList = getCustomerList();
+            Set<User> loyalCustomerList = getLoyalCustomerList();
+            for (User user : customerList) {
+                if (user.getSex() == 1) {
+                    maleCustomerNum++;
+                }
+                if (user.getSex() == 2) {
+                    maleLoyalCustomerNum++;
+                }
+            }
+            for (User user : loyalCustomerList) {
+                if (user.getSex() == 1) {
+                    maleLoyalCustomerNum++;
+                }
+                if (user.getSex() == 2) {
+                    femaleLoyalCustomerNum++;
+                }
+            }
+            map.put("maleCustomerNum", maleCustomerNum);
+            map.put("femaleCustomerNum", femaleCustomerNum);
+            map.put("maleLoyalCustomerNum", maleLoyalCustomerNum);
+            map.put("femaleLoyalCustomerNum", femaleLoyalCustomerNum);
+
+            map.put("orderSum", getOrderSum());//根据门店所有已入驻发型师（在入驻后）的已完成订单数量进行校正的
+            map.put("customerSum", customerList.size());//根据门店所有已入驻发型师（在入驻后）的已完成订单进行校正的
+            map.put("loyalCustomerSum", loyalCustomerList.size());
+
+            map.put("timeRate", getTimeRate());
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println("/n获取门店内顾客男女比例信息发生错误/n");
+            map.put("error", "获取门店内顾客男女比例信息时发生错误!!");
+            return map;
+        }
+        return map;
+    }
+
+
+    /**
+     * 获取门店中发型师被预约时间比例
+     *
+     * @return 门店中发型师被预约时间比例
+     */
+    public List<Integer> getTimeRate() {
+        Map map = new HashMap();
+        try {
+            List<Hairstylist> hairstylistList = getHairstylistsByStatus(1);
+            List<HaircutOrder> orderList = new ArrayList<>();//获取所有该门店的订单
+            for (Hairstylist h : hairstylistList) {
+                orderList.addAll(h.getCompletedOrderListAfterSettledTime());
+            }
+            List<Integer> result = new ArrayList<>();
+            int[] timeCount = new int[25];
+            for (int i = 0; i < 25; i++)
+                timeCount[i] = 0;
+
+            for (HaircutOrder order : orderList) {
+                int hour = MyUtils.getHour(order.getBookTime());
+                timeCount[hour]++;
+            }
+
+            for (int i = 9; i <= 22; i++) {
+                result.add(timeCount[i]);
+            }
+            return result;
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println("/n获取门店内顾客男女比例信息发生错误/n");
+            map.put("error", "获取门店内顾客男女比例信息时发生错误!!");
+        }
+        return null;
+    }
 
 }
