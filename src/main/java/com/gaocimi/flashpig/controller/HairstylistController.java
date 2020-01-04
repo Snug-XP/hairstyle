@@ -166,11 +166,11 @@ public class HairstylistController {
                 hairstylistService.edit(hairstylist);
 
 
-                logger.info("发型师用户 " + hairstylist.getHairstylistName() + "（" + myOpenid + "）重新修改了基本信息");
+                logger.info("发型师用户 " + hairstylist.getHairstylistName() + "（" + myOpenid + "）重新修改了基本信息：");
                 logger.info("传入的数据：" + JSONObject.toJSON(request.getParameterMap()) + "\n");
-                if (map.get("message") != null)
-                    map.put("message", "信息修改成功！(" + map.get("message") + ")");
-                else
+//                if (map.get("message") != null)
+//                    map.put("message", "信息修改成功！(" + map.get("message") + ")");
+//                else
                     map.put("message", "信息修改成功！");
 
                 return map;

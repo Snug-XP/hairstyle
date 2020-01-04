@@ -18,7 +18,7 @@ import java.util.*;
  */
 @Entity
 @Table(name = "hairstylist")
-@JsonIgnoreProperties(value = {"getCompletedOrderListAfterSettledTime","applyTime", "applyResultDescription", "openid", "shop", "articleList", "getCurrentMonthOrderSum", "allOperationalData", "loyalUserRecordList", "haircutOrderList", "hairstylistImageUrlList", "hairServiceList", "recordToUserList", "userList", "handler", "hibernateLazyInitializer", "fieldHandler"})
+@JsonIgnoreProperties(value = {"completedOrderListAfterSettledTime","applyTime", "applyResultDescription", "openid", "shop", "articleList", "getCurrentMonthOrderSum", "allOperationalData", "loyalUserRecordList", "haircutOrderList", "hairstylistImageUrlList", "hairServiceList", "recordToUserList", "userList", "handler", "hibernateLazyInitializer", "fieldHandler"})
 @Data
 public class Hairstylist {
 
@@ -153,7 +153,6 @@ public class Hairstylist {
     public Hairstylist() {
         Date date = new Date(System.currentTimeMillis());
 
-        setApplyStatus(0);
         setCreateTime(date);//设置注册时间
         setOrderSum(0);//根据自己的订单列表（中的已完成）数量进行校正,注册时没有订单，所以为0
         setPoint(0.0);

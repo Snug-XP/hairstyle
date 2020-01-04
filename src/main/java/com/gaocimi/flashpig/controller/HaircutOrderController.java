@@ -579,7 +579,7 @@ public class HaircutOrderController {
 
             Calendar calendar = Calendar.getInstance();
             calendar.setTime(date);
-            //...设计订单的预约号(预约的年月日+0+发型师id+0+服务项目id+0+用户id)
+            //...设计订单的预约号(预约的年月日+0+发型师id+0+用户id+0+用户性别标志)
             String reservationNum = calendar.get(Calendar.YEAR) + "" + calendar.get(Calendar.MONTH) + "" + calendar.get(Calendar.DAY_OF_MONTH) + "0" + hairstylist.getId() + "0" + user.getId() + "0" + user.getSex();
             order.setReservationNum(reservationNum);
 
