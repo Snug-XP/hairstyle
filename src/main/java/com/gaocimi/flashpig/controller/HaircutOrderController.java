@@ -55,7 +55,7 @@ public class HaircutOrderController {
         try {
             Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
             if (hairstylist == null) {
-                logger.info("非发型师用户操作！！");
+                logger.info("非发型师用户操作！！（获取一个时间段的预约列表）");
                 map.put("error", "对不起，你不是发型师用户，无权操作！！");
                 return map;
             }
@@ -126,7 +126,7 @@ public class HaircutOrderController {
         try {
             Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
             if (hairstylist == null) {
-                logger.info("非发型师用户操作！！");
+                logger.info("非发型师用户操作！！（获取今天、明天、或全部的预约列表）");
                 map.put("error", "对不起，你不是发型师用户，无权操作！！");
                 return map;
             }
@@ -450,7 +450,7 @@ public class HaircutOrderController {
         try {
             Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
             if (hairstylist == null) {
-                logger.info("非发型师用户操作！！");
+                logger.info("非发型师用户操作！！（获取自己关于某个顾客的预约记录）");
                 map.put("error", "对不起，你不是发型师用户，无权操作！！");
                 return map;
             } else {
@@ -508,7 +508,7 @@ public class HaircutOrderController {
         try {
             Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
             if (hairstylist == null) {
-                logger.info("非发型师用户操作！！");
+                logger.info("非发型师用户操作！！（获取自己的运营数据（包括中数据和日报周报月报表格的所有数据））");
                 map.put("error", "对不起，你不是发型师用户，无权操作！！");
                 return map;
             } else {

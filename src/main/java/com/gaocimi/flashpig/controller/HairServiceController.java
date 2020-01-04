@@ -41,7 +41,7 @@ public class HairServiceController {
         try {
             Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
             if (hairstylist == null) {
-                logger.info("非发型师用户操作！！");
+                logger.info("非发型师用户操作！！（添加一个发型服务）");
                 map.put("error", "对不起，你不是发型师用户，无权操作！！");
                 return map;
             }
@@ -81,7 +81,7 @@ public class HairServiceController {
         try {
             Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
             if (hairstylist == null) {
-                logger.info("非发型师用户操作！！");
+                logger.info("非发型师用户操作！！（修改个人的服务项目）");
                 map.put("error", "对不起，你不是发型师用户，无权操作！！");
                 return map;
             }
@@ -153,7 +153,7 @@ public class HairServiceController {
         try {
             Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
             if (hairstylist == null) {
-                logger.info("非发型师用户操作！！");
+                logger.info("非发型师用户操作！！（获取自己的服务列表）");
                 map.put("error", "对不起，你不是发型师用户，无权操作！！");
                 return map;
             }
@@ -181,7 +181,7 @@ public class HairServiceController {
         try {
             Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
             if (hairstylist == null) {
-                logger.info("非发型师用户操作！！");
+                logger.info("非发型师用户操作！！（删除个人服务项目）");
                 map.put("error", "非发型师用户操作！！");
                 return map;
             }
@@ -231,7 +231,7 @@ public class HairServiceController {
         try {
             Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
             if (hairstylist == null) {
-                logger.info("非发型师用户操作！！");
+                logger.info("非发型师用户操作！！（发型师同时修改个人全部的服务项目列表）");
                 map.put("error", "非发型师用户操作！！");
                 return map;
             }
