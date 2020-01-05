@@ -59,7 +59,7 @@ public class HairstylistController {
                               @RequestParam(value = "personalPhotoUrl", required = false) String personalPhotoUrl,
                               @RequestParam(value = "personalPhone", required = false) String personalPhone,
                               @RequestParam(value = "personalProfile", required = false) String personalProfile,
-                              @RequestParam(value = "shopId", required = false) Integer shopId ) {
+                              @RequestParam(value = "shopId", required = false) Integer shopId) {
         Map map = new HashMap();
 
 
@@ -80,7 +80,7 @@ public class HairstylistController {
 
             hairstylist = hairstylistService.findHairstylistByPhone(personalPhone);
             if (hairstylist != null) {
-                logger.info("与发型师“" + hairstylist.getHairstylistName() + "”（id="+hairstylist.getId()+"）个人电话（"+personalPhone+"）重复的注册！！");
+                logger.info("与发型师“" + hairstylist.getHairstylistName() + "”（id=" + hairstylist.getId() + "）个人电话（" + personalPhone + "）重复的注册！！");
                 map.put("error", "该电话已绑定发型师，不可重复注册！！");
                 return map;
             }
@@ -181,7 +181,7 @@ public class HairstylistController {
 //                if (map.get("message") != null)
 //                    map.put("message", "信息修改成功！(" + map.get("message") + ")");
 //                else
-                    map.put("message", "信息修改成功！");
+                map.put("message", "信息修改成功！");
 
                 return map;
             } else {
@@ -442,13 +442,25 @@ public class HairstylistController {
                 map.put("error", "对不起，你还没有入驻门店，不可操作！！");
                 return map;
             }
+            List<String> timeList = hairstylist.getAvailableTime();
+            if (hairstylist.getBusinessStatus() == 0 && (timeList == null || timeList.size() == 0) ) {
+                logger.info("无可预约时间，打开营业选项失败！");
+                map.put("error", "无可预约时间，打开营业选项失败！");
+                return map;
+            }
 
-            if (hairstylist.getBusinessStatus() == 1) {
-                hairstylist.setBusinessStatus(0);
-                map.put("message", "暂停营业");
-            } else {
+            if (hairstylist.getBusinessStatus() == 0 && (hairstylist.getHairServiceList() == null || hairstylist.getHairServiceList().size() == 0) ) {
+                logger.info("无可预约项目，打开营业选项失败！");
+                map.put("error", "无可预约项目，打开营业选项失败！");
+                return map;
+            }
+
+            if (hairstylist.getBusinessStatus() == 0) {
                 hairstylist.setBusinessStatus(1);
                 map.put("message", "开始营业");
+            } else {
+                hairstylist.setBusinessStatus(0);
+                map.put("message", "暂停营业");
             }
             hairstylistService.edit(hairstylist);
             logger.info("发型师用户 " + hairstylist.getHairstylistName() + "（id=" + hairstylist.getId() + "）设置了自己的营业状态为:" + hairstylist.getBusinessStatus() + "(0表示暂停营业，1表示营业中)");
@@ -487,6 +499,12 @@ public class HairstylistController {
             hairstylistService.edit(hairstylist);
             logger.info("发型师用户 " + hairstylist.getHairstylistName() + "（id=" + hairstylist.getId() + "）重新设置了可预约时间:" + timeList.toString());
             map.put("message", "可预约时间设置成功");
+
+            if ((hairstylist.getBusinessStatus()) != 0 && (timeList == null || timeList.size() == 0)) {//若没有了可预约时间
+                hairstylist.setBusinessStatus(0);//将营业状态设为暂停营业
+                hairstylistService.edit(hairstylist);
+                map.put("message", map.get("message") + "(没有可预约时间，营业状态自动设为暂停营业)");
+            }
             return map;
 
         } catch (Exception e) {

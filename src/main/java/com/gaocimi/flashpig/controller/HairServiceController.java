@@ -201,6 +201,15 @@ public class HairServiceController {
                 hairServiceService.delete(serviceId);
                 logger.info(hairstylist.getHairstylistName() + "(" + hairstylist.getOpenid() + ")删除服务项目：" + hairService.getServiceName());
                 map.put("message", "删除成功！");
+
+                //检验是否还有发型服务
+                hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
+                if(hairstylist.getBusinessStatus() != 0 && (hairstylist.getHairServiceList()==null||hairstylist.getHairServiceList().size()==0) )
+                {//若没有了发型服务
+                    hairstylist.setBusinessStatus(0);//将营业状态设为暂停营业
+                    hairstylistService.edit(hairstylist);
+                    map.put("message",map.get("message")+"(没有服务项目了，营业状态自动设为暂停营业)");
+                }
                 return map;
             } else {
                 logger.info("没有删除服务项目权限");
@@ -243,7 +252,7 @@ public class HairServiceController {
             //下面保存该理发师的服务项目
             //先删除原来对应的的服务项目
             hairServiceService.deleteAllByHairstylistId(hairstylist.getId());
-            if (hairService != null) {
+            if (hairService != null&&hairService.size()!=0) {
                 int serviceSize = hairService.size();
                 if (serviceSize != price.size()) {
                     logger.info("服务与价格数量不匹配！！");
@@ -270,8 +279,14 @@ public class HairServiceController {
                 return map;
             } else {
                 //没有新的服务项目传入，说明把原有服务项目都删了
+
                 logger.info("删除全部服务项目");
                 map.put("message", "删除全部服务项目成功！");
+                if(hairstylist.getBusinessStatus()!=0) {
+                    hairstylist.setBusinessStatus(0);//将营业状态设为暂停营业
+                    hairstylistService.edit(hairstylist);
+                    map.put("message", map.get("message") + "(没有可预约项目，营业状态自动设为暂停营业)");
+                }
                 return map;
             }
         } catch (Exception e) {
