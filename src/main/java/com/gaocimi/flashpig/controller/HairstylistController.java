@@ -1049,7 +1049,7 @@ public class HairstylistController {
         }
     }
 
-    @ApiOperation(value = "获取区域(经纬度相差0.001的)排行 - 全部")
+    @ApiOperation(value = "获取区域(经纬度相差0.05的)排行 - 全部")
     @GetMapping("/hairstylist/getRegionalRanking/all")
     public Map getRegionalRankingAll(@RequestParam String myOpenid,
                                      @RequestParam(name = "pageNum", defaultValue = "0") int pageNum,
@@ -1058,7 +1058,7 @@ public class HairstylistController {
         try {
             Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
             if (hairstylist == null) {
-                logger.info("非发型师用户操作！！（获取区域(经纬度相差0.001的)排行 - 全部）");
+                logger.info("非发型师用户操作！！（获取区域(经纬度相差0.05的)排行 - 全部）");
                 map.put("error", "对不起，你不是发型师用户，无权操作！！");
                 return map;
             }
@@ -1068,7 +1068,7 @@ public class HairstylistController {
                 return map;
             }
 
-            Double radius = 0.001;//0.001经纬度相对大概100米
+            Double radius = 0.05;//0.001经纬度相对大概100米，设定范围约5公里
             List<Hairstylist> hairstylists = new ArrayList<>();
             Shop shop = hairstylist.getShop();
             List<Shop> shopList = shopService.getShopsByRadius(shop.getLongitude(), shop.getLatitude(), radius);
@@ -1122,7 +1122,7 @@ public class HairstylistController {
         }
     }
 
-    @ApiOperation(value = "获取区域排行(经纬度相差0.001的) - 今天")
+    @ApiOperation(value = "获取区域排行(经纬度相差0.05的) - 今天")
     @GetMapping("/hairstylist/getRegionalRanking/today")
     public Map getRegionalRankingToday(@RequestParam String myOpenid,
                                        @RequestParam(name = "pageNum", defaultValue = "0") int pageNum,
@@ -1131,7 +1131,7 @@ public class HairstylistController {
         try {
             Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
             if (hairstylist == null) {
-                logger.info("非发型师用户操作！！（获取区域排行(经纬度相差0.001的) - 今天）");
+                logger.info("非发型师用户操作！！（获取区域排行(经纬度相差0.05的) - 今天）");
                 map.put("error", "对不起，你不是发型师用户，无权操作！！");
                 return map;
             }
@@ -1141,7 +1141,7 @@ public class HairstylistController {
                 return map;
             }
 
-            Double radius = 0.001;//0.001经纬度相对大概100米
+            Double radius = 0.05;//0.001经纬度相对大概100米，设定范围约5公里
             List<Hairstylist> hairstylists = new ArrayList<>();
             Shop shop = hairstylist.getShop();
             List<Shop> shopList = shopService.getShopsByRadius(shop.getLongitude(), shop.getLatitude(), radius);
@@ -1195,7 +1195,7 @@ public class HairstylistController {
         }
     }
 
-    @ApiOperation(value = "获取区域排行(经纬度相差0.001的) - 本月")
+    @ApiOperation(value = "获取区域排行(经纬度相差0.05的) - 本月")
     @GetMapping("/hairstylist/getRegionalRanking/month")
     public Map getRegionalRankingMonth(@RequestParam String myOpenid,
                                        @RequestParam(name = "pageNum", defaultValue = "0") int pageNum,
@@ -1204,7 +1204,7 @@ public class HairstylistController {
         try {
             Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
             if (hairstylist == null) {
-                logger.info("非发型师用户操作！！（获取区域排行(经纬度相差0.001的) - 本月）");
+                logger.info("非发型师用户操作！！（获取区域排行(经纬度相差0.05的) - 本月）");
                 map.put("error", "对不起，你不是发型师用户，无权操作！！");
                 return map;
             }
@@ -1214,7 +1214,7 @@ public class HairstylistController {
                 return map;
             }
 
-            Double radius = 0.001;//0.001经纬度相对大概100米
+            Double radius = 0.05;//0.001经纬度相对大概100米，设定范围约5公里
             List<Hairstylist> hairstylists = new ArrayList<>();
             Shop shop = hairstylist.getShop();
             List<Shop> shopList = shopService.getShopsByRadius(shop.getLongitude(), shop.getLatitude(), radius);
@@ -1268,14 +1268,14 @@ public class HairstylistController {
         }
     }
 
-    @ApiOperation(value = "根据经纬度获取推荐的发型师", notes = "从附近门店（经纬度相差0.01即约附近1公里左右）中随机选取一位发型师")
+    @ApiOperation(value = "根据经纬度获取推荐的发型师", notes = "从附近门店（经纬度相差0.05即约附近5公里左右）中随机选取一位发型师")
     @GetMapping("/user/getHairstylistRecommendedList")
     public Map getHairstylistRecommendedList(@RequestParam Double longitude,
                                              @RequestParam Double latitude) {
         Map map = new HashMap();
         try {
 
-            Double radius = 0.01;
+            Double radius = 0.05;
             List<Shop> shopList = shopService.getShopsByRadius(longitude, latitude, radius);
             List<Hairstylist> tempHairstylists = new ArrayList<>();
 
@@ -1312,7 +1312,7 @@ public class HairstylistController {
     }
 
 
-    @ApiOperation(value = "根据经纬度获取周围的发型师", notes = "从附近门店（经纬度相差0.01即约附近1公里左右）中获取发型师列表(按照flag排序：flag=0表示按照发型师的评分降序排序，flag=1表示按发型师已完成订单总数降序排序)")
+    @ApiOperation(value = "根据经纬度获取周围的发型师", notes = "从附近门店（经纬度相差0.05即约附近5公里左右）中获取发型师列表(按照flag排序：flag=0表示按照发型师的评分降序排序，flag=1表示按发型师已完成订单总数降序排序)")
     @GetMapping("/user/getLocalHairstylists")
     public Map getLocalHairstylists(@RequestParam Double longitude,
                                     @RequestParam Double latitude, @RequestParam Integer flag,
@@ -1321,7 +1321,7 @@ public class HairstylistController {
         Map map = new HashMap();
         try {
 
-            Double radius = 0.01;
+            Double radius = 0.05;
             List<Shop> shopList = shopService.getShopsByRadius(longitude, latitude, radius);
             List<HairstylistInfo> resultList = new ArrayList<>();
 

@@ -49,7 +49,7 @@ public class PushSubscribeMessageController {
     private ShopService shopService;
 
 
-    @ApiOperation(value = "推送订阅消息")
+    @ApiOperation(value = "推送提醒用户准备前往的订阅消息")
     @PostMapping("/hairstylist/pushComingMessage")
     public Map pushComingMessage(@RequestParam Integer orderId) {
 

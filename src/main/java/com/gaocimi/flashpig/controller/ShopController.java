@@ -623,7 +623,7 @@ public class ShopController {
                 map.put("error", "请先进行门店认证！");
                 return map;
             }
-            Double radius = 0.001;//0.001经纬度相对大概100米
+            Double radius = 0.05;//0.001经纬度相对大概100米
             List<Shop> shops = shopService.getShopsByRadius(shop.getLongitude(), shop.getLatitude(), radius);
             // 按完成订单数倒序排序
             Collections.sort(shops, (o1, o2) -> {
@@ -690,7 +690,7 @@ public class ShopController {
                 return map;
             }
 
-            Double radius = 0.001;//0.001经纬度相对大概100米
+            Double radius = 0.05;//0.001经纬度相对大概100米
             List<Shop> shops = shopService.getShopsByRadius(shop.getLongitude(), shop.getLatitude(), radius);
             // 按今日预约的订单数倒序排序
             Collections.sort(shops, (o1, o2) -> {
@@ -758,7 +758,7 @@ public class ShopController {
                 return map;
             }
 
-            Double radius = 0.001;//0.001经纬度相对大概100米
+            Double radius = 0.05;//0.001经纬度相对大概100米
             List<Shop> shops = shopService.getShopsByRadius(shop.getLongitude(), shop.getLatitude(), radius);
             // 按今日预约的订单数倒序排序
             Collections.sort(shops, (o1, o2) -> {

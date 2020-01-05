@@ -1,9 +1,13 @@
 ### 项目说明
 
-使用Springboot框架、持久层使用JPA生成，架构前后端分离，使用Restful设计风格的接口进行交互，接口文档方面使用swagger生成。
+
+1．使用Springboot框架快速生成后端项目结构
+2．架构前后端分离，使用Restful设计风格的接口进行交互，使用swagger工具生成接口测试页面（https://127.0.0.1:8080/swagger-ui.html#/）
+3．使用showdoc在线接口文档工具编写接口信息文档（https://www.showdoc.cc/jianzhao）
+4. 使用JPA数据持久化框架实现对MySQL数据库的操作
 
 
-1. 接口文档路径 https://127.0.0.1:8080/swagger-ui.html#/
+
 
 
 - 运行jar包（后台运行）：nohup java -jar hairstyle.jar >log.txt &

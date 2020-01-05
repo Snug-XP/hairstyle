@@ -180,7 +180,9 @@ public class MyUtils {
         return days;
     }
 
-    /**获取当前系统时间和下一个整点时间相差的秒数*/
+    /**
+     * 获取当前系统时间和下一个整点时间相差的秒数
+     */
     public static Long getDifferenceNextHour() {
         Calendar c = Calendar.getInstance();//加一个小时,设置对应的分和秒为0则得到了下一个整点的时间.
         c.add(Calendar.HOUR, 1);
@@ -276,17 +278,18 @@ public class MyUtils {
 
     /**
      * 获取日期年份
+     *
      * @param date 日期
      * @return
      */
     public static String getYear(Date date) {
         return getTimeString(date).substring(0, 4);
     }
+
     /**
      * 功能描述：返回月
      *
-     * @param date
-     *            Date 日期
+     * @param date Date 日期
      * @return 返回月份
      */
     public static int getMonth(Date date) {
@@ -298,8 +301,7 @@ public class MyUtils {
     /**
      * 功能描述：返回日期
      *
-     * @param date
-     *            Date 日期
+     * @param date Date 日期
      * @return 返回日份
      */
     public static int getDay(Date date) {
@@ -311,8 +313,7 @@ public class MyUtils {
     /**
      * 功能描述：返回小时
      *
-     * @param date
-     *            日期
+     * @param date 日期
      * @return 返回小时
      */
     public static int getHour(Date date) {
@@ -324,8 +325,7 @@ public class MyUtils {
     /**
      * 功能描述：返回分
      *
-     * @param date
-     *            日期
+     * @param date 日期
      * @return 返回分钟
      */
     public static int getMinute(Date date) {
@@ -337,8 +337,7 @@ public class MyUtils {
     /**
      * 返回秒钟
      *
-     * @param date
-     *            Date 日期
+     * @param date Date 日期
      * @return 返回秒钟
      */
     public static int getSecond(Date date) {
@@ -350,8 +349,7 @@ public class MyUtils {
     /**
      * 功能描述：返回毫
      *
-     * @param date
-     *            日期
+     * @param date 日期
      * @return 返回毫
      */
     public static long getMillis(Date date) {
@@ -359,6 +357,4 @@ public class MyUtils {
         calendar.setTime(date);
         return calendar.getTimeInMillis();
     }
-
-
 }
