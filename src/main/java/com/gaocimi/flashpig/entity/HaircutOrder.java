@@ -1,5 +1,7 @@
 package com.gaocimi.flashpig.entity;
 
+import lombok.Data;
+
 import javax.persistence.*;
 import java.util.Date;
 
@@ -12,6 +14,7 @@ import java.util.Date;
  */
 @Entity
 @Table(name = "haircut_order")
+@Data
 public class HaircutOrder {
 
     @Id
@@ -25,10 +28,6 @@ public class HaircutOrder {
     /**该订单中用户提交的联系电话（考虑到用户自身没有绑定手机号码）*/
     @Column(nullable = false)
     private String userPhone;
-
-    /**该订单中预约用户姓名 （不是用户账户中的名字，要求自己再输一遍，可以提示用户输入自己的称呼，不一定输入真名）*/
-    @Column(nullable = false)
-    private String userName;
 
     /**提交该订单的用户； 定义名为user_id的外键列，该外键引用user表的主键(id)列,采用懒加载*/
     @ManyToOne(targetEntity = User.class, fetch = FetchType.EAGER)
@@ -74,114 +73,6 @@ public class HaircutOrder {
 
     public Integer getId() {
         return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    public String getReservationNum() {
-        return reservationNum;
-    }
-
-    public void setReservationNum(String reservationNum) {
-        this.reservationNum = reservationNum;
-    }
-
-    public User getUser() {
-        return user;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
-    }
-
-    public Hairstylist getHairstylist() {
-        return hairstylist;
-    }
-
-    public void setHairstylist(Hairstylist hairstylist) {
-        this.hairstylist = hairstylist;
-    }
-
-    public Date getCreateTime() {
-        return createTime;
-    }
-
-    public void setCreateTime(Date createTime) {
-        this.createTime = createTime;
-    }
-
-    public Integer getStatus() {
-        return status;
-    }
-
-    public void setStatus(Integer status) {
-        this.status = status;
-    }
-
-    public Date getBookTime() {
-        return bookTime;
-    }
-
-    public void setBookTime(Date bookTime) {
-        this.bookTime = bookTime;
-    }
-
-    public String getComment() {
-        return comment;
-    }
-
-    public void setComment(String comment) {
-        this.comment = comment;
-    }
-
-    public Double getPoint() {
-        return point;
-    }
-
-    public void setPoint(Double point) {
-        this.point = point;
-    }
-
-    public String getUserPhone() {
-        return userPhone;
-    }
-
-    public void setUserPhone(String userPhone) {
-        this.userPhone = userPhone;
-    }
-
-    public String getServiceName() {
-        return serviceName;
-    }
-
-    public void setServiceName(String serviceName) {
-        this.serviceName = serviceName;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public Double getPrice() {
-        return price;
-    }
-
-    public void setPrice(Double price) {
-        this.price = price;
-    }
-
-    public String getUserName() {
-        return userName;
-    }
-
-    public void setUserName(String userName) {
-        this.userName = userName;
     }
 
     public String getAddress() {

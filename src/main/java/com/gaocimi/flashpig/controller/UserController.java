@@ -50,6 +50,12 @@ public class UserController {
                 return map;
             }
 
+            if(lastName.length()>8){
+                logger.info("用户“"+user.getName()+"”（id="+user.getId()+"）设置了姓氏失败:"+lastName);
+                map.put("error", "姓氏限制4个汉字以内！");
+                return map;
+            }
+
             if(sex!=1&&sex!=2){
                 logger.info("性别标志错误，传入的sex="+sex);
                 map.put("error","性别标志错误(仅允许1或2)");

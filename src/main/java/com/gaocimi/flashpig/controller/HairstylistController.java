@@ -20,8 +20,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -871,11 +869,8 @@ public class HairstylistController {
             HaircutOrder order;
             while (orderList.size() > 0) {
                 order = orderList.get(0);//一直获取发型师的预约单列表的第一个记录
-                CountUser countUser = new CountUser();
+                CountUser countUser = new CountUser(order);
 
-                countUser.setUserId(order.user.getId());
-                countUser.setUserName(order.getUserName());
-                countUser.setHeadImgUrl(order.user.getPictureUrl());
 
                 //找到该顾客的其他预约记录，计数后删除
                 int count = 0;

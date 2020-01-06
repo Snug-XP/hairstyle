@@ -530,7 +530,7 @@ public class HaircutOrderController {
 
     @ApiOperation(value = "普通用户提交预约订单")
     @PostMapping("/user/addHaircutOrder")
-    public Map addHaircutOrder(@RequestParam String myOpenid, @RequestParam String userName, @RequestParam String userPhone,
+    public Map addHaircutOrder(@RequestParam String myOpenid, @RequestParam String userPhone,
                                @RequestParam Integer hairstylistId, @RequestParam String bookTime, @RequestParam Integer serviceId) {
         Map map = new HashMap();
         try {
@@ -552,7 +552,6 @@ public class HaircutOrderController {
             order.setDescription(hairService.getDescription());//设置选取的服务项目描述
             order.setPrice(hairService.getPrice());//设置选取的服务项目大致价格
 
-            order.setUserName(userName);//设置用户的称呼（不是用户账户中的名字，要求自己再输一遍，可以提示用户输入自己的称呼，不一定输入真名）
             order.setUserPhone(userPhone);//设置联系方式
             order.setStatus(-1);//设置订单状态为"待完成"
 
@@ -590,7 +589,7 @@ public class HaircutOrderController {
             }
 
             haircutOrderService.save(order);
-            logger.info("id为" + user.getId() + "的用户“" + userName + "”提交了一个对发型师（id=" + hairstylist.getOpenid() + "）“" + hairstylist.getHairstylistName() + "”的订单");
+            logger.info("id为" + user.getId() + "的用户“" + user.getName() + "”提交了一个对发型师（id=" + hairstylist.getOpenid() + "）“" + hairstylist.getHairstylistName() + "”的订单");
             messageController.pushSuccessMessage(order.getId());//给用户发送预约成功的模板消息通知
             map.put("message", "订单提交成功！");
         } catch (Exception e) {

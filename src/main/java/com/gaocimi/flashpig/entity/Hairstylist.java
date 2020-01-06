@@ -260,8 +260,18 @@ public class Hairstylist {
         return orderList;
     }
 
+    /**
+     * 获取发型师自己的忠实顾客总数
+     *
+     * @return 忠实顾客总数
+     */
+    public int getLoyalCustomerSum() {
+        return loyalUserRecordList.size();
+    }
+
 
     /**************下面是一些关于发型师数据统计相关的方法*******************************************************************/
+
 
     /**
      * 获取发型师自己的顾客总数
