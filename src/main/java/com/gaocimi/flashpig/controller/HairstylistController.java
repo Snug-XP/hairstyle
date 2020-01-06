@@ -633,7 +633,7 @@ public class HairstylistController {
         }
     }
 
-    @ApiOperation(value = "获取个人作品图片url列表")
+    @ApiOperation(value = "发型师获取自己的个人作品图片url列表")
     @GetMapping("/hairstylist/getImageUrlList")
     public Map getImageUrlList(@RequestParam String myOpenid) {
         Map map = new HashMap();
@@ -650,6 +650,29 @@ public class HairstylistController {
         } catch (Exception e) {
             logger.error(e.getMessage());
             logger.info("获取个人作品图片操作失败！！（后端发生某些错误）\n\n");
+            map.put("error", "操作失败！！（后端发生某些错误）");
+            e.printStackTrace();
+            return map;
+        }
+    }
+
+
+    @ApiOperation(value = "根据发型师id，获取发型师的服务列表")
+    @GetMapping("/getHairstylistImageUrlList")
+    public Map getHairstylistImageUrlList(@RequestParam Integer hairstylistId) {
+        Map map = new HashMap();
+        try {
+            Hairstylist hairstylist = hairstylistService.findHairstylistById(hairstylistId);
+            if (hairstylist == null) {
+                logger.info("未找到该发型师用户（获取发型师的个人作品图片列表）");
+                map.put("error", "未找到该发型师用户！！·");
+                return map;
+            }
+            map.put("ImageUrlList", hairstylist.getHairstylistImageUrlList());
+            return map;
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            logger.info("获取发型师个人作品图片列表失败！！（后端发生某些错误）");
             map.put("error", "操作失败！！（后端发生某些错误）");
             e.printStackTrace();
             return map;
