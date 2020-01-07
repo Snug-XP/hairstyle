@@ -38,6 +38,68 @@ public class UserController {
 
 
 
+    @ApiOperation(value = "普通用户设置自己的姓氏和性别")
+    @PostMapping("/user/setLastNameAndSex")
+    public Map setLastNameAndSex(@RequestParam String myOpenid,@RequestParam String lastName ,@RequestParam Integer sex){
+        Map map = new HashMap();
+        try {
+            User user = userService.findUserByOpenid(myOpenid);
+            if(user==null){
+                logger.info("openid为"+myOpenid+"的普通用户不存在！");
+                map.put("error", "无效的用户！！");
+                return map;
+            }
+
+            if(lastName.length()>8){
+                logger.info("用户“"+user.getName()+"”（id="+user.getId()+"）设置了姓氏失败:"+lastName);
+                map.put("error", "姓氏限制4个汉字以内！");
+                return map;
+            }
+
+            if(sex!=1&&sex!=2){
+                logger.info("性别标志错误，传入的sex="+sex);
+                map.put("error","性别标志错误(仅允许1或2)");
+                return map;
+            }
+            user.setLastName(lastName);
+            user.setSex(sex);
+            userService.edit(user);
+            logger.info("用户“"+user.getName()+"”（id="+user.getId()+"）设置了自己的姓氏和性别（lastName="+lastName+",sex="+sex+")");
+            map.put("message", "设置成功！");
+            return map;
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            logger.info("设置自己的姓氏和性别失败！！（后端发生某些错误）");
+            map.put("error", "设置自己的姓氏和性别失败！！（后端发生某些错误）");
+            e.printStackTrace();
+            return map;
+        }
+    }
+
+
+    @ApiOperation(value = "普通用户获取自己的姓氏")
+    @GetMapping("/user/getLastName")
+    public Map getLastName(@RequestParam String myOpenid){
+        Map map = new HashMap();
+        try {
+            User user = userService.findUserByOpenid(myOpenid);
+            if(user==null){
+                logger.info("openid为"+myOpenid+"的普通用户不存在！");
+                map.put("error", "无效的用户！！");
+                return map;
+            }
+            map.put("lastName", user.getLastName());
+            return map;
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            logger.info("获取自己的姓氏失败！！（后端发生某些错误）");
+            map.put("error", "获取自己的姓氏失败！！（后端发生某些错误）");
+            e.printStackTrace();
+            return map;
+        }
+    }
+
+
     @ApiOperation(value = "普通用户分页获取自己收藏的发型师列表")
     @GetMapping("/user/getMyHairstylists")
     public Map getMyCollectionByPage(@RequestParam String myOpenid,
@@ -94,9 +156,9 @@ public class UserController {
         }
     }
 
-    @ApiOperation(value = "收藏该发型师")
-    @PostMapping("/user/addHairstylistToCollection")
-    public Map addToCollection( @RequestParam String myOpenid,@RequestParam Integer hairstylistId){
+    @ApiOperation(value = "收藏或取消收藏该发型师（转换用户对发型师的收藏关系）")
+    @PostMapping("/user/addOrRemoveHairstylistToCollection")
+    public Map addOrRemoveHairstylistToCollection( @RequestParam String myOpenid,@RequestParam Integer hairstylistId){
         Map map = new HashMap();
         try{
             User user = userService.findUserByOpenid(myOpenid);
@@ -111,14 +173,16 @@ public class UserController {
                 map.put("error","该发型师不存在！！");
                 return map;
             }
-            if(userToHairstylistService.findByUserAndHairstylist(user.getId(),hairstylistId)!=null){
-                logger.info("该用户已收藏该发型师，不需要重复收藏");
-                map.put("message","已收藏该发型师!!");
+            UserToHairstylist userToHairstylist = userToHairstylistService.findByUserAndHairstylist(user.getId(),hairstylistId);
+            if(userToHairstylist !=null){
+                userToHairstylistService.delete(userToHairstylist.getId());
+                logger.info("用户“"+user.getName()+"”（id="+user.getId()+"）取消收藏了id为"+hairstylist.getId()+"的发型师“"+hairstylist.getHairstylistName()+"”");
+                map.put("message","取消收藏成功！");
                 return map;
             }
-            UserToHairstylist userToHairstylist = new UserToHairstylist(user,hairstylist);
+            userToHairstylist = new UserToHairstylist(user,hairstylist);
             userToHairstylistService.save(userToHairstylist);
-            logger.info("id为"+user.getId()+"的用户“"+user.getName()+"”收藏了id为"+hairstylist.getId()+"的发型师“"+hairstylist.getHairstylistName()+"”");
+            logger.info("用户“"+user.getName()+"”（id="+user.getId()+"）收藏了id为"+hairstylist.getId()+"的发型师“"+hairstylist.getHairstylistName()+"”");
             map.put("message","收藏成功！");
 
         }catch (Exception e){

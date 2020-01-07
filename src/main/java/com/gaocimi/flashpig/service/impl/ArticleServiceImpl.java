@@ -60,7 +60,7 @@ public class ArticleServiceImpl implements ArticleService {
     // 分页获得列表
     @Override
     public Page<Article> findAll(int pageNum, int pageSize) {
-        Sort sort = new Sort(Sort.Direction.DESC, "id");  //降序
+        Sort sort = new Sort(Sort.Direction.DESC, "createTime");  //按创建时间倒序
         Pageable pageable = PageRequest.of(pageNum, pageSize, sort);
 
         Page<Article> articlePage = null;

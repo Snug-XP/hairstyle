@@ -55,7 +55,7 @@ public class HaircutOrderController {
         try {
             Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
             if (hairstylist == null) {
-                logger.info("非发型师用户操作！！");
+                logger.info("非发型师用户操作！！（获取一个时间段的预约列表）");
                 map.put("error", "对不起，你不是发型师用户，无权操作！！");
                 return map;
             }
@@ -126,7 +126,7 @@ public class HaircutOrderController {
         try {
             Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
             if (hairstylist == null) {
-                logger.info("非发型师用户操作！！");
+                logger.info("非发型师用户操作！！（获取今天、明天、或全部的预约列表）");
                 map.put("error", "对不起，你不是发型师用户，无权操作！！");
                 return map;
             }
@@ -381,7 +381,7 @@ public class HaircutOrderController {
      * @return
      */
     @ApiOperation(value = "发模板信息通知用户前面还有flag个人（flag=0/1/2/-1），当flag=-1时，通知订单已完成，并且根据通知类型改变订单状态" +
-            "（...到时候记得关闭url访问）",notes = "当flag > 0 时，通知用户前面还有flag个人，" +
+            "（...到时候记得关闭url访问）", notes = "当flag > 0 时，通知用户前面还有flag个人，" +
             "并将订单状态改为0（已通知）     当flag = 0 时，通知用户前往接受服务，并将订单状态改为1（进行中）     " +
             "当flag = -1 时，通知用户订单已完成，并将订单状态改为2（已完成）")
     @GetMapping("/hairstylist/notifyUser")
@@ -450,7 +450,7 @@ public class HaircutOrderController {
         try {
             Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
             if (hairstylist == null) {
-                logger.info("非发型师用户操作！！");
+                logger.info("非发型师用户操作！！（获取自己关于某个顾客的预约记录）");
                 map.put("error", "对不起，你不是发型师用户，无权操作！！");
                 return map;
             } else {
@@ -508,7 +508,7 @@ public class HaircutOrderController {
         try {
             Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
             if (hairstylist == null) {
-                logger.info("非发型师用户操作！！");
+                logger.info("非发型师用户操作！！（获取自己的运营数据（包括中数据和日报周报月报表格的所有数据））");
                 map.put("error", "对不起，你不是发型师用户，无权操作！！");
                 return map;
             } else {
@@ -530,7 +530,7 @@ public class HaircutOrderController {
 
     @ApiOperation(value = "普通用户提交预约订单")
     @PostMapping("/user/addHaircutOrder")
-    public Map addHaircutOrder(@RequestParam String myOpenid, @RequestParam String userName, @RequestParam String userPhone,
+    public Map addHaircutOrder(@RequestParam String myOpenid, @RequestParam String userPhone,
                                @RequestParam Integer hairstylistId, @RequestParam String bookTime, @RequestParam Integer serviceId) {
         Map map = new HashMap();
         try {
@@ -552,7 +552,6 @@ public class HaircutOrderController {
             order.setDescription(hairService.getDescription());//设置选取的服务项目描述
             order.setPrice(hairService.getPrice());//设置选取的服务项目大致价格
 
-            order.setUserName(userName);//设置用户的称呼（不是用户账户中的名字，要求自己再输一遍，可以提示用户输入自己的称呼，不一定输入真名）
             order.setUserPhone(userPhone);//设置联系方式
             order.setStatus(-1);//设置订单状态为"待完成"
 
@@ -569,6 +568,11 @@ public class HaircutOrderController {
                     map.put("error", "时间转换失败，请检查预约的时间格式：“yyyy-MM-dd HH:mm:ss”");
                     return map;
                 }
+                if(date.before(new Date(System.currentTimeMillis()))){
+                    logger.info("用户提交了当前时间之前的时间（" + bookTime + "），预约失败");
+                    map.put("error", "请选择当前时刻之后的可预约时间！");
+                    return map;
+                }
             } catch (Exception e) {
                 logger.error(e.getMessage());
                 logger.info("时间转换失败，请检查时间格式（传入数据：" + bookTime + "）");
@@ -579,18 +583,20 @@ public class HaircutOrderController {
 
             Calendar calendar = Calendar.getInstance();
             calendar.setTime(date);
-            //...设计订单的预约号(预约的年月日+0+发型师id+0+服务项目id+0+用户id)
-            String reservationNum = calendar.get(Calendar.YEAR) + "" + calendar.get(Calendar.MONTH) + "" + calendar.get(Calendar.DAY_OF_MONTH) + "0" + hairstylist.getId() + "0" + serviceId + "0" + user.getId();
+            //...设计订单的预约号(预约的年月日+0+发型师id+0+用户id+0+用户性别标志)
+            String reservationNum = calendar.get(Calendar.YEAR) + "" + calendar.get(Calendar.MONTH) + "" + calendar.get(Calendar.DAY_OF_MONTH) + "0" + hairstylist.getId() + "0" + user.getId() + "0" + user.getSex();
+            if (user.getSex() == null)
+                reservationNum = calendar.get(Calendar.YEAR) + "" + calendar.get(Calendar.MONTH) + "" + calendar.get(Calendar.DAY_OF_MONTH) + "0" + hairstylist.getId() + "0" + user.getId() + "00" ;
             order.setReservationNum(reservationNum);
 
             if (haircutOrderService.findByReservationNum(reservationNum) != null) {
-                logger.info("该用户当天已有相同的预约，不可重复预约");
-                map.put("error", "当天已有相同的预约，不可重复预约！");
+                logger.info("该用户当天已有同一发型师的预约，为避免刷单，禁止重复预约！");
+                map.put("error", "当天已有同一发型师的预约，不可重复预约！");
                 return map;
             }
 
             haircutOrderService.save(order);
-            logger.info("id为" + user.getId() + "的用户“" + userName + "”提交了一个对发型师（id=" + hairstylist.getOpenid() + "）“" + hairstylist.getHairstylistName() + "”的订单");
+            logger.info("id为" + user.getId() + "的用户“" + user.getName() + "”提交了一个对发型师（id=" + hairstylist.getOpenid() + "）“" + hairstylist.getHairstylistName() + "”的订单");
             messageController.pushSuccessMessage(order.getId());//给用户发送预约成功的模板消息通知
             map.put("message", "订单提交成功！");
         } catch (Exception e) {
@@ -701,7 +707,8 @@ public class HaircutOrderController {
 
     @ApiOperation(value = "普通用户给该订单的发型师评分")
     @PostMapping("/user/order/rate")
-    public Map rateThisOrder(@RequestParam String myOpenid, @RequestParam Integer orderId, @RequestParam Double point) {
+    public Map rateThisOrder(@RequestParam String myOpenid, @RequestParam Integer orderId, @RequestParam Double point,
+                             @RequestParam(value = "comment", required = false) String comment) {
         Map map = new HashMap();
         try {
 
@@ -736,6 +743,7 @@ public class HaircutOrderController {
 
             //进行评分
             order.setPoint(point);
+            order.setComment(comment);
             haircutOrderService.edit(order);
 
             Hairstylist hairstylist = order.getHairstylist();

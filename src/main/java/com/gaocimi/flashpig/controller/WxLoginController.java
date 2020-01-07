@@ -46,7 +46,6 @@ public class WxLoginController {
                        @RequestParam(value = "rawData", required = false) String rawData,
                        @RequestParam(value = "name", required = false) String name,
                        @RequestParam(value = "pictureUrl", required = false) String pictureUrl,
-                       @RequestParam(value = "sex", required = false, defaultValue = "0") Integer sex,
                        @RequestParam(value = "phoneNum", required = false) String phoneNum) throws WxErrorException {
         Map map = new HashMap();
 
@@ -103,7 +102,6 @@ public class WxLoginController {
             user.setOpenid(session.getOpenid());
             user.setSessionKey(session.getSessionKey());
             user.setName(name);
-            user.setSex(sex);
             user.setPhoneNum(phoneNum);
             user.setPictureUrl(pictureUrl);
             userService.save(user);
@@ -111,8 +109,6 @@ public class WxLoginController {
 
         } else {
             //以前登录过，更新信息
-            if (sex != 0)
-                user.setSex(sex);
             if (name != null)
                 user.setName(name);
 

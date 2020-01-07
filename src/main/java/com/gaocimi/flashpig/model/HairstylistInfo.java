@@ -6,7 +6,9 @@ import lombok.Data;
 
 import java.util.Date;
 
-/**用于“用户-我的发型师”页面的数据存储*/
+/**
+ * 用于“用户-我的发型师”页面的数据存储
+ */
 @Data
 public class HairstylistInfo {
     private int hairstylistId;
@@ -14,6 +16,7 @@ public class HairstylistInfo {
     private ShopSimpleInfo shop;
     private String personalPhotoUrl;
     private Double point;
+    private Integer orderSum;
     private Integer businessStatus;
     private Date recordCreatTime;
 
@@ -23,8 +26,9 @@ public class HairstylistInfo {
         this.shop = collectionRecord.hairstylist.getShopSimpleInfo();
         this.personalPhotoUrl = collectionRecord.hairstylist.getPersonalPhotoUrl();
         this.point = collectionRecord.hairstylist.getPoint();
+        this.orderSum = collectionRecord.hairstylist.getOrderSum();
         this.businessStatus = collectionRecord.hairstylist.getBusinessStatus();
-        this.recordCreatTime =collectionRecord.getCreateTime();
+        this.recordCreatTime = collectionRecord.getCreateTime();
     }
 
     public HairstylistInfo(Hairstylist hairstylist) {
@@ -33,10 +37,12 @@ public class HairstylistInfo {
         this.shop = hairstylist.getShopSimpleInfo();
         this.personalPhotoUrl = hairstylist.getPersonalPhotoUrl();
         this.point = hairstylist.getPoint();
+        this.orderSum = hairstylist.getOrderSum();
         this.businessStatus = hairstylist.getBusinessStatus();
-        this.recordCreatTime =null;
+        this.recordCreatTime = null;
     }
-    public HairstylistInfo(){
+
+    public HairstylistInfo() {
         super();
     }
 }

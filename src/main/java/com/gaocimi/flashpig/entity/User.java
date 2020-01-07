@@ -15,7 +15,7 @@ import java.util.List;
  */
 @Entity
 @Table(name = "user")
-@JsonIgnoreProperties(value = { "openid","userFormidList","haircutOrderList","hairstylistRecordList","articleRecordList","haircutOrderList","handler","hibernateLazyInitializer","fieldHandler"})
+@JsonIgnoreProperties(value = {"sessionKey", "openid","userFormidList","haircutOrderList","hairstylistRecordList","articleRecordList","haircutOrderList","handler","hibernateLazyInitializer","fieldHandler"})
 @Data
 public class User {
 
@@ -25,6 +25,9 @@ public class User {
 
     /** 用户姓名*/
     private String name;
+
+    /** 用户姓名*/
+    private String lastName;
 
     /**用户头像url*/
     private String pictureUrl;

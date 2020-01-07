@@ -1,7 +1,6 @@
 package com.gaocimi.flashpig.model;
 
 import com.gaocimi.flashpig.entity.HaircutOrder;
-import com.gaocimi.flashpig.entity.Hairstylist;
 import lombok.Data;
 
 import java.util.Date;
@@ -35,12 +34,17 @@ public class HairstylistReservation {
     /**
      * 提交预约的用户头像图片url
      */
-    private String imgUrl;
+    private String userHeadImgUrl;
 
     /**
      * 提交预约的用户姓名
      */
     private String userName;
+
+    /**
+     * 提交预约的用户姓氏
+     */
+    private String userLastName;
 
     /**
      * 预约订单中留的电话号码
@@ -84,8 +88,10 @@ public class HairstylistReservation {
         setReservationNum(order.getReservationNum());
         setUserPhone(order.getUserPhone());
         setUserId(order.user.getId());
-        setImgUrl(order.user.getPictureUrl());
-        setUserName(order.getUserName());
+        setUserHeadImgUrl(order.user.getPictureUrl());
+        setUserName(order.user.getName());
+        setUserName(order.user.getName());
+        setUserLastName(order.user.getLastName());
         setCreateTime(order.getCreateTime());
         setBookTime(order.getBookTime());
         setServiceName(order.getServiceName());
@@ -99,8 +105,9 @@ public class HairstylistReservation {
         setReservationNum(order.getReservationNum());
         setUserPhone(order.getUserPhone());
         setUserId(order.user.getId());
-        setImgUrl(order.user.getPictureUrl());
-        setUserName(order.getUserName());
+        setUserHeadImgUrl(order.user.getPictureUrl());
+        setUserName(order.user.getName());
+        setUserLastName(order.user.getLastName());
         setCreateTime(order.getCreateTime());
         setBookTime(order.getBookTime());
         setServiceName(order.getServiceName());

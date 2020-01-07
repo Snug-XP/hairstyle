@@ -18,7 +18,7 @@ import java.util.*;
  */
 @Entity
 @Table(name = "hairstylist")
-@JsonIgnoreProperties(value = {"applyTime","applyResultDescription","openid","shop", "articleList", "getCurrentMonthOrderSum", "allOperationalData", "loyalUserRecordList", "haircutOrderList", "hairstylistImageUrlList", "hairServiceList", "recordToUserList", "userList", "handler", "hibernateLazyInitializer", "fieldHandler"})
+@JsonIgnoreProperties(value = {"completedOrderListAfterSettledTime","applyTime", "applyResultDescription", "openid", "shop", "articleList", "getCurrentMonthOrderSum", "allOperationalData", "loyalUserRecordList", "haircutOrderList", "hairstylistImageUrlList", "hairServiceList", "recordToUserList", "userList", "handler", "hibernateLazyInitializer", "fieldHandler"})
 @Data
 public class Hairstylist {
 
@@ -89,16 +89,26 @@ public class Hairstylist {
      */
     private Integer applyStatus;
 
-    /** 发型师的营业状态（0表示未营业，其它状态表示营业中） */
+    /**
+     * 发型师的营业状态（0表示未营业，其它状态表示营业中）
+     */
     private Integer businessStatus;
 
-    /** 公告 */
-    private String  proclamation;
-    /** 发型师提交入驻门店申请的时间 */
-    private Date  applyTime;
-    /** 发型师申请入驻门店结果的审核说明 */
+    /**
+     * 公告
+     */
+    private String proclamation;
+    /**
+     * 发型师提交入驻门店申请的时间
+     */
+    private Date applyTime;
+    /**
+     * 发型师申请入驻门店结果的审核说明
+     */
     private String applyResultDescription;
-    /** 发型师用于推广的跳向自己主页的小程序码的地址 */
+    /**
+     * 发型师用于推广的跳向自己主页的小程序码的地址
+     */
     private String myAppletCodeUrl;
 
 
@@ -143,10 +153,10 @@ public class Hairstylist {
     public Hairstylist() {
         Date date = new Date(System.currentTimeMillis());
 
-        setApplyStatus(0);
         setCreateTime(date);//设置注册时间
         setOrderSum(0);//根据自己的订单列表（中的已完成）数量进行校正,注册时没有订单，所以为0
-        setPoint(-1.0);
+        setPoint(0.0);
+        setBusinessStatus(0);//设置默认经营状态为暂停营业
     }
 
 
@@ -159,7 +169,7 @@ public class Hairstylist {
 
     public List<String> getAvailableTime() {
 
-        if(this.availableTime==null||this.availableTime.length()<1) return null;
+        if (this.availableTime == null || this.availableTime.length() < 1) return null;
         DateFormat df3 = new SimpleDateFormat("HH:mm:ss");
         ;//只显示出时时分秒（12:43:37）的格式
         List<String> timeList = new ArrayList<>();
@@ -230,22 +240,38 @@ public class Hairstylist {
     }
 
     /**
-     * 获取入驻本门店后的总订单数
+     * 获取入驻本门店后的总完成订单数
      */
-    public int getOrderSumAfterSettledTime() {
-        int count = 0;
+    public int getCompletedOrderSumAfterSettledTime() {
+
+        return getCompletedOrderListAfterSettledTime().size();
+    }
+
+    /**
+     * 获取入驻本门店后的所有已完成订单
+     */
+    public List<HaircutOrder> getCompletedOrderListAfterSettledTime() {
+        List<HaircutOrder> orderList = new ArrayList<>();
         for (HaircutOrder order : haircutOrderList) {
-            if (order.getStatus() == 2&&( this.settledTime==null||order.getBookTime().after(this.settledTime) ) ){
-                count++;
+            if (order.getStatus() == 2 && (this.settledTime == null || order.getBookTime().after(this.settledTime))) {
+                orderList.add(order);
             }
         }
-        return count;
+        return orderList;
+    }
+
+    /**
+     * 获取发型师自己的忠实顾客总数
+     *
+     * @return 忠实顾客总数
+     */
+    public int getLoyalCustomerSum() {
+        return loyalUserRecordList.size();
     }
 
 
-
-
     /**************下面是一些关于发型师数据统计相关的方法*******************************************************************/
+
 
     /**
      * 获取发型师自己的顾客总数
@@ -394,7 +420,7 @@ public class Hairstylist {
         int count = 0;
         Date month = MyUtils.getFirstDayOfMonth(new Date(System.currentTimeMillis()));//获取今天所在月的第一天的日期Date(时间为00:00:00)
         for (HaircutOrder order : haircutOrderList) {
-            if (order.getStatus() == 2 && (this.settledTime==null||order.getBookTime().after(this.settledTime) )&& order.getBookTime().after(month)) {
+            if (order.getStatus() == 2 && (this.settledTime == null || order.getBookTime().after(this.settledTime)) && order.getBookTime().after(month)) {
                 count++;
             }
         }
