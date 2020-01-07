@@ -362,7 +362,7 @@ public class HairstylistController {
         try {
             Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
             if (hairstylist == null) {
-                logger.info("未找到该发型师用户(获取单个发型师信息)");
+                logger.info("未找到该发型师用户(获取单个发型师信息)：openid="+myOpenid);
                 map.put("error", "未找到该发型师用户！！");
                 return map;
             }

@@ -900,6 +900,7 @@ public class ShopController {
                         return map;
                     }
                     hairstylist.setApplyStatus(-1);
+                    hairstylist.setBusinessStatus(0);
                     hairstylistService.edit(hairstylist);
                     logger.info("门店“" + shop.getShopName() + "”(id=" + shop.getId() + ")拒绝id为" + hairstylist.getId() + "的发型师“" + hairstylist.getHairstylistName() + "”的入驻申请");
                     map.put("message", "拒绝该发型师的入驻申请，操作成功");
@@ -945,6 +946,7 @@ public class ShopController {
             hairstylist.setShop(null);
             hairstylist.setSettledTime(null);
             hairstylist.setApplyStatus(0);
+            hairstylist.setBusinessStatus(0);
             hairstylistService.edit(hairstylist);
 
             logger.info("门店“" + shop.getShopName() + "”(id=" + shop.getId() + ")移除了发型师“" + hairstylist.getHairstylistName() + "”(id=" + hairstylist.getId() + ")");
