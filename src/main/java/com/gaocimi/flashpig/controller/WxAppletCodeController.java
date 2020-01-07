@@ -51,7 +51,7 @@ public class WxAppletCodeController {
             }
 
             if (scene == null)
-                scene = "" + myOpenid;
+                scene =hairstylist.getId().toString();
             if (page == null)
                 page = "pages/contentDetail/contentDetail";
             WxMaCodeLineColor wxMaCodeLineColor = new WxMaCodeLineColor("0","0","0");

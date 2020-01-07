@@ -381,7 +381,7 @@ public class HaircutOrderController {
      * @return
      */
     @ApiOperation(value = "发模板信息通知用户前面还有flag个人（flag=0/1/2/-1），当flag=-1时，通知订单已完成，并且根据通知类型改变订单状态" +
-            "（...到时候记得关闭url访问）",notes = "当flag > 0 时，通知用户前面还有flag个人，" +
+            "（...到时候记得关闭url访问）", notes = "当flag > 0 时，通知用户前面还有flag个人，" +
             "并将订单状态改为0（已通知）     当flag = 0 时，通知用户前往接受服务，并将订单状态改为1（进行中）     " +
             "当flag = -1 时，通知用户订单已完成，并将订单状态改为2（已完成）")
     @GetMapping("/hairstylist/notifyUser")
@@ -580,6 +580,8 @@ public class HaircutOrderController {
             calendar.setTime(date);
             //...设计订单的预约号(预约的年月日+0+发型师id+0+用户id+0+用户性别标志)
             String reservationNum = calendar.get(Calendar.YEAR) + "" + calendar.get(Calendar.MONTH) + "" + calendar.get(Calendar.DAY_OF_MONTH) + "0" + hairstylist.getId() + "0" + user.getId() + "0" + user.getSex();
+            if (user.getSex() == null)
+                reservationNum = calendar.get(Calendar.YEAR) + "" + calendar.get(Calendar.MONTH) + "" + calendar.get(Calendar.DAY_OF_MONTH) + "0" + hairstylist.getId() + "0" + user.getId() + "00" ;
             order.setReservationNum(reservationNum);
 
             if (haircutOrderService.findByReservationNum(reservationNum) != null) {
@@ -701,7 +703,7 @@ public class HaircutOrderController {
     @ApiOperation(value = "普通用户给该订单的发型师评分")
     @PostMapping("/user/order/rate")
     public Map rateThisOrder(@RequestParam String myOpenid, @RequestParam Integer orderId, @RequestParam Double point,
-                             @RequestParam(value = "comment",required = false) String comment) {
+                             @RequestParam(value = "comment", required = false) String comment) {
         Map map = new HashMap();
         try {
 

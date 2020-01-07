@@ -313,14 +313,16 @@ public class Shop {
             List<User> customerList = getCustomerList();
             Set<User> loyalCustomerList = getLoyalCustomerList();
             for (User user : customerList) {
+                if(user.getSex()==null) continue;
                 if (user.getSex() == 1) {
                     maleCustomerNum++;
                 }
                 if (user.getSex() == 2) {
-                    maleLoyalCustomerNum++;
+                    femaleCustomerNum++;
                 }
             }
             for (User user : loyalCustomerList) {
+                if(user.getSex()==null) continue;
                 if (user.getSex() == 1) {
                     maleLoyalCustomerNum++;
                 }
@@ -341,7 +343,7 @@ public class Shop {
 
         } catch (Exception e) {
             e.printStackTrace();
-            System.out.println("/n获取门店内顾客男女比例信息发生错误/n");
+            System.out.println("\n获取门店内顾客男女比例信息发生错误\n");
             map.put("error", "获取门店内顾客男女比例信息时发生错误!!");
             return map;
         }
@@ -378,8 +380,8 @@ public class Shop {
             return result;
         } catch (Exception e) {
             e.printStackTrace();
-            System.out.println("/n获取门店内顾客男女比例信息发生错误/n");
-            map.put("error", "获取门店内顾客男女比例信息时发生错误!!");
+            System.out.println("\n获取门店内发型师被预约时间比例信息发生错误\n");
+            map.put("error", "获取门店内发型师被预约时间比例信息发生错误!!");
         }
         return null;
     }
