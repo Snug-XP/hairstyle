@@ -441,13 +441,13 @@ public class HairstylistController {
                 return map;
             }
             List<String> timeList = hairstylist.getAvailableTime();
-            if (hairstylist.getBusinessStatus() == 0 && (timeList == null || timeList.size() == 0) ) {
+            if (hairstylist.getBusinessStatus() == 0 && (timeList == null || timeList.size() == 0)) {
                 logger.info("无可预约时间，打开营业选项失败！");
                 map.put("error", "无可预约时间，打开营业选项失败！");
                 return map;
             }
 
-            if (hairstylist.getBusinessStatus() == 0 && (hairstylist.getHairServiceList() == null || hairstylist.getHairServiceList().size() == 0) ) {
+            if (hairstylist.getBusinessStatus() == 0 && (hairstylist.getHairServiceList() == null || hairstylist.getHairServiceList().size() == 0)) {
                 logger.info("无可预约项目，打开营业选项失败！");
                 map.put("error", "无可预约项目，打开营业选项失败！");
                 return map;
@@ -820,12 +820,12 @@ public class HairstylistController {
 
             //先获取所有的顾客预约数情况列表
             map = getCustomerList(myOpenid);
-            List<CountUser> resultList = (List<CountUser>) map.get("resultList");
 
-            if (resultList == null || resultList.size() == 0) {
-                //发生错误，或者目前没有被预约过，直接返回
+            if (map.get("error")!=null) {
+                //发生错误,直接返回
                 return map;
             }
+            List<CountUser> resultList = (List<CountUser>) map.get("resultList");
             map.clear();
 
             for (int i = 0; i < resultList.size(); ) {
@@ -839,9 +839,24 @@ public class HairstylistController {
                     i++;
                 }
             }
+
+            for (UserToHairstylist record : hairstylist.loyalUserRecordList) {
+                User user = record.user;
+                boolean flag = false;//resulrList中是否含有该忠实用户的标志
+                for (CountUser countUser : resultList) {
+                    if (user.getId() == countUser.getUserId()) {
+                        flag = true;
+                        break;
+                    }
+                }
+                if(!flag)//resulrList不包括该忠实用户
+                    resultList.add(new CountUser(user));
+            }
+
+
             map.put("resultList", resultList);
             if (resultList.size() == 0)
-                map.put("message", "你目前没有忠实顾客!");
+                map.put("message", "目前没有用户关注你哦!");
             return map;
         } catch (Exception e) {
             logger.error(e.getMessage());
@@ -851,6 +866,7 @@ public class HairstylistController {
             return map;
         }
     }
+
 
     @ApiOperation(value = "获取个人的所有顾客预约数情况列表（降序排序）  -  用于“发型师-数据中心-顾客列表”")
     @GetMapping("/hairstylist/getCustomerList")
@@ -863,8 +879,8 @@ public class HairstylistController {
                 map.put("error", "对不起，你不是发型师用户，无权操作！！");
                 return map;
             }
-            List<CountUser> resultList = new ArrayList<>();
 
+            List<CountUser> resultList = new ArrayList<>();
             List<HaircutOrder> orderList = hairstylist.getHaircutOrderList();
             HaircutOrder order;
             while (orderList.size() > 0) {
@@ -1290,11 +1306,11 @@ public class HairstylistController {
     @GetMapping("/user/getHairstylistRecommendedList")
     public Map getHairstylistRecommendedList(@RequestParam Double longitude,
                                              @RequestParam Double latitude,
-                                             @RequestParam(value = "distance",defaultValue = "5") Integer distance) {
+                                             @RequestParam(value = "distance", defaultValue = "5") Integer distance) {
         Map map = new HashMap();
         try {
 
-            Double radius = 0.01*distance;
+            Double radius = 0.01 * distance;
             List<Shop> shopList = shopService.getShopsByRadius(longitude, latitude, radius);
             List<Hairstylist> tempHairstylists = new ArrayList<>();
 
@@ -1335,13 +1351,13 @@ public class HairstylistController {
     @GetMapping("/user/getLocalHairstylists")
     public Map getLocalHairstylists(@RequestParam Double longitude,
                                     @RequestParam Double latitude, @RequestParam Integer flag,
-                                    @RequestParam(value = "distance",defaultValue = "5") Integer distance,
+                                    @RequestParam(value = "distance", defaultValue = "5") Integer distance,
                                     @RequestParam(name = "pageNum", defaultValue = "0") int pageNum,
                                     @RequestParam(name = "pageSize", defaultValue = "10") int pageSize) {
         Map map = new HashMap();
         try {
 
-            Double radius = 0.01*distance;//范围表示为distance公里
+            Double radius = 0.01 * distance;//范围表示为distance公里
             List<Shop> shopList = shopService.getShopsByRadius(longitude, latitude, radius);
             List<HairstylistInfo> resultList = new ArrayList<>();
 
