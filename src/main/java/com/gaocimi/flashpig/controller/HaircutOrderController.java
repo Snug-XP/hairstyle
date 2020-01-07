@@ -568,6 +568,11 @@ public class HaircutOrderController {
                     map.put("error", "时间转换失败，请检查预约的时间格式：“yyyy-MM-dd HH:mm:ss”");
                     return map;
                 }
+                if(date.before(new Date(System.currentTimeMillis()))){
+                    logger.info("用户提交了当前时间之前的时间（" + bookTime + "），预约失败");
+                    map.put("error", "请选择当前时刻之后的可预约时间！");
+                    return map;
+                }
             } catch (Exception e) {
                 logger.error(e.getMessage());
                 logger.info("时间转换失败，请检查时间格式（传入数据：" + bookTime + "）");
