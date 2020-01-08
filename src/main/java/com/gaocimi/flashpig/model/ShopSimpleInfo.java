@@ -9,6 +9,7 @@ public class ShopSimpleInfo {
     private int id;
     private String shopName;
     private String address;
+    private String logoUrl;
     private Integer applyStatus;
 
     public ShopSimpleInfo(Shop shop) {
@@ -16,6 +17,7 @@ public class ShopSimpleInfo {
             this.id = shop.getId();
             this.shopName = shop.getShopName();
             this.address = shop.getProvince() + " " + shop.getCity() + " " + shop.getDistrict() + " " + shop.getAddress();
+            this.logoUrl = shop.getLogoUrl();
             this.applyStatus = shop.getApplyStatus();
         }
     }

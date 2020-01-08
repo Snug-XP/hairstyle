@@ -89,12 +89,12 @@ class AdministratorController {
 
                 switch (decide) {
                     case 1:
-                        pushWxMsg.pushApplyResultMessage2(shopId);
                         shop.setApplyStatus(1);
                         shop.setApplyTime(new Date(System.currentTimeMillis()));
                         shopService.edit(shop);
                         logger.info("管理员“" + administrator.getName() + "”(id=" + administrator.getId() + ")同意了id为" + shop.getId() + "的发型师“" + shop.getShopName() + "”的认证");
                         map.put("message", "同意该门店认证，操作成功");
+                        pushWxMsg.pushApplyResultMessage2(shopId);
                         break;
                     case -1:
                         shop.setApplyStatus(-1);
