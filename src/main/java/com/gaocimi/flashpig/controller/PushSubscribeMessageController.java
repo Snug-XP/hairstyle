@@ -264,18 +264,18 @@ public class PushSubscribeMessageController {
         String resultString;
         String resultDescriptionString;
 
-        DateFormat df2 = DateFormat.getDateTimeInstance();
-        applyTimeString = df2.format(hairstylist.getApplyTime());
+        SimpleDateFormat df =new SimpleDateFormat("yyyy年MM月dd日 HH:mm:ss");
+        applyTimeString = df.format(hairstylist.getApplyTime());
 
         switch (hairstylist.getApplyStatus()) {
-            case -1:
+            case 1:
                 resultString = "通过";
                 break;
-            case 1:
+            case -1:
                 resultString = "未通过";
                 break;
             case 0:
-                resultString = "审核中..";
+                resultString = "审核中";
                 break;
             default:
                 resultString = "状态异常";
@@ -285,6 +285,8 @@ public class PushSubscribeMessageController {
             resultDescriptionString = "无";
         else
             resultDescriptionString = hairstylist.getApplyResultDescription();
+
+
 
 
 //        logger.info("获取到的预约时间："+bookTimeString);
@@ -321,11 +323,11 @@ public class PushSubscribeMessageController {
                 return map;
             }
 
-            if (shop.getOperatingLicensePictureUrl() == null) {
-                logger.info("该门店" + shop.getShopName() + "(id=" + shopId + ")没有提交过经营认定的申请，无法发送订阅消息！");
-                map.put("error","该门店没有提交过经营认定的申请，无法发送订阅消息！！");
-                return map;
-            }
+//            if (shop.getOperatingLicensePictureUrl() == null) {
+//                logger.info("该门店" + shop.getShopName() + "(id=" + shopId + ")没有提交过经营认定的申请，无法发送订阅消息！");
+//                map.put("error","该门店没有提交过经营认定的申请，无法发送订阅消息！！");
+//                return map;
+//            }
             if (shop.getApplyTime() == null) {
                 logger.info("该门店" + shop.getShopName() + "(id=" + shopId + ")发送审核结果通知时发现没有提交申请的时间，无法发送订阅消息");
                 map.put("error","缺失该门店提交经营认定申请的时间！无法发送订阅消息");

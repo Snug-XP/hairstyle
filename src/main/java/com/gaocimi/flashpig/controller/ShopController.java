@@ -888,6 +888,7 @@ public class ShopController {
                     Date date = new Date(System.currentTimeMillis());
                     hairstylist.setSettledTime(date);//设置发型师入驻门店的时间
                     hairstylist.setApplyStatus(1);
+                    hairstylist.setBusinessStatus(0);
                     hairstylistService.edit(hairstylist);
                     logger.info("门店“" + shop.getShopName() + "”(id=" + shop.getId() + ")同意id为" + hairstylist.getId() + "的发型师“" + hairstylist.getHairstylistName() + "”的入驻申请");
                     map.put("message", "同意该发型师的入驻申请，操作成功");

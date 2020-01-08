@@ -104,6 +104,7 @@ public class HairstylistController {
             hairstylist.setPersonalPhone(personalPhone);
             hairstylist.setPersonalProfile(personalProfile);
             hairstylist.setShop(shop);
+            hairstylist.setApplyTime(new Date(System.currentTimeMillis()));
             hairstylist.setApplyStatus(0);//入驻申请设为“审核中”
 
 
@@ -362,9 +363,13 @@ public class HairstylistController {
         try {
             Hairstylist hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
             if (hairstylist == null) {
-                logger.info("未找到该发型师用户(获取单个发型师信息)：openid="+myOpenid);
+                logger.info("未找到该发型师用户(获取单个发型师信息)：openid=" + myOpenid);
                 map.put("error", "未找到该发型师用户！！");
                 return map;
+            }
+            if (hairstylist.getMyAppletCodeUrl() == null || hairstylist.getMyAppletCodeUrl().length() < 10) {
+                wxAppletCodeController.appletCodeGeneration(hairstylist.getOpenid(), null, null);
+                hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
             }
             map.put("hairstylist", hairstylist);//总预约人数和今日预约人数已经在Hairstylist的get方法里面，会直接被当做属性放进去
             return map;
@@ -384,11 +389,15 @@ public class HairstylistController {
             Hairstylist hairstylist = hairstylistService.findHairstylistById(hairstylistId);
             User user = userService.findUserByOpenid(myOpenid);
             if (hairstylist != null) {
-
-                if (user.isLoyalToHairstylist(hairstylistId))
+                if(hairstylist.getMyAppletCodeUrl()==null||hairstylist.getMyAppletCodeUrl().length()<10){
+                    wxAppletCodeController.appletCodeGeneration(hairstylist.getOpenid(),null,null);
+                    hairstylist = hairstylistService.findHairstylistById(hairstylistId);
+                }
+                if (user != null && user.isLoyalToHairstylist(hairstylistId))
                     map.put("isCollected", "yes");
                 else
                     map.put("isCollected", "no");
+
                 map.put("hairstylist", hairstylist);//总预约人数和今日预约人数已经在Hairstylist的get方法里面，会直接被当做属性放进去
                 return map;
             } else {
@@ -821,7 +830,7 @@ public class HairstylistController {
             //先获取所有的顾客预约数情况列表
             map = getCustomerList(myOpenid);
 
-            if (map.get("error")!=null) {
+            if (map.get("error") != null) {
                 //发生错误,直接返回
                 return map;
             }
@@ -849,7 +858,7 @@ public class HairstylistController {
                         break;
                     }
                 }
-                if(!flag)//resulrList不包括该忠实用户
+                if (!flag)//resulrList不包括该忠实用户
                     resultList.add(new CountUser(user));
             }
 

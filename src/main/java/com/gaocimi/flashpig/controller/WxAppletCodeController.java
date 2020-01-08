@@ -53,7 +53,7 @@ public class WxAppletCodeController {
             if (scene == null)
                 scene =hairstylist.getId().toString();
             if (page == null)
-                page = "pages/contentDetail/contentDetail";
+                page = "pages/shares/shares";
             WxMaCodeLineColor wxMaCodeLineColor = new WxMaCodeLineColor("0","0","0");
             File wxacode = wxService.getQrcodeService().createWxaCodeUnlimit(scene, page ,1,false,wxMaCodeLineColor,false);
             String pathAndName = "hairstylist/" + hairstylist.getId() + "/MyAppletCode/appletCode";
