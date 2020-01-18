@@ -72,6 +72,8 @@ public class TestController {
     @GetMapping("/getDataHour")
     public Map getDataHour() throws ParseException {
         Map map = new HashMap();
+        System.out.printf("你号%n");
+        System.out.println("你号\n");
         Date date = new Date(System.currentTimeMillis());
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(date);

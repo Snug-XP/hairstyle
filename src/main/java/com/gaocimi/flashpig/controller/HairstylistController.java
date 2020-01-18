@@ -1313,11 +1313,21 @@ public class HairstylistController {
 
     @ApiOperation(value = "根据经纬度获取推荐的一位发型师", notes = "从附近门店中随机选取一位发型师,distance表示获取附近的范围距离（单位：公里）")
     @GetMapping("/user/getHairstylistRecommendedList")
-    public Map getHairstylistRecommendedList(@RequestParam Double longitude,
+    public Map getHairstylistRecommendedList(@RequestParam(required = false) String myOpenid,
+                                             @RequestParam Double longitude,
                                              @RequestParam Double latitude,
                                              @RequestParam(value = "distance", defaultValue = "5") Integer distance) {
         Map map = new HashMap();
         try {
+            if(myOpenid!=null)
+            {
+                User user = userService.findUserByOpenid(myOpenid);
+                if(user!=null) {
+                    user.setLongitude(longitude);
+                    user.setLatitude(latitude);
+                    userService.edit(user);
+                }
+            }
 
             Double radius = 0.01 * distance;
             List<Shop> shopList = shopService.getShopsByRadius(longitude, latitude, radius);
@@ -1358,13 +1368,24 @@ public class HairstylistController {
 
     @ApiOperation(value = "根据经纬度获取周围的发型师列表", notes = "从附近门店中获取发型师列表(按照flag排序：flag=0表示按照发型师的评分降序排序，flag=1表示按发型师已完成订单总数降序排序)")
     @GetMapping("/user/getLocalHairstylists")
-    public Map getLocalHairstylists(@RequestParam Double longitude,
+    public Map getLocalHairstylists(@RequestParam(required = false) String myOpenid,
+                                    @RequestParam Double longitude,
                                     @RequestParam Double latitude, @RequestParam Integer flag,
                                     @RequestParam(value = "distance", defaultValue = "5") Integer distance,
                                     @RequestParam(name = "pageNum", defaultValue = "0") int pageNum,
                                     @RequestParam(name = "pageSize", defaultValue = "10") int pageSize) {
         Map map = new HashMap();
         try {
+
+            if(myOpenid!=null)
+            {
+                User user = userService.findUserByOpenid(myOpenid);
+                if(user!=null) {
+                    user.setLongitude(longitude);
+                    user.setLatitude(latitude);
+                    userService.edit(user);
+                }
+            }
 
             Double radius = 0.01 * distance;//范围表示为distance公里
             List<Shop> shopList = shopService.getShopsByRadius(longitude, latitude, radius);

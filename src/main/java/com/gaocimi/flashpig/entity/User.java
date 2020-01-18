@@ -44,6 +44,16 @@ public class User {
     /** 用户微信临时的sessionKey*/
     private String sessionKey;
 
+    /**
+     * 用户最后位置的经度，对于两个接近赤道的点，在纬度相等的情况下： 经度每隔0.00001度，距离相差约1米；每隔0.0001度，距离相差约10米；每隔0.001度，距离相差约100米；
+     */
+    private Double longitude;
+
+    /**
+     * 用户最后位置的纬度，对于两个接近赤道的点，在经度相等的情况下： 纬度每隔0.00001度，距离相差约1.1米；每隔0.0001度，距离相差约11米；每隔0.001度，距离相差约111米；
+     */
+    private Double latitude;
+
     /**用户提交过的订单列表； 定义该User实体所有关联的HaircutOrder实体； 指定mappedBy属性表明该User实体不控制关联关系*/
     @OneToMany(targetEntity = HaircutOrder.class, mappedBy = "user")
     public List<HaircutOrder> haircutOrderList;
