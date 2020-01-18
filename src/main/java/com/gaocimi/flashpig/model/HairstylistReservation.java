@@ -1,9 +1,11 @@
 package com.gaocimi.flashpig.model;
 
+import com.gaocimi.flashpig.entity.ArticleImageUrl;
 import com.gaocimi.flashpig.entity.HaircutOrder;
 import lombok.Data;
 
 import java.util.Date;
+import java.util.List;
 
 /**
  * 用于“发型师-预约列表”页面的数据存储（该类给发型师那边用的）
@@ -81,6 +83,11 @@ public class HairstylistReservation {
      */
     public Double price;
 
+    /**
+     * 该订单选取的文章中的图片url列表
+     */
+    public List<ArticleImageUrl> articleImageUrlList;
+
 
     public HairstylistReservation(int index, HaircutOrder order) {
         setIndex(index);
@@ -98,6 +105,7 @@ public class HairstylistReservation {
         setDescription(order.getDescription());
         setPrice(order.getPrice());
         setStatus(order.getStatus());
+        setArticleImageUrlList(order.getArticleImageUrlList());
     }
 
     public HairstylistReservation(HaircutOrder order) {
@@ -114,6 +122,8 @@ public class HairstylistReservation {
         setDescription(order.getDescription());
         setPrice(order.getPrice());
         setStatus(order.getStatus());
+        setArticleImageUrlList(order.getArticleImageUrlList());
+
     }
     public HairstylistReservation(){
         super();

@@ -144,7 +144,7 @@ public class PushSubscribeMessageController {
                     .toUser(order.user.getOpenid())//要推送的用户openid
                     .templateId("NJQk-0J20gRSjIiklUocZMCaFmkC336gs8sZHrV_Kh4")//推送的模版id（在小程序后台设置）
                     .data(subscribeDataList)//订阅消息
-                    .page("pages/orderDetail/orderDetail")//要跳转到小程序那个页面
+                    .page("pages/orderDetail/orderDetail?orderId="+orderId)//要跳转到小程序那个页面
                     .build();
             //4，发起推送
             try {
