@@ -18,7 +18,7 @@ import java.util.*;
  */
 @Entity
 @Table(name = "hairstylist")
-@JsonIgnoreProperties(value = {"completedOrderListAfterSettledTime","applyTime", "applyResultDescription", "openid", "shop", "articleList", "getCurrentMonthOrderSum", "allOperationalData", "loyalUserRecordList", "haircutOrderList", "hairstylistImageUrlList", "hairServiceList", "recordToUserList", "userList", "handler", "hibernateLazyInitializer", "fieldHandler"})
+@JsonIgnoreProperties(value = {"completedOrderListAfterSettledTime","applyTime", "applyResultDescription", "openid", "shop", "articleList", "allOperationalData", "loyalUserRecordList", "haircutOrderList", "hairstylistImageUrlList", "hairServiceList", "recordToUserList", "userList", "handler", "hibernateLazyInitializer", "fieldHandler"})
 @Data
 public class Hairstylist {
 
@@ -171,7 +171,7 @@ public class Hairstylist {
 
         if (this.availableTime == null || this.availableTime.length() < 1) return null;
         DateFormat df3 = new SimpleDateFormat("HH:mm:ss");
-        ;//只显示出时时分秒（12:43:37）的格式
+        //只显示出时分秒（12:43:37）的格式
         List<String> timeList = new ArrayList<>();
         String[] availableTime = this.availableTime.split(",");
         for (String str : availableTime) {
@@ -187,6 +187,29 @@ public class Hairstylist {
 
         return timeList;
     }
+
+
+    public List<Integer> getAvailableTimeIntegerList() {
+
+        if (this.availableTime == null || this.availableTime.length() < 1) return null;
+        DateFormat df3 = new SimpleDateFormat("HH:mm:ss");
+        //只显示出时时分秒（12:43:37）的格式
+        List<Integer> timeList = new ArrayList<>();
+        String[] availableTime = this.availableTime.split(",");
+        for (String str : availableTime) {
+            int hour;
+            try {
+                hour = Integer.parseInt(str);
+                timeList.add(hour);
+            } catch (Exception e) {
+                System.out.println("可预约时间的小时数转换失败（数据为：" + str + "）");
+                return null;
+            }
+        }
+
+        return timeList;
+    }
+
 
     public void setAvailableTime(List<String> timeList) {
         String str = "";

@@ -10,6 +10,7 @@ import com.gaocimi.flashpig.service.*;
 import com.gaocimi.flashpig.utils.xp.MyUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import org.aspectj.weaver.ast.Or;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +21,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.xml.crypto.Data;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -49,6 +53,8 @@ public class HairstylistController {
     UserService userService;
     @Autowired
     WxAppletCodeController wxAppletCodeController;
+    @Autowired
+    HaircutOrderController haircutOrderController;
 
     @ApiOperation(value = "发型师注册")
     @PostMapping("/hairstylist/register")
@@ -590,9 +596,10 @@ public class HairstylistController {
     }
 
 
-    @ApiOperation(value = "根据发型师id，获取发型师的可预约时间")
+    @ApiOperation(value = "根据发型师id和时间标志，获取发型师的可预约时间",notes = "timeFlag默认为0，表示只获取今天的可预约时间,flag=-1表示获取明天的可预约时间")
     @GetMapping("/getHairstylistTime")
-    public Map getHairstylistTime(@RequestParam Integer hairstylistId) {
+    public Map getHairstylistTime(@RequestParam Integer hairstylistId,
+                                  @RequestParam(defaultValue = "0") int timeFlag) {
         Map map = new HashMap();
         try {
             Hairstylist hairstylist = hairstylistService.findHairstylistById(hairstylistId);
@@ -601,17 +608,58 @@ public class HairstylistController {
                 map.put("error", "未找到该发型师用户！！");
                 return map;
             }
-            map = getTime(hairstylist.getOpenid());
-            List<String> availableTimeList = (List<String>) map.get("availableTimeList");
-            if(availableTimeList==null)
-                return map;
-            //进行去除已预约时间的操作
+//            map = getTime(hairstylist.getOpenid());
+//            List<String> availableTimeList = (List<String>) map.get("availableTimeList");
+//            if(availableTimeList==null)
+//                return map;
+//
+//
+//
 
+            //发型师的所有可预约时间
+            List<Integer> timeList = hairstylist.getAvailableTimeIntegerList();
+
+            //下面去除已被预约的时间
+            List<HaircutOrder> orderList = new ArrayList<>();
+            Date orderBookTime;
+            if (timeFlag == 0 || timeFlag == -1) {
+                //获取今天（0）或明天（-1）的预约列表
+                for (HaircutOrder order : hairstylist.haircutOrderList) {
+                    orderBookTime = order.getBookTime();
+                    Long day = MyUtils.getDifferenceToday(orderBookTime);//取得预约时间与今天23点59分相差的天数
+                    if (day == timeFlag) orderList.add(order);
+                }
+            } else {
+                logger.info("获取今天、明天的可预约时间,flag标志错误：" + timeFlag);
+                map.put("error", "flag标志错误：" + timeFlag);
+                return map;
+            }
+
+            for(HaircutOrder order:orderList){
+                orderBookTime = order.getBookTime();
+                Integer orderHour = MyUtils.getHour(orderBookTime);
+                for(int i=0 ; i<timeList.size(); ){
+                    int hour = timeList.get(i);
+                    if(hour==orderHour){
+                        timeList.remove(i);
+                        logger.info("(获取发型师可预约时间)去除一个已被预约的时间："+orderBookTime);
+                    }else{
+                        i++;
+                    }
+                }
+            }
+            List<String> availableTimeList = new ArrayList<>();
+            DateFormat df3 = new SimpleDateFormat("HH:mm:ss");
+            //只显示出时分秒（12:43:37）的格式
+            for(Integer i : timeList){
+                availableTimeList.add(df3.format(MyUtils.getTime(i)));
+            }
+            map.put("availableTimeList",availableTimeList);
             return map;
         } catch (Exception e) {
             logger.error(e.getMessage());
-            logger.info("获取发型师信息失败！！（后端发生某些错误）");
-            map.put("error", "获取发型师信息失败！！（后端发生某些错误）");
+            logger.info("获取发型师的可预约时间失败！！（后端发生某些错误）");
+            map.put("error", "获取发型师的可预约时间失败！！（后端发生某些错误）");
             e.printStackTrace();
             return map;
         }

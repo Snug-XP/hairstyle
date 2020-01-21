@@ -52,6 +52,7 @@ public class ApplicationRunnerImpl implements ApplicationRunner {
                     pushSubscribeMessageController.pushComingMessage(order.getId());
                 }
             }
+            System.out.println("\n\n");
         }, delay, timeout, TimeUnit.SECONDS);
         //参数第一次执行时间，间隔执行时间,执行时间单位
     }
