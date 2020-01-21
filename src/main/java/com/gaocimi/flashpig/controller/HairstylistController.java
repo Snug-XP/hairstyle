@@ -598,10 +598,15 @@ public class HairstylistController {
             Hairstylist hairstylist = hairstylistService.findHairstylistById(hairstylistId);
             if (hairstylist == null) {
                 logger.info("未找到该发型师用户(获取发型师的可预约时间)");
-                map.put("error", "未找到该发型师用户！！·");
+                map.put("error", "未找到该发型师用户！！");
                 return map;
             }
             map = getTime(hairstylist.getOpenid());
+            List<String> availableTimeList = (List<String>) map.get("availableTimeList");
+            if(availableTimeList==null)
+                return map;
+            //进行去除已预约时间的操作
+
             return map;
         } catch (Exception e) {
             logger.error(e.getMessage());

@@ -534,7 +534,7 @@ public class HaircutOrderController {
     @PostMapping("/user/addHaircutOrder")
     public Map addHaircutOrder(@RequestParam String myOpenid, @RequestParam String userPhone,
                                @RequestParam Integer hairstylistId, @RequestParam String bookTime,
-                               @RequestParam Integer serviceId, @RequestParam(value = "atticleId",required = false) Integer articleId) {
+                               @RequestParam Integer serviceId, @RequestParam(value = "articleId",required = false) Integer articleId) {
         Map map = new HashMap();
         try {
 
@@ -552,6 +552,8 @@ public class HaircutOrderController {
                 Article article = articleService.findArticleById(articleId);
                 if (article != null)
                     order.setArticle(article);//设置选取文章
+            } else {
+                logger.info("该订单未添加参照文章~");
             }
 
             order.setUser(user);//设置提交该订单的用户
