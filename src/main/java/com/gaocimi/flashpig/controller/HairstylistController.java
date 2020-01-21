@@ -596,7 +596,7 @@ public class HairstylistController {
     }
 
 
-    @ApiOperation(value = "根据发型师id和时间标志，获取发型师的可预约时间",notes = "timeFlag默认为0，表示只获取今天的可预约时间,flag=-1表示获取明天的可预约时间")
+    @ApiOperation(value = "根据发型师id和时间标志，获取发型师的可预约时间列表",notes = "timeFlag默认为0，表示只获取今天的可预约时间,timeFlag=-1表示获取明天的可预约时间")
     @GetMapping("/getHairstylistTime")
     public Map getHairstylistTime(@RequestParam Integer hairstylistId,
                                   @RequestParam(defaultValue = "0") int timeFlag) {
@@ -630,7 +630,7 @@ public class HairstylistController {
                     if (day == timeFlag) orderList.add(order);
                 }
             } else {
-                logger.info("获取今天、明天的可预约时间,flag标志错误：" + timeFlag);
+                logger.info("(获取发型师可预约时间)获取今天、明天的可预约时间,flag标志错误：" + timeFlag);
                 map.put("error", "flag标志错误：" + timeFlag);
                 return map;
             }
