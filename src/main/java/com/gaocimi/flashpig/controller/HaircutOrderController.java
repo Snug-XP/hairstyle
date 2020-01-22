@@ -132,7 +132,7 @@ public class HaircutOrderController {
                 map.put("error", "对不起，你不是发型师用户，无权操作！！");
                 return map;
             }
-            List<HaircutOrder> tempOrderList = hairstylist.haircutOrderList;
+            List<HaircutOrder> tempOrderList = hairstylist.getHaircutOrderList();
             List<HaircutOrder> resultOrderList = new ArrayList<>();
             Date orderBookTime;
 

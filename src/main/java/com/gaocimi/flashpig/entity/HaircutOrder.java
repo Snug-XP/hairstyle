@@ -40,21 +40,21 @@ public class HaircutOrder {
      * 提交该订单的用户； 定义名为user_id的外键列，该外键引用user表的主键(id)列,采用懒加载
      */
     @ManyToOne(targetEntity = User.class, fetch = FetchType.EAGER)
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(name = "user_id")
     public User user;
 
     /**
      * 该订单中用户选择的文章； 定义名为article_id的外键列，该外键引用article表的主键(id)列,采用懒加载
      */
     @ManyToOne(targetEntity = Article.class, fetch = FetchType.EAGER)
-    @JoinColumn(name = "article_id", nullable = false)
+    @JoinColumn(name = "article_id")
     public Article article;
 
     /**
      * 该订单对应的发型师； 定义名为hairstylist_id的外键列，该外键引用hairstylist表的主键(id)列,采用急加载
      */
     @ManyToOne(targetEntity = Hairstylist.class, fetch = FetchType.EAGER)
-    @JoinColumn(name = "hairstylist_id", nullable = false)
+    @JoinColumn(name = "hairstylist_id")
     public Hairstylist hairstylist;
 
     /**
