@@ -53,6 +53,11 @@ public class WxPayOrder {
     private Date createTime;
 
     /**
+     * 支付订单的结束时间
+     */
+    private Date endTime;
+
+    /**
      * 订单状态，“0”表示未完成，“1”表示支付已完成
      */
     @Column(nullable = false)

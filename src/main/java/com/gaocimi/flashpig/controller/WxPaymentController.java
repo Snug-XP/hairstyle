@@ -6,21 +6,23 @@ import com.gaocimi.flashpig.result.ResponseResult;
 import com.gaocimi.flashpig.service.UserService;
 import com.gaocimi.flashpig.service.WxPayOrderService;
 import com.gaocimi.flashpig.utils.xp.IpUtil;
-import com.gaocimi.flashpig.utils.xp.MyUtils;
-import com.github.binarywang.wxpay.bean.order.WxPayAppOrderResult;
+import com.github.binarywang.wxpay.bean.notify.WxPayNotifyResponse;
+import com.github.binarywang.wxpay.bean.notify.WxPayOrderNotifyResult;
 import com.github.binarywang.wxpay.bean.order.WxPayMpOrderResult;
 import com.github.binarywang.wxpay.bean.request.WxPayUnifiedOrderRequest;
-import com.github.binarywang.wxpay.bean.result.WxPayUnifiedOrderResult;  //统一下单所需参数类
+import com.github.binarywang.wxpay.bean.result.BaseWxPayResult;
 import com.github.binarywang.wxpay.exception.WxPayException;
 import com.github.binarywang.wxpay.service.WxPayService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -95,7 +97,7 @@ public class WxPaymentController {
 //            logger.info(map.toString());
             return map;
         } catch (Exception e) {
-            logger.error("【微信支付】支付失败(订单号={}) 原因:“{}”", payOrder.getId(), e.getMessage());
+            logger.error("【微信支付】生成支付订单失败(订单号={}) 原因:“{}”", payOrder.getId(), e.getMessage());
             map.put("error", "支付失败," + e.getMessage());
             e.printStackTrace();
             wxPayOrderService.delete(payOrder.getId());
@@ -148,12 +150,55 @@ public class WxPaymentController {
         }
     }
 
+//
+//    @ApiOperation(value = "支付结果收集处理")
+//    @PostMapping("/notify")
+//    public boolean notify(@RequestParam Map<String, Object> map) {
+//        logger.info("\n\n支付结果:\n" + map + "\n\n");
+//        return true;
+//    }
 
-    @ApiOperation(value = "支付结果收集处理")
-    @PostMapping("/notify")
-    public boolean notify(@RequestParam Map<String, Object> map) {
-        logger.info("\n\n支付结果:\n" + map + "\n\n");
-        return true;
+    @SuppressWarnings("deprecation")
+    @ApiOperation("微信支付回调地址")
+    @PostMapping("/notify") // 返回订单号
+    public String payNotify(HttpServletRequest request, HttpServletResponse response) {
+        logger.info("======================>>>微信支付回调<<======================");
+        logger.info("======================>>>微信支付回调<<======================");
+        try {
+
+            String xmlResult = IOUtils.toString(request.getInputStream(), request.getCharacterEncoding());
+            WxPayOrderNotifyResult notifyResult = wxPayService.parseOrderNotifyResult(xmlResult);
+
+
+            if("SUCCESS".equals(notifyResult.getResultCode())) {
+                // 结果正确 outTradeNo
+                Integer orderId = Integer.parseInt(notifyResult.getOutTradeNo());
+                String tradeNo = notifyResult.getTransactionId();
+                String totalFee = BaseWxPayResult.fenToYuan(notifyResult.getTotalFee());
+                WxPayOrder payOrder = wxPayOrderService.findWxPayOrderById(orderId);
+                if(payOrder!=null){
+                    payOrder.setStatus(1);//订单已完成
+                    payOrder.setEndTime(new Date());
+                    wxPayOrderService.edit(payOrder);
+                }
+
+                logger.info("微信订单号==>{}元", tradeNo);
+                logger.info("数据库订单号==>{}元", orderId);
+                logger.info("付款总金额==>{}元", totalFee);
+                logger.info("付款人==>{}(id={})\n\n",payOrder.getUser().getName(),payOrder.getUser().getId());
+                logger.info("付款人联系电话==>{}",payOrder.getUser().getPhoneNum());
+            }
+
+            // 自己处理订单的业务逻辑，需要判断订单是否已经支付过，否则可能会重复调用
+            // 通知微信.异步确认成功.必写.不然会一直通知后台.十次之后就认为交易失败了.
+
+            return WxPayNotifyResponse.success("成功");
+        } catch (Exception e) {
+            logger.error("微信回调结果异常,异常原因{}", e.getMessage());
+            // WxPayNotifyResponse.fail(e.getMessage());
+
+            return WxPayNotifyResponse.success("code:"+9999+"微信回调结果异常,异常原因:"+e.getMessage());
+        }
     }
 
 
