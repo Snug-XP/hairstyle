@@ -38,7 +38,6 @@ public class WxMaConfiguration {
         config.setToken(this.SystemConfigProperty.getToken());
         config.setAesKey(this.SystemConfigProperty.getAesKey());
         config.setMsgDataFormat(this.SystemConfigProperty.getMsgDataFormat());
-
         return config;
     }
 

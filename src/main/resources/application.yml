@@ -92,11 +92,13 @@ wechat:
     appid: wx0eebc4a396708dee
     secret: ff3774682602c7c21040c09ce1bf9ea1
 
-    mchId: 1518642251
+    mchId: 1577174041
     keyPath: classpath:apiclient_cert.p12
     subMchId:
-    aesKey: 0355ddfe39dd854d911d0c19a99509d0
-    mchKey: 0355ddfe39dd854d911d0c19a99509d1
+    aesKey:
+    mchKey: jianzhaoxiaochengxu13067273603yd
+#    aesKey: 0355ddfe39dd854d911d0c19a99509d0
+#    mchKey: 0355ddfe39dd854d911d0c19a99509d1
     token: 1998
     subAppId:
   message:
