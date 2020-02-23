@@ -49,8 +49,8 @@ public class WxPaymentController {
      * 调用统一下单接口，获取“预支付交易会话标识”
      */
     @ApiOperation(value = "调用统一下单接口，获取“预支付交易会话标识”")
-    @PostMapping("/unifiedOrder")
-    public Map unifiedOrder(HttpServletRequest request,@RequestParam String myOpenid, @RequestParam Integer money) throws WxPayException {
+    @PostMapping("/creatPayOrder")
+    public Map creatPayOrder(HttpServletRequest request,@RequestParam String myOpenid, @RequestParam Integer money) throws WxPayException {
         Map map = new HashMap();
 
         User user= userService.findUserByOpenid(myOpenid);
@@ -81,9 +81,8 @@ public class WxPaymentController {
             //用户IP地址
             orderRequest.setSpbillCreateIp(IpUtil.getIpAddress(request));
             orderRequest.setNotifyUrl("https://xp.1998pic.cn:8080/notify");
-            map.put("orderResult",wxPayService.createOrder(orderRequest));
+            map.put("orderResult",wxPayService.createOrder(orderRequest));//createOrder()会调用统一下单接口，获取“预支付交易会话标识，并生成二次签名，将结果返回前端
             logger.info(map.toString());
-
             return map;
         } catch (Exception e) {
             logger.error("【微信支付】支付失败(订单号={}) 原因:“{}”", payOrder.getId(), e.getMessage());
