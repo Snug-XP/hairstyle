@@ -58,4 +58,8 @@ public class WxPayOrder {
     @Column(nullable = false)
     private Integer status;
 
+    /**
+     * 调用统一下单接口后生成的预订单id
+     */
+    private String prepayId;
 }
