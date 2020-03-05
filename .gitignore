@@ -34,3 +34,5 @@ out
 gen
 /log/
 /target/
+
+!/src/main/resources/application.yml
