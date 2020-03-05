@@ -7,15 +7,20 @@ import com.gaocimi.flashpig.result.ResponseResult;
 import com.gaocimi.flashpig.service.ArticleService;
 import com.gaocimi.flashpig.service.HairstylistService;
 import com.gaocimi.flashpig.service.ShopService;
+import com.gaocimi.flashpig.utils.xp.IpUtil;
 import com.gaocimi.flashpig.utils.xp.MyUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletRequest;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -25,6 +30,7 @@ import java.util.*;
 @ResponseResult
 @Api(value = "测试controller", description = "测试一些功能")
 public class TestController {
+    private static Logger logger = LoggerFactory.getLogger(WxPaymentController.class);
 
     @Autowired
     ArticleService articleService;
@@ -79,8 +85,8 @@ public class TestController {
         return map;
     }
 
-    @ApiOperation(value = "对象比较测试", produces = "application/json")
-    @GetMapping("/stringTest")
+    @ApiOperation(value = "对象比较测试(订单号1，订单号2)", produces = "application/json")
+    @GetMapping("/equalTest")
     public boolean TestString(Integer a,Integer b) {
 
         Article article1 = articleService.findArticleById(a);
@@ -100,5 +106,23 @@ public class TestController {
         Pageable pageable = PageRequest.of(pageNum, pageSize, sort);
         Page<Hairstylist> page = new PageImpl<>(list, pageable, 5*list.size());
         return page;
+    }
+
+
+
+    @ApiOperation(value = "获取用户ip测试", produces = "application/json")
+    @GetMapping("/getUserIpTest")
+    public Map getUserIpTest(HttpServletRequest request) {
+        Map map = new HashMap();
+        String ip = IpUtil.getIpAddress(request);
+        logger.info("用户ip:"+ip);
+        map.put("ip",ip);
+        return map;
+    }
+
+    @ApiOperation(value = "获取数据测试", produces = "application/json")
+    @PostMapping("/recipeData")
+    public void notify(@RequestParam Map<String,Object> map){
+        logger.info("\n获取的数据:\n"+map+"\n");
     }
 }

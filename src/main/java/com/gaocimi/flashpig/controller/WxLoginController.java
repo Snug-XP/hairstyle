@@ -153,6 +153,13 @@ public class WxLoginController {
         // 解密用户电话信息
         WxMaPhoneNumberInfo userInfo = this.wxService.getUserService().getPhoneNoInfo(sessionKey, encryptedData, iv);
 //        System.out.println("获取到用户电话号码： "+userInfo+"\n");
+        try {
+            user.setPhoneNum(userInfo.getPhoneNumber());
+            userService.edit(user);
+        }catch (Exception e){
+            logger.error("往数据库存储用户电话号码时发生错误！错误信息："+e.getCause());
+        }
+
         map.put("userInfo", userInfo);
         return map;
     }

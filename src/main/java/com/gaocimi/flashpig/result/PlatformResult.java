@@ -30,12 +30,13 @@ public class PlatformResult implements Result {
 
     private Object data;
 
-    private Date timestamp;
+    private Date time;
 
     public static PlatformResult success() {
         PlatformResult result = new PlatformResult();
         result.setResultCode(ResultCode.SUCCESS);
         result.setData(new Date());
+        result.setTime(new Date());
         return result;
     }
 
@@ -44,6 +45,7 @@ public class PlatformResult implements Result {
         result.setResultCode(ResultCode.SUCCESS);
         if(data==null){ result.setData(new Date()); }
         else{ result.setData(data); }
+        result.setTime(new Date());
         return result;
     }
 
@@ -51,6 +53,7 @@ public class PlatformResult implements Result {
         PlatformResult result = new PlatformResult();
         result.setResultCode(resultCode);
         result.setData(new Date());
+        result.setTime(new Date());
         return result;
     }
 
@@ -59,6 +62,7 @@ public class PlatformResult implements Result {
         result.setResultCode(resultCode);
         if(data==null){ result.setData(new Date()); }
         else{ result.setData(data); }
+        result.setTime(new Date());
         return result;
     }
 
@@ -66,6 +70,7 @@ public class PlatformResult implements Result {
         PlatformResult result = new PlatformResult();
         result.setCode(ResultCode.PARAM_IS_INVALID.code());
         result.setMsg(message);
+        result.setTime(new Date());
         return result;
     }
 
@@ -80,8 +85,8 @@ public class PlatformResult implements Result {
         if(null == this.data){
             this.setData(new Object());
         }
-        if(null==this.timestamp){
-            this.timestamp=new Date();
+        if(null==this.time){
+            this.time =new Date();
         }
         return JSON.toJSONString(this);
     }

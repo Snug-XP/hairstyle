@@ -48,7 +48,7 @@ public class ResponseResultHandler implements ResponseBodyAdvice<Object> {
                         .code(defaultErrorResult.getCode())
                         .msg(defaultErrorResult.getMessage())
                         .data(defaultErrorResult.getErrors())
-                        .timestamp(new Date())
+                        .time(new Date())
                         .build();
             }else if(body instanceof PlatformResult){
                 PlatformResult platformResult = (PlatformResult) body;
@@ -56,7 +56,7 @@ public class ResponseResultHandler implements ResponseBodyAdvice<Object> {
                         .code(platformResult.getCode())
                         .msg(platformResult.getMsg())
                         .data(platformResult.getData())
-                        .timestamp(new Date())
+                        .time(new Date())
                         .build();
             }else {
                 return PlatformResult.success(body);

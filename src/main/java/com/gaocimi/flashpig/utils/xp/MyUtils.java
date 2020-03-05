@@ -15,10 +15,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -225,7 +222,8 @@ public class MyUtils {
         try {
             //13********* ,15********,18*********
             Pattern p = Pattern
-                    .compile("^((13[0-9])|(15[^4,\\D])|(18[0,5-9]))\\d{8}$");
+                    .compile("^(1)\\d{10}$");
+//                    .compile("^((13[0-9])|(14[5,7,9])|(15([0-3]|[5-9]))|(166)|(17[0,1,3,5,6,7,8])|(18[0-9])|(19[8|9]))\\d{8}$");
             Matcher m = p.matcher(mobiles);
             flag = m.matches();
         } catch (Exception e) {
@@ -357,4 +355,24 @@ public class MyUtils {
         calendar.setTime(date);
         return calendar.getTimeInMillis();
     }
+
+    /**
+     * 获取时间戳
+     * 时间戳从1970年1月1日00:00:00至今的秒数
+     */
+    public static long getTimeStamp() {
+        Date d = new Date();
+        long timeStamp = d.getTime();     //getTime()得到的是微秒
+        return timeStamp;
+    }
+
+
+    /**
+     * 获取32位随机串
+     */
+    public static String getNonceStr() {
+        String s = UUID.randomUUID().toString().replace("-", "");
+        return s;
+    }
+
 }

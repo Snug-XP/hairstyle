@@ -43,6 +43,8 @@ public class HaircutOrderController {
     @Autowired
     HairServiceService hairServiceService;
     @Autowired
+    ArticleService articleService;
+    @Autowired
     PushTemplateMessageController messageController;
     @Autowired
     PushSubscribeMessageController pushWxMsg;
@@ -130,7 +132,7 @@ public class HaircutOrderController {
                 map.put("error", "对不起，你不是发型师用户，无权操作！！");
                 return map;
             }
-            List<HaircutOrder> tempOrderList = hairstylist.haircutOrderList;
+            List<HaircutOrder> tempOrderList = hairstylist.getHaircutOrderList();
             List<HaircutOrder> resultOrderList = new ArrayList<>();
             Date orderBookTime;
 
@@ -531,7 +533,8 @@ public class HaircutOrderController {
     @ApiOperation(value = "普通用户提交预约订单")
     @PostMapping("/user/addHaircutOrder")
     public Map addHaircutOrder(@RequestParam String myOpenid, @RequestParam String userPhone,
-                               @RequestParam Integer hairstylistId, @RequestParam String bookTime, @RequestParam Integer serviceId) {
+                               @RequestParam Integer hairstylistId, @RequestParam String bookTime,
+                               @RequestParam Integer serviceId, @RequestParam(value = "articleId",required = false) Integer articleId) {
         Map map = new HashMap();
         try {
 
@@ -545,12 +548,20 @@ public class HaircutOrderController {
             }
             Hairstylist hairstylist = hairstylistService.findHairstylistById(hairstylistId);
             HairService hairService = hairServiceService.findHairServiceById(serviceId);
+            if(articleId != null) {
+                Article article = articleService.findArticleById(articleId);
+                if (article != null)
+                    order.setArticle(article);//设置选取文章
+            } else {
+                logger.info("该订单未添加参照文章~");
+            }
 
             order.setUser(user);//设置提交该订单的用户
             order.setHairstylist(hairstylist);//设置该订单对应的发型师
             order.setServiceName(hairService.getServiceName());//设置选取的服务项目名称
             order.setDescription(hairService.getDescription());//设置选取的服务项目描述
             order.setPrice(hairService.getPrice());//设置选取的服务项目大致价格
+
 
             order.setUserPhone(userPhone);//设置联系方式
             order.setStatus(-1);//设置订单状态为"待完成"
@@ -568,7 +579,7 @@ public class HaircutOrderController {
                     map.put("error", "时间转换失败，请检查预约的时间格式：“yyyy-MM-dd HH:mm:ss”");
                     return map;
                 }
-                if(date.before(new Date(System.currentTimeMillis()))){
+                if (date.before(new Date(System.currentTimeMillis()))) {
                     logger.info("用户提交了当前时间之前的时间（" + bookTime + "），预约失败");
                     map.put("error", "请选择当前时刻之后的可预约时间！");
                     return map;
@@ -586,7 +597,7 @@ public class HaircutOrderController {
             //...设计订单的预约号(预约的年月日+0+发型师id+0+用户id+0+用户性别标志)
             String reservationNum = calendar.get(Calendar.YEAR) + "" + calendar.get(Calendar.MONTH) + "" + calendar.get(Calendar.DAY_OF_MONTH) + "0" + hairstylist.getId() + "0" + user.getId() + "0" + user.getSex();
             if (user.getSex() == null)
-                reservationNum = calendar.get(Calendar.YEAR) + "" + calendar.get(Calendar.MONTH) + "" + calendar.get(Calendar.DAY_OF_MONTH) + "0" + hairstylist.getId() + "0" + user.getId() + "00" ;
+                reservationNum = calendar.get(Calendar.YEAR) + "" + calendar.get(Calendar.MONTH) + "" + calendar.get(Calendar.DAY_OF_MONTH) + "0" + hairstylist.getId() + "0" + user.getId() + "00";
             order.setReservationNum(reservationNum);
 
             if (haircutOrderService.findByReservationNum(reservationNum) != null) {
