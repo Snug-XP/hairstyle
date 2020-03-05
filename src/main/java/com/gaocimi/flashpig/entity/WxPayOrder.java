@@ -43,9 +43,9 @@ public class WxPayOrder {
     private Integer money;
 
     /**
-     * 支付订单的备注
+     * 支付订单的商品名称（类似备注）
      */
-    private String note;
+    private String body;
 
     /**
      * 支付订单的创建时间

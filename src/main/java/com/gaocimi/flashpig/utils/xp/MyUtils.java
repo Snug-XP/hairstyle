@@ -362,7 +362,7 @@ public class MyUtils {
      */
     public static long getTimeStamp() {
         Date d = new Date();
-        long timeStamp = d.getTime() / 1000;     //getTime()得到的是微秒， 需要换算成秒
+        long timeStamp = d.getTime();     //getTime()得到的是微秒
         return timeStamp;
     }
 
@@ -374,4 +374,5 @@ public class MyUtils {
         String s = UUID.randomUUID().toString().replace("-", "");
         return s;
     }
+
 }

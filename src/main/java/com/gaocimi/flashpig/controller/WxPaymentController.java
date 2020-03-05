@@ -2,7 +2,6 @@ package com.gaocimi.flashpig.controller;
 
 import com.gaocimi.flashpig.entity.User;
 import com.gaocimi.flashpig.entity.WxPayOrder;
-import com.gaocimi.flashpig.result.ResponseResult;
 import com.gaocimi.flashpig.service.UserService;
 import com.gaocimi.flashpig.service.WxPayOrderService;
 import com.gaocimi.flashpig.utils.xp.IpUtil;
@@ -33,7 +32,6 @@ import java.util.Map;
  * @decription 微信用户进行支付操作的相关处理
  */
 @RestController
-@ResponseResult
 @Api(value = "微信支付相关操作", description = "微信用户进行支付操作的相关处理")
 public class WxPaymentController {
 
@@ -53,7 +51,10 @@ public class WxPaymentController {
      */
     @ApiOperation(value = "调用统一下单接口，获取“预支付交易会话标识”")
     @PostMapping("/creatPayOrder")
-    public Map creatPayOrder(HttpServletRequest request, @RequestParam String myOpenid, @RequestParam Integer money) throws WxPayException {
+    public Map creatPayOrder(HttpServletRequest request,
+                             @RequestParam String myOpenid,
+                             @RequestParam Integer money,
+                             @RequestParam(value = "body",required = false) String body) throws WxPayException {
         Map map = new HashMap();
 
         User user = userService.findUserByOpenid(myOpenid);
@@ -63,17 +64,22 @@ public class WxPaymentController {
             return map;
         }
         WxPayOrder payOrder = new WxPayOrder();
+
         payOrder.setUser(user);
         payOrder.setMoney(money);//单位：分
         payOrder.setStatus(0);
         payOrder.setCreateTime(new Date());
-        payOrder.setNote("购买会员");
+        payOrder.setBody("购买会员");
         wxPayOrderService.save(payOrder);
 
 
         try {
             WxPayUnifiedOrderRequest orderRequest = new WxPayUnifiedOrderRequest();   //商户订单类
-            orderRequest.setBody("购买会员(支付测试)");
+            if(body!=null){
+                orderRequest.setBody(body);
+            }else{
+                orderRequest.setBody("购买会员");
+            }
             orderRequest.setOpenid(myOpenid);
             //设置金额
             orderRequest.setTotalFee(payOrder.getMoney());   //注意：传入的金额参数单位为分
@@ -106,100 +112,103 @@ public class WxPaymentController {
     }
 
 
-    @ApiOperation(value = "创建支付预订单")
-    @PostMapping("/cerate")
-    public Map create(@RequestParam String myOpenid, @RequestParam Integer orderId) {
-
-        Map map = new HashMap();
-
-        User user = userService.findUserByOpenid(myOpenid);
-        if (user == null) {
-            logger.info("openid为" + myOpenid + "的普通用户不存在！（付款）");
-            map.put("error", "无效的用户！！");
-            return map;
-        }
-        WxPayOrder payOrder = wxPayOrderService.findWxPayOrderById(orderId);
-        if (payOrder == null) {
-            logger.info("oederId为" + orderId + "的订单不存在！（付款）");
-            map.put("error", "无效的订单！！");
-            return map;
-        }
-        if (payOrder.user.getId() != user.getId()) {
-            logger.info("用户与订单不匹配！！（付款）");
-            map.put("error", "用户与订单不匹配！！");
-            return map;
-        }
-
-        try {
-            WxPayUnifiedOrderRequest orderRequest = new WxPayUnifiedOrderRequest();   //商户订单类
-            orderRequest.setBody("微信支付");
-            orderRequest.setOpenid(myOpenid);
-            //设置金额
-            orderRequest.setTotalFee(payOrder.getMoney());   //注意：传入的金额参数单位为分
-            //outTradeNo  订单号
-            orderRequest.setOutTradeNo(payOrder.getId().toString());
-            //tradeType 支付方式
-            orderRequest.setTradeType("JSAPI");
-            //用户IP地址
-            orderRequest.setSpbillCreateIp("165465464646");
-            return wxPayService.createOrder(orderRequest);
-        } catch (Exception e) {
-            logger.error("【微信支付】支付失败 订单号={} 原因={}", payOrder.getId(), e.getMessage());
-            e.printStackTrace();
-            return null;
-        }
-    }
-
-//
-//    @ApiOperation(value = "支付结果收集处理")
-//    @PostMapping("/notify")
-//    public boolean notify(@RequestParam Map<String, Object> map) {
-//        logger.info("\n\n支付结果:\n" + map + "\n\n");
-//        return true;
-//    }
-
     @SuppressWarnings("deprecation")
     @ApiOperation("微信支付回调地址")
     @PostMapping("/notify") // 返回订单号
     public String payNotify(HttpServletRequest request, HttpServletResponse response) {
+        String resXml = "";
         logger.info("======================>>>微信支付回调<<======================");
-        logger.info("======================>>>微信支付回调<<======================");
+        logger.info("======================>>>===========<<======================");
         try {
 
             String xmlResult = IOUtils.toString(request.getInputStream(), request.getCharacterEncoding());
             WxPayOrderNotifyResult notifyResult = wxPayService.parseOrderNotifyResult(xmlResult);
 
 
-            if("SUCCESS".equals(notifyResult.getResultCode())) {
+            if ("SUCCESS".equals(notifyResult.getResultCode())) {
                 // 结果正确 outTradeNo
                 Integer orderId = Integer.parseInt(notifyResult.getOutTradeNo());
                 String tradeNo = notifyResult.getTransactionId();
                 String totalFee = BaseWxPayResult.fenToYuan(notifyResult.getTotalFee());
                 WxPayOrder payOrder = wxPayOrderService.findWxPayOrderById(orderId);
-                if(payOrder!=null){
+                if (payOrder != null) {
+                    if (payOrder.getStatus() == 1) {
+                        logger.info("重复回调的支付订单！");
+                        return WxPayNotifyResponse.success("重复回调的支付订单！");
+                    }
                     payOrder.setStatus(1);//订单已完成
                     payOrder.setEndTime(new Date());
                     wxPayOrderService.edit(payOrder);
                 }
 
-                logger.info("微信订单号==>{}元", tradeNo);
-                logger.info("数据库订单号==>{}元", orderId);
-                logger.info("付款总金额==>{}元", totalFee);
-                logger.info("付款人==>{}(id={})\n\n",payOrder.getUser().getName(),payOrder.getUser().getId());
-                logger.info("付款人联系电话==>{}",payOrder.getUser().getPhoneNum());
+                logger.info("微信订单号状态==>{}", "支付成功！");
+                logger.info("微信订单号   ==>{}", tradeNo);
+                logger.info("数据库订单号 ==>{}", orderId);
+                logger.info("商品名称     ==>{}",payOrder.getBody());
+                logger.info("付款总金额   ==>{}元", totalFee);
+                logger.info("付款人       ==>{}(id={})", payOrder.getUser().getName(), payOrder.getUser().getId());
+                logger.info("付款人电话   ==>{}", payOrder.getUser().getPhoneNum());
+                logger.info("==========================================================\n\n");
+
+//另一种直接返回数据
+//                resXml = "<xml>" + "<return_code><![CDATA[SUCCESS]]></return_code>"
+//                        + "<return_msg><![CDATA[OK]]></return_msg>" + "</xml> ";
+//                response.setContentType("text/xml");
+//                BufferedOutputStream out = new BufferedOutputStream(response.getOutputStream());
+//                out.write(resXml.getBytes());
+//                out.flush();
+//                out.close();
+//                return resXml;
+
+                //使用已写好的类返回
+                return WxPayNotifyResponse.success("成功");
+
+            } else {
+                Integer orderId = Integer.parseInt(notifyResult.getOutTradeNo());
+                String tradeNo = notifyResult.getTransactionId();
+
+                logger.warn("微信订单号状态==>支付失败！！！！！！！！！！！！！");
+                logger.warn("返回信息=======>{}",notifyResult.getReturnMsg());
+                logger.info("微信订单号   ==>{}", tradeNo);
+                logger.info("数据库订单号 ==>{}", orderId);
+                logger.info("==========================================================\n\n");
+
+                //另一种直接返回数据
+//                resXml = "<xml>" + "<return_code><![CDATA[SUCCESS]]></return_code>"
+//                        + "<return_msg><![CDATA[OK]]></return_msg>" + "</xml> ";
+//                response.setContentType("text/xml");
+//                BufferedOutputStream out = new BufferedOutputStream(response.getOutputStream());
+//                out.write(resXml.getBytes());
+//                out.flush();
+//                out.close();
+//                return resXml;
+
+                //使用已写好的类返回
+                return WxPayNotifyResponse.success("支付失败");
             }
 
             // 自己处理订单的业务逻辑，需要判断订单是否已经支付过，否则可能会重复调用
             // 通知微信.异步确认成功.必写.不然会一直通知后台.十次之后就认为交易失败了.
 
-            return WxPayNotifyResponse.success("成功");
         } catch (Exception e) {
-            logger.error("微信回调结果异常,异常原因{}", e.getMessage());
+//            logger.error("微信回调结果异常,异常原因{}", e.getMessage());
             // WxPayNotifyResponse.fail(e.getMessage());
 
-            return WxPayNotifyResponse.success("code:"+9999+"微信回调结果异常,异常原因:"+e.getMessage());
+            logger.error(WxPayNotifyResponse.success("code:" + 9999 + "微信回调结果异常,异常原因:" + e.getMessage()));
+
+            return WxPayNotifyResponse.success("code:" + 9999 + "微信回调结果异常,异常原因:" + e.getMessage());
         }
     }
+
+
+
+//    @SuppressWarnings("deprecation")
+//    @ApiOperation("微信支付回调地址测试")
+//    @PostMapping("/notifyTest") // 返回订单号
+//    public T payNotifyTest() {
+//
+//    }
+
 
 
 }
