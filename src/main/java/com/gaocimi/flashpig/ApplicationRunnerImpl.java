@@ -33,7 +33,6 @@ public class ApplicationRunnerImpl implements ApplicationRunner {
         System.out.println("通过实现ApplicationRunner接口，在spring boot项目启动后自动执行的方法");
         System.out.println("测试pull_request_review触发的自动化部署");
 
-
         Long delay = MyUtils.getDifferenceNextHour();
         System.out.println(delay+"秒后开始检查未完成订单");
         //定期检查刷新数据... 	 开启一个线程，检查有效期...(过期自动删除缓存)
