@@ -16,6 +16,7 @@ import java.util.List;
  * @date 2019-12-31 17:01:02
  */
 @Entity
+@JsonIgnoreProperties(value = {"openid"})
 @Table(name = "feedback")
 @Data
 public class Feedback {
