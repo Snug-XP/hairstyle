@@ -1,17 +1,17 @@
 ### 项目说明
 
 
- 1．使用Springboot框架快速生成后端项目结构
+1,使用Springboot框架快速生成后端项目结构
  
- 2．架构前后端分离，使用Restful设计风格的接口进行交互，使用swagger工具生成接口测试页面（https://xp.1998pic.cn:8080/swagger-ui.html )
+2,架构前后端分离，使用Restful设计风格的接口进行交互，使用swagger工具生成接口测试页面（https://xp.1998pic.cn:8080/swagger-ui.html )
  
- 3．使用showdoc在线接口文档工具编写接口信息文档（https://www.showdoc.cc/jianzhao 访问密码123456）
+3,使用showdoc在线接口文档工具编写接口信息文档（https://www.showdoc.cc/jianzhao 访问密码123456）
  
- 4. 使用JPA数据持久化框架实现对MySQL数据库的操作
+4,使用JPA数据持久化框架实现对MySQL数据库的操作
  
- 5. 使用阿里云OSS存储小程序内用户提交的文件
+5,使用阿里云OSS存储小程序内用户提交的文件
  
- 6. 使用了webhook+jenkins实现自动化部署
+6,使用了webhook+jenkins实现自动化部署
 
 
 - 运行jar包（后台运行）：nohup java -jar hairstyle.jar >log.txt &
