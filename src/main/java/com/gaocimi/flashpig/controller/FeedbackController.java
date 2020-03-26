@@ -44,6 +44,13 @@ public class FeedbackController {
         Map map = new HashMap();
         try {
 
+            User user = userService.findUserByOpenid(myOpenid);
+            if(user==null){
+                logger.info("openid为"+myOpenid+"的用户不存在！");
+                map.put("error","无效的用户！！");
+                return map;
+            }
+
             Feedback feedback = new Feedback();
             feedback.setOpenid(myOpenid);
             feedback.setContent(content);
@@ -67,11 +74,25 @@ public class FeedbackController {
 
         Map map = new HashMap();
         try {
+            User user = userService.findUserByOpenid(myOpenid);
+            if(user==null){
+                logger.info("openid为"+myOpenid+"的用户不存在！");
+                map.put("error","无效的用户！！");
+                return map;
+            }
+
             Feedback feedback = feedbackService.findFeedbackById(feedbackId);
             if (feedback == null) {
-                logger.info("id为" + feedbackId + "的反馈不存在（删除用户的反馈）！");
+                logger.info("id为" + feedbackId + "的反馈不存在！（删除用户的反馈）");
                 map.put("error", "该反馈不存在！！");
                 return map;
+            }
+
+            Administrator administrator = administratorService.findAdministratorByOpenid(myOpenid);
+
+            if(administrator==null&&feedback.getOpenid()!=myOpenid){
+                logger.info("无权限删除（删除用户的反馈）");
+                map.put("error", "无权限！");
             }
 
             logger.info("openid为" + myOpenid + "的用户删除了id为" + feedbackId + "的用户的反馈:" + feedback.getContent());
@@ -99,6 +120,11 @@ public class FeedbackController {
                 logger.info("id为" + feedbackId + "的用户的反馈不存在（修改用户的反馈）！");
                 map.put("error", "该用户的反馈不存在！！");
                 return map;
+            }
+
+            if(feedback.getOpenid()!=myOpenid){
+                logger.info("无权限修改（修改用户的反馈）");
+                map.put("error", "无权限！");
             }
 
             feedback.setContent(content);
