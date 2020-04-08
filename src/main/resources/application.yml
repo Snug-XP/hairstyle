@@ -60,6 +60,7 @@ spring:
     useGlobalDataSourceStat: true
 
 
+
 #日志输出
 logging:
   path: ./usr
