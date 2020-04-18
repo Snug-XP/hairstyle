@@ -16,6 +16,8 @@ import java.lang.reflect.Method;
  *
  * @author zhumaer
  * @since 4/1/2018 3:00 PM
+ *
+ * 参考博客：https://blog.csdn.net/aiyaya_/article/details/78976759
  */
 @Component
 public class ResponseResultInterceptor implements HandlerInterceptor {

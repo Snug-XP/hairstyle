@@ -24,18 +24,17 @@ public class WxPayOrder {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-//    /**
-//     * 该订单中按照一些参数生成的预约号
-//     */
-//    @Column(nullable = false)
-//    private String reservationNum;
-
     /**
      * 提交该支付订单的用户； 定义名为user_id的外键列，该外键引用user表的主键(id)列,采用懒加载
      */
     @ManyToOne(targetEntity = User.class, fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id")
     public User user;
+
+    /**
+     * 支付类型（0表示普通用户购买会员的订单）
+     */
+    private Integer type;
 
     /**
      * 支付金额

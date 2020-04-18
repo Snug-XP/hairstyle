@@ -25,7 +25,7 @@ import java.util.Map;
  */
 @RestController
 @ResponseResult
-@Api(value = "订阅消息的服务", description = "微信小程序获推送订阅消息给用户")
+@Api(value = "小程序码生成相关操作", description = "微信小程序码相关业务")
 public class WxAppletCodeController {
     protected static final Logger logger = LoggerFactory.getLogger(WxLoginController.class);
 

@@ -54,6 +54,11 @@ public class User {
      */
     private Double latitude;
 
+    /**
+     * 用户是否是vip(会员)用户（1表示该用户是vip,0或其它数字表示该用户不是vip）
+     */
+    private Integer isVip;
+
     /**用户提交过的订单列表； 定义该User实体所有关联的HaircutOrder实体； 指定mappedBy属性表明该User实体不控制关联关系*/
     @OneToMany(targetEntity = HaircutOrder.class, mappedBy = "user")
     public List<HaircutOrder> haircutOrderList;
@@ -76,11 +81,7 @@ public class User {
     @OneToMany(targetEntity = UserFormid.class, mappedBy = "user")
     public List<UserFormid> userFormidList;
 
-
-    public User() {
-        super();
-    }
-
+/**************************************************************************************************************************/
     /**
      * 判断该用户是否收藏了发型师
      *
@@ -97,5 +98,10 @@ public class User {
                 return true;
         }
         return false;
+    }
+
+    public boolean isVIP(){
+        if(isVip==1) return true;
+        else return false;
     }
 }

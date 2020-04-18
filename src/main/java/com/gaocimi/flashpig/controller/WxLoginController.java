@@ -104,6 +104,7 @@ public class WxLoginController {
             user.setName(name);
             user.setPhoneNum(phoneNum);
             user.setPictureUrl(pictureUrl);
+            user.setIsVip(0);//设置为非vip
             userService.save(user);
             logger.info("用户 " + user.getName() + " （" + user.getOpenid() + "）登录成功！\n\n\n\n");
 
