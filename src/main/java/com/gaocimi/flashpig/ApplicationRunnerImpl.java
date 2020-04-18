@@ -33,7 +33,7 @@ public class ApplicationRunnerImpl implements ApplicationRunner {
         System.out.println("通过实现ApplicationRunner接口，在spring boot项目启动后自动执行的方法");
 
         Long delay = MyUtils.getDifferenceNextHour();
-        System.out.println(delay+"秒后开始检查未完成订单");
+        System.out.println(delay+"秒后开始检查未完成订单（预约时间在当前时间之后的订单）");
         //定期检查刷新数据... 	 开启一个线程，检查有效期...(过期自动删除缓存)
         ScheduledExecutorService scheduledThreadPool = Executors.newScheduledThreadPool(5);
         //定时周期任务(间隔时间重复执行)
@@ -41,12 +41,12 @@ public class ApplicationRunnerImpl implements ApplicationRunner {
             count++;
             Date nowTime = new Date(System.currentTimeMillis());
             System.out.println("每" + timeout + "秒执行一次，检查未完成订单,并通知还有60分钟左右的订单用户准备前往(" + count + ")");
-            List<HaircutOrder> haircutOrderList = haircutOrderService.findAllByStatus(-1);//找到未完成订单
+            List<HaircutOrder> haircutOrderList = haircutOrderService.findAllByStatusAfterNow(-1);//找到未完成订单
             System.out.println("目前有" + haircutOrderList.size() + "个未完成订单");
             for (HaircutOrder order : haircutOrderList) {
                 Long timeDiff = order.getBookTime().getTime() - nowTime.getTime();//与当前时刻相差的毫秒数
 
-                System.out.println("距离用户“"+order.getUser().getName()+"”的订单（id="+order.getId()+"）到达预约时间还有" + timeDiff/(60*1000)+"分钟（现在时间："+nowTime+"）");
+                System.out.println("距离用户“"+order.getUser().getName()+"”的订单（id="+order.getId()+"）到达预约时间还有" + timeDiff/(60*1000)+"分钟(" + timeDiff/(60*60*1000)+"小时)（现在时间："+nowTime+"）");
 
                 if (timeDiff > (60-5)*60*1000 && timeDiff <= (60+5)*60*1000) {//找到还有接近60分钟内的订单
                     pushSubscribeMessageController.pushComingMessage(order.getId());

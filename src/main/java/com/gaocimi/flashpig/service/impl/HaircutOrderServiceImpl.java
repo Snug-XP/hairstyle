@@ -12,6 +12,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import javax.xml.crypto.Data;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -29,10 +31,26 @@ public class HaircutOrderServiceImpl implements HaircutOrderService {
     public List<HaircutOrder> getHaircutOrderList() {
         return haircutOrderRepository.findAll();
     }
+
     @Override
     public List<HaircutOrder> findAllByStatus(Integer status) {
         return haircutOrderRepository.findAllByStatus(status);
     }
+
+    @Override
+    public List<HaircutOrder> findAllByStatusAfterNow(Integer status) {
+        List<HaircutOrder> orderList = haircutOrderRepository.findAllByStatus(status);
+        Date nowTime = new Date(System.currentTimeMillis());
+        for (int i = 0; i < orderList.size(); ) {
+            HaircutOrder order = orderList.get(i);
+            if (order.getBookTime().before(nowTime))
+                orderList.remove(i);
+            else
+                i++;
+        }
+        return orderList;
+    }
+
 
     @Override
     public HaircutOrder findHaircutOrderById(int id) {
@@ -40,7 +58,7 @@ public class HaircutOrderServiceImpl implements HaircutOrderService {
     }
 
     @Override
-    public HaircutOrder findByReservationNum(String reservationNum){
+    public HaircutOrder findByReservationNum(String reservationNum) {
         return haircutOrderRepository.findByReservationNum(reservationNum);
     }
 
@@ -60,8 +78,7 @@ public class HaircutOrderServiceImpl implements HaircutOrderService {
     }
 
 
-    public List<HaircutOrder> findAll()
-    {
+    public List<HaircutOrder> findAll() {
         return haircutOrderRepository.findAll();
     }
 
@@ -69,13 +86,12 @@ public class HaircutOrderServiceImpl implements HaircutOrderService {
     @Override
     public Page<HaircutOrder> findAll(int pageNum, int pageSize) {
         Sort sort = new Sort(Sort.Direction.DESC, "id");  //降序
-        Pageable pageable = PageRequest.of(pageNum,pageSize,sort);
+        Pageable pageable = PageRequest.of(pageNum, pageSize, sort);
 
         Page<HaircutOrder> haircutOrderPage = null;
         try {
             haircutOrderPage = haircutOrderRepository.findAll(pageable);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             logger.info("查询记录出错");
             return null;

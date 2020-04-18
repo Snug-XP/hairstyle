@@ -54,6 +54,7 @@ public class WxPaymentController {
     public Map creatPayOrder(HttpServletRequest request,
                              @RequestParam String myOpenid,
                              @RequestParam Integer money,
+                             @RequestParam(value = "type",required = false) Integer type,
                              @RequestParam(value = "body",required = false) String body) throws WxPayException {
         Map map = new HashMap();
 
@@ -71,6 +72,7 @@ public class WxPaymentController {
         payOrder.setCreateTime(new Date());
         payOrder.setBody("购买会员");
         payOrder.setType(0);//设置支付类型为0（购买会员）
+        if(type!=null) payOrder.setType(type);
         wxPayOrderService.save(payOrder);
 
 

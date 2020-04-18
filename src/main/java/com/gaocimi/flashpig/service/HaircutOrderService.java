@@ -16,6 +16,8 @@ public interface HaircutOrderService {
 
     public List<HaircutOrder> findAllByStatus(Integer status);
 
+    public List<HaircutOrder> findAllByStatusAfterNow(Integer status);
+
     public HaircutOrder findHaircutOrderById(int id);
 
     public HaircutOrder findByReservationNum(String reservationNum);
