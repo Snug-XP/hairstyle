@@ -70,6 +70,7 @@ public class WxPaymentController {
         payOrder.setStatus(0);
         payOrder.setCreateTime(new Date());
         payOrder.setBody("购买会员");
+        payOrder.setType(0);//设置支付类型为0（购买会员）
         wxPayOrderService.save(payOrder);
 
 
