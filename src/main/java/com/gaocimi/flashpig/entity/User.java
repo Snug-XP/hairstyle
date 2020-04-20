@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
 
 import javax.persistence.*;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -58,6 +59,11 @@ public class User {
      * 用户是否是vip(会员)用户（1表示该用户是vip,0或其它数字表示该用户不是vip）
      */
     private Integer isVip;
+
+    /**
+     * 用户的会员到期时间，如果为空表示未开通过会员
+     */
+    private Date vipEndTime;
 
     /**用户提交过的订单列表； 定义该User实体所有关联的HaircutOrder实体； 指定mappedBy属性表明该User实体不控制关联关系*/
     @OneToMany(targetEntity = HaircutOrder.class, mappedBy = "user")

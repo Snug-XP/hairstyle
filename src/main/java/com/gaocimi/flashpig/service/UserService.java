@@ -1,5 +1,6 @@
 package com.gaocimi.flashpig.service;
 
+import java.util.Date;
 import java.util.List;
 
 import com.gaocimi.flashpig.entity.User;
@@ -17,6 +18,8 @@ public interface UserService {
     public User findUserById(int id);
 
     public User findUserByOpenid(String openid);
+
+    public List<User> findAllByIsVipAndVipEndTimeBefore(Integer isVip , Date time);
 
     public void save(User user);
 

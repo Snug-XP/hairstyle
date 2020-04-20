@@ -12,6 +12,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -39,6 +40,11 @@ public class UserServiceImpl implements UserService {
     @Override
     public User findUserByOpenid(String openid) {
     	return userRepository.findByOpenid(openid);
+    }
+
+    @Override
+    public List<User> findAllByIsVipAndVipEndTimeBefore(Integer isVip , Date time){
+        return userRepository.findAllByIsVipAndVipEndTimeBefore(isVip,time);
     }
 
     @Override
