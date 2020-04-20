@@ -59,8 +59,6 @@ spring:
     # 合并多个DruidDataSource的监控数据
     useGlobalDataSourceStat: true
 
-
-
 #日志输出
 logging:
   path: ./usr

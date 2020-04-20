@@ -54,6 +54,7 @@ public class WxPaymentController {
     public Map creatPayOrder(HttpServletRequest request,
                              @RequestParam String myOpenid,
                              @RequestParam Integer money,
+                             @RequestParam(value = "type",required = false) Integer type,
                              @RequestParam(value = "body",required = false) String body) throws WxPayException {
         Map map = new HashMap();
 
@@ -70,6 +71,8 @@ public class WxPaymentController {
         payOrder.setStatus(0);
         payOrder.setCreateTime(new Date());
         payOrder.setBody("购买会员");
+        payOrder.setType(0);//设置支付类型为0（购买会员）
+        if(type!=null) payOrder.setType(type);
         wxPayOrderService.save(payOrder);
 
 
@@ -136,10 +139,34 @@ public class WxPaymentController {
                         logger.info("重复回调的支付订单！");
                         return WxPayNotifyResponse.success("重复回调的支付订单！");
                     }
+
+                    //支付订单有效，下面进行相关处理操作
+                    try{
+                        switch (payOrder.getType()){
+                            case 0:
+                                //0表示普通用户购买会员的订单
+                                User user = payOrder.getUser();
+                                user.setIsVip(1);
+                                userService.edit(user);
+                                break;
+                            default:
+                                logger.info("》》》支付订单类型错误！！（支付已完成，但是无法判断是何种支付服务，请管理员尽快查看！！！《《《）");
+                        }
+                    }catch (Exception e){
+                        //...微信支付相关操作信息出现错误，比较敏感，这边可以设置邮箱提醒之类的
+                        logger.info("》》》支付订单有效，但进行相关处理操作时发生异常,请管理员尽快查看《《《");
+                    }
+
+
+
+
                     payOrder.setStatus(1);//订单已完成
                     payOrder.setEndTime(new Date());
                     wxPayOrderService.edit(payOrder);
+
                 }
+
+
 
                 logger.info("微信订单号状态==>{}", "支付成功！");
                 logger.info("微信订单号   ==>{}", tradeNo);

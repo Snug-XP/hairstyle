@@ -5,7 +5,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.web.servlet.ServletComponentScan;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
-@EnableScheduling
+@EnableScheduling    //开启调度任务
 @SpringBootApplication
 @ServletComponentScan //设置启动时spring能够扫描到我们自己编写的servlet和filter, 用于Druid监控
 public class ServiceWeiXinApplication {
