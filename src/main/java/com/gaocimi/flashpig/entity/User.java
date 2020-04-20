@@ -2,6 +2,7 @@ package com.gaocimi.flashpig.entity;
 
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.gaocimi.flashpig.utils.xp.MyUtils;
 import lombok.Data;
 
 import javax.persistence.*;
@@ -16,7 +17,7 @@ import java.util.List;
  */
 @Entity
 @Table(name = "user")
-@JsonIgnoreProperties(value = {"sessionKey", "openid","userFormidList","haircutOrderList","hairstylistRecordList","articleRecordList","haircutOrderList","handler","hibernateLazyInitializer","fieldHandler"})
+@JsonIgnoreProperties(value = {"sessionKey", "openid", "userFormidList", "haircutOrderList", "hairstylistRecordList", "articleRecordList", "haircutOrderList", "handler", "hibernateLazyInitializer", "fieldHandler"})
 @Data
 public class User {
 
@@ -24,25 +25,39 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    /** 用户姓名*/
+    /**
+     * 用户姓名
+     */
     private String name;
 
-    /** 用户姓名*/
+    /**
+     * 用户姓名
+     */
     private String lastName;
 
-    /**用户头像url*/
+    /**
+     * 用户头像url
+     */
     private String pictureUrl;
 
-    /** 性别（0为未知，1为男生，2为女生）*/
+    /**
+     * 性别（0为未知，1为男生，2为女生）
+     */
     private Integer sex;
 
-    /** 对应微信用户的openid*/
+    /**
+     * 对应微信用户的openid
+     */
     private String openid;
 
-    /** 用户绑定的手机号码*/
+    /**
+     * 用户绑定的手机号码
+     */
     private String phoneNum;
 
-    /** 用户微信临时的sessionKey*/
+    /**
+     * 用户微信临时的sessionKey
+     */
     private String sessionKey;
 
     /**
@@ -65,7 +80,9 @@ public class User {
      */
     private Date vipEndTime;
 
-    /**用户提交过的订单列表； 定义该User实体所有关联的HaircutOrder实体； 指定mappedBy属性表明该User实体不控制关联关系*/
+    /**
+     * 用户提交过的订单列表； 定义该User实体所有关联的HaircutOrder实体； 指定mappedBy属性表明该User实体不控制关联关系
+     */
     @OneToMany(targetEntity = HaircutOrder.class, mappedBy = "user")
     public List<HaircutOrder> haircutOrderList;
 
@@ -83,7 +100,9 @@ public class User {
     public List<UserToHairstylist> hairstylistRecordList;
 
 
-    /**用户提交过的Formid列表； 定义该User实体所有关联的UserFormid实体； 指定mappedBy属性表明该User实体不控制关联关系*/
+    /**
+     * 用户提交过的Formid列表； 定义该User实体所有关联的UserFormid实体； 指定mappedBy属性表明该User实体不控制关联关系
+     */
     @OneToMany(targetEntity = UserFormid.class, mappedBy = "user")
     public List<UserFormid> userFormidList;
 
@@ -100,14 +119,36 @@ public class User {
             return false;
         }
         for (UserToHairstylist h : recordList) {
-            if (h.getHairstylist().getId() == hairstylistId )
+            if (h.getHairstylist().getId() == hairstylistId)
                 return true;
         }
         return false;
     }
 
-    public boolean isVIP(){
-        if(isVip==1) return true;
+    public boolean isVIP() {
+        if (isVip == 1) return true;
         else return false;
+    }
+
+    /**
+     * @param days 购买几天会员的天数
+     */
+    public boolean buyVip(int days) {
+        if ((isVip == 1 && vipEndTime != null)||(isVip == 0 && vipEndTime.after(new Date()))) {
+            System.out.println("\n\n》》》会员状态异常！！会员信息与会员到期时间不匹配《《《");
+            return false;
+        }
+
+        if (isVip == 1) {
+            setVipEndTime(MyUtils.getTimeFromDateAddDays(vipEndTime, days));
+            return true;
+        } else if (isVip == 0) {
+            setIsVip(1);
+            setVipEndTime(MyUtils.getTimeFromDateAddDays(new Date(), days));
+            return true;
+        } else {
+            System.out.println("\n\n》》》会员状态异常！！《《《");
+            return false;
+        }
     }
 }

@@ -5,6 +5,7 @@ import com.gaocimi.flashpig.entity.WxPayOrder;
 import com.gaocimi.flashpig.service.UserService;
 import com.gaocimi.flashpig.service.WxPayOrderService;
 import com.gaocimi.flashpig.utils.xp.IpUtil;
+import com.gaocimi.flashpig.utils.xp.MyUtils;
 import com.github.binarywang.wxpay.bean.notify.WxPayNotifyResponse;
 import com.github.binarywang.wxpay.bean.notify.WxPayOrderNotifyResult;
 import com.github.binarywang.wxpay.bean.order.WxPayMpOrderResult;
@@ -14,6 +15,7 @@ import com.github.binarywang.wxpay.exception.WxPayException;
 import com.github.binarywang.wxpay.service.WxPayService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import net.bytebuddy.implementation.bytecode.Throw;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -141,17 +143,36 @@ public class WxPaymentController {
                     }
 
                     //支付订单有效，下面进行相关处理操作
+
                     try{
+                        User user = payOrder.getUser();
                         switch (payOrder.getType()){
                             case 0:
-                                //0表示普通用户购买会员的订单
-                                User user = payOrder.getUser();
-                                user.setIsVip(1);
-                                userService.edit(user);
+                                //0表示普通用户购买会员(90天)的订单
+                                if( !user.buyVip(90) ){
+                                    logger.info("购买会员失败！！");
+                                    throw new Exception();
+                                };
                                 break;
+                            case 1:
+                                //1表示普通用户购买会员(180天)的订单
+                                if( !user.buyVip(180) ){
+                                    logger.info("购买会员失败！！");
+                                    throw new Exception();
+                                };
+                                break;
+                            case 2:
+                                //3表示普通用户购买会员(365天)的订单
+                                if( !user.buyVip(365) ){
+                                    logger.info("购买会员失败！！");
+                                    throw new Exception();
+                                };
+                                break;
+
                             default:
                                 logger.info("》》》支付订单类型错误！！（支付已完成，但是无法判断是何种支付服务，请管理员尽快查看！！！《《《）");
                         }
+                        userService.edit(user);
                     }catch (Exception e){
                         //...微信支付相关操作信息出现错误，比较敏感，这边可以设置邮箱提醒之类的
                         logger.info("》》》支付订单有效，但进行相关处理操作时发生异常,请管理员尽快查看《《《");

@@ -32,7 +32,7 @@ public class WxPayOrder {
     public User user;
 
     /**
-     * 支付类型（0表示普通用户购买会员的订单）
+     * 支付类型（0表示购买会员【90天】的订单，1表示购买会员【180天】的订单，2表示购买会员【365天】的订单）
      */
     private Integer type;
 

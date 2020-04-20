@@ -41,29 +41,29 @@ public class TestController {
 
     @ApiOperation(value = "时间测试", produces = "application/json")
     @GetMapping("/timeTest")
-    public Map Test(Double a) {
-        Double testDouble;
-        testDouble = Double.parseDouble(a.toString());
+    public Map Test() {
         Map map = new HashMap();
 
-        Map daily = new HashMap();
-        Map weekly = new HashMap();
-        Map monthly = new HashMap();
-
-        Date today = MyUtils.getTodayFirstTime();
-        Date week = MyUtils.getFirstDayOfWeek(today);
-        Date month = MyUtils.getFirstDayOfMonth(today);
-
-        for(int i = 0;i<13;i++){
-            daily.put(i+"daysAgo", MyUtils.stepDay(today,-i));
-            weekly.put(i+"weeksAgo",MyUtils.stepWeek(week,-i));
-            monthly.put(i+"monthsAgo",MyUtils.stepMonth(month,-i));
-        }
-        map.put("daily",daily);
-        map.put("weekly",weekly);
-        map.put("monthly",monthly);
+//        Map daily = new HashMap();
+//        Map weekly = new HashMap();
+//        Map monthly = new HashMap();
+//
+//        Date today = MyUtils.getTodayFirstTime();
+//        Date week = MyUtils.getFirstDayOfWeek(today);
+//        Date month = MyUtils.getFirstDayOfMonth(today);
+//
+//        for(int i = 0;i<13;i++){
+//            daily.put(i+"daysAgo", MyUtils.stepDay(today,-i));
+//            weekly.put(i+"weeksAgo",MyUtils.stepWeek(week,-i));
+//            monthly.put(i+"monthsAgo",MyUtils.stepMonth(month,-i));
+//        }
+//        map.put("daily",daily);
+//        map.put("weekly",weekly);
+//        map.put("monthly",monthly);
         map.put("nowTime",new Date(System.currentTimeMillis()));
-        map.put("double",testDouble);
+        map.put("new Date.getTime()",new Date().getTime());
+        map.put("System.currentTimeMillis()",System.currentTimeMillis());
+        map.put("getTimeFromNowAddDays(1)",MyUtils.getTimeFromDateAddDays(new Date() , 1));
         return map;
     }
 
@@ -84,6 +84,7 @@ public class TestController {
         map.put("当前小时数",calendar.get(Calendar.HOUR_OF_DAY));
         return map;
     }
+
 
     @ApiOperation(value = "对象比较测试(订单号1，订单号2)", produces = "application/json")
     @GetMapping("/equalTest")
