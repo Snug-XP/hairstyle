@@ -76,7 +76,6 @@ public class ArticleServiceImpl implements ArticleService {
 
     @Override
     public List<Article> findAllByTagLike(String[] tagList) {
-        List<Article> articleList = new ArrayList<>();
         Set<Article> set = new HashSet<>();//使用集合Set，自带去重功能
 
         for (String tag : tagList) {
