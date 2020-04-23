@@ -23,7 +23,7 @@ public interface ArticleService {
 
     public void delete(int id);
 
-    public List<Article> findAllByTagLike(String[] tagList);
+    public List<Article> findAllByTagLikeAndStatus(List<String> tagList, Integer status);
 
     public List<Article> findAllByTitleLike(String title);
 

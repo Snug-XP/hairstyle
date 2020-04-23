@@ -101,12 +101,12 @@ public class Article {
         }
     }
 
-//    public HairstylistInfo getHairstylist() {
-//        if (this.hairstylist == null)
-//            return null;
-//        else
-//            return new HairstylistInfo(this.hairstylist);
-//    }
+    public HairstylistInfo getHairstylist() {
+        if (this.hairstylist == null)
+            return null;
+        else
+            return new HairstylistInfo(this.hairstylist);
+    }
 
 
 }

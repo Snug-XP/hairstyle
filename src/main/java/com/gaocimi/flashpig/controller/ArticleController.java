@@ -15,6 +15,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 
+import java.lang.reflect.Array;
+import java.text.Collator;
 import java.util.*;
 
 /**
@@ -452,7 +454,7 @@ public class ArticleController {
     @ApiOperation(value = "用户获取相关标签的文章列表")
     @GetMapping("/article/getAtricleListByTaglist")
     public Map getRecommendList(@RequestParam String myOpenid,
-                                     @RequestParam String[] tagList,
+                                     @RequestParam List<String> tagList,
                                      @RequestParam(name = "pageNum", defaultValue = "0") int pageNum,
                                      @RequestParam(name = "pageSize", defaultValue = "10") int pageSize) {
         Map map = new HashMap();
@@ -464,7 +466,8 @@ public class ArticleController {
                 map.put("error", "无效的用户！！");
                 return map;
             }
-            List<Article> tempArticleList = articleService.findAllByTagLike(tagList);
+
+            List<Article> tempArticleList = articleService.findAllByTagLikeAndStatus(tagList,1);
 
             if (tempArticleList == null||tempArticleList.size()==0) {
                 logger.info("没有找到相关标签的文章（用户获取相关标签的文章）");
@@ -472,15 +475,9 @@ public class ArticleController {
                 return map;
             }
 
-            // 按时间倒序排序
-            Collections.sort(tempArticleList, (o1, o2) -> {
-                if (o2.getCreateTime().after(o1.getCreateTime())) {
-                    return 1;
-                } else if (o1.getCreateTime().after(o2.getCreateTime())) {
-                    return -1;
-                }
-                return 0; //相等为0
-            });
+            // 按标题升序排序
+            Collections.sort(tempArticleList, (o1, o2) -> Collator.getInstance(Locale.CHINESE).compare(o1.getTitle(), o2.getTitle()));
+
 
             Page<Article> page = MyUtils.getPage(tempArticleList,pageNum,pageSize);
 
