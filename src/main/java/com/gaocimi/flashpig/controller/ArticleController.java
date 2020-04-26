@@ -15,7 +15,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 
-import java.lang.reflect.Array;
 import java.text.Collator;
 import java.util.*;
 
@@ -185,7 +184,7 @@ public class ArticleController {
 
 
             //删除原有文章的图片url
-            imageUrlService.deleteAllByArticlId(articleId);
+            imageUrlService.deleteAllByArticleId(articleId);
 
             //储存发型文章的图片url列表
             for (String imageUrlStr : imgUrlList) {
@@ -272,12 +271,12 @@ public class ArticleController {
             User user = userService.findUserByOpenid(myOpenid);
             Article article = articleService.findArticleById(articleId);
             if (user == null) {
-                logger.info("（" + myOpenid + "）该用户不存在！");
+                logger.info("（" + myOpenid + "）该用户不存在！(获取单个文章信息)");
                 map.put("error", "无效的用户！！");
                 return map;
             }
             if (article == null) {
-                logger.info("id为" + articleId + "的文章不存在！");
+                logger.info("id为" + articleId + "的文章不存在！(获取单个文章信息)");
                 map.put("error", "该文章不存在！！");
                 return map;
             }
@@ -316,12 +315,12 @@ public class ArticleController {
             User user = userService.findUserByOpenid(myOpenid);
             Article article = articleService.findArticleById(articleId);
             if (user == null) {
-                logger.info("（" + myOpenid + "）该用户不存在！");
+                logger.info("（" + myOpenid + "）该用户不存在！(收藏或取消收藏该发型文章)");
                 map.put("error", "无效的用户！！");
                 return map;
             }
             if (article == null) {
-                logger.info("id为" + articleId + "的文章不存在！");
+                logger.info("id为" + articleId + "的文章不存在！(收藏或取消收藏该发型文章)");
                 map.put("error", "该文章不存在！！");
                 return map;
             }
@@ -405,7 +404,7 @@ public class ArticleController {
 
             User user = userService.findUserByOpenid(myOpenid);
             if (user == null) {
-                logger.info("（" + myOpenid + "）该用户不存在！");
+                logger.info("（" + myOpenid + "）该用户不存在！(获取自己收藏的文章列表)");
                 map.put("error", "无效的用户！！");
                 return map;
             }
@@ -462,7 +461,7 @@ public class ArticleController {
 
             User user = userService.findUserByOpenid(myOpenid);
             if (user == null) {
-                logger.info("（" + myOpenid + "）该用户不存在！");
+                logger.info("（" + myOpenid + "）该用户不存在！(获取相关标签的文章列表)");
                 map.put("error", "无效的用户！！");
                 return map;
             }

@@ -52,7 +52,7 @@ public class ArticleImageUrlServiceImpl implements ArticleImageUrlService {
     }
 
     @Override
-    public void deleteAllByArticlId(int articleId){
+    public void deleteAllByArticleId(int articleId){
         articleImageUrlRepository.deleteAllByArticle_Id(articleId);
     }
 

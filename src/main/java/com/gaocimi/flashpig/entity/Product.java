@@ -1,7 +1,6 @@
 package com.gaocimi.flashpig.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.gaocimi.flashpig.model.HairstylistInfo;
 import lombok.Data;
 
 import javax.persistence.*;
@@ -16,7 +15,7 @@ import java.util.List;
  */
 @Entity
 @Table(name = "product")
-@JsonIgnoreProperties(value = { "handler", "hibernateLazyInitializer", "fieldHandler"})
+@JsonIgnoreProperties(value = { "administrator","handler", "hibernateLazyInitializer", "fieldHandler"})
 @Data
 public class Product {
 
@@ -51,15 +50,39 @@ public class Product {
     private Integer sales;
 
     /**
+     * 商品的剩余数量
+     */
+    private Integer remainingQuantity;
+
+    /**
+     * 创建时间
+     */
+    private Date createTime;
+
+    /**
+     * 发布该商品的管理员； 定义名为administrator_id的外键列，该外键引用administrator表的主键(id)列,采用懒加载
+     */
+    @ManyToOne(targetEntity = Administrator.class, fetch = FetchType.LAZY)
+    @JoinColumn(name = "administrator_id")
+    public Administrator administrator;
+    
+    
+    
+    /**
      * 该文章中的图片列表； 定义该Product实体所有关联的ProductImageUrl实体； 指定mappedBy属性表明该Product实体不控制关联关系
      */
     @OneToMany(targetEntity = ProductImageUrl.class, mappedBy = "product")
     public List<ProductImageUrl> productImageUrlList;
 
+    
+    
+    
 
-
-
-
+    public Product() {
+        sales = 0;
+        remainingQuantity = 0;
+        createTime = new Date(System.currentTimeMillis());
+    }
 
     public String[] getTag() {
         if (tag == null)

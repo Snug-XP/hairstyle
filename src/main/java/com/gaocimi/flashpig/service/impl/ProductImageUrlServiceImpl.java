@@ -16,7 +16,7 @@ import java.util.List;
 
 /**
  * @author xp
- * @date 2019-10-21 20:16:20
+ * @date 2020-4-26 14:23:38
  * @description 对数据库product_image_url表进行相关操作的实现类
  */
 @Service
