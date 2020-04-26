@@ -47,7 +47,7 @@ public class Article {
     private Integer status;
 
     /**
-     * 标签、关键词
+     * 标签、关键词(以英文逗号隔开)
      */
     private String tag;
 

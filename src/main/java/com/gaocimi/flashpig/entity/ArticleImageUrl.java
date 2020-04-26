@@ -1,6 +1,7 @@
 package com.gaocimi.flashpig.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import lombok.Data;
 
 import javax.persistence.*;
 
@@ -13,6 +14,7 @@ import javax.persistence.*;
 @Entity
 @Table(name = "article_image_url")
 @JsonIgnoreProperties(value = {"article"})
+@Data
 public class ArticleImageUrl {
 
     @Id
@@ -27,32 +29,5 @@ public class ArticleImageUrl {
     /**文章图片的url*/
     @Column(nullable = false,unique = true)
     private String imageUrl;
-
-
-
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    public Article getArticle() {
-        return article;
-    }
-
-    public void setArticle(Article article) {
-        this.article = article;
-    }
-
-    public String getImageUrl() {
-        return imageUrl;
-    }
-
-    public void setImageUrl(String imageUrl) {
-        this.imageUrl = imageUrl;
-    }
-
 
 }

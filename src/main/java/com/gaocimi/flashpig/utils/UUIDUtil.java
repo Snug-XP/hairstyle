@@ -37,7 +37,7 @@ public class UUIDUtil {
         Date currentTime = new Date();
         SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmssSSS");
         String dateString = formatter.format(currentTime);
-        logger.info("dateString", dateString);
+        logger.info("dateString  ： " + dateString);
         return dateString;
     }
     /**
@@ -45,7 +45,7 @@ public class UUIDUtil {
      */
     public static String get32UUIDString(){
         String uuidStr = UUID.randomUUID().toString().replaceAll("-", "");
-//        logger.info("uuidStr", uuidStr);
+        logger.info("uuidStr  ： " + uuidStr);
         return uuidStr;
     }
 
@@ -70,8 +70,7 @@ public class UUIDUtil {
             bussinessNo.append(number[i]);
         }
 
-        logger.info("bussinessNo", bussinessNo.toString());
-        System.out.println(bussinessNo.toString());
+//        logger.info("bussinessNo  : " + bussinessNo.toString());
         return bussinessNo.toString();
     }
 
