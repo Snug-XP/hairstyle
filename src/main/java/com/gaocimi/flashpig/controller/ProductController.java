@@ -164,7 +164,7 @@ public class ProductController {
 
             productService.edit(product);
 
-            if (imgUrlList != null && imgUrlList.size() != 0) {
+            if (imgUrlList != null && !imgUrlList.isEmpty()) {
                 //删除原有商品的图片url
                 imageUrlService.deleteAllByProductId(productId);
 
@@ -295,15 +295,15 @@ public class ProductController {
                 return map;
             }
             UserToProduct userToProduct = userToProductService.findByUserAndProduct(user.getId(), productId);
-            if ( userToProduct != null) {
+            if (userToProduct != null) {
                 userToProductService.delete(userToProduct.getId());
-                logger.info("id为" + user.getId() + "的用户“"+user.getName()+"”取消收藏了id为" + product.getId() + "的商品（name：" + product.getName() + "）");
+                logger.info("id为" + user.getId() + "的用户“" + user.getName() + "”取消收藏了id为" + product.getId() + "的商品（name：" + product.getName() + "）");
                 map.put("message", "取消收藏成功！");
                 return map;
             }
             userToProduct = new UserToProduct(user, product);
             userToProductService.save(userToProduct);
-            logger.info("id为" + user.getId() + "的用户“"+user.getName()+"”收藏了id为" + product.getId() + "的商品（name：" + product.getName() + "）");
+            logger.info("id为" + user.getId() + "的用户“" + user.getName() + "”收藏了id为" + product.getId() + "的商品（name：" + product.getName() + "）");
             map.put("message", "收藏成功！");
 
         } catch (Exception e) {
@@ -333,7 +333,7 @@ public class ProductController {
             List<UserToProduct> tempProductList = user.getProductRecordList();
             List<Product> resultProductList = new ArrayList<>();
 
-            if (tempProductList == null||tempProductList.size()==0) {
+            if (tempProductList == null || tempProductList.isEmpty()) {
                 map.put("message", "你还没有收藏商品哦~");
                 return map;
             }
@@ -371,44 +371,44 @@ public class ProductController {
     }
 
 
-//    @ApiOperation(value = "用户获取相关标签的商品列表")
-//    @GetMapping("/product/getProductListByTaglist")
-//    public Map getRecommendList(@RequestParam String myOpenid,
-//                                     @RequestParam List<String> tagList,
-//                                     @RequestParam(name = "pageNum", defaultValue = "0") int pageNum,
-//                                     @RequestParam(name = "pageSize", defaultValue = "10") int pageSize) {
-//        Map map = new HashMap();
-//        try {
-//
-//            User user = userService.findUserByOpenid(myOpenid);
-//            if (user == null) {
-//                logger.info("（" + myOpenid + "）该用户不存在！(用户获取相关标签的商品列表`)");
-//                map.put("error", "无效的用户！！");
-//                return map;
-//            }
-//
-//            List<Product> tempProductList = productService.findAllByTagLike(tagList);
-//
-//            if (tempProductList == null||tempProductList.size()==0) {
-//                logger.info("没有找到相关标签的商品（用户获取相关标签的商品）");
-//                map.put("message", "抱歉，没有找到相关标签的商品~");
-//                return map;
-//            }
-//
-//            // 按标题升序排序
-//            Collections.sort(tempProductList, (o1, o2) -> Collator.getInstance(Locale.CHINESE).compare(o1.getName(), o2.getName()));
-//
-//
-//            Page<Product> page = MyUtils.getPage(tempProductList,pageNum,pageSize);
-//
-//            map.put("page", page);
-//            return map;
-//        } catch (Exception e) {
-//            logger.error(e.getMessage());
-//            logger.info("用户获取相关标签的商品列表失败！！（后端发生某些错误）");
-//            map.put("error", "获取相关标签的商品列表失败！！（后端发生某些错误）");
-//            e.printStackTrace();
-//            return map;
-//        }
-//    }
+    @ApiOperation(value = "用户获取相关标签的商品列表")
+    @GetMapping("/product/getProductListByTaglist")
+    public Map getRecommendList(@RequestParam String myOpenid,
+                                @RequestParam List<String> tagList,
+                                @RequestParam(name = "pageNum", defaultValue = "0") int pageNum,
+                                @RequestParam(name = "pageSize", defaultValue = "10") int pageSize) {
+        Map map = new HashMap();
+        try {
+
+            User user = userService.findUserByOpenid(myOpenid);
+            if (user == null) {
+                logger.info("（" + myOpenid + "）该用户不存在！(用户获取相关标签的商品列表`)");
+                map.put("error", "无效的用户！！");
+                return map;
+            }
+
+            List<Product> tempProductList = productService.findAllByTagLike(tagList);
+
+            if (tempProductList == null || tempProductList.isEmpty()) {
+                logger.info("没有找到相关标签的商品（用户获取相关标签的商品）");
+                map.put("message", "抱歉，没有找到相关标签的商品~");
+                return map;
+            }
+
+            // 按标题升序排序
+            Collections.sort(tempProductList, (o1, o2) -> Collator.getInstance(Locale.CHINESE).compare(o1.getName(), o2.getName()));
+
+
+            Page<Product> page = MyUtils.getPage(tempProductList, pageNum, pageSize);
+
+            map.put("page", page);
+            return map;
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            logger.info("用户获取相关标签的商品列表失败！！（后端发生某些错误）");
+            map.put("error", "获取相关标签的商品列表失败！！（后端发生某些错误）");
+            e.printStackTrace();
+            return map;
+        }
+    }
 }

@@ -413,7 +413,7 @@ public class ArticleController {
             List<UserToArticle> tempArticleList = user.getArticleRecordList();
             List<Article> resultArticleList = new ArrayList<>();
 
-            if (tempArticleList == null||tempArticleList.size()==0) {
+            if (tempArticleList == null||tempArticleList.isEmpty()) {
                 logger.info("你还没有收藏文章哦~");
                 map.put("message", "你还没有收藏文章哦~");
                 return map;
@@ -470,7 +470,7 @@ public class ArticleController {
 
             List<Article> tempArticleList = articleService.findAllByTagLikeAndStatus(tagList,1);
 
-            if (tempArticleList == null||tempArticleList.size()==0) {
+            if (tempArticleList == null||tempArticleList.isEmpty()) {
                 logger.info("没有找到相关标签的文章（用户获取相关标签的文章）");
                 map.put("message", "抱歉，没有找到相关标签的文章~");
                 return map;

@@ -204,7 +204,7 @@ public class HairServiceController {
 
                 //检验是否还有发型服务
                 hairstylist = hairstylistService.findHairstylistByOpenid(myOpenid);
-                if(hairstylist.getBusinessStatus() != 0 && (hairstylist.getHairServiceList()==null||hairstylist.getHairServiceList().size()==0) )
+                if(hairstylist.getBusinessStatus() != 0 && (hairstylist.getHairServiceList()==null||hairstylist.getHairServiceList().isEmpty()) )
                 {//若没有了发型服务
                     hairstylist.setBusinessStatus(0);//将营业状态设为暂停营业
                     hairstylistService.edit(hairstylist);
