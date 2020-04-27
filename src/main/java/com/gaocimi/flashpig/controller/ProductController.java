@@ -1,6 +1,8 @@
 package com.gaocimi.flashpig.controller;
 
 import com.gaocimi.flashpig.entity.*;
+import com.gaocimi.flashpig.model.ArticleInfo;
+import com.gaocimi.flashpig.model.ProductInfo;
 import com.gaocimi.flashpig.result.ResponseResult;
 import com.gaocimi.flashpig.service.*;
 import com.gaocimi.flashpig.utils.xp.MyUtils;
@@ -388,6 +390,7 @@ public class ProductController {
             }
 
             List<Product> tempProductList = productService.findAllByTagLike(tagList);
+            List<ProductInfo> resultList = new ArrayList<>();
 
             if (tempProductList == null || tempProductList.isEmpty()) {
                 logger.info("没有找到相关标签的商品（用户获取相关标签的商品）");
@@ -395,11 +398,28 @@ public class ProductController {
                 return map;
             }
 
-            // 按标题升序排序
-            Collections.sort(tempProductList, (o1, o2) -> Collator.getInstance(Locale.CHINESE).compare(o1.getName(), o2.getName()));
+            // 按创建时间倒序排序
+            Collections.sort(tempProductList, (o1, o2) -> {
+                if (o2.getCreateTime().after(o1.getCreateTime())) {
+                    return 1;
+                } else if (o1.getCreateTime().after(o2.getCreateTime())) {
+                    return -1;
+                }
+                return 0; //相等为0
+            });
 
 
-            Page<Product> page = MyUtils.getPage(tempProductList, pageNum, pageSize);
+            //获取所求页数的专辑数据
+            int first = pageNum * pageSize;
+            int last = pageNum * pageSize + pageSize - 1;
+            for (int i = first; i <= last && i < tempProductList.size(); i++) {
+                resultList.add(new ProductInfo(tempProductList.get(i)));
+            }
+
+            //包装分页数据
+            Pageable pageable = PageRequest.of(pageNum, pageSize);
+            Page<ProductInfo> page = new PageImpl<>(resultList, pageable, tempProductList.size());
+
 
             map.put("page", page);
             return map;
