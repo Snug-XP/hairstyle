@@ -307,7 +307,7 @@ public class HaircutOrderController {
         map = getWaitingOrder(myOpenid);  //获取当前的排号列表
         List<HairstylistReservation> reservationList = (List<HairstylistReservation>) map.get("resultList");
         //今天没订单或出错了
-        if (reservationList == null || reservationList.size() == 0) {
+        if (reservationList == null || reservationList.isEmpty()) {
 //            logger.info(map.toString());
             return map; //提示信息都在map里面
         }
@@ -636,7 +636,7 @@ public class HaircutOrderController {
             List<HaircutOrder> tempOrderList = user.getHaircutOrderList();
             List<UserReservation> resultList = new ArrayList<>();
 
-            if (tempOrderList == null || tempOrderList.size() == 0) {
+            if (tempOrderList == null || tempOrderList.isEmpty()) {
                 map.put("message", "你还没有进行预约过哦~");
                 return map;
             }

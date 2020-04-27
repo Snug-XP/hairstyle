@@ -456,13 +456,13 @@ public class HairstylistController {
                 return map;
             }
             List<String> timeList = hairstylist.getAvailableTime();
-            if (hairstylist.getBusinessStatus() == 0 && (timeList == null || timeList.size() == 0)) {
+            if (hairstylist.getBusinessStatus() == 0 && (timeList == null || timeList.isEmpty())) {
                 logger.info("无可预约时间，打开营业选项失败！");
                 map.put("error", "无可预约时间，打开营业选项失败！");
                 return map;
             }
 
-            if (hairstylist.getBusinessStatus() == 0 && (hairstylist.getHairServiceList() == null || hairstylist.getHairServiceList().size() == 0)) {
+            if (hairstylist.getBusinessStatus() == 0 && (hairstylist.getHairServiceList() == null || hairstylist.getHairServiceList().isEmpty())) {
                 logger.info("无可预约项目，打开营业选项失败！");
                 map.put("error", "无可预约项目，打开营业选项失败！");
                 return map;
@@ -513,7 +513,7 @@ public class HairstylistController {
             logger.info("发型师用户 " + hairstylist.getHairstylistName() + "（id=" + hairstylist.getId() + "）重新设置了可预约时间:" + timeList.toString());
             map.put("message", "可预约时间设置成功");
 
-            if ((hairstylist.getBusinessStatus()) != 0 && (timeList == null || timeList.size() == 0)) {//若没有了可预约时间
+            if ((hairstylist.getBusinessStatus()) != 0 && (timeList == null || timeList.isEmpty())) {//若没有了可预约时间
                 hairstylist.setBusinessStatus(0);//将营业状态设为暂停营业
                 hairstylistService.edit(hairstylist);
                 map.put("message", map.get("message") + "(没有可预约时间，营业状态自动设为暂停营业)");
@@ -837,7 +837,7 @@ public class HairstylistController {
             map = getCustomerList(myOpenid);
             List<CountUser> resultList = (List<CountUser>) map.get("resultList");
 
-            if (resultList == null || resultList.size() == 0) {
+            if (resultList == null || resultList.isEmpty()) {
                 //发生错误，或者目前没有被预约过，直接返回
                 return map;
             }
@@ -856,7 +856,7 @@ public class HairstylistController {
             }
 
             map.put("resultList", resultList);
-            if (resultList.size() == 0)
+            if (resultList.isEmpty())
                 map.put("message", "你目前没有普通顾客!");
             return map;
         } catch (Exception e) {
@@ -917,7 +917,7 @@ public class HairstylistController {
 
 
             map.put("resultList", resultList);
-            if (resultList.size() == 0)
+            if (resultList.isEmpty())
                 map.put("message", "目前没有用户关注你哦!");
             return map;
         } catch (Exception e) {
@@ -977,7 +977,7 @@ public class HairstylistController {
             });
 
             map.put("resultList", resultList);
-            if (resultList.size() == 0)
+            if (resultList.isEmpty())
                 map.put("message", "你目前没有顾客!");
             return map;
 
@@ -1386,7 +1386,7 @@ public class HairstylistController {
             List<Shop> shopList = shopService.getShopsByRadius(longitude, latitude, radius);
             List<Hairstylist> tempHairstylists = new ArrayList<>();
 
-            if (shopList == null || shopList.size() == 0) {
+            if (shopList == null || shopList.isEmpty()) {
                 logger.info("附近没有门店~（经度：" + longitude + "  维度：" + latitude + "  ）");
                 map.put("message", "附近没有门店~");
                 return map;
@@ -1396,7 +1396,7 @@ public class HairstylistController {
                 tempHairstylists.addAll(shop.getHairstylistsByStatusAndBusinessStatus(1, 1));
             }
 
-            if (tempHairstylists == null || tempHairstylists.size() == 0) {
+            if (tempHairstylists == null || tempHairstylists.isEmpty()) {
                 logger.info("附近没有可预约发型师~（经度：" + longitude + "  维度：" + latitude + "  ）");
                 map.put("message", "附近没有可预约发型师~");
                 return map;
@@ -1444,7 +1444,7 @@ public class HairstylistController {
             List<Shop> shopList = shopService.getShopsByRadius(longitude, latitude, radius);
             List<HairstylistInfo> resultList = new ArrayList<>();
 
-            if (shopList == null || shopList.size() == 0) {
+            if (shopList == null || shopList.isEmpty()) {
                 logger.info("附近没有门店~（经度：" + longitude + "  维度：" + latitude + "  ）");
                 map.put("message", "附近没有门店~");
                 return map;
@@ -1454,7 +1454,7 @@ public class HairstylistController {
                 for (Hairstylist hairstylist : shop.getHairstylistsByStatusAndBusinessStatus(1, 1))
                     resultList.add(new HairstylistInfo(hairstylist));
             }
-            if (resultList == null || resultList.size() == 0) {
+            if (resultList == null || resultList.isEmpty()) {
                 logger.info("附近没有可预约发型师~（经度：" + longitude + "  维度：" + latitude + "  ）");
                 map.put("message", "附近没有可预约发型师~");
                 return map;

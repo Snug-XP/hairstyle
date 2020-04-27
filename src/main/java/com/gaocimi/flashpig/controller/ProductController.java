@@ -207,7 +207,7 @@ public class ProductController {
 //            List<Product> tempProductList = administrator.getProductList();
 //            List<Product> resultList = new ArrayList<>();
 //
-//            if (tempProductList == null || tempProductList.size() == 0) {
+//            if (tempProductList == null || tempProductList.isEmpty()) {
 //                logger.info("你还没有创建过商品哦~");
 //                map.put("message", "你还没有创建过商品哦~");
 //                return map;

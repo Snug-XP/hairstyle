@@ -115,7 +115,7 @@ public class User {
      */
     public boolean isLoyalToHairstylist(int hairstylistId) {
         List<UserToHairstylist> recordList = getHairstylistRecordList();
-        if (recordList == null || recordList.size() == 0) {
+        if (recordList == null || recordList.isEmpty()) {
             return false;
         }
         for (UserToHairstylist h : recordList) {

@@ -166,7 +166,7 @@ public class AlbumController {
             List<Article> tempList = articleService.findAllByTagLikeAndStatus(Arrays.asList(album.getTag()),1);
             List<ArticleInfo> resultList = new ArrayList<>();
 
-            if (tempList.size() == 0) {
+            if (tempList.isEmpty()) {
                 map.put("message", "未找到相关标签的文章~");
                 return map;
             }
@@ -213,7 +213,7 @@ public class AlbumController {
             List<Article> tempList = album.getArticleList();
             List<ArticleInfo> resultList = new ArrayList<>();
 
-            if (tempList.size() == 0) {
+            if (tempList.isEmpty()) {
                 map.put("message", "该专辑无发型文章~");
                 return map;
             }

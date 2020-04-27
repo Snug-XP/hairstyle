@@ -224,7 +224,7 @@ public class ArticleController {
             List<Article> tempArticleList = hairstylist.getArticleList();
             List<Article> resultList = new ArrayList<>();
 
-            if (tempArticleList == null || tempArticleList.size() == 0) {
+            if (tempArticleList == null || tempArticleList.isEmpty()) {
                 logger.info("你还没有创建过发型文章哦~");
                 map.put("message", "你还没有创建过发型文章哦~");
                 return map;
