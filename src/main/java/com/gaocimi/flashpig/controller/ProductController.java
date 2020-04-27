@@ -39,8 +39,10 @@ public class ProductController {
     ProductImageUrlService imageUrlService;
     @Autowired
     AlbumService albumService;
+    @Autowired
+    UserToProductService userToProductService;
 
-    @ApiOperation(value = "添加商品")
+    @ApiOperation(value = "发布商品")
     @PostMapping("/Administrator/addProduct")
     public Map addProduct(@RequestParam String myOpenid, @RequestParam String name, @RequestParam String introduction,
                           @RequestParam Double price, @RequestParam Integer remainingQuantity,
@@ -93,8 +95,6 @@ public class ProductController {
 
         Map map = new HashMap();
         try {
-
-
             Product product = productService.findProductById(productId);
             if (product == null) {
                 logger.info("id为" + productId + "的商品不存在（删除商品）！");
@@ -176,120 +176,106 @@ public class ProductController {
                     imageUrlService.save(imageUrl);
                 }
             }
-            logger.info("id为" + administrator.getId() + "的发型师“" + administrator.getName() + "”修改了id为" + productId + "的商品");
-            map.put("message", "商品修改成功！");
+            logger.info("管理员“" + administrator.getName() + "”（id=" + administrator.getId() + "）修改了商品“" + product.getName() + "”（id=" + product.getId() + "）的信息：");
+            map.put("message", "商品信息修改成功！");
             return map;
         } catch (Exception e) {
             logger.error(e.getMessage());
-            logger.info("商品修改失败！！（后端发生某些错误）");
-            map.put("error", "商品修改失败！！（后端发生某些错误）");
+            logger.info("商品信息修改失败！！（后端发生某些错误）");
+            map.put("error", "商品信息修改失败！！（后端发生某些错误）");
             e.printStackTrace();
             return map;
         }
     }
 
 
-//    @ApiOperation(value = "获取自己发布的的商品列表(分页展示)", notes = "权限：发型师(管理员会有一个发型师记录)")
-//    @GetMapping("/administrator/getMyProductList")
-//    public Map getMyProductList(@RequestParam String myOpenid,
-//                                @RequestParam(name = "pageNum", defaultValue = "0") int pageNum,
-//                                @RequestParam(name = "pageSize", defaultValue = "10") int pageSize) {
-//
-//        Map map = new HashMap();
-//        try {
-//            Administrator administrator = administratorService.findAdministratorByOpenid(myOpenid);
-//            if (administrator == null ) {
-//                logger.info("非发型师用户或管理员操作（获取自己的商品列表）！！");
-//                map.put("error", "对不起，你不是发型师或管理员，无权操作！！");
-//                return map;
-//            }
-//
-//            List<Product> tempProductList = administrator.getProductList();
-//            List<Product> resultList = new ArrayList<>();
-//
-//            if (tempProductList == null || tempProductList.isEmpty()) {
-//                logger.info("你还没有创建过商品哦~");
-//                map.put("message", "你还没有创建过商品哦~");
-//                return map;
-//            }
-//
-//            // 按创建时间倒序排序
-//            Collections.sort(tempProductList, (o1, o2) -> {
-//                if (o2.getCreateTime().after(o1.getCreateTime())) {
-//                    return 1;
-//                } else if (o1.getCreateTime().after(o2.getCreateTime())) {
-//                    return -1;
-//                }
-//                return 0; //相等为0
-//            });
-//
-//            //获取所求页数的商品数据
-//            int first = pageNum * pageSize;
-//            int last = pageNum * pageSize + pageSize - 1;
-//            for (int i = first; i <= last && i < tempProductList.size(); i++) {
-//                resultList.add(tempProductList.get(i));
-//            }
-//
-//            //包装分页数据
-//            Pageable pageable = PageRequest.of(pageNum, pageSize);
-//            Page<Product> page = new PageImpl<>(resultList, pageable, tempProductList.size());
-//
-//            map.put("page", page);
-//            return map;
-//        } catch (Exception e) {
-//            logger.error(e.getMessage());
-//            logger.info("获取自己的商品列表失败！！（后端发生某些错误）");
-//            map.put("error", "获取自己的商品列表失败！！（后端发生某些错误）");
-//            e.printStackTrace();
-//            return map;
-//        }
-//    }
-//
-//
-//    @ApiOperation(value = "获取单个商品信息", produces = "application/json")
-//    @GetMapping("/product/getOne")
-//    public Map getOne(@RequestParam String myOpenid,@RequestParam Integer productId) {
-//        Map map = new HashMap();
-//        try {
-//            User user = userService.findUserByOpenid(myOpenid);
-//            Product product = productService.findProductById(productId);
-//            if (user == null) {
-//                logger.info("（" + myOpenid + "）该用户不存在！(获取单个商品信息)");
-//                map.put("error", "无效的用户！！");
-//                return map;
-//            }
-//            if (product == null) {
-//                logger.info("id为" + productId + "的商品不存在！(获取单个商品信息)");
-//                map.put("error", "该商品不存在！！");
-//                return map;
-//            }
-//            if (userToProductService.findByUserAndProduct(user.getId(), productId) != null) {
-//                map.put("isCollected", "yes");
-//                map.put("product",product);
-//                return map;
-//            }else{
-//                map.put("isCollected", "no");
-//                map.put("product",product);
-//                return map;
-//            }
-//
-//        } catch (Exception e) {
-//            logger.info("后端发生异常：\n");
-//            map.put("error", "抱歉，后端发生异常!!");
-//            e.printStackTrace();
-//            return map;
-//        }
-//    }
-//
-//    @ApiOperation(value = "获取所有商品列表（分页展示）")
-//    @GetMapping("/products/getAll")
-//    public Page<Product> getAllByPage(@RequestParam(name = "pageNum", defaultValue = "0") int pageNum,
-//                                      @RequestParam(name = "pageSize", defaultValue = "10") int pageSize
-//    ) {
-//        Page<Product> page = productService.findAllByStatus(1, pageNum, pageSize);
-//        return page;
-//    }
-//
+    @ApiOperation(value = "获取自己发布的的商品列表(分页展示)", notes = "权限：发型师(管理员会有一个发型师记录)")
+    @GetMapping("/administrator/getMyProductList")
+    public Map getMyProductList(@RequestParam String myOpenid,
+                                @RequestParam(name = "pageNum", defaultValue = "0") int pageNum,
+                                @RequestParam(name = "pageSize", defaultValue = "10") int pageSize) {
+
+        Map map = new HashMap();
+        try {
+            Administrator administrator = administratorService.findAdministratorByOpenid(myOpenid);
+            if (administrator == null) {
+                logger.info("非管理员用户操作！！（获取自己发布的的商品列表:操作openid=" + myOpenid + "）");
+                map.put("error", "无权操作！！");
+                return map;
+            }
+
+            List<Product> tempProductList = administrator.getProductList();
+
+            if (tempProductList == null || tempProductList.isEmpty()) {
+                map.put("message", "你还没有创建过商品哦~");
+                return map;
+            }
+
+            // 按创建时间倒序排序
+            Collections.sort(tempProductList, (o1, o2) -> {
+                if (o2.getCreateTime().after(o1.getCreateTime())) {
+                    return 1;
+                } else if (o1.getCreateTime().after(o2.getCreateTime())) {
+                    return -1;
+                }
+                return 0; //相等为0
+            });
+
+            map.put("page", MyUtils.getPage(tempProductList,pageNum,pageSize));
+            return map;
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            logger.info("获取自己发布的商品列表失败！！（后端发生某些错误）");
+            map.put("error", "获取自己发布的商品列表失败！！（后端发生某些错误）");
+            e.printStackTrace();
+            return map;
+        }
+    }
+
+
+    @ApiOperation(value = "获取单个商品信息", produces = "application/json")
+    @GetMapping("/product/getOne")
+    public Map getOne(@RequestParam String myOpenid,@RequestParam Integer productId) {
+        Map map = new HashMap();
+        try {
+            User user = userService.findUserByOpenid(myOpenid);
+            Product product = productService.findProductById(productId);
+            if (user == null) {
+                logger.info("（" + myOpenid + "）该用户不存在！(获取单个商品信息)");
+                map.put("error", "无效的用户！！");
+                return map;
+            }
+            if (product == null) {
+                logger.info("id为" + productId + "的商品不存在！(获取单个商品信息)");
+                map.put("error", "该商品不存在！！");
+                return map;
+            }
+
+            if (userToProductService.findByUserAndProduct(user.getId(), productId) != null) {
+                map.put("isCollected", "yes");
+            }else{
+                map.put("isCollected", "no");
+            }
+            map.put("product",product);
+            return map;
+
+        } catch (Exception e) {
+            logger.info("后端发生异常(获取单个商品信息)：\n");
+            map.put("error", "抱歉，后端发生异常!!");
+            e.printStackTrace();
+            return map;
+        }
+    }
+
+    @ApiOperation(value = "获取所有商品列表（分页展示）")
+    @GetMapping("/products/getAll")
+    public Page<Product> getAllByPage(@RequestParam(name = "pageNum", defaultValue = "0") int pageNum,
+                                      @RequestParam(name = "pageSize", defaultValue = "10") int pageSize
+    ) {
+        Page<Product> page = productService.findAll(pageNum, pageSize);
+        return page;
+    }
+
 //    @ApiOperation(value = "收藏或取消收藏该商品（转换用户对商品的收藏关系）")
 //    @PostMapping("/product/addOrRemoveCollection")
 //    public Map addOrRemoveCollection(@RequestParam String myOpenid, @RequestParam Integer productId) {
@@ -327,9 +313,9 @@ public class ProductController {
 //
 //        return map;
 //    }
-//
-//
-//
+
+
+
 //    @ApiOperation(value = "普通用户分页获取自己收藏的商品列表")
 //    @GetMapping("/product/getMyCollection")
 //    public Map getMyCollectionByPage(@RequestParam String myOpenid,
@@ -387,7 +373,7 @@ public class ProductController {
 //
 //
 //    @ApiOperation(value = "用户获取相关标签的商品列表")
-//    @GetMapping("/product/getAtricleListByTaglist")
+//    @GetMapping("/product/getProductListByTaglist")
 //    public Map getRecommendList(@RequestParam String myOpenid,
 //                                     @RequestParam List<String> tagList,
 //                                     @RequestParam(name = "pageNum", defaultValue = "0") int pageNum,

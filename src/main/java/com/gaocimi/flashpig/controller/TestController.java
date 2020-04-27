@@ -126,4 +126,25 @@ public class TestController {
     public void notify(@RequestParam Map<String,Object> map){
         logger.info("\n获取的数据:\n"+map+"\n");
     }
+
+
+    @ApiOperation(value = "List转数组测试", produces = "application/json")
+    @PostMapping("/listToArray")
+    public Map listToArray(@RequestParam List<String> list){
+        Map map = new HashMap();
+
+        String []array;
+
+        //1）等于0，动态创建与size相同的数组，性能最好。
+        //2）大于0但小于size，重新创建大小等于size的数组，增加GC负担。
+        //3）等于size，在高并发情况下，数组创建完成之后，size正在变大的情况下，负面影响与2相同。
+        //4）大于size，空间浪费，且在size处插入null值，存在NPE隐患。
+        array = list.toArray(new String[0]);
+
+        map.put("array",array);
+        return map;
+    }
+
+
+
 }
