@@ -88,13 +88,19 @@ public class User {
 
 
     /**
-     * 该用户提交的对发型文章的收藏记录列表； 定义该User实体所有关联的UserToArticle实体； 指定mappedBy属性表明该User实体不控制关联关系
+     * 该用户对发型文章的收藏记录列表； 定义该User实体所有关联的UserToArticle实体； 指定mappedBy属性表明该User实体不控制关联关系
      */
     @OneToMany(targetEntity = UserToArticle.class, mappedBy = "user")
     public List<UserToArticle> articleRecordList;
+    
+    /**
+     * 该用户对商品的收藏记录列表； 定义该User实体所有关联的UserToProduct实体； 指定mappedBy属性表明该User实体不控制关联关系
+     */
+    @OneToMany(targetEntity = UserToProduct.class, mappedBy = "user")
+    public List<UserToProduct> productRecordList;
 
     /**
-     * 该用户提交的对发型师的收藏记录列表； 定义该User实体所有关联的UserToHairstylist实体； 指定mappedBy属性表明该User实体不控制关联关系
+     * 该用户对发型师的收藏记录列表； 定义该User实体所有关联的UserToHairstylist实体； 指定mappedBy属性表明该User实体不控制关联关系
      */
     @OneToMany(targetEntity = UserToHairstylist.class, mappedBy = "user")
     public List<UserToHairstylist> hairstylistRecordList;

@@ -316,62 +316,61 @@ public class ProductController {
     }
 
 
-//    @ApiOperation(value = "普通用户分页获取自己收藏的商品列表")
-//    @GetMapping("/product/getMyCollection")
-//    public Map getMyCollectionByPage(@RequestParam String myOpenid,
-//                                     @RequestParam(name = "pageNum", defaultValue = "0") int pageNum,
-//                                     @RequestParam(name = "pageSize", defaultValue = "10") int pageSize) {
-//        Map map = new HashMap();
-//        try {
-//
-//            User user = userService.findUserByOpenid(myOpenid);
-//            if (user == null) {
-//                logger.info("（" + myOpenid + "）该用户不存在！(获取自己收藏的商品列表)");
-//                map.put("error", "无效的用户！！");
-//                return map;
-//            }
-//            List<UserToProduct> tempProductList = user.getProductRecordList();
-//            List<Product> resultProductList = new ArrayList<>();
-//
-//            if (tempProductList == null||tempProductList.size()==0) {
-//                logger.info("你还没有收藏商品哦~");
-//                map.put("message", "你还没有收藏商品哦~");
-//                return map;
-//            }
-//
-//            // 按时间倒序排序
-//            Collections.sort(tempProductList, (o1, o2) -> {
-//                if (o2.getCreateTime().after(o1.getCreateTime())) {
-//                    return 1;
-//                } else if (o1.getCreateTime().after(o2.getCreateTime())) {
-//                    return -1;
-//                }
-//                return 0; //相等为0
-//            });
-//
-//            //获取所求页数的商品数据
-//            int first = pageNum * pageSize;
-//            int last = pageNum * pageSize + pageSize - 1;
-//            for (int i = first; i <= last && i < tempProductList.size(); i++) {
-//                resultProductList.add(tempProductList.get(i).product);
-//            }
-//
-//            //包装分页数据
-//            Pageable pageable = PageRequest.of(pageNum, pageSize);
-//            Page<Product> page = new PageImpl<>(resultProductList, pageable, tempProductList.size());
-//
-//            map.put("page", page);
-//            return map;
-//        } catch (Exception e) {
-//            logger.error(e.getMessage());
-//            logger.info("获取自己收藏的商品列表失败！！（后端发生某些错误）");
-//            map.put("error", "获取收藏列表失败！！（后端发生某些错误）");
-//            e.printStackTrace();
-//            return map;
-//        }
-//    }
-//
-//
+    @ApiOperation(value = "普通用户分页获取自己收藏的商品列表")
+    @GetMapping("/product/getMyCollection")
+    public Map getMyCollectionByPage(@RequestParam String myOpenid,
+                                     @RequestParam(name = "pageNum", defaultValue = "0") int pageNum,
+                                     @RequestParam(name = "pageSize", defaultValue = "10") int pageSize) {
+        Map map = new HashMap();
+        try {
+
+            User user = userService.findUserByOpenid(myOpenid);
+            if (user == null) {
+                logger.info("（" + myOpenid + "）该用户不存在！(获取自己收藏的商品列表)");
+                map.put("error", "无效的用户！！");
+                return map;
+            }
+            List<UserToProduct> tempProductList = user.getProductRecordList();
+            List<Product> resultProductList = new ArrayList<>();
+
+            if (tempProductList == null||tempProductList.size()==0) {
+                map.put("message", "你还没有收藏商品哦~");
+                return map;
+            }
+
+            // 按时间倒序排序
+            Collections.sort(tempProductList, (o1, o2) -> {
+                if (o2.getCreateTime().after(o1.getCreateTime())) {
+                    return 1;
+                } else if (o1.getCreateTime().after(o2.getCreateTime())) {
+                    return -1;
+                }
+                return 0; //相等为0
+            });
+
+            //获取所求页数的商品数据
+            int first = pageNum * pageSize;
+            int last = pageNum * pageSize + pageSize - 1;
+            for (int i = first; i <= last && i < tempProductList.size(); i++) {
+                resultProductList.add(tempProductList.get(i).product);
+            }
+
+            //包装分页数据
+            Pageable pageable = PageRequest.of(pageNum, pageSize);
+            Page<Product> page = new PageImpl<>(resultProductList, pageable, tempProductList.size());
+
+            map.put("page", page);
+            return map;
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            logger.info("获取自己收藏的商品列表失败！！（后端发生某些错误）");
+            map.put("error", "获取收藏列表失败！！（后端发生某些错误）");
+            e.printStackTrace();
+            return map;
+        }
+    }
+
+
 //    @ApiOperation(value = "用户获取相关标签的商品列表")
 //    @GetMapping("/product/getProductListByTaglist")
 //    public Map getRecommendList(@RequestParam String myOpenid,
