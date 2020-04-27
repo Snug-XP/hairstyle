@@ -69,14 +69,15 @@ public class ProductController {
             productService.save(product);
 
             //储存商品的图片url列表
-            for (String imageUrlStr : imgUrlList) {
-                ProductImageUrl imageUrl = new ProductImageUrl();
-                imageUrl.setProduct(product);
-                imageUrl.setImageUrl(imageUrlStr);
+            if (imgUrlList != null) {
+                for (String imageUrlStr : imgUrlList) {
+                    ProductImageUrl imageUrl = new ProductImageUrl();
+                    imageUrl.setProduct(product);
+                    imageUrl.setImageUrl(imageUrlStr);
 
-                imageUrlService.save(imageUrl);
+                    imageUrlService.save(imageUrl);
+                }
             }
-
             logger.info("管理员“" + administrator.getName() + "”（id=" + administrator.getId() + "）发布了商品“" + product.getName() + "”（id=" + product.getId() + "）");
             map.put("message", "商品发布成功！");
             return map;
@@ -158,8 +159,8 @@ public class ProductController {
                 product.setPrice(price);
             if (remainingQuantity != null)
                 product.setRemainingQuantity(remainingQuantity);
-            if(tagList != null)
-            product.setTag(tagList);
+            if (tagList != null)
+                product.setTag(tagList);
 
             productService.edit(product);
 
@@ -221,7 +222,7 @@ public class ProductController {
                 return 0; //相等为0
             });
 
-            map.put("page", MyUtils.getPage(tempProductList,pageNum,pageSize));
+            map.put("page", MyUtils.getPage(tempProductList, pageNum, pageSize));
             return map;
         } catch (Exception e) {
             logger.error(e.getMessage());
@@ -235,7 +236,7 @@ public class ProductController {
 
     @ApiOperation(value = "获取单个商品信息", produces = "application/json")
     @GetMapping("/product/getOne")
-    public Map getOne(@RequestParam String myOpenid,@RequestParam Integer productId) {
+    public Map getOne(@RequestParam String myOpenid, @RequestParam Integer productId) {
         Map map = new HashMap();
         try {
             User user = userService.findUserByOpenid(myOpenid);
@@ -247,16 +248,16 @@ public class ProductController {
             }
             if (product == null) {
                 logger.info("id为" + productId + "的商品不存在！(获取单个商品信息)");
-                map.put("error", "该商品不存在！！");
+                map.put("error", "该商品不存在！");
                 return map;
             }
 
             if (userToProductService.findByUserAndProduct(user.getId(), productId) != null) {
                 map.put("isCollected", "yes");
-            }else{
+            } else {
                 map.put("isCollected", "no");
             }
-            map.put("product",product);
+            map.put("product", product);
             return map;
 
         } catch (Exception e) {
@@ -313,7 +314,6 @@ public class ProductController {
 //
 //        return map;
 //    }
-
 
 
 //    @ApiOperation(value = "普通用户分页获取自己收藏的商品列表")

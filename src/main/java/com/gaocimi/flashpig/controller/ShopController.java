@@ -267,7 +267,7 @@ public class ShopController {
                 if (shop.getApplyStatus() == 1) {
                     logger.info("门店“" + shop.getShopName() + "”(" + shop.getId() + ")门店认证已通过！将取消认证！");
                     map.put("message", "取消认证成功！");
-                }else{
+                } else {
                     map.put("message", "取消认证申请成功！");
                 }
                 logger.info("门店“" + shop.getShopName() + "”(" + shop.getId() + ")取消认证成功！");
@@ -428,6 +428,12 @@ public class ShopController {
         Map map = new HashMap();
         try {
             Shop shop = shopService.findShopById(shopId);
+            if (shop == null) {
+                logger.info("查看的门店(id=" + shopId + ")不存在！");
+                map.put("error","该门店不存在！");
+                return map;
+            }
+
             shop.regulateOrderSum();//根据所有订单进行数据校正
             shopService.edit(shop);//更新到数据库
 
@@ -1072,36 +1078,35 @@ public class ShopController {
 
     @ApiOperation(value = "获取门店数据")
     @GetMapping("/shop/getShopData")
-    public Map getShopData( @RequestParam String myOpenid) {
+    public Map getShopData(@RequestParam String myOpenid) {
         Map map = new HashMap();
         try {
             Shop shop = shopService.findShopByOpenid(myOpenid);
-            if ( shop == null || shop.getApplyStatus() != 1) {
+            if (shop == null || shop.getApplyStatus() != 1) {
                 logger.info("未登录操作！！(获取门店数据)");
                 map.put("error", "请先登录！！");
                 return map;
             }
 
             Map shopInfo = new HashMap();
-            shopInfo.put("shopName",shop.getShopName());
-            shopInfo.put("hairtylistNum",shop.hairstylists.size()+"人");
-            shopInfo.put("settledTime",shop.getApplyTime());
-            map.put("shopInfo",shopInfo);
-
+            shopInfo.put("shopName", shop.getShopName());
+            shopInfo.put("hairtylistNum", shop.hairstylists.size() + "人");
+            shopInfo.put("settledTime", shop.getApplyTime());
+            map.put("shopInfo", shopInfo);
 
 
             Map employeeData = new HashMap();
-            employeeData.put("maxPointPerson",shop.getMaxPointPerson());
-            employeeData.put("maxOrderPerson",shop.getMaxOrderPerson());
-            employeeData.put("mostPopularPerson",shop.getMostPopularPerson());
+            employeeData.put("maxPointPerson", shop.getMaxPointPerson());
+            employeeData.put("maxOrderPerson", shop.getMaxOrderPerson());
+            employeeData.put("mostPopularPerson", shop.getMostPopularPerson());
 
-            map.put("employeeData",employeeData);
-            map.put("customerAnalyzeData",shop.getCustomerAnalyzeData());
+            map.put("employeeData", employeeData);
+            map.put("customerAnalyzeData", shop.getCustomerAnalyzeData());
 
 
             return map;
 
-        }catch (Exception e) {
+        } catch (Exception e) {
             logger.info("获取个人的顾客预约数情况列表失败！！（后端发生某些错误）\n\n");
             map.put("error", "操作失败！！（后端发生某些错误）");
             e.printStackTrace();

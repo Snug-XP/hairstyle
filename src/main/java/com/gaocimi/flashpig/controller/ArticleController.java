@@ -80,12 +80,14 @@ public class ArticleController {
             articleService.save(article);
 
             //储存发型文章的图片url列表
-            for (String imageUrlStr : imgUrlList) {
-                ArticleImageUrl imageUrl = new ArticleImageUrl();
-                imageUrl.setArticle(article);
-                imageUrl.setImageUrl(imageUrlStr);
+            if(imgUrlList!=null) {
+                for (String imageUrlStr : imgUrlList) {
+                    ArticleImageUrl imageUrl = new ArticleImageUrl();
+                    imageUrl.setArticle(article);
+                    imageUrl.setImageUrl(imageUrlStr);
 
-                imageUrlService.save(imageUrl);
+                    imageUrlService.save(imageUrl);
+                }
             }
             map.put("message", "文章上传成功！");
             return map;
