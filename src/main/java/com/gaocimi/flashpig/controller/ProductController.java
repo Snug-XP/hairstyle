@@ -277,43 +277,43 @@ public class ProductController {
         return page;
     }
 
-//    @ApiOperation(value = "收藏或取消收藏该商品（转换用户对商品的收藏关系）")
-//    @PostMapping("/product/addOrRemoveCollection")
-//    public Map addOrRemoveCollection(@RequestParam String myOpenid, @RequestParam Integer productId) {
-//        Map map = new HashMap();
-//        try {
-//            User user = userService.findUserByOpenid(myOpenid);
-//            Product product = productService.findProductById(productId);
-//            if (user == null) {
-//                logger.info("（" + myOpenid + "）该用户不存在！(收藏或取消收藏该商品)");
-//                map.put("error", "无效的用户！！");
-//                return map;
-//            }
-//            if (product == null) {
-//                logger.info("id为" + productId + "的商品不存在！(收藏或取消收藏该商品)");
-//                map.put("error", "该商品不存在！！");
-//                return map;
-//            }
-//            UserToProduct userToProduct = userToProductService.findByUserAndProduct(user.getId(), productId);
-//            if ( userToProduct != null) {
-//                userToProductService.delete(userToProduct.getId());
-//                logger.info("id为" + user.getId() + "的用户“"+user.getName()+"”取消收藏了id为" + product.getId() + "的商品（name：" + product.getName() + "）");
-//                map.put("message", "取消收藏成功！");
-//                return map;
-//            }
-//            userToProduct = new UserToProduct(user, product);
-//            userToProductService.save(userToProduct);
-//            logger.info("id为" + user.getId() + "的用户“"+user.getName()+"”收藏了id为" + product.getId() + "的商品（name：" + product.getName() + "）");
-//            map.put("message", "收藏成功！");
-//
-//        } catch (Exception e) {
-//            logger.info("后端发生异常：\n");
-//            logger.error(e.getMessage());
-//            map.put("error", "抱歉，后端发生异常!!");
-//        }
-//
-//        return map;
-//    }
+    @ApiOperation(value = "收藏或取消收藏该商品（转换用户对商品的收藏关系）")
+    @PostMapping("/product/addOrRemoveCollection")
+    public Map addOrRemoveCollection(@RequestParam String myOpenid, @RequestParam Integer productId) {
+        Map map = new HashMap();
+        try {
+            User user = userService.findUserByOpenid(myOpenid);
+            Product product = productService.findProductById(productId);
+            if (user == null) {
+                logger.info("（" + myOpenid + "）该用户不存在！(收藏或取消收藏该商品)");
+                map.put("error", "无效的用户！！");
+                return map;
+            }
+            if (product == null) {
+                logger.info("id为" + productId + "的商品不存在！(收藏或取消收藏该商品)");
+                map.put("error", "该商品不存在！！");
+                return map;
+            }
+            UserToProduct userToProduct = userToProductService.findByUserAndProduct(user.getId(), productId);
+            if ( userToProduct != null) {
+                userToProductService.delete(userToProduct.getId());
+                logger.info("id为" + user.getId() + "的用户“"+user.getName()+"”取消收藏了id为" + product.getId() + "的商品（name：" + product.getName() + "）");
+                map.put("message", "取消收藏成功！");
+                return map;
+            }
+            userToProduct = new UserToProduct(user, product);
+            userToProductService.save(userToProduct);
+            logger.info("id为" + user.getId() + "的用户“"+user.getName()+"”收藏了id为" + product.getId() + "的商品（name：" + product.getName() + "）");
+            map.put("message", "收藏成功！");
+
+        } catch (Exception e) {
+            logger.info("后端发生异常：\n");
+            logger.error(e.getMessage());
+            map.put("error", "抱歉，后端发生异常!!");
+        }
+
+        return map;
+    }
 
 
 //    @ApiOperation(value = "普通用户分页获取自己收藏的商品列表")
