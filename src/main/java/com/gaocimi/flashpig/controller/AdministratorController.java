@@ -3,9 +3,7 @@ package com.gaocimi.flashpig.controller;
 
 import com.gaocimi.flashpig.entity.*;
 import com.gaocimi.flashpig.result.ResponseResult;
-import com.gaocimi.flashpig.service.AdministratorService;
-import com.gaocimi.flashpig.service.ArticleService;
-import com.gaocimi.flashpig.service.ShopService;
+import com.gaocimi.flashpig.service.*;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.slf4j.Logger;
@@ -35,11 +33,39 @@ class AdministratorController {
     @Autowired
     ShopService shopService;
     @Autowired
-    ShopService hairstylistService;
+    HairstylistService hairstylistService;
     @Autowired
     ArticleService articleService;
     @Autowired
     PushSubscribeMessageController pushWxMsg;
+    @Autowired
+    UserService userService;
+
+    @ApiOperation(value = "获取管理端页面初始化所需数据")
+    @GetMapping("/Administrator/getData")
+    public Map getData(@RequestParam String myOpenid) {
+        Map map = new HashMap();
+        try {
+            if (!administratorService.isExist(myOpenid)) {
+                map.put("error", "无权限！");
+                return map;
+            }
+
+            map.put("userNum", userService.getCount());
+            map.put("verifiedShopNum", shopService.countAllByStatus(1));
+            map.put("verifiedHairstylistNum", hairstylistService.countAllByStatus(1));
+            map.put("pendingReviewNum", shopService.countAllByStatus(0));
+
+            return map;
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            logger.info("获取管理端页面初始化所需数据失败！！（后端发生某些错误）");
+            map.put("error", "获取数据失败！！（后端发生某些错误）");
+            e.printStackTrace();
+            return map;
+        }
+    }
+
     @ApiOperation(value = "获取待审核或审核已通过的门店信息列表(分页展示)（status=0表示“待审核”status=1表示“审核通过”，status=-1表示“审核未通过”，可选定省、市、县以及门店名的范围）", notes = "仅管理员有权限")
     @GetMapping("/Administrator/getRegisterShopList")
     public Map getRegisterShopList(@RequestParam String myOpenid,

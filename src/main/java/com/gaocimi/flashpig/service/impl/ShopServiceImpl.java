@@ -158,6 +158,10 @@ public class ShopServiceImpl implements ShopService {
         return shopRepository.findAllByApplyStatus(status,pageable);
     }
 
+    @Override
+    public long countAllByStatus(int status){
+        return shopRepository.countAllByApplyStatus(status);
+    }
 }
 
 

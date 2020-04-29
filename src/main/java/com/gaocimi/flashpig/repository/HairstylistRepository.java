@@ -20,6 +20,8 @@ public interface HairstylistRepository extends JpaRepository<Hairstylist, Intege
 
     void deleteById(int id);
 
+    public long countAllByApplyStatus(int status);
+
     //分页
     public Page<Hairstylist> findAll(Pageable pageable);
 

@@ -28,4 +28,6 @@ public interface UserService {
     public void delete(int id);
 
     public Page<User> findAll(int pageNum, int pageSize);
+
+    public long getCount();
 }
