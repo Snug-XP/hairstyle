@@ -467,6 +467,32 @@ public class ShopController {
         }
     }
 
+    @ApiOperation(value = "管理员按状态分页获取所有门店列表",notes = "权限：仅管理员",produces = "application/json")
+    @GetMapping("/shop/getAllByStatus")
+    public Map getAllByStatus(@RequestParam String myOpenid,
+                              @RequestParam Integer status,
+                              @RequestParam(name = "pageNum", defaultValue = "0") int pageNum,
+                              @RequestParam(name = "pageSize", defaultValue = "10") int pageSize) {
+        Map map = new HashMap();
+        try {
+            if (!administratorService.isExist(myOpenid)) {
+                map.put("error", "无权限！");
+                return map;
+            }
+
+            Page<Shop> page = shopService.findAllByStatus(status, pageNum, pageSize);
+            map.put("page", page);
+            logger.info("获取门店列表信息成功！");
+            return map;
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            logger.info("获取门店列表信息失败！！（后端发生某些错误）");
+            map.put("error", "获取门店列表信息失败！！（后端发生某些错误）");
+            e.printStackTrace();
+            return map;
+        }
+    }
+
     @ApiOperation(value = "获取店内排行 - 全部")
     @GetMapping("/shop/getInStoreRanking/all")
     public Map getInStoreRankingAll(@RequestParam String myOpenid) {
