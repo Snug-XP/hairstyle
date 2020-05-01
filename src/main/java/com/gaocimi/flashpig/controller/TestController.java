@@ -154,7 +154,8 @@ public class TestController {
     public Map buyVipTest(@RequestParam Integer days){
         Map map = new HashMap();
 
-        map.put("endTime",MyUtils.getTimeFromDateAddDays(new Date(),days));
+        User user = userService.findUserById(26);
+        map.put("result",user.buyVip(days));
         return map;
     }
 

@@ -151,28 +151,33 @@ public class WxPaymentController {
                                 //0表示普通用户购买会员(90天)的订单
                                 if( !user.buyVip(90) ){
                                     logger.info("购买会员失败！！");
-                                    throw new Exception();
-                                };
+                                    logger.info("》》》支付订单有效，但进行相关处理操作时（type="+payOrder.getType()+"）发生异常,请管理员尽快查看《《《");
+                                }else{
+                                    userService.edit(user);
+                                }
                                 break;
                             case 1:
                                 //1表示普通用户购买会员(180天)的订单
                                 if( !user.buyVip(180) ){
                                     logger.info("购买会员失败！！");
-                                    throw new Exception();
-                                };
+                                    logger.info("》》》支付订单有效，但进行相关处理操作时（type="+payOrder.getType()+"）发生异常,请管理员尽快查看《《《");
+                                }else{
+                                    userService.edit(user);
+                                }
                                 break;
                             case 2:
                                 //3表示普通用户购买会员(365天)的订单
                                 if( !user.buyVip(365) ){
                                     logger.info("购买会员失败！！");
-                                    throw new Exception();
-                                };
+                                    logger.info("》》》支付订单有效，但进行相关处理操作时（type="+payOrder.getType()+"）发生异常,请管理员尽快查看《《《");
+                                }else{
+                                    userService.edit(user);
+                                }
                                 break;
 
                             default:
                                 logger.info("》》》支付订单类型错误！！（支付已完成，但是无法判断是何种支付服务，请管理员尽快查看！！！《《《）");
                         }
-                        userService.edit(user);
                     }catch (Exception e){
                         //...微信支付相关操作信息出现错误，比较敏感，这边可以设置邮箱提醒之类的
                         logger.info(e.getMessage());
