@@ -3,6 +3,7 @@ import com.gaocimi.flashpig.entity.*;
 import com.gaocimi.flashpig.model.HairstylistInfo;
 import com.gaocimi.flashpig.result.ResponseResult;
 import com.gaocimi.flashpig.service.HairstylistService;
+import com.gaocimi.flashpig.service.UserAddressService;
 import com.gaocimi.flashpig.service.UserService;
 import com.gaocimi.flashpig.service.UserToHairstylistService;
 import io.swagger.annotations.Api;
@@ -35,6 +36,8 @@ public class UserController {
     HairstylistService hairstylistService;
     @Autowired
     UserToHairstylistService userToHairstylistService;
+    @Autowired
+    UserAddressService userAddressService;
 
 
 
@@ -45,7 +48,7 @@ public class UserController {
         try {
             User user = userService.findUserByOpenid(myOpenid);
             if(user==null){
-                logger.info("openid为"+myOpenid+"的普通用户不存在！");
+                logger.info("openid为"+myOpenid+"的普通用户不存在！(普通用户设置自己的姓氏和性别)");
                 map.put("error", "无效的用户！！");
                 return map;
             }
@@ -57,7 +60,7 @@ public class UserController {
             }
 
             if(sex!=1&&sex!=2){
-                logger.info("性别标志错误，传入的sex="+sex);
+                logger.info("性别标志错误，传入的sex="+sex+" (普通用户设置自己的姓氏和性别)");
                 map.put("error","性别标志错误(仅允许1或2)");
                 return map;
             }
@@ -84,7 +87,7 @@ public class UserController {
         try {
             User user = userService.findUserByOpenid(myOpenid);
             if(user==null){
-                logger.info("openid为"+myOpenid+"的普通用户不存在！");
+                logger.info("openid为"+myOpenid+"的普通用户不存在！(普通用户获取自己的姓氏)");
                 map.put("error", "无效的用户！！");
                 return map;
             }
@@ -110,7 +113,7 @@ public class UserController {
 
             User user = userService.findUserByOpenid(myOpenid);
             if(user==null){
-                logger.info("openid为"+myOpenid+"的普通用户不存在！");
+                logger.info("openid为"+myOpenid+"的普通用户不存在！(普通用户分页获取自己收藏的发型师列表)");
                 map.put("error", "无效的用户！！");
                 return map;
             }
@@ -118,7 +121,6 @@ public class UserController {
             List<HairstylistInfo> resultList = new ArrayList<>();
 
             if(tempRecordList==null){
-                logger.info("你还没有收藏的发型师哦~");
                 map.put("message","你还没有收藏的发型师哦~");
                 return map;
             }
@@ -163,13 +165,13 @@ public class UserController {
         try{
             User user = userService.findUserByOpenid(myOpenid);
             if(user==null){
-                logger.info("openid为"+myOpenid+"的普通用户不存在！");
+                logger.info("openid为"+myOpenid+"的普通用户不存在！(转换用户对发型师的收藏关系)");
                 map.put("error","无效的用户！！");
                 return map;
             }
             Hairstylist hairstylist = hairstylistService.findHairstylistById(hairstylistId);
             if(hairstylist==null){
-                logger.info("id为"+hairstylistId+"的发型师不存在！");
+                logger.info("id为"+hairstylistId+"的发型师不存在！(转换用户对发型师的收藏关系)");
                 map.put("error","该发型师不存在！！");
                 return map;
             }
@@ -191,6 +193,141 @@ public class UserController {
             map.put("error","抱歉，后端发生异常!!");
         }
 
+        return map;
+    }
+
+    @ApiOperation(value = "普通用户添加配送地址")
+    @PostMapping("/user/addAddress")
+    public Map addAddress(@RequestParam String myOpenid,
+                          @RequestParam String province,
+                          @RequestParam String city,
+                          @RequestParam String district,
+                          @RequestParam String address){
+        Map map = new HashMap();
+        try {
+            User user = userService.findUserByOpenid(myOpenid);
+            if (user == null) {
+                logger.info("openid为" + myOpenid + "的普通用户不存在！(普通用户添加配送地址)");
+                map.put("error", "无效的用户！！");
+                return map;
+            }
+            UserAddress userAddress = new UserAddress();
+            userAddress.setUser(user);
+            userAddress.setProvince(province);
+            userAddress.setCity(city);
+            userAddress.setDistrict(district);
+            userAddress.setAddress(address);
+
+            userAddressService.save(userAddress);
+            logger.info("用户“"+user.getName()+"”（id="+user.getId()+"）添加了一个配送地址："+userAddress.toString());
+            map.put("message","添加成功");
+        }catch (Exception e){
+            logger.info("(普通用户添加配送地址)后端发生异常：\n");
+            logger.error(e.getMessage());
+            map.put("error","抱歉，后端发生异常!!");
+        }
+        return map;
+    }
+
+
+    @ApiOperation(value = "普通用户修改配送地址")
+    @PutMapping("/user/editAddress")
+    public Map editAddress(@RequestParam String myOpenid,
+                           @RequestParam Integer addressId,
+                          @RequestParam String province,
+                          @RequestParam String city,
+                          @RequestParam String district,
+                          @RequestParam String address){
+        Map map = new HashMap();
+        try {
+            User user = userService.findUserByOpenid(myOpenid);
+            if (user == null) {
+                logger.info("openid为" + myOpenid + "的普通用户不存在！(普通用户添加配送地址)");
+                map.put("error", "无效的用户！！");
+                return map;
+            }
+            UserAddress userAddress = userAddressService.findUserAddressById(addressId);
+            if(userAddress==null){
+                logger.info("id=" + addressId + "的配送地址不存在！(普通用户修改配送地址)");
+                map.put("error", "该配送地址不存在！");
+                return map;
+            }
+
+            if(user.getId()!=userAddress.getUser().getId()){
+                logger.info("用户“"+user.getName()+"”（id="+user.getId()+"）企图删除其他用户的配送地址(id="+addressId+")！");
+                map.put("error", "请检查参数addressId或者数据库，所选配送地址不是该用户的");
+                return map;
+            }
+            userAddress.setProvince(province);
+            userAddress.setCity(city);
+            userAddress.setDistrict(district);
+            userAddress.setAddress(address);
+
+            userAddressService.edit(userAddress);
+            logger.info("用户“"+user.getName()+"”（id="+user.getId()+"修改了配送地址（id="+addressId+"）："+userAddress.toString());
+            map.put("message","修改成功");
+        }catch (Exception e){
+            logger.info("(普通用户修改配送地址)后端发生异常：\n");
+            logger.error(e.getMessage());
+            map.put("error","抱歉，后端发生异常!!");
+        }
+        return map;
+    }
+
+    @ApiOperation(value = "普通用户获取自己的配送地址列表")
+    @GetMapping("/user/getAddressList")
+    public Map getAddressList(@RequestParam String myOpenid){
+        Map map = new HashMap();
+        try {
+            User user = userService.findUserByOpenid(myOpenid);
+            if (user == null) {
+                logger.info("openid为" + myOpenid + "的普通用户不存在！(普通用户添加配送地址)");
+                map.put("error", "无效的用户！！");
+                return map;
+            }
+            List<UserAddress> addressList = user.getUserAddressList();
+
+            map.put("addressList",addressList);
+        }catch (Exception e){
+            logger.info("(普通用户添加配送地址)后端发生异常：\n");
+            logger.error(e.getMessage());
+            map.put("error","抱歉，后端发生异常!!");
+        }
+        return map;
+    }
+
+    @ApiOperation(value = "普通用户删除自己的配送地址列表")
+    @DeleteMapping("/user/deleteAddress")
+    public Map deleteAddress(@RequestParam String myOpenid, @RequestParam Integer addressId){
+        Map map = new HashMap();
+        try {
+            User user = userService.findUserByOpenid(myOpenid);
+            if (user == null) {
+                logger.info("openid为" + myOpenid + "的普通用户不存在！(普通用户删除配送地址)");
+                map.put("error", "无效的用户！！");
+                return map;
+            }
+            UserAddress userAddress = userAddressService.findUserAddressById(addressId);
+            if(userAddress==null){
+                logger.info("id=" + addressId + "的配送地址不存在！(普通用户删除配送地址)");
+                map.put("error", "该配送地址不存在！");
+                return map;
+            }
+
+            if(user.getId()!=userAddress.getUser().getId()){
+                logger.info("用户“"+user.getName()+"”（id="+user.getId()+"）企图删除其他用户的配送地址(id="+addressId+")！");
+                map.put("error", "请检查参数addressId或者数据库，所选配送地址不是该用户的");
+                return map;
+            }
+
+            userAddressService.delete(addressId);
+
+            map.put("message","删除成功");
+        }catch (Exception e){
+            logger.info("(普通用户删除配送地址)后端发生异常：\n");
+            logger.error(e.getMessage());
+            map.put("error","抱歉，后端发生异常!!");
+        }
         return map;
     }
 

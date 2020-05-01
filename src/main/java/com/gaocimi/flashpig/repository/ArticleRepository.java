@@ -16,6 +16,8 @@ public interface ArticleRepository extends JpaRepository<Article, Integer>, JpaS
 
     List<Article> findAllByTagLike(String tag);
 
+    List<Article> findAllByTagLikeAndStatus(String tag,Integer status);
+
     List<Article> findAllByTitleLike(String title);
 
     List<Article> findAllByContentLike(String Content);

@@ -1,8 +1,10 @@
 package com.gaocimi.flashpig.controller;
 
 import com.gaocimi.flashpig.entity.*;
+import com.gaocimi.flashpig.model.ArticleInfo;
 import com.gaocimi.flashpig.result.ResponseResult;
 import com.gaocimi.flashpig.service.*;
+import com.gaocimi.flashpig.utils.xp.MyUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.slf4j.Logger;
@@ -12,9 +14,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.text.Collator;
 import java.util.*;
 
 /**
@@ -79,12 +81,14 @@ public class ArticleController {
             articleService.save(article);
 
             //储存发型文章的图片url列表
-            for (String imageUrlStr : imgUrlList) {
-                ArticleImageUrl imageUrl = new ArticleImageUrl();
-                imageUrl.setArticle(article);
-                imageUrl.setImageUrl(imageUrlStr);
+            if(imgUrlList!=null) {
+                for (String imageUrlStr : imgUrlList) {
+                    ArticleImageUrl imageUrl = new ArticleImageUrl();
+                    imageUrl.setArticle(article);
+                    imageUrl.setImageUrl(imageUrlStr);
 
-                imageUrlService.save(imageUrl);
+                    imageUrlService.save(imageUrl);
+                }
             }
             map.put("message", "文章上传成功！");
             return map;
@@ -183,7 +187,7 @@ public class ArticleController {
 
 
             //删除原有文章的图片url
-            imageUrlService.deleteAllByArticlId(articleId);
+            imageUrlService.deleteAllByArticleId(articleId);
 
             //储存发型文章的图片url列表
             for (String imageUrlStr : imgUrlList) {
@@ -223,7 +227,7 @@ public class ArticleController {
             List<Article> tempArticleList = hairstylist.getArticleList();
             List<Article> resultList = new ArrayList<>();
 
-            if (tempArticleList == null || tempArticleList.size() == 0) {
+            if (tempArticleList == null || tempArticleList.isEmpty()) {
                 logger.info("你还没有创建过发型文章哦~");
                 map.put("message", "你还没有创建过发型文章哦~");
                 return map;
@@ -270,12 +274,12 @@ public class ArticleController {
             User user = userService.findUserByOpenid(myOpenid);
             Article article = articleService.findArticleById(articleId);
             if (user == null) {
-                logger.info("（" + myOpenid + "）该用户不存在！");
+                logger.info("（" + myOpenid + "）该用户不存在！(获取单个文章信息)");
                 map.put("error", "无效的用户！！");
                 return map;
             }
             if (article == null) {
-                logger.info("id为" + articleId + "的文章不存在！");
+                logger.info("id为" + articleId + "的文章不存在！(获取单个文章信息)");
                 map.put("error", "该文章不存在！！");
                 return map;
             }
@@ -314,12 +318,12 @@ public class ArticleController {
             User user = userService.findUserByOpenid(myOpenid);
             Article article = articleService.findArticleById(articleId);
             if (user == null) {
-                logger.info("（" + myOpenid + "）该用户不存在！");
+                logger.info("（" + myOpenid + "）该用户不存在！(收藏或取消收藏该发型文章)");
                 map.put("error", "无效的用户！！");
                 return map;
             }
             if (article == null) {
-                logger.info("id为" + articleId + "的文章不存在！");
+                logger.info("id为" + articleId + "的文章不存在！(收藏或取消收藏该发型文章)");
                 map.put("error", "该文章不存在！！");
                 return map;
             }
@@ -403,14 +407,14 @@ public class ArticleController {
 
             User user = userService.findUserByOpenid(myOpenid);
             if (user == null) {
-                logger.info("（" + myOpenid + "）该用户不存在！");
+                logger.info("（" + myOpenid + "）该用户不存在！(获取自己收藏的文章列表)");
                 map.put("error", "无效的用户！！");
                 return map;
             }
             List<UserToArticle> tempArticleList = user.getArticleRecordList();
             List<Article> resultArticleList = new ArrayList<>();
 
-            if (tempArticleList == null) {
+            if (tempArticleList == null||tempArticleList.isEmpty()) {
                 logger.info("你还没有收藏文章哦~");
                 map.put("message", "你还没有收藏文章哦~");
                 return map;
@@ -449,58 +453,60 @@ public class ArticleController {
     }
 
 
-//    @ApiOperation(value = "普通用户获取被推荐的文章列表")
-//    @GetMapping("/article/getRecommendList")
-//    public Map getRecommendList(@RequestParam String myOpenid,
-//                                     @RequestParam(name = "pageNum", defaultValue = "0") int pageNum,
-//                                     @RequestParam(name = "pageSize", defaultValue = "10") int pageSize) {
-//        Map map = new HashMap();
-//        try {
-//
-//            User user = userService.findUserByOpenid(myOpenid);
-//            if (user == null) {
-//                logger.info("（" + myOpenid + "）该用户不存在！");
-//                map.put("error", "无效的用户！！");
-//                return map;
-//            }
-//            List<Article> tempArticleList = articleService.getRecommendListBy();
-//            List<UserToArticle> resultArticleList = new ArrayList<>();
-//
-//            if (tempArticleList == null) {
-//                logger.info("你还没有收藏文章哦~");
-//                map.put("message", "你还没有收藏文章哦~");
-//                return map;
-//            }
-//
-//            // 按时间倒序排序
-//            Collections.sort(tempArticleList, (o1, o2) -> {
-//                if (o2.getCreateTime().after(o1.getCreateTime())) {
-//                    return 1;
-//                } else if (o1.getCreateTime().after(o2.getCreateTime())) {
-//                    return -1;
-//                }
-//                return 0; //相等为0
-//            });
-//
-//            //获取所求页数的文章数据
-//            int first = pageNum * pageSize;
-//            int last = pageNum * pageSize + pageSize - 1;
-//            for (int i = first; i <= last && i < tempArticleList.size(); i++) {
-//                resultArticleList.add(tempArticleList.get(i).article);
-//            }
-//
-//            //包装分页数据
-//            Pageable pageable = PageRequest.of(pageNum, pageSize);
-//            Page<Article> page = new PageImpl<>(resultArticleList, pageable, tempArticleList.size());
-//
-//            map.put("page", page);
-//            return map;
-//        } catch (Exception e) {
-//            logger.error(e.getMessage());
-//            logger.info("获取自己收藏的文章列表失败！！（后端发生某些错误）");
-//            map.put("error", "获取收藏列表失败！！（后端发生某些错误）");
-//            e.printStackTrace();
-//            return map;
-//        }
-//    }
+    @ApiOperation(value = "用户获取相关标签的文章列表")
+    @GetMapping("/article/getAtricleListByTaglist")
+    public Map getRecommendList(@RequestParam String myOpenid,
+                                     @RequestParam List<String> tagList,
+                                     @RequestParam(name = "pageNum", defaultValue = "0") int pageNum,
+                                     @RequestParam(name = "pageSize", defaultValue = "10") int pageSize) {
+        Map map = new HashMap();
+        try {
+
+            User user = userService.findUserByOpenid(myOpenid);
+            if (user == null) {
+                logger.info("（" + myOpenid + "）该用户不存在！(获取相关标签的文章列表)");
+                map.put("error", "无效的用户！！");
+                return map;
+            }
+
+            List<Article> tempArticleList = articleService.findAllByTagLikeAndStatus(tagList,1);
+            List<ArticleInfo> resultList = new ArrayList<>();
+
+            if (tempArticleList == null||tempArticleList.isEmpty()) {
+                logger.info("没有找到相关标签的文章（用户获取相关标签的文章）");
+                map.put("message", "抱歉，没有找到相关标签的文章~");
+                return map;
+            }
+
+            // 按创建时间倒序排序
+            Collections.sort(tempArticleList, (o1, o2) -> {
+                if (o2.getCreateTime().after(o1.getCreateTime())) {
+                    return 1;
+                } else if (o1.getCreateTime().after(o2.getCreateTime())) {
+                    return -1;
+                }
+                return 0; //相等为0
+            });
+
+            //获取所求页数的专辑数据
+            int first = pageNum * pageSize;
+            int last = pageNum * pageSize + pageSize - 1;
+            for (int i = first; i <= last && i < tempArticleList.size(); i++) {
+                resultList.add(new ArticleInfo(tempArticleList.get(i)));
+            }
+
+            //包装分页数据
+            Pageable pageable = PageRequest.of(pageNum, pageSize);
+            Page<ArticleInfo> page = new PageImpl<>(resultList, pageable, tempArticleList.size());
+
+            map.put("page", page);
+            return map;
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            logger.info("用户获取相关标签的文章列表失败！！（后端发生某些错误）");
+            map.put("error", "获取相关标签的文章列表失败！！（后端发生某些错误）");
+            e.printStackTrace();
+            return map;
+        }
+    }
 }

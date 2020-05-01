@@ -36,4 +36,7 @@ public interface ShopRepository extends JpaRepository<Shop, Integer>, JpaSpecifi
 
     public List<Shop> findAllByShopNameLike(String shopName);
 
+    public long countAllByApplyStatus(int status);
+
+
 }

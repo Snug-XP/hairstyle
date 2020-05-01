@@ -103,7 +103,7 @@ public class UserFormidController {
             map.put("formidList",formidList);
             return map;
         }
-        if(formidList.size()==0)
+        if(formidList.isEmpty())
         {
             System.out.println("为0");
             map.put("formidList",formidList);

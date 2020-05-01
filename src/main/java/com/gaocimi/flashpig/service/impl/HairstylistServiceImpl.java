@@ -85,6 +85,11 @@ public class HairstylistServiceImpl implements HairstylistService {
         Pageable pageable = PageRequest.of(pageNum, pageSize, sort);
         return hairstylistRepository.findAllByApplyStatus(status, pageable);
     }
+
+    @Override
+    public long countAllByStatus(int status){
+        return hairstylistRepository.countAllByApplyStatus(status);
+    }
 }
 
 

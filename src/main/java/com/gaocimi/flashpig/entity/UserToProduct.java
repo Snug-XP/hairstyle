@@ -7,16 +7,16 @@ import javax.persistence.*;
 import java.util.Date;
 
 /**
- * UserToArticle - 用户收藏文章的中间表记录类
+ * UserToProduct - 用户收藏商品的中间表记录类
  *
  * @author xp
- * @date 2019-10-22 15:32:44
+ * @date 2020-4-27 15:37:22
  */
 @Entity
-@Table(name = "user_to_article")
-@JsonIgnoreProperties(value = {"user", "article", "handler", "hibernateLazyInitializer", "fieldHandler"})
+@Table(name = "user_to_product")
+@JsonIgnoreProperties(value = {"user", "product", "handler", "hibernateLazyInitializer", "fieldHandler"})
 @Data
-public class UserToArticle {
+public class UserToProduct {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -32,19 +32,19 @@ public class UserToArticle {
     public User user;
 
     /**
-     * 该收藏记录对应的文章； 定义名为article_id的外键列，该外键引用article表的主键(id)列,采用懒加载
+     * 该收藏记录对应的商品； 定义名为product_id的外键列，该外键引用product表的主键(id)列,采用懒加载
      */
-    @ManyToOne(targetEntity = Article.class, fetch = FetchType.LAZY)
-    @JoinColumn(name = "article_id", nullable = false)
-    public Article article;
+    @ManyToOne(targetEntity = Product.class, fetch = FetchType.LAZY)
+    @JoinColumn(name = "product_id", nullable = false)
+    public Product product;
 
-    public UserToArticle(User user, Article article) {
+    public UserToProduct(User user, Product product) {
         this.user = user;
-        this.article = article;
+        this.product = product;
         this.createTime = new Date(System.currentTimeMillis());
     }
 
-    public UserToArticle() {
+    public UserToProduct() {
         super();
         this.createTime = new Date(System.currentTimeMillis());
     }

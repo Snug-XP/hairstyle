@@ -41,29 +41,29 @@ public class TestController {
 
     @ApiOperation(value = "时间测试", produces = "application/json")
     @GetMapping("/timeTest")
-    public Map Test(Double a) {
-        Double testDouble;
-        testDouble = Double.parseDouble(a.toString());
+    public Map Test() {
         Map map = new HashMap();
 
-        Map daily = new HashMap();
-        Map weekly = new HashMap();
-        Map monthly = new HashMap();
-
-        Date today = MyUtils.getTodayFirstTime();
-        Date week = MyUtils.getFirstDayOfWeek(today);
-        Date month = MyUtils.getFirstDayOfMonth(today);
-
-        for(int i = 0;i<13;i++){
-            daily.put(i+"daysAgo", MyUtils.stepDay(today,-i));
-            weekly.put(i+"weeksAgo",MyUtils.stepWeek(week,-i));
-            monthly.put(i+"monthsAgo",MyUtils.stepMonth(month,-i));
-        }
-        map.put("daily",daily);
-        map.put("weekly",weekly);
-        map.put("monthly",monthly);
+//        Map daily = new HashMap();
+//        Map weekly = new HashMap();
+//        Map monthly = new HashMap();
+//
+//        Date today = MyUtils.getTodayFirstTime();
+//        Date week = MyUtils.getFirstDayOfWeek(today);
+//        Date month = MyUtils.getFirstDayOfMonth(today);
+//
+//        for(int i = 0;i<13;i++){
+//            daily.put(i+"daysAgo", MyUtils.stepDay(today,-i));
+//            weekly.put(i+"weeksAgo",MyUtils.stepWeek(week,-i));
+//            monthly.put(i+"monthsAgo",MyUtils.stepMonth(month,-i));
+//        }
+//        map.put("daily",daily);
+//        map.put("weekly",weekly);
+//        map.put("monthly",monthly);
         map.put("nowTime",new Date(System.currentTimeMillis()));
-        map.put("double",testDouble);
+        map.put("new Date.getTime()",new Date().getTime());
+        map.put("System.currentTimeMillis()",System.currentTimeMillis());
+        map.put("getTimeFromNowAddDays(1)",MyUtils.getTimeFromDateAddDays(new Date() , 1));
         return map;
     }
 
@@ -84,6 +84,7 @@ public class TestController {
         map.put("当前小时数",calendar.get(Calendar.HOUR_OF_DAY));
         return map;
     }
+
 
     @ApiOperation(value = "对象比较测试(订单号1，订单号2)", produces = "application/json")
     @GetMapping("/equalTest")
@@ -125,4 +126,25 @@ public class TestController {
     public void notify(@RequestParam Map<String,Object> map){
         logger.info("\n获取的数据:\n"+map+"\n");
     }
+
+
+    @ApiOperation(value = "List转数组测试", produces = "application/json")
+    @PostMapping("/listToArray")
+    public Map listToArray(@RequestParam List<String> list){
+        Map map = new HashMap();
+
+        String []array;
+
+        //1）等于0，动态创建与size相同的数组，性能最好。
+        //2）大于0但小于size，重新创建大小等于size的数组，增加GC负担。
+        //3）等于size，在高并发情况下，数组创建完成之后，size正在变大的情况下，负面影响与2相同。
+        //4）大于size，空间浪费，且在size处插入null值，存在NPE隐患。
+        array = list.toArray(new String[0]);
+
+        map.put("array",array);
+        return map;
+    }
+
+
+
 }

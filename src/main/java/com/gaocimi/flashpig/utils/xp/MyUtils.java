@@ -375,4 +375,10 @@ public class MyUtils {
         return s;
     }
 
+    /**
+     * 获取距离某个日期（date）多少天（days）的时间
+     */
+    public static Date getTimeFromDateAddDays(Date date ,int days) {
+        return new Date(date.getTime()+days*24*60*60*1000);
+    }
 }

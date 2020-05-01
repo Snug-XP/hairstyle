@@ -19,7 +19,7 @@ public class ArticleInfo {
         this.tag = article.getTag();
 
         List<ArticleImageUrl> imgList = article.getArticleImageUrlList();
-        if (imgList.size() > 0)
+        if (imgList != null && imgList.size() > 0)
             this.imgUrl = imgList.get(0).getImageUrl();
     }
 }

@@ -47,5 +47,6 @@ public class UserToHairstylist {
 
     public UserToHairstylist() {
         super();
+        this.createTime = new Date(System.currentTimeMillis());
     }
 }

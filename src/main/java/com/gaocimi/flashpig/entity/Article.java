@@ -5,7 +5,6 @@ import com.gaocimi.flashpig.model.HairstylistInfo;
 import lombok.Data;
 
 import javax.persistence.*;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -47,7 +46,7 @@ public class Article {
     private Integer status;
 
     /**
-     * 标签、关键词
+     * 标签、关键词(以英文逗号隔开)
      */
     private String tag;
 
@@ -56,7 +55,7 @@ public class Article {
      * 发表该文章的发型师； 定义名为hairstylist_id的外键列，该外键引用hairstylist表的主键(id)列,采用懒加载
      */
     @ManyToOne(targetEntity = Hairstylist.class, fetch = FetchType.LAZY)
-    @JoinColumn(name = "hairstylist_id",nullable = false)
+    @JoinColumn(name = "hairstylist_id", nullable = false)
     public Hairstylist hairstylist;
 
 
@@ -74,7 +73,7 @@ public class Article {
 
 
     public String[] getTag() {
-        if(tag==null)
+        if (tag == null)
             return null;
         return tag.split(",");
     }
@@ -101,8 +100,11 @@ public class Article {
         }
     }
 
-    public HairstylistInfo getHairstylist(){
-        return new HairstylistInfo(this.hairstylist);
+    public HairstylistInfo getHairstylist() {
+        if (this.hairstylist == null)
+            return null;
+        else
+            return new HairstylistInfo(this.hairstylist);
     }
 
 

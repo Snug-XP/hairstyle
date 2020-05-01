@@ -223,7 +223,7 @@ public class Shop {
 
     public String getMaxPointPerson() {
         List<Hairstylist> hairstylistList = getHairstylistsByStatus(1);
-        if (hairstylistList == null || hairstylistList.size() == 0) {
+        if (hairstylistList == null || hairstylistList.isEmpty()) {
             return null;
         }
         Hairstylist hairstylist = hairstylistList.get(0);
@@ -237,7 +237,7 @@ public class Shop {
 
     public String getMaxOrderPerson() {
         List<Hairstylist> hairstylistList = getHairstylistsByStatus(1);
-        if (hairstylistList == null || hairstylistList.size() == 0) {
+        if (hairstylistList == null || hairstylistList.isEmpty()) {
             return null;
         }
         Hairstylist hairstylist = hairstylistList.get(0);
@@ -251,7 +251,7 @@ public class Shop {
 
     public String getMostPopularPerson() {
         List<Hairstylist> hairstylistList = getHairstylistsByStatus(1);
-        if (hairstylistList == null || hairstylistList.size() == 0) {
+        if (hairstylistList == null || hairstylistList.isEmpty()) {
             return null;
         }
         Hairstylist hairstylist = hairstylistList.get(0);

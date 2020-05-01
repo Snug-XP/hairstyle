@@ -4,7 +4,6 @@ import com.gaocimi.flashpig.entity.*;
 import com.gaocimi.flashpig.model.ArticleInfo;
 import com.gaocimi.flashpig.result.ResponseResult;
 import com.gaocimi.flashpig.service.*;
-import com.gaocimi.flashpig.utils.xp.MyUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.slf4j.Logger;
@@ -14,7 +13,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.text.Collator;
@@ -164,11 +162,12 @@ public class AlbumController {
                 map.put("error", "id为" + albumId + "的专辑不存在！");
                 return map;
             }
-            List<Article> tempList = articleService.findAllByTagLike(album.getTag());
+
+            List<Article> tempList = articleService.findAllByTagLikeAndStatus(Arrays.asList(album.getTag()),1);
             List<ArticleInfo> resultList = new ArrayList<>();
 
-            if (tempList.size() == 0) {
-                map.put("message", "未找到相关标签的文章");
+            if (tempList.isEmpty()) {
+                map.put("message", "未找到相关标签的文章~");
                 return map;
             }
 
@@ -214,6 +213,10 @@ public class AlbumController {
             List<Article> tempList = album.getArticleList();
             List<ArticleInfo> resultList = new ArrayList<>();
 
+            if (tempList.isEmpty()) {
+                map.put("message", "该专辑无发型文章~");
+                return map;
+            }
             // 按标题升序排序
             Collections.sort(tempList, (o1, o2) -> Collator.getInstance(Locale.CHINESE).compare(o1.getTitle(), o2.getTitle()));
 

@@ -75,12 +75,11 @@ public class ArticleServiceImpl implements ArticleService {
     }
 
     @Override
-    public List<Article> findAllByTagLike(String[] tagList) {
-        List<Article> articleList = new ArrayList<>();
+    public List<Article> findAllByTagLikeAndStatus(List<String> tagList,Integer status) {
         Set<Article> set = new HashSet<>();//使用集合Set，自带去重功能
 
         for (String tag : tagList) {
-            List<Article> tempList = articleRepository.findAllByTagLike("%" + tag + "%");
+            List<Article> tempList = articleRepository.findAllByTagLikeAndStatus("%" + tag + "%" , status);
             set.addAll(tempList);
         }
         //这样合并去重需要重写对象的equals()方法,但是发现不重写也可以
