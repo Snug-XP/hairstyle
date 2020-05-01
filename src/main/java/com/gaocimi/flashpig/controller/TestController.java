@@ -3,10 +3,12 @@ package com.gaocimi.flashpig.controller;
 import com.gaocimi.flashpig.entity.Article;
 import com.gaocimi.flashpig.entity.Hairstylist;
 import com.gaocimi.flashpig.entity.Shop;
+import com.gaocimi.flashpig.entity.User;
 import com.gaocimi.flashpig.result.ResponseResult;
 import com.gaocimi.flashpig.service.ArticleService;
 import com.gaocimi.flashpig.service.HairstylistService;
 import com.gaocimi.flashpig.service.ShopService;
+import com.gaocimi.flashpig.service.UserService;
 import com.gaocimi.flashpig.utils.xp.IpUtil;
 import com.gaocimi.flashpig.utils.xp.MyUtils;
 import io.swagger.annotations.Api;
@@ -38,6 +40,8 @@ public class TestController {
     HairstylistService hairstylistService;
     @Autowired
     ShopService shopService;
+    @Autowired
+    UserService userService;
 
     @ApiOperation(value = "时间测试", produces = "application/json")
     @GetMapping("/timeTest")
@@ -142,6 +146,15 @@ public class TestController {
         array = list.toArray(new String[0]);
 
         map.put("array",array);
+        return map;
+    }
+
+    @ApiOperation(value = "获取今天days天后的日期", produces = "application/json")
+    @PostMapping("/buyVipTest")
+    public Map buyVipTest(@RequestParam Integer days){
+        Map map = new HashMap();
+
+        map.put("endTime",MyUtils.getTimeFromDateAddDays(new Date(),days));
         return map;
     }
 
