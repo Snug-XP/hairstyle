@@ -153,6 +153,7 @@ public class User {
 
         if (isVip == 1) {
             setVipEndTime(MyUtils.getTimeFromDateAddDays(vipEndTime, days));
+            System.out.println("用户“"+name+"”购买了 "+days+" 天的会员");
             return true;
         } else if (isVip == 0) {
             setIsVip(1);
