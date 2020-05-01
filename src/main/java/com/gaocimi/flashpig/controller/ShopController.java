@@ -456,7 +456,6 @@ public class ShopController {
         try {
             Page<Shop> page = shopService.findAllByStatus(1, pageNum, pageSize);
             map.put("page", page);
-            logger.info("获取门店列表信息成功！");
             return map;
         } catch (Exception e) {
             logger.error(e.getMessage());
@@ -482,7 +481,6 @@ public class ShopController {
 
             Page<Shop> page = shopService.findAllByStatus(status, pageNum, pageSize);
             map.put("page", page);
-            logger.info("获取门店列表信息成功！");
             return map;
         } catch (Exception e) {
             logger.error(e.getMessage());

@@ -25,7 +25,7 @@ public class WxPayOrder {
     private Integer id;
 
     /**
-     * 提交该支付订单的用户； 定义名为user_id的外键列，该外键引用user表的主键(id)列,采用懒加载
+     * 提交该支付订单的用户； 定义名为user_id的外键列，该外键引用user表的主键(id)列,采用急加载
      */
     @ManyToOne(targetEntity = User.class, fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id")
@@ -66,4 +66,24 @@ public class WxPayOrder {
      * 调用统一下单接口后生成的预订单id
      */
     private String prepayId;
+
+    /**
+     * 配送省份
+     */
+    private String province;
+
+    /**
+     * 配送城市
+     */
+    private String city;
+
+    /**
+     * 配送区县
+     */
+    private String district;
+
+    /**
+     * 配送详细地址
+     */
+    private String address;
 }

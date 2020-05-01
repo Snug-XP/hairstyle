@@ -81,7 +81,6 @@ class AdministratorController {
             if (administratorService.isExist(myOpenid)) {
                 Page<Shop> page = shopService.findRegisterShopList(status, province, city, district, shopName, pageNum, pageSize);
                 map.put("page", page);
-                logger.info("获取门店列表信息成功！");
                 return map;
             } else {
                 logger.info("获取正在注册的门店信息失败！！（没有权限！！）");

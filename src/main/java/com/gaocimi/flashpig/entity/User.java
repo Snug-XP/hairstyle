@@ -17,7 +17,7 @@ import java.util.List;
  */
 @Entity
 @Table(name = "user")
-@JsonIgnoreProperties(value = {"sessionKey", "openid", "userFormidList", "haircutOrderList", "hairstylistRecordList", "articleRecordList", "haircutOrderList", "handler", "hibernateLazyInitializer", "fieldHandler"})
+@JsonIgnoreProperties(value = {"sessionKey", "openid","userAddressList" , "userFormidList", "haircutOrderList", "hairstylistRecordList", "articleRecordList", "haircutOrderList", "handler", "hibernateLazyInitializer", "fieldHandler"})
 @Data
 public class User {
 
@@ -111,6 +111,12 @@ public class User {
      */
     @OneToMany(targetEntity = UserFormid.class, mappedBy = "user")
     public List<UserFormid> userFormidList;
+
+    /**
+     * 该用户的配送地址列表； 定义该User实体所有关联的UserAddress实体； 指定mappedBy属性表明该User实体不控制关联关系
+     */
+    @OneToMany(targetEntity = UserAddress.class, mappedBy = "user")
+    public List<UserAddress> userAddressList;
 
 /**************************************************************************************************************************/
     /**
