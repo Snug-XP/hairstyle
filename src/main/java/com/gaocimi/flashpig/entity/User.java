@@ -17,7 +17,7 @@ import java.util.List;
  */
 @Entity
 @Table(name = "user")
-@JsonIgnoreProperties(value = {"sessionKey", "openid","userAddressList" , "userFormidList", "haircutOrderList", "hairstylistRecordList", "articleRecordList", "haircutOrderList", "handler", "hibernateLazyInitializer", "fieldHandler"})
+@JsonIgnoreProperties(value = {"isVip","sessionKey", "openid","userAddressList" , "userFormidList", "haircutOrderList", "hairstylistRecordList", "articleRecordList", "haircutOrderList", "handler", "hibernateLazyInitializer", "fieldHandler"})
 @Data
 public class User {
 
@@ -146,8 +146,8 @@ public class User {
      * @param days 购买几天会员的天数
      */
     public boolean buyVip(int days) {
-        if ((isVip == 1 && vipEndTime != null)||(isVip == 0 && vipEndTime.after(new Date()))) {
-            System.out.println("\n\n》》》会员状态异常！！会员信息与会员到期时间不匹配《《《");
+        if ((isVip == 1 && vipEndTime == null)||(isVip == 0 && vipEndTime.after(new Date()))) {
+            System.out.println("\n\n》》》（用户id="+id+"）会员状态异常！！会员信息与会员到期时间不匹配《《《");
             return false;
         }
 

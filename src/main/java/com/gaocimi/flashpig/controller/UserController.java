@@ -39,7 +39,27 @@ public class UserController {
     @Autowired
     UserAddressService userAddressService;
 
-
+    @ApiOperation(value = "普通用户获取自己的信息")
+    @GetMapping("/user/info")
+    public Map getMyInfo(@RequestParam String myOpenid){
+        Map map = new HashMap();
+        try {
+            User user = userService.findUserByOpenid(myOpenid);
+            if(user==null){
+                logger.info("openid为"+myOpenid+"的普通用户不存在！(普通用户获取自己的姓氏)");
+                map.put("error", "无效的用户！！");
+                return map;
+            }
+            map.put("user", user);
+            return map;
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            logger.info("获取自己的信息失败！！（后端发生某些错误）");
+            map.put("error", "获取自己的信息失败！！（后端发生某些错误）");
+            e.printStackTrace();
+            return map;
+        }
+    }
 
     @ApiOperation(value = "普通用户设置自己的姓氏和性别")
     @PostMapping("/user/setLastNameAndSex")
