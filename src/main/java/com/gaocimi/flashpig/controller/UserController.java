@@ -264,7 +264,7 @@ public class UserController {
             userAddress.setAddress(address);
 
             userAddressService.edit(userAddress);
-            logger.info("用户“"+user.getName()+"”（id="+user.getId()+"修改了配送地址（id="+addressId+"）："+userAddress.toString());
+            logger.info("用户“"+user.getName()+"”（id="+user.getId()+"）修改了配送地址（id="+addressId+"）："+userAddress.toString());
             map.put("message","修改成功");
         }catch (Exception e){
             logger.info("(普通用户修改配送地址)后端发生异常：\n");

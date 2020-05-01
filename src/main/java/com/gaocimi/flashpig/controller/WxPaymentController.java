@@ -175,7 +175,10 @@ public class WxPaymentController {
                         userService.edit(user);
                     }catch (Exception e){
                         //...微信支付相关操作信息出现错误，比较敏感，这边可以设置邮箱提醒之类的
+                        logger.info(e.getMessage());
+                        e.printStackTrace();
                         logger.info("》》》支付订单有效，但进行相关处理操作时发生异常,请管理员尽快查看《《《");
+
                     }
 
 

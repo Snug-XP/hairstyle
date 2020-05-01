@@ -46,7 +46,7 @@ public class UserAddress {
     private String district;
 
     /**
-     * 配送详细地址
+     * 配送详细地址(村、路、门牌)
      */
     private String address;
 

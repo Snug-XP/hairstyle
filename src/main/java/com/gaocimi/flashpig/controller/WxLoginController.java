@@ -57,8 +57,8 @@ public class WxLoginController {
         Map<String, String> rawDataMap = new HashMap<>();
         if (rawData != null) {
             rawDataMap = JsonUtils.jsonToPojo(rawData, rawDataMap.getClass());
-            logger.info("wxlogin临时凭证  -  code:  " + code + "");
-            logger.info("获取的rawDataMap数据为： " + rawDataMap.toString());
+//            logger.info("wxlogin临时凭证  -  code:  " + code + "");
+//            logger.info("获取的rawDataMap数据为： " + rawDataMap.toString());
         }
 
         if (name == null) {
