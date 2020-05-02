@@ -1,6 +1,7 @@
 package com.gaocimi.flashpig.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.gaocimi.flashpig.model.ProductInfo;
 import lombok.Data;
 
 import javax.persistence.*;
@@ -14,7 +15,7 @@ import java.util.Date;
  * @date 2020-5-2 10:54:07
  */
 @Entity
-@JsonIgnoreProperties(value = {"user"})
+@JsonIgnoreProperties(value = {"user","product","wxPayOrder"})
 @Table(name = "wx_pay_order")
 @Data
 public class ProductOrder {
@@ -62,7 +63,7 @@ public class ProductOrder {
     private String userPhone;
 
     /**
-     * 订单总价格
+     * 绑定该订单的支付订单； 定义名为pay_order_id的外键列，该外键引用wx_pay_order表的主键(id)列,采用懒加载
      */
     @OneToOne(targetEntity = WxPayOrder.class, fetch = FetchType.LAZY)
     @JoinColumn(name = "pay_order_id")
@@ -96,4 +97,7 @@ public class ProductOrder {
     @Column(nullable = false)
     private String comment;
 
+    public ProductInfo getProductInfo(){
+        return new ProductInfo(product);
+    }
 }

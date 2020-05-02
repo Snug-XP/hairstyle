@@ -409,7 +409,7 @@ public class ProductController {
             });
 
 
-            //获取所求页数的专辑数据
+            //获取所求页数的商品数据
             int first = pageNum * pageSize;
             int last = pageNum * pageSize + pageSize - 1;
             for (int i = first; i <= last && i < tempProductList.size(); i++) {
