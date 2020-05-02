@@ -39,15 +39,9 @@ public class ProductOrderController {
     @PostMapping("/user/addProductOrder")
     public Map addProductOrder(@RequestParam String myOpenid, @RequestParam Integer productId,
                                @RequestParam Integer productQuantity, @RequestParam String userPhone,
-                               @RequestParam Integer addressId) {
+                               @RequestParam(required = false) Integer addressId) {
         Map map = new HashMap();
         try {
-
-            if (!MyUtils.isMobileNO(userPhone)) {
-                logger.info("（userPhone=" + userPhone + "）手机号码不合法！(创建商品订单)");
-                map.put("error", "手机号码不合法！");
-                return map;
-            }
 
             User user = userService.findUserByOpenid(myOpenid);
             if (user == null) {
@@ -60,6 +54,21 @@ public class ProductOrderController {
             if (product == null) {
                 logger.info("（productId=" + productId + "）该商品不存在！(创建商品订单)");
                 map.put("error", "该商品不存在！");
+                return map;
+            }
+
+            if (!MyUtils.isMobileNO(userPhone)) {
+                logger.info("（userPhone=" + userPhone + "）手机号码不合法！(创建商品订单)");
+                map.put("error", "手机号码不合法！");
+                return map;
+            }
+
+            if(addressId==null){
+                if(user.getUserAddressList().isEmpty()){
+                    map.put("error","你还没有添加过配送地址,请前往添加配送地址");
+                    return map;
+                }
+                map.put("error", "请选择配送地址！");
                 return map;
             }
             UserAddress address = userAddressService.findUserAddressById(addressId);
