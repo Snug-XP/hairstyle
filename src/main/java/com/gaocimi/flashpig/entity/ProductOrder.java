@@ -9,7 +9,7 @@ import java.util.Date;
 
 
 /**
- * ProductOrder - 产品订单类
+ * ProductOrder - 商品订单类
  *
  * @author xp
  * @date 2020-5-2 10:54:07
@@ -38,14 +38,14 @@ public class ProductOrder {
     public User user;
 
     /**
-     * 该订单的产品； 定义名为product_id的外键列，该外键引用product表的主键(id)列,采用懒加载
+     * 该订单的商品； 定义名为product_id的外键列，该外键引用product表的主键(id)列,采用懒加载
      */
     @ManyToOne(targetEntity = Product.class, fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id")
     public Product product;
 
     /**
-     * 订购的产品数量
+     * 订购的商品数量
      */
     @Column(nullable = false)
     private Integer productQuantity;
@@ -96,6 +96,11 @@ public class ProductOrder {
      */
     @Column(nullable = false)
     private String comment;
+
+    public ProductOrder() {
+        status = 0;
+        createTime = new Date();
+    }
 
     public ProductInfo getProductInfo(){
         return new ProductInfo(product);

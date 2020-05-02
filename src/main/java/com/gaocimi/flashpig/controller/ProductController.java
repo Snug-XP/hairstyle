@@ -1,7 +1,6 @@
 package com.gaocimi.flashpig.controller;
 
 import com.gaocimi.flashpig.entity.*;
-import com.gaocimi.flashpig.model.ArticleInfo;
 import com.gaocimi.flashpig.model.ProductInfo;
 import com.gaocimi.flashpig.result.ResponseResult;
 import com.gaocimi.flashpig.service.*;
@@ -17,12 +16,11 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 
-import java.text.Collator;
 import java.util.*;
 
 /**
  * @author xp
- * @date 2019-10-14 15:03:39
+ * @date 2020-4-26 14:40:07
  * @description 商品相关业务
  */
 @RestController
