@@ -9,9 +9,7 @@ import io.swagger.annotations.ApiOperation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
 
@@ -31,6 +29,8 @@ public class ProductOrderController {
     @Autowired
     UserService userService;
     @Autowired
+    AdministratorService administratorService;
+    @Autowired
     ProductService productService;
     @Autowired
     UserAddressService userAddressService;
@@ -42,6 +42,12 @@ public class ProductOrderController {
                                @RequestParam Integer addressId) {
         Map map = new HashMap();
         try {
+
+            if (!MyUtils.isMobileNO(userPhone)) {
+                logger.info("（userPhone=" + userPhone + "）手机号码不合法！(创建商品订单)");
+                map.put("error", "手机号码不合法！");
+                return map;
+            }
 
             User user = userService.findUserByOpenid(myOpenid);
             if (user == null) {
@@ -62,17 +68,18 @@ public class ProductOrderController {
                 map.put("error", "该地址不存在！");
                 return map;
             }
-            if(address.getUser().getId()!=user.getId()){
+            if (address.getUser().getId() != user.getId()) {
                 logger.info("（addressId=" + addressId + "）该地址非本用户创建！(创建商品订单)");
                 map.put("error", "该地址非本用户创建！");
                 return map;
             }
 
+
             ProductOrder productOrder = new ProductOrder();
             productOrder.setUser(user);
             productOrder.setProduct(product);
             productOrder.setProductQuantity(productQuantity);
-            productOrder.setTotalPrice(product.getPrice()*productQuantity);
+            productOrder.setTotalPrice(product.getPrice() * productQuantity);
             productOrder.setUserPhone(userPhone);
 
             productOrder.setDeliveryAddress(address);//填入配送地址
@@ -82,18 +89,18 @@ public class ProductOrderController {
 
             //下面控制用户每个10秒中只能产生一次相同产品的订单
             String orderNumber = productOrder.getOrderNumber();
-            List<ProductOrder> list = productOrderService.findByOrderNumberLisk(orderNumber.substring(0,orderNumber.length()-1));
-            if(!list.isEmpty()){
-                logger.info("生成订单太频繁，请几秒钟后再试(用户“"+user.getName()+"”<id="+user.getId()+">创建商品订单)");
-                map.put("error","生成订单太频繁，请几秒钟后再试（建议前往“我的订单”查看是否已生成订单）");
+            List<ProductOrder> list = productOrderService.findByOrderNumberLisk(orderNumber.substring(0, orderNumber.length() - 1));
+            if (!list.isEmpty()) {
+                logger.info("生成订单太频繁，请几秒钟后再试(用户“" + user.getName() + "”<id=" + user.getId() + ">创建商品订单)");
+                map.put("error", "生成订单太频繁，请几秒钟后再试（建议前往“我的订单”查看是否已生成订单）");
                 return map;
             }
 
 
             productService.edit(product);
             productOrderService.save(productOrder);
-            
-            logger.info("用户“" + user.getName() + "”（id=" + user.getId() + "）创建了一个“" + product.getName() + "”（id=" + productOrder.getId() + "，number="+productQuantity+"）的商品订单(id="+productOrder.getId()+")");
+
+            logger.info("用户“" + user.getName() + "”（id=" + user.getId() + "）创建了一个“" + product.getName() + "”（id=" + productOrder.getId() + "，number=" + productQuantity + "）的商品订单(id=" + productOrder.getId() + ")");
             map.put("message", "订单创建成功！");
             return map;
         } catch (Exception e) {
@@ -111,7 +118,7 @@ public class ProductOrderController {
 //
 //        Map map = new HashMap();
 //        try {
-//            ProductOrder productOrder = productOrderService.findProductOrderById(productOrderId);
+//            ProductOrder productOrder = productOrderService.findById(productOrderId);
 //            if (productOrder == null) {
 //                logger.info("id为" + productOrderId + "的商品订单不存在（删除商品订单）！");
 //                map.put("error", "该商品订单不存在！！");
@@ -119,13 +126,13 @@ public class ProductOrderController {
 //            }
 //
 //            User user = userService.findUserByOpenid(myOpenid);
-//            if (user == null) {
+//            if (user == null||productOrder.getUser().getId()!=user.getId()) {
 //                logger.info("删除商品订单失败！！（没有权限！！）");
 //                map.put("error", "无权限！");
 //                return map;
 //            }
 //
-//            logger.info("用户“" + user.getName() + "”（id=" + user.getId() + "）删除了商品订单“" + productOrder.getName() + "”（id=" + productOrder.getId() + "）");
+//            logger.info("用户“" + user.getName() + "”（id=" + user.getId() + "）删除了商品订单“" + productOrder.getOrderNumber() + "”（id=" + productOrder.getId() + "）");
 //
 //            productOrderService.delete(productOrderId);
 //            map.put("message", "商品订单删除成功！");
@@ -138,151 +145,157 @@ public class ProductOrderController {
 //            return map;
 //        }
 //    }
-//
-//    @ApiOperation(value = "修改商品订单信息", notes = "没有相关属性将不修改其原有信息")
-//    @PutMapping("/user/updateProductOrder")
-//    public Map updateProductOrder(@RequestParam String myOpenid, @RequestParam Integer productOrderId,
-//                             @RequestParam(value = "name", required = false) String name,
-//                             @RequestParam(value = "introduction", required = false) String introduction,
-//                             @RequestParam(value = "price", required = false) Double price,
-//                             @RequestParam(value = "remainingQuantity", required = false) Integer remainingQuantity,
-//                             @RequestParam(value = "tagList", required = false) List<String> tagList,
-//                             @RequestParam(value = "imgUrlList", required = false) List<String> imgUrlList) {
-//        Map map = new HashMap();
-//        try {
-//
-//            ProductOrder productOrder = productOrderService.findProductOrderById(productOrderId);
-//
-//            if (productOrder == null) {
-//                logger.info("id为" + productOrderId + "的商品订单不存在（修改商品订单信息）！");
-//                map.put("error", "该商品订单不存在！！");
-//                return map;
-//            }
-//
-//            User user = userService.findUserByOpenid(myOpenid);
-//            if (user == null) {
-//                logger.info("非用户用户操作！！（修改商品订单信息:操作openid=" + myOpenid + "）");
-//                map.put("error", "无权操作！！");
-//                return map;
-//            }
-//
-//            if (name != null)
-//                productOrder.setName(name);
-//            if (introduction != null)
-//                productOrder.setIntroduction(introduction);
-//            if (price != null)
-//                productOrder.setPrice(price);
-//            if (remainingQuantity != null)
-//                productOrder.setRemainingQuantity(remainingQuantity);
-//            if (tagList != null)
-//                productOrder.setTag(tagList);
-//
-//            productOrderService.edit(productOrder);
-//
-//            if (imgUrlList != null && !imgUrlList.isEmpty()) {
-//                //删除原有商品订单的图片url
-//                imageUrlService.deleteAllByProductOrderId(productOrderId);
-//
-//                //储存商品订单的图片url列表
-//                for (String imageUrlStr : imgUrlList) {
-//                    ProductOrderImageUrl imageUrl = new ProductOrderImageUrl();
-//                    imageUrl.setProductOrder(productOrder);
-//                    imageUrl.setImageUrl(imageUrlStr);
-//
-//                    imageUrlService.save(imageUrl);
-//                }
-//            }
-//            logger.info("用户“" + user.getName() + "”（id=" + user.getId() + "）修改了商品订单“" + productOrder.getName() + "”（id=" + productOrder.getId() + "）的信息：");
-//            map.put("message", "商品订单信息修改成功！");
-//            return map;
-//        } catch (Exception e) {
-//            logger.error(e.getMessage());
-//            logger.info("商品订单信息修改失败！！（后端发生某些错误）");
-//            map.put("error", "商品订单信息修改失败！！（后端发生某些错误）");
-//            e.printStackTrace();
-//            return map;
-//        }
-//    }
-//
-//
-//    @ApiOperation(value = "获取自己创建的的商品订单列表(分页展示)", notes = "权限：发型师(用户会有一个发型师记录)")
-//    @GetMapping("/user/getMyProductOrderList")
-//    public Map getMyProductOrderList(@RequestParam String myOpenid,
-//                                @RequestParam(name = "pageNum", defaultValue = "0") int pageNum,
-//                                @RequestParam(name = "pageSize", defaultValue = "10") int pageSize) {
-//
-//        Map map = new HashMap();
-//        try {
-//            User user = userService.findUserByOpenid(myOpenid);
-//            if (user == null) {
-//                logger.info("非用户用户操作！！（获取自己创建的的商品订单列表:操作openid=" + myOpenid + "）");
-//                map.put("error", "无权操作！！");
-//                return map;
-//            }
-//
-//            List<ProductOrder> tempProductOrderList = user.getProductOrderList();
-//
-//            if (tempProductOrderList == null || tempProductOrderList.isEmpty()) {
-//                map.put("message", "你还没有创建过商品订单哦~");
-//                return map;
-//            }
-//
-//            // 按创建时间倒序排序
-//            Collections.sort(tempProductOrderList, (o1, o2) -> {
-//                if (o2.getCreateTime().after(o1.getCreateTime())) {
-//                    return 1;
-//                } else if (o1.getCreateTime().after(o2.getCreateTime())) {
-//                    return -1;
-//                }
-//                return 0; //相等为0
-//            });
-//
-//            map.put("page", MyUtils.getPage(tempProductOrderList, pageNum, pageSize));
-//            return map;
-//        } catch (Exception e) {
-//            logger.error(e.getMessage());
-//            logger.info("获取自己创建的商品订单列表失败！！（后端发生某些错误）");
-//            map.put("error", "获取自己创建的商品订单列表失败！！（后端发生某些错误）");
-//            e.printStackTrace();
-//            return map;
-//        }
-//    }
-//
-//
-//    @ApiOperation(value = "获取单个商品订单信息", produces = "application/json")
-//    @GetMapping("/productOrder/getOne")
-//    public Map getOne(@RequestParam String myOpenid, @RequestParam Integer productOrderId) {
-//        Map map = new HashMap();
-//        try {
-//            User user = userService.findUserByOpenid(myOpenid);
-//            ProductOrder productOrder = productOrderService.findProductOrderById(productOrderId);
-//            if (user == null) {
-//                logger.info("（" + myOpenid + "）该用户不存在！(获取单个商品订单信息)");
-//                map.put("error", "无效的用户！！");
-//                return map;
-//            }
-//            if (productOrder == null) {
-//                logger.info("id为" + productOrderId + "的商品订单不存在！(获取单个商品订单信息)");
-//                map.put("error", "该商品订单不存在！");
-//                return map;
-//            }
-//
-//            if (userToProductOrderService.findByUserAndProductOrder(user.getId(), productOrderId) != null) {
-//                map.put("isCollected", "yes");
-//            } else {
-//                map.put("isCollected", "no");
-//            }
-//            map.put("productOrder", productOrder);
-//            return map;
-//
-//        } catch (Exception e) {
-//            logger.info("后端发生异常(获取单个商品订单信息)：\n");
-//            map.put("error", "抱歉，后端发生异常!!");
-//            e.printStackTrace();
-//            return map;
-//        }
-//    }
-//
+
+    @ApiOperation(value = "修改商品订单的电话号码或地址信息", notes = "没有相关属性将不修改其原有信息,并且用户只能修改未支付且未取消订单的信息")
+    @PutMapping("/user/updateProductOrder")
+    public Map updateProductOrder(@RequestParam String myOpenid, @RequestParam Integer productOrderId,
+                                  @RequestParam(value = "userPhone", required = false) String userPhone,
+                                  @RequestParam(value = "addressId", required = false) Integer addressId) {
+        Map map = new HashMap();
+        try {
+
+            if (userPhone == null && addressId == null) {
+                map.put("message", "无任何修改！");
+                return map;
+            }
+
+            ProductOrder productOrder = productOrderService.findById(productOrderId);
+            if (productOrder == null) {
+                logger.info("id为" + productOrderId + "的商品订单不存在（修改商品订单信息）！");
+                map.put("error", "该商品订单不存在！！");
+                return map;
+            }
+            User user = userService.findUserByOpenid(myOpenid);
+            if (user == null || productOrder.getUser().getId() != user.getId()) {
+                logger.info("修改商品订单失败！！（没有权限！！）");
+                map.put("error", "无权限！");
+                return map;
+            }
+            if (productOrder.getStatus() != 0) {
+                logger.info("用户“" + user.getName() + "”（id=" + user.getId() + "）企图修改了商品订单（id=" + productOrderId + "，status=" + productOrder.getStatus() + "）的信息");
+                map.put("error", "订单无法修改！（用户只能修改未支付且未取消订单的信息）");
+                return map;
+            }
+
+            if (userPhone != null) {
+                if (!MyUtils.isMobileNO(userPhone)) {
+                    logger.info("（userPhone=" + userPhone + "）手机号码不合法！(创建商品订单)");
+                    map.put("error", "手机号码不合法！");
+                    return map;
+                }
+                productOrder.setUserPhone(userPhone);
+            }
+            if (addressId != null) {
+                UserAddress address = userAddressService.findUserAddressById(addressId);
+                if (address == null) {
+                    logger.info("（addressId=" + addressId + "）该地址不存在！(修改商品订单)");
+                    map.put("error", "该地址不存在！");
+                    return map;
+                }
+                if (address.getUser().getId() != user.getId()) {
+                    logger.info("（addressId=" + addressId + "）该地址非本用户创建！(修改商品订单)");
+                    map.put("error", "该地址非本用户创建！");
+                    return map;
+                }
+                productOrder.setDeliveryAddress(address);
+            }
+
+            productOrderService.edit(productOrder);
+            logger.info("用户“" + user.getName() + "”（id=" + user.getId() + "）修改了商品订单“" + productOrder.getOrderNumber() + "”（id=" + productOrder.getId() + "）的信息：userPhone:" + userPhone + ",addressId=" + addressId);
+            map.put("message", "修改成功");
+            return map;
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            logger.info("商品订单信息修改失败！！（后端发生某些错误）");
+            map.put("error", "商品订单信息修改失败！！（后端发生某些错误）");
+            e.printStackTrace();
+            return map;
+        }
+    }
+
+
+    @ApiOperation(value = "获取自己创建的的商品订单列表(分页展示)")
+    @GetMapping("/user/getMyProductOrderList")
+    public Map getMyProductOrderList(@RequestParam String myOpenid,
+                                     @RequestParam(name = "pageNum", defaultValue = "0") int pageNum,
+                                     @RequestParam(name = "pageSize", defaultValue = "10") int pageSize) {
+
+        Map map = new HashMap();
+        try {
+            User user = userService.findUserByOpenid(myOpenid);
+            if (user == null) {
+                logger.info("openid为" + myOpenid + "的普通用户不存在！(获取自己创建的的商品订单列表)");
+                map.put("error", "无效的用户！！");
+                return map;
+            }
+
+            List<ProductOrder> tempProductOrderList = user.getProductOrderList();
+
+            if (tempProductOrderList == null || tempProductOrderList.isEmpty()) {
+                map.put("message", "你还没有创建过商品订单哦~");
+                return map;
+            }
+
+            // 按创建时间倒序排序
+            Collections.sort(tempProductOrderList, (o1, o2) -> {
+                if (o2.getCreateTime().after(o1.getCreateTime())) {
+                    return 1;
+                } else if (o1.getCreateTime().after(o2.getCreateTime())) {
+                    return -1;
+                }
+                return 0; //相等为0
+            });
+
+            map.put("page", MyUtils.getPage(tempProductOrderList, pageNum, pageSize));
+            return map;
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            logger.info("获取自己创建的商品订单列表失败！！（后端发生某些错误）");
+            map.put("error", "获取自己创建的商品订单列表失败！！（后端发生某些错误）");
+            e.printStackTrace();
+            return map;
+        }
+    }
+
+
+    @ApiOperation(value = "获取单个商品订单信息", notes = "权限：管理员和订单对应的用户", produces = "application/json")
+    @GetMapping("/productOrder/getOne")
+    public Map getOne(@RequestParam String myOpenid, @RequestParam Integer productOrderId) {
+        Map map = new HashMap();
+        try {
+            User user = userService.findUserByOpenid(myOpenid);
+            Administrator administrator = administratorService.findAdministratorByOpenid(myOpenid);
+            if (user == null && administrator == null) {
+                logger.info("（" + myOpenid + "）该用户不存在！(获取单个商品订单信息)");
+                map.put("error", "无效的用户！！");
+                return map;
+            }
+
+            ProductOrder productOrder = productOrderService.findById(productOrderId);
+            if (productOrder == null) {
+                logger.info("id为" + productOrderId + "的商品订单不存在！(获取单个商品订单信息)");
+                map.put("error", "该商品订单不存在！");
+                return map;
+            }
+
+
+            if (user != null && productOrder.getUser().getId() != user.getId()) {
+                logger.info("用户（openid=" + myOpenid + "）企图查看非自己的订单（id=" + productOrderId + "）！");
+                map.put("error", "无权查看该订单！");
+                return map;
+            }
+
+            map.put("productOrder", productOrder);
+            return map;
+
+        } catch (Exception e) {
+            logger.info("后端发生异常(获取单个商品订单信息)：\n");
+            map.put("error", "抱歉，后端发生异常!!");
+            e.printStackTrace();
+            return map;
+        }
+    }
+
 //    @ApiOperation(value = "获取所有商品订单列表（分页展示）")
 //    @GetMapping("/productOrders/getAll")
 //    public Page<ProductOrder> getAllByPage(@RequestParam(name = "pageNum", defaultValue = "0") int pageNum,

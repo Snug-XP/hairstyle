@@ -212,9 +212,9 @@ public class MyUtils {
     }
 
     /**
-     * 判断电话号码是否符合格式
+     * 判断手机号码是否符合格式
      *
-     * @param mobiles 11位电话号码
+     * @param mobiles 11位手机号码
      * @return
      */
     public static boolean isMobileNO(String mobiles) {
