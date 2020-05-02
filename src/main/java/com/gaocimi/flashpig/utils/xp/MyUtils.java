@@ -273,6 +273,15 @@ public class MyUtils {
 
         return df.format(date);
     }
+    /**
+     * 获取时间字符串(纯数字)
+     */
+    public static String getTimeStringInteger(Date date) {
+        SimpleDateFormat df = new SimpleDateFormat("yyyyMMddHHmmss");//精确到秒
+//        SimpleDateFormat df =new SimpleDateFormat("yyyy年MM月dd日 HH:mm:ss");
+
+        return df.format(date);
+    }
 
     /**
      * 获取日期年份

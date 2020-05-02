@@ -37,6 +37,11 @@ public class ProductOrderServiceImpl implements ProductOrderService {
     }
 
     @Override
+    public List<ProductOrder> findByOrderNumberLisk(String orderNumber) {
+        return productOrderRepository.findAllByOrderNumberLike("%"+orderNumber+"%");
+    }
+
+    @Override
     public void save(ProductOrder productOrder) {
         productOrderRepository.save(productOrder);
     }

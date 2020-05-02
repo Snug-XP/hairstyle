@@ -2,6 +2,7 @@ package com.gaocimi.flashpig.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.gaocimi.flashpig.model.ProductInfo;
+import com.gaocimi.flashpig.utils.xp.MyUtils;
 import lombok.Data;
 
 import javax.persistence.*;
@@ -16,7 +17,7 @@ import java.util.Date;
  */
 @Entity
 @JsonIgnoreProperties(value = {"user","product","wxPayOrder"})
-@Table(name = "wx_pay_order")
+@Table(name = "product_order")
 @Data
 public class ProductOrder {
 
@@ -25,9 +26,9 @@ public class ProductOrder {
     private Integer id;
 
     /**
-     * 根据一系列参数设计的订单号
+     * 根据一系列参数设计的订单号(用户id+产品id+时间串)
      */
-    @Column(nullable = false)
+    @Column(nullable = false,unique = true)
     private String orderNumber;
 
     /**
@@ -92,10 +93,32 @@ public class ProductOrder {
     private Integer status;
 
     /**
-     * 订单完成后用户的评价
+     * 配送省份
      */
     @Column(nullable = false)
-    private String comment;
+    private String province;
+
+    /**
+     * 配送城市
+     */
+    @Column(nullable = false)
+    private String city;
+
+    /**
+     * 配送区县
+     */
+    @Column(nullable = false)
+    private String district;
+
+    /**
+     * 配送详细地址(村、路、门牌)
+     */
+    @Column(nullable = false)
+    private String address;
+
+
+
+
 
     public ProductOrder() {
         status = 0;
@@ -104,5 +127,22 @@ public class ProductOrder {
 
     public ProductInfo getProductInfo(){
         return new ProductInfo(product);
+    }
+
+    /**
+     * 生成订单号：用户id+产品id+时间串
+     */
+    public void generateOrderNumber() {
+        orderNumber = user.getId()+"0"+product.getId()+MyUtils.getTimeStringInteger(new Date());
+    }
+
+    /**
+     * 填入配送地址
+     */
+    public void setDeliveryAddress(UserAddress address) {
+        this.province = address.getProvince();
+        this.city = address.getCity();
+        this.district = address.getDistrict();
+        this.address = address.getAddress();
     }
 }

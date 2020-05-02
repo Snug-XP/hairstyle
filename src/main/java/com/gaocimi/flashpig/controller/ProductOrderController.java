@@ -3,6 +3,7 @@ package com.gaocimi.flashpig.controller;
 import com.gaocimi.flashpig.entity.*;
 import com.gaocimi.flashpig.result.ResponseResult;
 import com.gaocimi.flashpig.service.*;
+import com.gaocimi.flashpig.utils.xp.MyUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.slf4j.Logger;
@@ -61,6 +62,11 @@ public class ProductOrderController {
                 map.put("error", "该地址不存在！");
                 return map;
             }
+            if(address.getUser().getId()!=user.getId()){
+                logger.info("（addressId=" + addressId + "）该地址非本用户创建！(创建商品订单)");
+                map.put("error", "该地址非本用户创建！");
+                return map;
+            }
 
             ProductOrder productOrder = new ProductOrder();
             productOrder.setUser(user);
@@ -68,6 +74,23 @@ public class ProductOrderController {
             productOrder.setProductQuantity(productQuantity);
             productOrder.setTotalPrice(product.getPrice()*productQuantity);
             productOrder.setUserPhone(userPhone);
+
+            productOrder.setDeliveryAddress(address);//填入配送地址
+            productOrder.generateOrderNumber();//生成订单号
+
+            product.reduceRemainingQuantity(productQuantity);//减少该商品的剩余数量
+
+            //下面控制用户每个10秒中只能产生一次相同产品的订单
+            String orderNumber = productOrder.getOrderNumber();
+            List<ProductOrder> list = productOrderService.findByOrderNumberLisk(orderNumber.substring(0,orderNumber.length()-1));
+            if(!list.isEmpty()){
+                logger.info("生成订单太频繁，请几秒钟后再试(用户“"+user.getName()+"”<id="+user.getId()+">创建商品订单)");
+                map.put("error","生成订单太频繁，请几秒钟后再试（建议前往“我的订单”查看是否已生成订单）");
+                return map;
+            }
+
+
+            productService.edit(product);
             productOrderService.save(productOrder);
             
             logger.info("用户“" + user.getName() + "”（id=" + user.getId() + "）创建了一个“" + product.getName() + "”（id=" + productOrder.getId() + "，number="+productQuantity+"）的商品订单(id="+productOrder.getId()+")");

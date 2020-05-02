@@ -112,4 +112,11 @@ public class Product {
         }
     }
 
+    /**
+     * 减少该商品的剩余数量
+     * @param number 要减少的数量
+     */
+    public void reduceRemainingQuantity(Integer number) {
+        remainingQuantity -=number;
+    }
 }

@@ -159,6 +159,13 @@ public class TestController {
         return map;
     }
 
+    public static void main(String[] args){
+
+        Date now = new Date();
+
+        System.out.println(MyUtils.getTimeStringInteger(now).substring(0,13));
+    }
+
 
 
 }
