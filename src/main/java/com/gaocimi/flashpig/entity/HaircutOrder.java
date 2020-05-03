@@ -15,7 +15,7 @@ import java.util.List;
  * @date 2019-9-23 03:14:25
  */
 @Entity
-@JsonIgnoreProperties(value = {"article"})
+@JsonIgnoreProperties(value = {"article","user","hairstylist"})
 @Table(name = "haircut_order")
 @Data
 public class HaircutOrder {
@@ -110,13 +110,13 @@ public class HaircutOrder {
     }
 
     public String getAddress() {
-        return hairstylist.shop.getCity() + " " + hairstylist.shop.getDistrict() + " " + hairstylist.shop.getAddress();
+        return hairstylist.getShop().getCity() + " " + hairstylist.getShop().getDistrict() + " " + hairstylist.getShop().getAddress();
     }
 
     public List<ArticleImageUrl> getArticleImageUrlList() {
         if (article == null)
             return null;
         else
-            return article.articleImageUrlList;
+            return article.getArticleImageUrlList();
     }
 }

@@ -1,14 +1,9 @@
 package com.gaocimi.flashpig.controller;
 
-import com.gaocimi.flashpig.entity.Article;
-import com.gaocimi.flashpig.entity.Hairstylist;
-import com.gaocimi.flashpig.entity.Shop;
-import com.gaocimi.flashpig.entity.User;
+import com.gaocimi.flashpig.entity.*;
 import com.gaocimi.flashpig.result.ResponseResult;
-import com.gaocimi.flashpig.service.ArticleService;
-import com.gaocimi.flashpig.service.HairstylistService;
-import com.gaocimi.flashpig.service.ShopService;
-import com.gaocimi.flashpig.service.UserService;
+import com.gaocimi.flashpig.service.*;
+import com.gaocimi.flashpig.service.impl.WxPayOrderServiceImpl;
 import com.gaocimi.flashpig.utils.xp.IpUtil;
 import com.gaocimi.flashpig.utils.xp.MyUtils;
 import io.swagger.annotations.Api;
@@ -42,6 +37,10 @@ public class TestController {
     ShopService shopService;
     @Autowired
     UserService userService;
+    @Autowired
+    ProductOrderService productOrderService;
+    @Autowired
+    WxPayOrderService wxPayOrderService;
 
     @ApiOperation(value = "时间测试", produces = "application/json")
     @GetMapping("/timeTest")
@@ -159,12 +158,37 @@ public class TestController {
         return map;
     }
 
-    public static void main(String[] args){
-
-        Date now = new Date();
-
-        System.out.println(MyUtils.getTimeStringInteger(now).substring(0,13));
+    @ApiOperation(value = "测试", produces = "application/json")
+    @PostMapping("/test")
+    public Map test(){
+        Map map = new HashMap();
+        System.out.println("111111111111111");
+        WxPayOrder payOrder = wxPayOrderService.findWxPayOrderById(1040);
+        System.out.println("2222222222222222");
+        ProductOrder productOrder = payOrder.getProductOrder();
+        System.out.println("3333333333333333333333");
+        if(payOrder==null){
+            logger.info("》》》未查找到对应商品订单，请管理员尽快查看！！！《《《）");
+        }
+        productOrder.setStatus(1);
+        productOrder.setWxPayOrder(payOrder);
+        map.put("productOrder",productOrder);
+        return map;
     }
+
+//    public static void main(String[] args){
+//
+//        //-1表示商品购物订单
+//        WxPayOrder payOrder = wxPayOrderService.findWxPayOrderById(1040);
+//        ProductOrder productOrder = payOrder.getProductOrder();
+//        if(payOrder==null){
+//            logger.info("》》》未查找到对应商品订单，请管理员尽快查看！！！《《《）");
+//        }
+//        productOrder.setStatus(1);
+//        productOrder.setWxPayOrder(payOrder);
+//
+////        productOrderService.edit(productOrder);
+//    }
 
 
 

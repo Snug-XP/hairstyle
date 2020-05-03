@@ -68,13 +68,11 @@ public class WxPayOrder {
     private String prepayId;
 
 
+
     /**
-     * 商品订单（如果type!=-1，即非商品订单的支付订单，该属性为空）
+     * 商品订单（如果type!=-1，即非商品订单的支付订单，该属性为空）； 定义名为product_order_id的外键列，该外键引用product_order表的主键(id)列,采用懒加载
      */
-    /**
-     * 提交该支付订单的用户； 定义名为user_id的外键列，该外键引用user表的主键(id)列,采用懒加载
-     */
-    @OneToOne(targetEntity = User.class, fetch = FetchType.LAZY)
+    @OneToOne(targetEntity = ProductOrder.class, fetch = FetchType.LAZY)
     @JoinColumn(name = "product_order_id")
     public ProductOrder productOrder;
 
