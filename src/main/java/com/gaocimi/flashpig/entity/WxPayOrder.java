@@ -32,7 +32,7 @@ public class WxPayOrder {
     public User user;
 
     /**
-     * 支付类型（0表示购买会员【90天】的订单，1表示购买会员【180天】的订单，2表示购买会员【365天】的订单）
+     * 支付类型（0表示购买会员【90天】的订单，1表示购买会员【180天】的订单，2表示购买会员【365天】的订单，-1表示商品购物订单）
      */
     private Integer type;
 
@@ -67,23 +67,20 @@ public class WxPayOrder {
      */
     private String prepayId;
 
-    /**
-     * 配送省份
-     */
-    private String province;
 
     /**
-     * 配送城市
+     * 商品订单（如果type!=-1，即非商品订单的支付订单，该属性为空）
      */
-    private String city;
-
     /**
-     * 配送区县
+     * 提交该支付订单的用户； 定义名为user_id的外键列，该外键引用user表的主键(id)列,采用懒加载
      */
-    private String district;
+    @OneToOne(targetEntity = User.class, fetch = FetchType.LAZY)
+    @JoinColumn(name = "product_order_id")
+    public ProductOrder productOrder;
 
-    /**
-     * 配送详细地址
-     */
-    private String address;
+
+    public WxPayOrder() {
+        status = 0;
+        createTime = new Date();
+    }
 }

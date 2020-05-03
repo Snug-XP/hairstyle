@@ -1,7 +1,9 @@
 package com.gaocimi.flashpig.controller;
 
+import com.gaocimi.flashpig.entity.ProductOrder;
 import com.gaocimi.flashpig.entity.User;
 import com.gaocimi.flashpig.entity.WxPayOrder;
+import com.gaocimi.flashpig.service.ProductOrderService;
 import com.gaocimi.flashpig.service.UserService;
 import com.gaocimi.flashpig.service.WxPayOrderService;
 import com.gaocimi.flashpig.utils.xp.IpUtil;
@@ -45,6 +47,8 @@ public class WxPaymentController {
     @Autowired
     WxPayOrderService wxPayOrderService;
     @Autowired
+    ProductOrderService productOrderService;
+    @Autowired
     UserService userService;
 
     /**
@@ -56,44 +60,52 @@ public class WxPaymentController {
     public Map creatPayOrder(HttpServletRequest request,
                              @RequestParam String myOpenid,
                              @RequestParam Integer money,
-                             @RequestParam(value = "type", required = false) Integer type,
-                             @RequestParam(value = "body", required = false) String body) throws WxPayException {
+                             @RequestParam Integer type,
+                             @RequestParam String body,
+                             @RequestParam(value = "productOrderId", required = false) Integer productOrderId) throws WxPayException {
         Map map = new HashMap();
 
         User user = userService.findUserByOpenid(myOpenid);
         if (user == null) {
-            logger.info("openid为" + myOpenid + "的普通用户不存在！");
+            logger.info("openid为" + myOpenid + "的普通用户不存在！(调用统一下单接口)");
             map.put("error", "无效的用户！！");
             return map;
         }
+
+        ProductOrder productOrder = null;
+        if (productOrderId != null) {
+
+            if (type != -1) {
+                logger.info("调用商品订单的支付操作（type应该为-1），但是选择的支付类型错误：type=" + type);
+                map.put("error", "订单类型错误！（商品订单的支付订单类型应为-1）");
+                return map;
+            }
+
+            productOrder = productOrderService.findById(productOrderId);
+            if (productOrder == null) {
+                logger.info("id为" + productOrderId + "的商品订单不存在！（调用统一下单接口）");
+                map.put("error", "无效的商品订单！");
+                return map;
+            }
+//            productOrder.setWxPayOrder(w);
+        }
+
+
         WxPayOrder payOrder = new WxPayOrder();
 
         payOrder.setUser(user);
+        payOrder.setProductOrder(productOrder);
         payOrder.setMoney(money);//单位：分
-        payOrder.setStatus(0);
-        payOrder.setCreateTime(new Date());
+        payOrder.setType(type);
+        payOrder.setBody(body);
 
-        if (body != null) {
-            payOrder.setBody(body);
-        } else {
-            payOrder.setBody("购买会员");
-        }
 
-        if (type != null) {
-            payOrder.setType(type);
-        } else {
-            payOrder.setType(0);//设置支付类型为0（购买会员）
-        }
         wxPayOrderService.save(payOrder);
 
 
         try {
             WxPayUnifiedOrderRequest orderRequest = new WxPayUnifiedOrderRequest();   //商户订单类
-            if (body != null) {
-                orderRequest.setBody(body);
-            } else {
-                orderRequest.setBody("购买会员");
-            }
+            orderRequest.setBody(body);
             orderRequest.setOpenid(myOpenid);
             //设置金额
             orderRequest.setTotalFee(payOrder.getMoney());   //注意：传入的金额参数单位为分
@@ -175,13 +187,25 @@ public class WxPaymentController {
                                 }
                                 break;
                             case 2:
-                                //3表示普通用户购买会员(365天)的订单
+                                //2表示普通用户购买会员(365天)的订单
                                 if (!user.buyVip(365)) {
                                     logger.info("购买会员失败！！");
                                     logger.info("》》》支付订单有效，但进行相关处理操作时（type=" + payOrder.getType() + "）发生异常,请管理员尽快查看《《《");
                                 } else {
                                     userService.edit(user);
                                 }
+                                break;
+                            case -1:
+                                //-1表示商品购物订单
+                                ProductOrder productOrder = payOrder.getProductOrder();
+                                if(payOrder==null){
+                                    logger.info("》》》未查找到对应商品订单，请管理员尽快查看！！！《《《）");
+                                    throw new Exception("未查找到对应商品订单");
+                                }
+                                productOrder.setStatus(1);
+                                productOrder.setWxPayOrder(payOrder);
+
+                                productOrderService.edit(productOrder);
                                 break;
 
                             default:
