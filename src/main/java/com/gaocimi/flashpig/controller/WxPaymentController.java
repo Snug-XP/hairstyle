@@ -99,8 +99,13 @@ public class WxPaymentController {
         payOrder.setType(type);
         payOrder.setBody(body);
 
-
         wxPayOrderService.save(payOrder);
+
+        if(productOrder!=null){
+            //商品订单和支付订单相互绑定
+            productOrder.setWxPayOrder(payOrder);
+            productOrderService.edit(productOrder);
+        }
 
 
         try {
@@ -130,7 +135,7 @@ public class WxPaymentController {
             return map;
         } catch (Exception e) {
             logger.error("【微信支付】生成支付订单失败(订单号={}) 原因:“{}”", payOrder.getId(), e.getMessage());
-            map.put("error", "支付失败," + e.getMessage());
+            map.put("error", "生成支付订单失败：" + e.getMessage());
             e.printStackTrace();
             wxPayOrderService.delete(payOrder.getId());
             return map;
@@ -138,7 +143,6 @@ public class WxPaymentController {
     }
 
 
-    @SuppressWarnings("deprecation")
     @ApiOperation("微信支付回调地址")
     @PostMapping("/notify") // 返回订单号
     public String payNotify(HttpServletRequest request, HttpServletResponse response) {

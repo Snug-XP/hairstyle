@@ -15,7 +15,7 @@ import java.util.List;
  * @date 2020-2-22 17:01:00
  */
 @Entity
-@JsonIgnoreProperties(value = {"user"})
+@JsonIgnoreProperties(value = {"user","productOrder","handler", "hibernateLazyInitializer", "fieldHandler"})
 @Table(name = "wx_pay_order")
 @Data
 public class WxPayOrder {
