@@ -39,6 +39,7 @@ public class ProductOrderController {
     @PostMapping("/user/addProductOrder")
     public Map addProductOrder(@RequestParam String myOpenid, @RequestParam Integer productId,
                                @RequestParam Integer productQuantity, @RequestParam String userPhone,
+                               @RequestParam(required = false) String remark,
                                @RequestParam(required = false) Integer addressId) {
         Map map = new HashMap();
         try {
@@ -90,6 +91,7 @@ public class ProductOrderController {
             productOrder.setProductQuantity(productQuantity);
             productOrder.setTotalPrice(product.getPrice() * productQuantity);
             productOrder.setUserPhone(userPhone);
+            productOrder.setRemark(remark);
 
             productOrder.setDeliveryAddress(address);//填入配送地址
             productOrder.generateOrderNumber();//生成订单号
