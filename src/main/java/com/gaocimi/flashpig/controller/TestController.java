@@ -5,6 +5,7 @@ import com.gaocimi.flashpig.result.ResponseResult;
 import com.gaocimi.flashpig.service.*;
 import com.gaocimi.flashpig.service.impl.WxPayOrderServiceImpl;
 import com.gaocimi.flashpig.utils.xp.IpUtil;
+import com.gaocimi.flashpig.utils.xp.MyMD5Util;
 import com.gaocimi.flashpig.utils.xp.MyUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -18,6 +19,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.UnsupportedEncodingException;
+import java.security.NoSuchAlgorithmException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -160,19 +163,33 @@ public class TestController {
 
     @ApiOperation(value = "测试", produces = "application/json")
     @PostMapping("/test")
-    public Map test(){
+    public Map test(String openid ,String password){
         Map map = new HashMap();
-        System.out.println("111111111111111");
-        WxPayOrder payOrder = wxPayOrderService.findWxPayOrderById(1040);
-        System.out.println("2222222222222222");
-        ProductOrder productOrder = payOrder.getProductOrder();
-        System.out.println("3333333333333333333333");
-        if(payOrder==null){
-            logger.info("》》》未查找到对应商品订单，请管理员尽快查看！！！《《《）");
+
+        Shop shop = shopService.findShopByOpenid(openid);
+        if (shop == null) {
+            logger.info("未登录操作！！");
+            map.put("error", "请先登录！！");
+            return map;
         }
-        productOrder.setStatus(1);
-        productOrder.setWxPayOrder(payOrder);
-        map.put("productOrder",productOrder);
+        //将密码加密存储
+        String encryptedPassword = null;
+        try {
+            encryptedPassword = MyMD5Util.getEncryptedPwd(password);
+            shop.setPassword(encryptedPassword);
+        } catch (NoSuchAlgorithmException e) {
+            map.put("error", "加密算法在当前环境中不可用，注册失败！");
+            logger.info("加密算法在当前环境中不可用，注册失败！");
+            e.printStackTrace();
+            return map;
+        } catch (UnsupportedEncodingException e) {
+            map.put("error", "密码包含不支持的字符编码，注册失败！");
+            logger.info("密码包含不支持的字符编码，注册失败！");
+            e.printStackTrace();
+            return map;
+        }
+        shopService.edit(shop);
+        map.put("message","门店“"+shop.getShopName()+"”设置了密码："+encryptedPassword+"("+password+")");
         return map;
     }
 

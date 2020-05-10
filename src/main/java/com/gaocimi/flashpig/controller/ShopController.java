@@ -5,6 +5,7 @@ import com.gaocimi.flashpig.entity.*;
 import com.gaocimi.flashpig.model.RankingData;
 import com.gaocimi.flashpig.result.ResponseResult;
 import com.gaocimi.flashpig.service.*;
+import com.gaocimi.flashpig.utils.xp.MyMD5Util;
 import com.gaocimi.flashpig.utils.xp.MyUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -18,6 +19,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.UnsupportedEncodingException;
+import java.security.NoSuchAlgorithmException;
 import java.util.*;
 
 /**
@@ -44,7 +47,7 @@ public class ShopController {
 
     @ApiOperation(value = "门店登录")
     @PostMapping("/shop/login")
-    public Map shopLogin(@RequestParam String myOpenid, @RequestParam String phone, @RequestParam String password) {
+    public Map shopLogin(@RequestParam String myOpenid, @RequestParam String phone, @RequestParam String password) throws UnsupportedEncodingException, NoSuchAlgorithmException {
         Map map = new HashMap();
 
         Shop shop = shopService.findShopByPhone(phone);
@@ -53,8 +56,10 @@ public class ShopController {
             map.put("error", "账号不存在!");
             return map;
         }
-        if (!shop.getPassword().equals(password)) {
-            logger.info("门店“" + shop.getShopName() + "”（id=" + shop.getId() + "）登录密码错误!（phone：" + phone + " ，wrongPassword:" + password + ",rightpassword:" + shop.getPassword() + "）");
+
+
+        if (!MyMD5Util.validPassword(password, shop.getPassword())) {
+            logger.info("门店“" + shop.getShopName() + "”（id=" + shop.getId() + "）登录密码错误!（phone：" + phone + " ，wrongPassword:" + password );
             map.put("error", "密码错误！！");
             return map;
         }
@@ -176,11 +181,27 @@ public class ShopController {
                 shop1 = shopService.findShopByOpenid(myOpenid);
             }
 
+            //将密码加密存储
+            String encryptedPassword = null;
+            try {
+                encryptedPassword = MyMD5Util.getEncryptedPwd(password);
+                shop.setPassword(encryptedPassword);
+            } catch (NoSuchAlgorithmException e) {
+                map.put("error", "加密算法在当前环境中不可用，注册失败！");
+                logger.info("加密算法在当前环境中不可用，注册失败！");
+                e.printStackTrace();
+                return map;
+            } catch (UnsupportedEncodingException e) {
+                map.put("error", "密码包含不支持的字符编码，注册失败！");
+                logger.info("密码包含不支持的字符编码，注册失败！");
+                e.printStackTrace();
+                return map;
+            }
+
             shop.setOpenid(myOpenid);
 
             shop.setShopName(shopName);
             shop.setPhone(phone);
-            shop.setPassword(password);
             shop.setLogoUrl(logoUrl);
             shop.setOperatingLicensePictureUrl(operatingLicensePictureUrl);
             shop.setProvince(province);
@@ -360,8 +381,24 @@ public class ShopController {
                     }
                     shop.setPhone(phone);
                 }
-                if (password != null)
-                    shop.setPassword(password);
+                if (password != null){
+                    //将密码加密存储
+                    String encryptedPassword;
+                    try {
+                        encryptedPassword = MyMD5Util.getEncryptedPwd(password);
+                        shop.setPassword(encryptedPassword);
+                    } catch (NoSuchAlgorithmException e) {
+                        map.put("error", "加密算法在当前环境中不可用，修改密码失败！");
+                        logger.info("加密算法在当前环境中不可用，修改密码失败！");
+                        e.printStackTrace();
+                        return map;
+                    } catch (UnsupportedEncodingException e) {
+                        map.put("error", "密码包含不支持的字符编码，修改密码失败！");
+                        logger.info("密码包含不支持的字符编码！");
+                        e.printStackTrace();
+                        return map;
+                    }
+                }
                 if (iconUrl != null)
                     shop.setLogoUrl(iconUrl);
                 if (province != null)
