@@ -99,6 +99,44 @@ public class ShopController {
     }
 
 
+//    @ApiOperation(value = "门店忘记密码，进行重设密码")
+//    @PostMapping("/shop/reSetPassword")
+//    public Map reSetPassword(@RequestParam String myOpenid, @RequestParam String phone, @RequestParam String password) throws UnsupportedEncodingException, NoSuchAlgorithmException {
+//        Map map = new HashMap();
+//
+//        Shop shop = shopService.findShopByPhone(phone);
+//        if (shop == null) {
+//            logger.info("账号（" + phone + "）不存在!");
+//            map.put("error", "账号不存在!");
+//            return map;
+//        }
+//
+//
+//        if (!MyMD5Util.validPassword(password, shop.getPassword())) {
+//            logger.info("门店“" + shop.getShopName() + "”（id=" + shop.getId() + "）登录密码错误!（phone：" + phone + " ，wrongPassword:" + password );
+//            map.put("error", "密码错误！！");
+//            return map;
+//        }
+//
+//        //去除该微信用户在其他门店的登录标记（一个微信仅允许登录一个门店账户）
+//        Shop shop1 = shopService.findShopByOpenid(myOpenid);
+//        while (shop1 != null) {
+//            shop1.setOpenid(null);
+//            shopService.edit(shop1);
+//            shop1 = shopService.findShopByOpenid(myOpenid);
+//        }
+//
+//        shop.setOpenid(myOpenid);
+//        shopService.edit(shop);
+//        logger.info("门店“" + shop.getShopName() + "”（id=" + shop.getId() + "）登录成功！");
+//
+//
+//        map.put("shop", shop);
+//        map.put("message", "登陆成功!");
+//        return map;
+//    }
+
+
     @ApiOperation(value = "门店退出登录")
     @GetMapping("/shop/exit")
     public Map exit(@RequestParam String myOpenid) {

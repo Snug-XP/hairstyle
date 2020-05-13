@@ -21,16 +21,18 @@ import org.springframework.web.filter.CorsFilter;
 public class Redirect2HttpsConfig {
     @Bean
     public Connector connector(){
-        Connector connector=new Connector("org.apache.coyote.http11.Http11NioProtocol");
+        // 捕获http请求8081端口，并将其重定向到8080端口
+        Connector connector=new Connector("org.apache.coyote.http11.Http11NioProtocol");//设置将分配给通过此连接器收到的请求的方案
         connector.setScheme("http");
         connector.setPort(8081);
-        connector.setSecure(false);
-        connector.setRedirectPort(443);
+        connector.setSecure(false);//如果connector.setSecure（true），则http使用http，而https使用https；否则，如果connector.setSecure（false），则http重定向至https;
+        connector.setRedirectPort(8080);//监听到http的端口号后转向到的https的端口号
         return connector;
     }
 
     @Bean
     public TomcatServletWebServerFactory servletContainer() {
+        // 对http请求添加安全性约束，将其转换为https请求
         TomcatServletWebServerFactory tomcat =new TomcatServletWebServerFactory(){
             @Override
             protected void postProcessContext(Context context){

@@ -1,7 +1,5 @@
-#eureka:
-#  client:
-#    serviceUrl:
-#      defaultZone: http://119.23.35.107:8761/eureka/
+
+#设置ssl可以实现https访问，但http访问就没了，因此加个配置“Redirect2HttpsConfig.java”，使http访问自动跳转https访问
 server:
   port: 8080
   ssl:

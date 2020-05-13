@@ -54,7 +54,6 @@ public class FeedbackController {
             Feedback feedback = new Feedback();
             feedback.setOpenid(myOpenid);
             feedback.setContent(content);
-            feedback.setCreateTime(new Date(System.currentTimeMillis()));
 
             feedbackService.save(feedback);
 

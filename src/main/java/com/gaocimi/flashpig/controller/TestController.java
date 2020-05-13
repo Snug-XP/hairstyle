@@ -188,8 +188,7 @@ public class TestController {
             e.printStackTrace();
             return map;
         }
-        shopService.edit(shop);
-        map.put("message","门店“"+shop.getShopName()+"”设置了密码："+encryptedPassword+"("+password+")");
+        map.put("message","门店“"+shop.getShopName()+"”设置密码："+encryptedPassword+"("+password+")");
         return map;
     }
 
