@@ -229,7 +229,9 @@ class AdministratorController {
     }
 
 
-    @ApiOperation(value = "系统管理员创建商品管理员账号", notes = "仅系统管理员有权限", produces = "application/json")
+    /******************************************下面是系统管理员对商品管理员的相关操作*************************************************************************/
+
+    @ApiOperation(value = "系统管理员创建商品管理员账号", notes = "仅系统管理员", produces = "application/json")
     @PostMapping("/Administrator/creatProductManager")
     public Map creatProductManager(@RequestParam String myOpenid,
                                    @RequestParam String phone,
@@ -241,11 +243,12 @@ class AdministratorController {
             if (administrator == null) {
                 logger.info("系统管理员创建商品管理员账号操作失败！！（没有权限！！）");
                 map.put("error", "操作失败！！（没有权限！！）");
+                return map;
             }
 
             ProductManager productManager = productManagerService.findProductManagerByPhone(phone);
             if (productManager != null) {
-                logger.info("系统管理员创建商品管理员账号操作失败!(该商品管理员账号已存在：{})",phone);
+                logger.info("系统管理员创建商品管理员账号操作失败!(该商品管理员账号已存在：{})", phone);
                 map.put("error", "该商品管理员已存在！");
                 return map;
             }
@@ -255,8 +258,8 @@ class AdministratorController {
             productManager.setPassword(password);
             productManager.setName(name);
             productManagerService.save(productManager);
-            logger.info("系统管理员“{}”（id={}）创建了一个商品管理员账户：“{}”(id={},phone={})",administrator.getName(),administrator.getId(),name,productManager.getId(),phone);
-            map.put("message","创建商品管理员账号成功");
+            logger.info("系统管理员“{}”（id={}）创建了一个商品管理员账户：“{}”(id={},phone={})", administrator.getName(), administrator.getId(), name, productManager.getId(), phone);
+            map.put("message", "创建商品管理员账号成功");
         } catch (Exception e) {
             logger.error(e.getMessage());
             logger.info("系统管理员创建商品管理员账号操作失败！！（后端发生某些错误）");
@@ -266,5 +269,131 @@ class AdministratorController {
         return map;
     }
 
+    @ApiOperation(value = "系统管理员修改商品管理员信息", notes = "权限：仅系统管理员")
+    @PutMapping("/Administrator/updateProductManagerInfo")
+    public Map updateNameOrPassword(@RequestParam String myOpenid,
+                                    @RequestParam Integer productManagerId,
+                                    @RequestParam(value = "phone", required = false) String phone,
+                                    @RequestParam(value = "name", required = false) String name,
+                                    @RequestParam(value = "password", required = false) String password) {
+        Map map = new HashMap();
+        try {
+            Administrator administrator = administratorService.findAdministratorByOpenid(myOpenid);
+            if (administrator == null) {
+                logger.info("用户(openid={})企图修改商品管理员（id={}）的信息,已阻止", myOpenid, productManagerId);
+                map.put("error", "无权限！");
+                return map;
+            }
+
+            ProductManager productManager = productManagerService.findProductManagerById(productManagerId);
+            if (productManager == null) {
+                map.put("error", "该商品管理员不存在！");
+                return map;
+            }
+
+            if (phone != null)
+                productManager.setPhone(phone);
+            if (name != null)
+                productManager.setName(name);
+            if (password != null) {
+                productManager.setPassword(password);
+            }
+            productManagerService.edit(productManager);
+            logger.info("系统管理员“{}”（id={}）修改了商品管理员(id={})的信息", administrator.getName(), administrator.getId(), productManagerId);
+            map.put("message", "修改成功！");
+            return map;
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            logger.info("系统管理员修改商品管理员信息！！（后端发生某些错误）");
+            map.put("error", "信息修改失败！！（后端发生某些错误）");
+            e.printStackTrace();
+            return map;
+        }
+    }
+
+    @ApiOperation(value = "根据商品管理员id(不是openid),获取单个商品管理员信息", notes = "权限：系统管理员", produces = "application/json")
+    @GetMapping("/Administrator/getProductManagerById")
+    public Map getById(@RequestParam String myOpenid,
+                       @RequestParam Integer productManagerId) {
+        Map map = new HashMap();
+        try {
+            if (!administratorService.isExist(myOpenid)) {
+                map.put("error", "无权限！");
+                return map;
+            }
+            ProductManager productManager = productManagerService.findProductManagerById(productManagerId);
+            if (productManager == null) {
+                logger.info("查看的商品管理员(id=" + productManagerId + ")不存在！");
+                map.put("error", "该商品管理员不存在！");
+                return map;
+            }
+            map.put("productManager", productManager);
+            return map;
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            logger.info("获取商品管理员信息失败！！（后端发生某些错误）");
+            map.put("error", "获取商品管理员信息失败！！（后端发生某些错误）");
+            e.printStackTrace();
+            return map;
+        }
+    }
+
+    @ApiOperation(value = "分页获取所有商品管理员列表", notes = "权限：仅系统管理员", produces = "application/json")
+    @GetMapping("/Administrator/getAllByPage")
+    public Map getProductManagersPage(@RequestParam String myOpenid,
+                                      @RequestParam(name = "pageNum", defaultValue = "0") int pageNum,
+                                      @RequestParam(name = "pageSize", defaultValue = "10") int pageSize) {
+        Map map = new HashMap();
+        try {
+            if (!administratorService.isExist(myOpenid)) {
+                map.put("error", "无权限！");
+                return map;
+            }
+            Page<ProductManager> page = productManagerService.findAll(pageNum, pageSize);
+            map.put("page", page);
+            return map;
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            logger.info("获取商品管理员列表信息失败！！（后端发生某些错误）");
+            map.put("error", "获取商品管理员列表信息失败！！（后端发生某些错误）");
+            e.printStackTrace();
+            return map;
+        }
+    }
+
+    @ApiOperation(value = "转换商品管理员账户的状态（正常、异常）", notes = "权限：仅系统管理员", produces = "application/json")
+    @PostMapping("/Administrator/changeProductManagerStatus")
+    public Map changeProductManagerStatus(@RequestParam String myOpenid,
+                                          @RequestParam Integer productManagerId) {
+        Map map = new HashMap();
+        try {
+            Administrator administrator = administratorService.findAdministratorByOpenid(myOpenid);
+            if (administrator == null) {
+                map.put("error", "无权限！");
+                return map;
+            }
+            ProductManager productManager = productManagerService.findProductManagerById(productManagerId);
+            if (productManager == null) {
+                logger.info("商品管理员(id=" + productManagerId + ")不存在！（修改商品管理员账户的状态）");
+                map.put("error", "该商品管理员不存在！");
+                return map;
+            }
+
+            productManager.changeStatus();
+            productManagerService.edit(productManager);
+            logger.info("系统管理员“{}”（id={}）修改了商品管理员“{}”(id={})的状态为“{}”", administrator.getName(), administrator.getId(), productManager.getName(),productManagerId,(productManager.getStatus()==1)? "正常":"异常");
+            map.put("message", "修改成功");
+            return map;
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            logger.info("转换商品管理员账户的状态失败！！（后端发生某些错误）");
+            map.put("error", "操作失败！！（后端发生某些错误）");
+            e.printStackTrace();
+            return map;
+        }
+    }
+
+
+/*************************************************************************************/
 
 }
