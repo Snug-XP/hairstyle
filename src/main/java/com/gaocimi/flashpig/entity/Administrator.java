@@ -25,6 +25,7 @@ public class Administrator {
 
     private String name;
 
+    @Column(unique = true)
     private String openid;
 
     /**
