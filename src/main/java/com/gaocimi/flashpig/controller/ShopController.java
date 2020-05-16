@@ -44,12 +44,19 @@ public class ShopController {
     ShopImageUrlService shopImageUrlService;
     @Autowired
     PushSubscribeMessageController pushWxMsg;
+    @Autowired
+    UserService userService;
 
     @ApiOperation(value = "门店登录")
     @PostMapping("/shop/login")
     public Map shopLogin(@RequestParam String myOpenid, @RequestParam String phone, @RequestParam String password) throws UnsupportedEncodingException, NoSuchAlgorithmException {
         Map map = new HashMap();
-
+        User user = userService.findUserByOpenid(myOpenid);
+        if(user==null){
+            logger.info("无效的用户！（门店登录）");
+            map.put("message","无效的用户！");
+            return map;
+        }
         Shop shop = shopService.findShopByPhone(phone);
         if (shop == null) {
             logger.info("账号（" + phone + "）不存在!");
@@ -154,7 +161,7 @@ public class ShopController {
                 return map;
             }
         } catch (Exception e) {
-            logger.info("获取个人的顾客预约数情况列表失败！！（后端发生某些错误）\n\n");
+            logger.info("门店退出登录失败！！（后端发生某些错误）\n\n");
             map.put("error", "操作失败！！（后端发生某些错误）");
             e.printStackTrace();
             return map;
@@ -482,11 +489,15 @@ public class ShopController {
         try {
             Shop shop = shopService.findShopByOpenid(myOpenid);
             if (shop == null) {
-                logger.info("还未登录(获取单个门店信息)");
+                logger.info("还未登录(根据openid获取单个门店信息)");
                 map.put("error", "请先登录！！");
                 return map;
             }
-            map = getOneById(shop.getId());
+
+            shop.regulateOrderSum();//根据所有订单进行数据校正
+            shopService.edit(shop);//更新到数据库
+
+            map.put("shop", shop);//总预约人数和今日预约人数已经在Shop的get方法里面，会直接被当做属性放进去
             return map;
         } catch (Exception e) {
             logger.error(e.getMessage());
@@ -508,9 +519,6 @@ public class ShopController {
                 map.put("error","该门店不存在！");
                 return map;
             }
-
-            shop.regulateOrderSum();//根据所有订单进行数据校正
-            shopService.edit(shop);//更新到数据库
 
             map.put("shop", shop);//总预约人数和今日预约人数已经在Shop的get方法里面，会直接被当做属性放进去
             return map;

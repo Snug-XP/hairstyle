@@ -15,7 +15,7 @@ import java.util.*;
  */
 @Entity
 @Table(name = "product_manager")
-@JsonIgnoreProperties(value = {"customerAnalyzeData", "timeRate", "loyalCustomerList", "customerList", "maleAndFemaleInfo", "mostPopularPerson", "maxOrderPerson", "maxPointPerson", "point", "applyTime", "applyResultDescription", "openid", "password", "hairstylistsByStatus", "hairstylists", "handler", "hibernateLazyInitializer", "fieldHandler"})
+@JsonIgnoreProperties(value = {"openid", "password", "productList", "handler", "hibernateLazyInitializer", "fieldHandler"})
 @Data
 public class ProductManager {
 
@@ -26,7 +26,7 @@ public class ProductManager {
     /**
      * 记录本次登录的微信的openid
      */
-    @Column(name = "temp_openid",unique = true)
+    @Column(name = "temp_openid", unique = true)
     private String openid;
 
     /**
@@ -46,6 +46,11 @@ public class ProductManager {
     private String password;
 
     /**
+     * 商品管理员状态(1表示状态正常，其它数字代表状态异常，阻止商品管理员操作)
+     */
+    private Integer status;
+
+    /**
      * 商品管理员账户被创建的时间
      */
     private Date createTime;
@@ -58,7 +63,22 @@ public class ProductManager {
 
     //初始化
     public ProductManager() {
+        status = 1;//刚创建的商品管理员状态设为正常
         Date date = new Date(System.currentTimeMillis());
-        setCreateTime(date);//设置注册时间
-     }
+        setCreateTime(date);//设置创建时间
+    }
+
+    public void changeStatus() {
+        if(status==1)
+            status = 0;
+        else
+            status = 1;
+    }
+
+    /**
+     * @return 该商品管理员目前发布的商品数量
+     */
+    public int getProductNumber(){
+        return getProductList().size();
+    }
 }

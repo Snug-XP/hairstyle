@@ -143,12 +143,11 @@ public class HairstylistController {
             if (hairstylist == null) {
                 logger.info("该发型师用户不存在（修改信息）！！");
                 logger.info("传入的数据：" + JSONObject.toJSON(request.getParameterMap()) + "\n");
-
-                map.put("error", "发型师用户不存在！！");
+                map.put("error", "无权限！");
                 return map;
             }
 
-            if (myOpenid.equals(hairstylist.getOpenid()) || administratorService.isExist(myOpenid)) {
+            if (myOpenid.equals(hairstylist.getOpenid())) {
 
                 if (hairstylistName != null)
                     hairstylist.setHairstylistName(hairstylistName);
@@ -157,9 +156,8 @@ public class HairstylistController {
                 if (personalPhone != null) {
                     Hairstylist h = hairstylistService.findHairstylistByPhone(personalPhone);
                     if (h != null) {
-
                         if (h.getOpenid().equals(myOpenid)) {
-                            map.put("message", "电话号码未修改");
+                            map.put("message2", "电话号码未修改");
                         } else {
                             logger.info("“" + hairstylist.getHairstylistName() + "”(id=" + hairstylist.getId() + ")修改个人电话与" + h.getHairstylistName() + "(id=" + h.getId() + ")重复！！(发型师修改个人信息)");
                             map.put("error", "该电话已绑定发型师！！");
