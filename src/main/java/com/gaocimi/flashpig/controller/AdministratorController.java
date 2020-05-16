@@ -24,7 +24,7 @@ import java.util.Map;
  */
 @RestController
 @ResponseResult
-@Api(value = "管理端操作", description = "")
+@Api(value = "系统管理员业务操作")
 class AdministratorController {
     protected final Logger logger = LoggerFactory.getLogger(this.getClass());
 
@@ -40,6 +40,8 @@ class AdministratorController {
     PushSubscribeMessageController pushWxMsg;
     @Autowired
     UserService userService;
+    @Autowired
+    ProductManagerService productManagerService;
 
     @ApiOperation(value = "获取管理端页面初始化所需数据")
     @GetMapping("/Administrator/getData")
@@ -66,7 +68,7 @@ class AdministratorController {
         }
     }
 
-    @ApiOperation(value = "获取待审核或审核已通过的门店信息列表(分页展示)（status=0表示“待审核”status=1表示“审核通过”，status=-1表示“审核未通过”，可选定省、市、县以及门店名的范围）", notes = "仅管理员有权限")
+    @ApiOperation(value = "获取待审核或审核已通过的门店信息列表(分页展示)（status=0表示“待审核”status=1表示“审核通过”，status=-1表示“审核未通过”，可选定省、市、县以及门店名的范围）", notes = "仅系统管理员有权限")
     @GetMapping("/Administrator/getRegisterShopList")
     public Map getRegisterShopList(@RequestParam String myOpenid,
                                    @RequestParam Integer status,
@@ -97,7 +99,7 @@ class AdministratorController {
     }
 
 
-    @ApiOperation(value = "同意或拒绝门店的认证（decide=1表示同意，decide=-1表示不同意）", notes = "仅管理员有权限", produces = "application/json")
+    @ApiOperation(value = "同意或拒绝门店的认证（decide=1表示同意，decide=-1表示不同意）", notes = "仅系统管理员有权限", produces = "application/json")
     @PostMapping("/Administrator/shop/approveOrReject")
     public Map approveOrReject(@RequestParam String myOpenid, int shopId, int decide) {
         Map map = new HashMap();
@@ -150,7 +152,7 @@ class AdministratorController {
     }
 
 
-    @ApiOperation(value = "获取待审核的文章列表(分页展示)", notes = "仅管理员有权限", produces = "application/json")
+    @ApiOperation(value = "获取待审核的文章列表(分页展示)", notes = "仅系统管理员有权限", produces = "application/json")
     @GetMapping("/Administrator/article/getPendingList")
     public Map getairstylistsPage(@RequestParam String myOpenid,
                                   @RequestParam(name = "pageNum", defaultValue = "0") int pageNum,
@@ -177,7 +179,7 @@ class AdministratorController {
     }
 
 
-    @ApiOperation(value = "同意或拒绝发型文章的发表（decide=1表示同意，decide=-1表示不同意）", notes = "仅管理员有权限", produces = "application/json")
+    @ApiOperation(value = "同意或拒绝发型文章的发表（decide=1表示同意，decide=-1表示不同意）", notes = "仅系统管理员有权限", produces = "application/json")
     @PostMapping("/Administrator/article/approveOrReject")
     public Map approveOrRejectArticle(@RequestParam String myOpenid, @RequestParam Integer articleId, @RequestParam Integer decide) {
         Map map = new HashMap();
@@ -225,5 +227,44 @@ class AdministratorController {
         }
         return map;
     }
+
+
+    @ApiOperation(value = "系统管理员创建商品管理员账号", notes = "仅系统管理员有权限", produces = "application/json")
+    @PostMapping("/Administrator/creatProductManager")
+    public Map creatProductManager(@RequestParam String myOpenid,
+                                   @RequestParam String phone,
+                                   @RequestParam String password,
+                                   @RequestParam String name) {
+        Map map = new HashMap();
+        try {
+            Administrator administrator = administratorService.findAdministratorByOpenid(myOpenid);
+            if (administrator == null) {
+                logger.info("系统管理员创建商品管理员账号操作失败！！（没有权限！！）");
+                map.put("error", "操作失败！！（没有权限！！）");
+            }
+
+            ProductManager productManager = productManagerService.findProductManagerByPhone(phone);
+            if (productManager != null) {
+                logger.info("系统管理员创建商品管理员账号操作失败!(该商品管理员账号已存在：{})",phone);
+                map.put("error", "该商品管理员已存在！");
+                return map;
+            }
+
+            productManager = new ProductManager();
+            productManager.setPhone(phone);
+            productManager.setPassword(password);
+            productManager.setName(name);
+            productManagerService.save(productManager);
+            logger.info("系统管理员“{}”（id={}）创建了一个商品管理员账户：“{}”(id={},phone={})",administrator.getName(),administrator.getId(),name,productManager.getId(),phone);
+            map.put("message","创建商品管理员账号成功");
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            logger.info("系统管理员创建商品管理员账号操作失败！！（后端发生某些错误）");
+            map.put("error", "操作失败！！（后端发生某些错误）");
+            e.printStackTrace();
+        }
+        return map;
+    }
+
 
 }

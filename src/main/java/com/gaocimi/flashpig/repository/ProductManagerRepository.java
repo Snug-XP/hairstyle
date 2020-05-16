@@ -11,6 +11,8 @@ public interface ProductManagerRepository extends JpaRepository<ProductManager, 
 
     public ProductManager findByOpenid(String openid);
 
+    ProductManager findByPhone(String phone);
+
     void deleteById(int id);
 
     //分页

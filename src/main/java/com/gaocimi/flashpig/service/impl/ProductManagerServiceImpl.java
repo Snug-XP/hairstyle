@@ -35,7 +35,12 @@ public class ProductManagerServiceImpl implements ProductManagerService {
     public ProductManager findProductManagerById(int id) {
         return productManagerRepository.findById(id);
     }
-    
+
+    @Override
+    public ProductManager findProductManagerByPhone(String phone) {
+        return productManagerRepository.findByPhone(phone);
+    }
+
     @Override
     public ProductManager findProductManagerByOpenid(String openid) {
     	return productManagerRepository.findByOpenid(openid);

@@ -793,7 +793,7 @@ public class HaircutOrderController {
 //    }
 
 
-    @ApiOperation(value = "分页获取所有订单列表", notes = "仅管理员有权限", produces = "application/json")
+    @ApiOperation(value = "分页获取所有订单列表", notes = "仅系统管理员有权限", produces = "application/json")
     @GetMapping("/haircutOrders/getAll")
     public Map getHaircutOrdersPage(@RequestParam String myOpenid,
                                     @RequestParam(name = "pageNum", defaultValue = "0") int pageNum,

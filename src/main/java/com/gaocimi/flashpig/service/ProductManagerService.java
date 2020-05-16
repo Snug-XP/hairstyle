@@ -1,6 +1,7 @@
 package com.gaocimi.flashpig.service;
 
 import com.gaocimi.flashpig.entity.ProductManager;
+import com.gaocimi.flashpig.entity.ProductManager;
 import org.springframework.data.domain.Page;
 
 import java.util.List;
@@ -15,6 +16,8 @@ public interface ProductManagerService {
     public List<ProductManager> getProductManagerList();
 
     public ProductManager findProductManagerById(int id);
+
+    public ProductManager findProductManagerByPhone(String phone);
 
     public ProductManager findProductManagerByOpenid(String openid);
 
