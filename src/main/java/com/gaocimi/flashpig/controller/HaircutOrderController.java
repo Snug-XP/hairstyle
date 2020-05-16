@@ -30,7 +30,7 @@ import java.util.*;
 @ResponseResult
 @Api(value = "订单操作服务", description = "订单的相关业务")
 public class HaircutOrderController {
-    protected static final Logger logger = LoggerFactory.getLogger(HairstylistController.class);
+    protected static final Logger logger = LoggerFactory.getLogger(HaircutOrderController.class);
 
     @Autowired
     HaircutOrderService haircutOrderService;

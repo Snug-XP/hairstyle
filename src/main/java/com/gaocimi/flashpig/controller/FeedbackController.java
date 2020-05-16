@@ -9,9 +9,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
@@ -25,7 +22,7 @@ import java.util.*;
 @ResponseResult
 @Api(value = "用户的反馈服务相关业务", description = "用户的反馈相关业务")
 public class FeedbackController {
-    protected static final Logger logger = LoggerFactory.getLogger(HairstylistController.class);
+    protected static final Logger logger = LoggerFactory.getLogger(FeedbackController.class);
 
     @Autowired
     FeedbackService feedbackService;

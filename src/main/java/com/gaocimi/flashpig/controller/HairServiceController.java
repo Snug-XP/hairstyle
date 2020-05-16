@@ -25,7 +25,7 @@ import java.util.Map;
 @ResponseResult
 @Api(value = "管理端发型服务", description = "发型服务相关业务")
 public class HairServiceController {
-    protected static final Logger logger = LoggerFactory.getLogger(HairstylistController.class);
+    protected static final Logger logger = LoggerFactory.getLogger(HairServiceController.class);
 
     @Autowired
     HairServiceService hairServiceService;

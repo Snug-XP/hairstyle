@@ -37,7 +37,7 @@ import java.util.Map;
 @ResponseResult
 @Api(value = "订阅消息的服务", description = "微信小程序获推送订阅消息给用户")
 public class PushSubscribeMessageController {
-    protected static final Logger logger = LoggerFactory.getLogger(WxLoginController.class);
+    protected static final Logger logger = LoggerFactory.getLogger(PushSubscribeMessageController.class);
 
     @Autowired
     private WxMaService wxService;

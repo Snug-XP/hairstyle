@@ -26,7 +26,7 @@ import java.util.Map;
 @ResponseResult
 @Api(value = "管理端操作", description = "")
 class AdministratorController {
-    protected static final Logger logger = LoggerFactory.getLogger(ShopController.class);
+    protected final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Autowired
     AdministratorService administratorService;

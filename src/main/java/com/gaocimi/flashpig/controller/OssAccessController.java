@@ -30,7 +30,7 @@ import java.util.Map;
 @RequestMapping
 @Api(value = "阿里云OSS服务", description = "阿里云OSS操作相关业务")
 public class OssAccessController {
-    private final Logger logger = LoggerFactory.getLogger(this.getClass());
+    private static final Logger logger = LoggerFactory.getLogger(OssAccessController.class);
 
     @Autowired
     private OSSClient client;

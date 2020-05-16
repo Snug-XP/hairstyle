@@ -30,7 +30,7 @@ import java.util.*;
 @ResponseResult
 @Api(value = "测试controller", description = "测试一些功能")
 public class TestController {
-    private static Logger logger = LoggerFactory.getLogger(WxPaymentController.class);
+    private static Logger logger = LoggerFactory.getLogger(TestController.class);
 
     @Autowired
     ArticleService articleService;

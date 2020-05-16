@@ -28,7 +28,7 @@ import java.util.*;
 @ResponseResult
 @Api(value = "文章服务相关业务", description = "文章相关业务")
 public class ArticleController {
-    protected static final Logger logger = LoggerFactory.getLogger(HairstylistController.class);
+    protected static final Logger logger = LoggerFactory.getLogger(ArticleController.class);
 
     @Autowired
     ArticleService articleService;

@@ -27,7 +27,7 @@ import java.util.*;
 @ResponseResult
 @Api(value = "专辑操作的相关业务", description = "专辑相关业务")
 public class AlbumController {
-    protected static final Logger logger = LoggerFactory.getLogger(HairstylistController.class);
+    protected static final Logger logger = LoggerFactory.getLogger(AlbumController.class);
 
     @Autowired
     AlbumService albumService;

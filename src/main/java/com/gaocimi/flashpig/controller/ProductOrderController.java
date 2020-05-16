@@ -22,7 +22,7 @@ import java.util.*;
 @ResponseResult
 @Api(value = "商品订单服务相关业务", description = "商品订单相关业务")
 public class ProductOrderController {
-    protected static final Logger logger = LoggerFactory.getLogger(UserController.class);
+    protected static final Logger logger = LoggerFactory.getLogger(ProductOrderController.class);
 
     @Autowired
     ProductOrderService productOrderService;
