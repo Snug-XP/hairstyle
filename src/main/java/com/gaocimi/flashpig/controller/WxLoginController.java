@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -105,6 +106,7 @@ public class WxLoginController {
             user.setPhoneNum(phoneNum);
             user.setPictureUrl(pictureUrl);
             user.setIsVip(0);//设置为非vip
+            user.setLastLoginTime(new Date());
             userService.save(user);
             logger.info("用户 " + user.getName() + " （" + user.getOpenid() + "）登录成功！\n\n\n\n");
 
@@ -120,7 +122,7 @@ public class WxLoginController {
                 user.setPictureUrl(pictureUrl);
 
             user.setSessionKey(session.getSessionKey());
-
+            user.setLastLoginTime(new Date());
             userService.edit(user);
             logger.info("用户 " + user.getName() + " （" + user.getOpenid() + "）登录成功！\n\n\n\n");
         }

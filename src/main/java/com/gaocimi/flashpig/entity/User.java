@@ -81,6 +81,11 @@ public class User {
     private Date vipEndTime;
 
     /**
+     * 用户的最近一次登录时间
+     */
+    private Date lastLoginTime;
+
+    /**
      * 用户提交过的订单列表； 定义该User实体所有关联的HaircutOrder实体； 指定mappedBy属性表明该User实体不控制关联关系
      */
     @OneToMany(targetEntity = HaircutOrder.class, mappedBy = "user")
