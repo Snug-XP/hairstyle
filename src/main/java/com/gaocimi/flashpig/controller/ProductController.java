@@ -27,12 +27,12 @@ import java.util.*;
 @ResponseResult
 @Api(value = "商品服务相关业务", description = "商品相关业务")
 public class ProductController {
-    protected static final Logger logger = LoggerFactory.getLogger(AdministratorController.class);
+    protected static final Logger logger = LoggerFactory.getLogger(ProductController.class);
 
     @Autowired
     ProductService productService;
     @Autowired
-    AdministratorService administratorService;
+    ProductManagerService productManagerService;
     @Autowired
     UserService userService;
     @Autowired
@@ -43,7 +43,7 @@ public class ProductController {
     UserToProductService userToProductService;
 
     @ApiOperation(value = "发布商品")
-    @PostMapping("/Administrator/addProduct")
+    @PostMapping("/productManager/addProduct")
     public Map addProduct(@RequestParam String myOpenid, @RequestParam String name, @RequestParam String introduction,
                           @RequestParam Double price, @RequestParam Integer remainingQuantity,
                           @RequestParam(value = "tagList", required = false) List<String> tagList,
@@ -51,15 +51,15 @@ public class ProductController {
         Map map = new HashMap();
         try {
 
-            Administrator administrator = administratorService.findAdministratorByOpenid(myOpenid);
-            if (administrator == null) {
+            ProductManager productManager = productManagerService.findProductManagerByOpenid(myOpenid);
+            if (productManager == null) {
                 logger.info("添加商品失败！！（没有权限！！）");
                 map.put("error", "无权限！");
                 return map;
             }
 
             Product product = new Product();
-            product.setAdministrator(administrator);
+            product.setProductManager(productManager);
             product.setTag(tagList);
             product.setName(name);
             product.setIntroduction(introduction);
@@ -78,7 +78,7 @@ public class ProductController {
                     imageUrlService.save(imageUrl);
                 }
             }
-            logger.info("管理员“" + administrator.getName() + "”（id=" + administrator.getId() + "）发布了商品“" + product.getName() + "”（id=" + product.getId() + "）");
+            logger.info("商品管理员“" + productManager.getName() + "”（id=" + productManager.getId() + "）发布了商品“" + product.getName() + "”（id=" + product.getId() + "）");
             map.put("message", "商品发布成功！");
             return map;
         } catch (Exception e) {
@@ -91,7 +91,7 @@ public class ProductController {
     }
 
     @ApiOperation(value = "删除商品")
-    @DeleteMapping("/Administrator/deleteProduct")
+    @DeleteMapping("/productManager/deleteProduct")
     public Map deleteProduct(@RequestParam String myOpenid, @RequestParam Integer productId) {
 
         Map map = new HashMap();
@@ -103,14 +103,14 @@ public class ProductController {
                 return map;
             }
 
-            Administrator administrator = administratorService.findAdministratorByOpenid(myOpenid);
-            if (administrator == null) {
+            ProductManager productManager = productManagerService.findProductManagerByOpenid(myOpenid);
+            if (productManager == null) {
                 logger.info("删除商品失败！！（没有权限！！）");
                 map.put("error", "无权限！");
                 return map;
             }
 
-            logger.info("管理员“" + administrator.getName() + "”（id=" + administrator.getId() + "）删除了商品“" + product.getName() + "”（id=" + product.getId() + "）");
+            logger.info("管理员“" + productManager.getName() + "”（id=" + productManager.getId() + "）删除了商品“" + product.getName() + "”（id=" + product.getId() + "）");
 
             productService.delete(productId);
             map.put("message", "商品删除成功！");
@@ -125,7 +125,7 @@ public class ProductController {
     }
 
     @ApiOperation(value = "修改商品信息", notes = "没有相关属性将不修改其原有信息")
-    @PutMapping("/administrator/updateProduct")
+    @PutMapping("/productManager/updateProduct")
     public Map updateProduct(@RequestParam String myOpenid, @RequestParam Integer productId,
                              @RequestParam(value = "name", required = false) String name,
                              @RequestParam(value = "introduction", required = false) String introduction,
@@ -144,8 +144,8 @@ public class ProductController {
                 return map;
             }
 
-            Administrator administrator = administratorService.findAdministratorByOpenid(myOpenid);
-            if (administrator == null) {
+            ProductManager productManager = productManagerService.findProductManagerByOpenid(myOpenid);
+            if (productManager == null) {
                 logger.info("非管理员用户操作！！（修改商品信息:操作openid=" + myOpenid + "）");
                 map.put("error", "无权操作！！");
                 return map;
@@ -177,7 +177,7 @@ public class ProductController {
                     imageUrlService.save(imageUrl);
                 }
             }
-            logger.info("管理员“" + administrator.getName() + "”（id=" + administrator.getId() + "）修改了商品“" + product.getName() + "”（id=" + product.getId() + "）的信息：");
+            logger.info("管理员“" + productManager.getName() + "”（id=" + productManager.getId() + "）修改了商品“" + product.getName() + "”（id=" + product.getId() + "）的信息：");
             map.put("message", "商品信息修改成功！");
             return map;
         } catch (Exception e) {
@@ -191,21 +191,21 @@ public class ProductController {
 
 
     @ApiOperation(value = "获取自己发布的的商品列表(分页展示)", notes = "权限：发型师(管理员会有一个发型师记录)")
-    @GetMapping("/administrator/getMyProductList")
+    @GetMapping("/productManager/getMyProductList")
     public Map getMyProductList(@RequestParam String myOpenid,
                                 @RequestParam(name = "pageNum", defaultValue = "0") int pageNum,
                                 @RequestParam(name = "pageSize", defaultValue = "10") int pageSize) {
 
         Map map = new HashMap();
         try {
-            Administrator administrator = administratorService.findAdministratorByOpenid(myOpenid);
-            if (administrator == null) {
+            ProductManager productManager = productManagerService.findProductManagerByOpenid(myOpenid);
+            if (productManager == null) {
                 logger.info("非管理员用户操作！！（获取自己发布的的商品列表:操作openid=" + myOpenid + "）");
                 map.put("error", "无权操作！！");
                 return map;
             }
 
-            List<Product> tempProductList = administrator.getProductList();
+            List<Product> tempProductList = productManager.getProductList();
 
             if (tempProductList == null || tempProductList.isEmpty()) {
                 map.put("message", "你还没有创建过商品哦~");

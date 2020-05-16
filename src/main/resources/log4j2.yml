@@ -1,3 +1,5 @@
+#本配置文件参考https://blog.csdn.net/u010598111/article/details/80556437
+
 # 共有8个级别，按照从低到高为：ALL < TRACE < DEBUG < INFO < WARN < ERROR < FATAL < OFF。
 
 Configuration:
