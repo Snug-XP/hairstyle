@@ -30,6 +30,11 @@ public class ProductManager {
     private String openid;
 
     /**
+     * 商品管理员头像
+     */
+    private String avatarUrl;
+
+    /**
      * 商品管理员名称
      */
     private String name;

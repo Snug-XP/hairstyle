@@ -74,6 +74,10 @@ public class ProductManagerController {
         }
 
         productManager.setOpenid(myOpenid);
+        if(productManager.getAvatarUrl()==null){
+            //商品管理员第一次登录会自动设置其头像为微信头像
+            productManager.setAvatarUrl(user.getPictureUrl());
+        }
         productManagerService.edit(productManager);
         logger.info("商品管理员“" + productManager.getName() + "”（id=" + productManager.getId() + "）登录成功！");
 
