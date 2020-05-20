@@ -136,6 +136,7 @@ public class ArticleServiceImpl implements ArticleService {
 
         //按管理员审核时间倒序排序
         Collections.sort(resultList, (o1, o2) -> {
+            if(o1.getCheckTime()==null||o2.getCheckTime()==null) return 0;
             if (o2.getCheckTime().after(o1.getCheckTime())) {
                 return 1;
             } else if (o1.getCheckTime().after(o2.getCheckTime())) {
