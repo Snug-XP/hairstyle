@@ -685,7 +685,7 @@ public class HaircutOrderController {
     }
 
     @ApiOperation(value = "普通用户获取预约单详情")
-    @PostMapping("/user/getHaircutOrder")
+    @GetMapping("/user/getHaircutOrder")
     public Map addHaircutOrder(@RequestParam String myOpenid, @RequestParam Integer orderId) {
         Map map = new HashMap();
         try {

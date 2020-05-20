@@ -4,6 +4,7 @@ package com.gaocimi.flashpig.controller;
 import com.gaocimi.flashpig.entity.*;
 import com.gaocimi.flashpig.result.ResponseResult;
 import com.gaocimi.flashpig.service.*;
+import com.gaocimi.flashpig.utils.xp.MyUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.slf4j.Logger;
@@ -13,9 +14,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 
 /**
@@ -153,6 +152,7 @@ class AdministratorController {
         return map;
     }
 
+    /******************************************下面是系统管理员对发型文章的相关操作*************************************************************************/
 
     @ApiOperation(value = "获取待审核的文章列表(分页展示)", notes = "仅系统管理员有权限", produces = "application/json")
     @GetMapping("/Administrator/article/getPendingList")
@@ -164,6 +164,9 @@ class AdministratorController {
             if (administratorService.isExist(myOpenid)) {
                 Page<Article> page = articleService.findAllByStatus(0, pageNum, pageSize);
                 map.put("page", page);
+                if (page.getTotalElements() == 0) {
+                    map.put("message", "无数据");
+                }
                 return map;
             } else {
                 logger.info("获取待审核的文章列表失败！！（没有权限！！）");
@@ -182,13 +185,16 @@ class AdministratorController {
     @ApiOperation(value = "获取所有已审核（被管理员看过的）的发型文章列表（分页展示）")
     @GetMapping("/Administrator/article/getReviewedList")
     public Map getReviewedByPage(@RequestParam String myOpenid,
-                                           @RequestParam(name = "pageNum", defaultValue = "0") int pageNum,
-                                           @RequestParam(name = "pageSize", defaultValue = "10") int pageSize) {
+                                 @RequestParam(name = "pageNum", defaultValue = "0") int pageNum,
+                                 @RequestParam(name = "pageSize", defaultValue = "10") int pageSize) {
         Map map = new HashMap();
         try {
             if (administratorService.isExist(myOpenid)) {
                 Page<Article> page = articleService.findAllByStatusIsNot(0, pageNum, pageSize);
                 map.put("page", page);
+                if (page.getTotalElements() == 0) {
+                    map.put("message", "无数据");
+                }
                 return map;
             } else {
                 logger.info("获取已审核的文章列表失败！！（没有权限！！）");
@@ -203,7 +209,6 @@ class AdministratorController {
             return map;
         }
     }
-
 
     @ApiOperation(value = "同意或拒绝发型文章的发表（decide=1表示同意，decide=-1表示不同意）", notes = "仅系统管理员有权限", produces = "application/json")
     @PostMapping("/Administrator/article/approveOrReject")
@@ -256,8 +261,48 @@ class AdministratorController {
         return map;
     }
 
+    @ApiOperation(value = "按标题获取发型文章列表（分页展示）")
+    @GetMapping("/Administrator/article/getAllByTitleLike")
+    public Map getAllByTitleLike(@RequestParam String myOpenid,
+                                 @RequestParam String title,
+                                 @RequestParam(name = "pageNum", defaultValue = "0") int pageNum,
+                                 @RequestParam(name = "pageSize", defaultValue = "10") int pageSize) {
+        Map map = new HashMap();
+        try {
+            if (!administratorService.isExist(myOpenid)) {
+                logger.info("按标题获取发型文章列表失败！！（没有权限！！）");
+                map.put("error", "无权限！");
+                return map;
+            }
 
-    /******************************************下面是系统管理员对商品管理员的相关操作*************************************************************************/
+            List<Article> articleList = articleService.findAllByTitleLike(title);
+            if (articleList.isEmpty()) {
+                map.put("message", "无数据");
+                return map;
+            }
+            // 按时间倒序排序
+            Collections.sort(articleList, (o1, o2) -> {
+                if (o2.getCreateTime().after(o1.getCreateTime())) {
+                    return 1;
+                } else if (o1.getCreateTime().after(o2.getCreateTime())) {
+                    return -1;
+                }
+                return 0; //相等为0
+            });
+            Page<Article> page = MyUtils.getPage(articleList, pageNum, pageSize);
+            map.put("page", page);
+            return map;
+
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            logger.info("按标题获取发型文章列表失败！！（后端发生某些错误）");
+            map.put("error", "操作失败！（后端发生某些错误）");
+            e.printStackTrace();
+            return map;
+        }
+    }
+/*************************************************************************************************************/
+    /*********************下面是系统管理员对商品管理员的相关操作*************************************************************************/
 
     @ApiOperation(value = "系统管理员创建商品管理员账号", notes = "仅系统管理员", produces = "application/json")
     @PostMapping("/Administrator/creatProductManager")
