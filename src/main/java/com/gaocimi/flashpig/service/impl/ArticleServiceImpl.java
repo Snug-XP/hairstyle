@@ -10,10 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * @author xp
@@ -136,6 +133,16 @@ public class ArticleServiceImpl implements ArticleService {
         for (int i = first; i <= last && i < articles.size(); i++) {
             resultList.add(articles.get(i));
         }
+
+        //按管理员审核时间倒序排序
+        Collections.sort(resultList, (o1, o2) -> {
+            if (o2.getCheckTime().after(o1.getCheckTime())) {
+                return 1;
+            } else if (o1.getCheckTime().after(o2.getCheckTime())) {
+                return -1;
+            }
+            return 0; //相等为0
+        });
 
         //包装分页数据
         Pageable pageable = PageRequest.of(pageNum, pageSize);

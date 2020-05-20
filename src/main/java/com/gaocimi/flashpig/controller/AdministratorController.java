@@ -222,12 +222,14 @@ class AdministratorController {
                 switch (decide) {
                     case 1:
                         article.setStatus(1);
+                        article.setCheckTime(new Date());
                         articleService.edit(article);
                         logger.info("管理员“" + administrator.getName() + "”(id=" + administrator.getId() + ")同意发型id为" + article.getId() + "的文章“" + article.getTitle() + "”的发表操作成功！");
                         map.put("message", "同意发表，操作成功");
                         break;
                     case -1:
                         article.setStatus(-1);
+                        article.setCheckTime(new Date());
                         articleService.edit(article);
                         logger.info("管理员“" + administrator.getName() + "”(id=" + administrator.getId() + ")拒绝发型id为" + article.getId() + "的文章“" + article.getTitle() + "”的发表操作成功！");
                         map.put("message", "拒绝发表，操作成功");
