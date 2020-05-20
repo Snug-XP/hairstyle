@@ -92,8 +92,8 @@ public class WxLoginController {
         map.put("openid", session.getOpenid());
         map.put("sessionKey", session.getSessionKey());
 
-        logger.info("登录用户openid为  " + session.getOpenid());
-        logger.info("   sessionKey为  " + session.getSessionKey() + "\n");
+//        logger.info("登录用户openid为  " + session.getOpenid());
+//        logger.info("   sessionKey为  " + session.getSessionKey() + "\n");
 
         User user = userService.findUserByOpenid(session.getOpenid());
         if (user == null) {
@@ -108,7 +108,7 @@ public class WxLoginController {
             user.setIsVip(0);//设置为非vip
             user.setLastLoginTime(new Date());
             userService.save(user);
-            logger.info("用户 " + user.getName() + " （" + user.getOpenid() + "）登录成功！\n\n\n\n");
+            logger.info("<新用户> " + user.getName() + " （" + user.getOpenid() + "）登录成功！\n\n\n\n");
 
         } else {
             //以前登录过，更新信息
@@ -124,7 +124,7 @@ public class WxLoginController {
             user.setSessionKey(session.getSessionKey());
             user.setLastLoginTime(new Date());
             userService.edit(user);
-            logger.info("用户 " + user.getName() + " （" + user.getOpenid() + "）登录成功！\n\n\n\n");
+            logger.info("<老用户>  " + user.getName() + " （" + user.getOpenid() + "）登录成功！\n\n\n\n");
         }
 //        } catch (Exception e) {
 //            logger.error(e.getMessage());

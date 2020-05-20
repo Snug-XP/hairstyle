@@ -367,7 +367,7 @@ class AdministratorController {
     }
 
     @ApiOperation(value = "分页获取所有商品管理员列表", notes = "权限：仅系统管理员", produces = "application/json")
-    @GetMapping("/Administrator/getAllByPage")
+    @GetMapping("/Administrator/getProductManagersByPage")
     public Map getProductManagersPage(@RequestParam String myOpenid,
                                       @RequestParam(name = "pageNum", defaultValue = "0") int pageNum,
                                       @RequestParam(name = "pageSize", defaultValue = "10") int pageSize) {

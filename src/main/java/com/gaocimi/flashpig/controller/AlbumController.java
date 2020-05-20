@@ -132,7 +132,7 @@ public class AlbumController {
                 return map;
             }
             map = ossAccessController.deleteObject(myOpenid, album.getImgUrl());
-            logger.info("oss操作结果：" + map + "\n");
+            logger.info("（删除专辑）oss操作结果：" + map + "\n");
             map.clear();
 
             albumService.delete(albumId);
