@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Date;
@@ -154,15 +155,14 @@ class AdministratorController {
 
     @ApiOperation(value = "获取待审核的文章列表(分页展示)", notes = "仅系统管理员有权限", produces = "application/json")
     @GetMapping("/Administrator/article/getPendingList")
-    public Map getairstylistsPage(@RequestParam String myOpenid,
-                                  @RequestParam(name = "pageNum", defaultValue = "0") int pageNum,
-                                  @RequestParam(name = "pageSize", defaultValue = "10") int pageSize) {
+    public Map getPendingListByPage(@RequestParam String myOpenid,
+                                    @RequestParam(name = "pageNum", defaultValue = "0") int pageNum,
+                                    @RequestParam(name = "pageSize", defaultValue = "10") int pageSize) {
         Map map = new HashMap();
         try {
             if (administratorService.isExist(myOpenid)) {
                 Page<Article> page = articleService.findAllByStatus(0, pageNum, pageSize);
                 map.put("page", page);
-                logger.info("获取待审核的文章列表信息成功！");
                 return map;
             } else {
                 logger.info("获取待审核的文章列表失败！！（没有权限！！）");
@@ -172,7 +172,32 @@ class AdministratorController {
         } catch (Exception e) {
             logger.error(e.getMessage());
             logger.info("获取待审核的文章列表失败！！（后端发生某些错误）");
-            map.put("error", "获取待审核的文章列表失败！！（后端发生某些错误）");
+            map.put("error", "操作失败！（后端发生某些错误）");
+            e.printStackTrace();
+            return map;
+        }
+    }
+
+    @ApiOperation(value = "获取所有已审核（被管理员看过的）的发型文章列表（分页展示）")
+    @GetMapping("/Administrator/article/getReviewedList")
+    public Map getReviewedByPage(@RequestParam String myOpenid,
+                                           @RequestParam(name = "pageNum", defaultValue = "0") int pageNum,
+                                           @RequestParam(name = "pageSize", defaultValue = "10") int pageSize) {
+        Map map = new HashMap();
+        try {
+            if (administratorService.isExist(myOpenid)) {
+                Page<Article> page = articleService.findAllByStatusIsNot(0, pageNum, pageSize);
+                map.put("page", page);
+                return map;
+            } else {
+                logger.info("获取已审核的文章列表失败！！（没有权限！！）");
+                map.put("error", "无权限！");
+                return map;
+            }
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            logger.info("获取待审核的文章列表失败！！（后端发生某些错误）");
+            map.put("error", "操作失败！（后端发生某些错误）");
             e.printStackTrace();
             return map;
         }
@@ -216,7 +241,7 @@ class AdministratorController {
                 }
             } else {
                 logger.info("同意或拒绝发型文章发表操作失败！！（没有权限！！）");
-                map.put("error", "操作失败！！（没有权限！！）");
+                map.put("error", "操作失败！！（无权限！！）");
             }
         } catch (Exception e) {
             logger.error(e.getMessage());
@@ -381,7 +406,7 @@ class AdministratorController {
 
             productManager.changeStatus();
             productManagerService.edit(productManager);
-            logger.info("系统管理员“{}”（id={}）修改了商品管理员“{}”(id={})的状态为“{}”", administrator.getName(), administrator.getId(), productManager.getName(),productManagerId,(productManager.getStatus()==1)? "正常":"异常");
+            logger.info("系统管理员“{}”（id={}）修改了商品管理员“{}”(id={})的状态为“{}”", administrator.getName(), administrator.getId(), productManager.getName(), productManagerId, (productManager.getStatus() == 1) ? "正常" : "异常");
             map.put("message", "修改成功");
             return map;
         } catch (Exception e) {

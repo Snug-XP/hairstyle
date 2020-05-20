@@ -39,4 +39,8 @@ public interface ArticleService {
      * @return
      */
     public Page<Article> findAllByStatus(int status, int pageNum, int pageSize);
+
+    public Page<Article> findAllByStatusIsNot(int status, int pageNum, int pageSize);
+
+
 }

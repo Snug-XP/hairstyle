@@ -125,6 +125,24 @@ public class ArticleServiceImpl implements ArticleService {
 
         return page;
     }
+
+    public Page<Article> findAllByStatusIsNot(int status, int pageNum, int pageSize){
+        int first = pageNum * pageSize;
+        int last = pageNum * pageSize + pageSize - 1;
+
+        List<Article> articles = articleRepository.findAllByStatusIsNot(status);
+        List<Article> resultList = new ArrayList<>();
+
+        for (int i = first; i <= last && i < articles.size(); i++) {
+            resultList.add(articles.get(i));
+        }
+
+        //包装分页数据
+        Pageable pageable = PageRequest.of(pageNum, pageSize);
+        Page<Article> page = new PageImpl<>(resultList, pageable, articles.size());
+
+        return page;
+    }
 }
 
 
