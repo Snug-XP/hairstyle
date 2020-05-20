@@ -42,5 +42,6 @@ public interface ArticleService {
 
     public Page<Article> findAllByStatusIsNot(int status, int pageNum, int pageSize);
 
+    public long countAllByStatus(int status);
 
 }

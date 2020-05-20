@@ -57,7 +57,8 @@ class AdministratorController {
             map.put("userNum", userService.getCount());
             map.put("verifiedShopNum", shopService.countAllByStatus(1));
             map.put("verifiedHairstylistNum", hairstylistService.countAllByStatus(1));
-            map.put("pendingReviewNum", shopService.countAllByStatus(0));
+            map.put("shopPendingReviewNum", shopService.countAllByStatus(0));
+            map.put("articlePendingReviewNum", articleService.countAllByStatus(0));
 
             return map;
         } catch (Exception e) {

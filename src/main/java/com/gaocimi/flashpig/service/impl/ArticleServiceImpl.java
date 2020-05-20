@@ -152,6 +152,11 @@ public class ArticleServiceImpl implements ArticleService {
 
         return page;
     }
+
+    @Override
+    public long countAllByStatus(int status){
+        return articleRepository.countAllByStatus(status);
+    }
 }
 
 
