@@ -128,14 +128,9 @@ public class ArticleServiceImpl implements ArticleService {
         int last = pageNum * pageSize + pageSize - 1;
 
         List<Article> articles = articleRepository.findAllByStatusIsNot(status);
-        List<Article> resultList = new ArrayList<>();
-
-        for (int i = first; i <= last && i < articles.size(); i++) {
-            resultList.add(articles.get(i));
-        }
 
         //按管理员审核时间倒序排序
-        Collections.sort(resultList, (o1, o2) -> {
+        Collections.sort(articles, (o1, o2) -> {
             if(o1.getCheckTime()==null||o2.getCheckTime()==null) return 0;
             if (o2.getCheckTime().after(o1.getCheckTime())) {
                 return 1;
@@ -144,6 +139,12 @@ public class ArticleServiceImpl implements ArticleService {
             }
             return 0; //相等为0
         });
+
+        List<Article> resultList = new ArrayList<>();
+
+        for (int i = first; i <= last && i < articles.size(); i++) {
+            resultList.add(articles.get(i));
+        }
 
         //包装分页数据
         Pageable pageable = PageRequest.of(pageNum, pageSize);
