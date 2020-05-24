@@ -1,13 +1,11 @@
 package com.gaocimi.flashpig.controller;
 
-import com.gaocimi.flashpig.entity.Article;
-import com.gaocimi.flashpig.entity.Hairstylist;
-import com.gaocimi.flashpig.entity.Shop;
+import com.gaocimi.flashpig.entity.*;
 import com.gaocimi.flashpig.result.ResponseResult;
-import com.gaocimi.flashpig.service.ArticleService;
-import com.gaocimi.flashpig.service.HairstylistService;
-import com.gaocimi.flashpig.service.ShopService;
+import com.gaocimi.flashpig.service.*;
+import com.gaocimi.flashpig.service.impl.WxPayOrderServiceImpl;
 import com.gaocimi.flashpig.utils.xp.IpUtil;
+import com.gaocimi.flashpig.utils.xp.MyMD5Util;
 import com.gaocimi.flashpig.utils.xp.MyUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -21,6 +19,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.UnsupportedEncodingException;
+import java.security.NoSuchAlgorithmException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -30,7 +30,7 @@ import java.util.*;
 @ResponseResult
 @Api(value = "测试controller", description = "测试一些功能")
 public class TestController {
-    private static Logger logger = LoggerFactory.getLogger(WxPaymentController.class);
+    private static Logger logger = LoggerFactory.getLogger(TestController.class);
 
     @Autowired
     ArticleService articleService;
@@ -38,6 +38,12 @@ public class TestController {
     HairstylistService hairstylistService;
     @Autowired
     ShopService shopService;
+    @Autowired
+    UserService userService;
+    @Autowired
+    ProductOrderService productOrderService;
+    @Autowired
+    WxPayOrderService wxPayOrderService;
 
     @ApiOperation(value = "时间测试", produces = "application/json")
     @GetMapping("/timeTest")
@@ -144,6 +150,61 @@ public class TestController {
         map.put("array",array);
         return map;
     }
+
+    @ApiOperation(value = "获取今天days天后的日期", produces = "application/json")
+    @PostMapping("/buyVipTest")
+    public Map buyVipTest(@RequestParam Integer days){
+        Map map = new HashMap();
+
+        User user = userService.findUserById(26);
+        map.put("result",user.buyVip(days));
+        return map;
+    }
+
+    @ApiOperation(value = "测试", produces = "application/json")
+    @PostMapping("/test")
+    public Map test(String openid ,String password){
+        Map map = new HashMap();
+
+        Shop shop = shopService.findShopByOpenid(openid);
+        if (shop == null) {
+            logger.info("未登录操作！！");
+            map.put("error", "请先登录！！");
+            return map;
+        }
+        //将密码加密存储
+        String encryptedPassword = null;
+        try {
+            encryptedPassword = MyMD5Util.getEncryptedPwd(password);
+            shop.setPassword(encryptedPassword);
+        } catch (NoSuchAlgorithmException e) {
+            map.put("error", "加密算法在当前环境中不可用，注册失败！");
+            logger.info("加密算法在当前环境中不可用，注册失败！");
+            e.printStackTrace();
+            return map;
+        } catch (UnsupportedEncodingException e) {
+            map.put("error", "密码包含不支持的字符编码，注册失败！");
+            logger.info("密码包含不支持的字符编码，注册失败！");
+            e.printStackTrace();
+            return map;
+        }
+        map.put("message","门店“"+shop.getShopName()+"”设置密码："+encryptedPassword+"("+password+")");
+        return map;
+    }
+
+//    public static void main(String[] args){
+//
+//        //-1表示商品购物订单
+//        WxPayOrder payOrder = wxPayOrderService.findWxPayOrderById(1040);
+//        ProductOrder productOrder = payOrder.getProductOrder();
+//        if(payOrder==null){
+//            logger.info("》》》未查找到对应商品订单，请管理员尽快查看！！！《《《）");
+//        }
+//        productOrder.setStatus(1);
+//        productOrder.setWxPayOrder(payOrder);
+//
+////        productOrderService.edit(productOrder);
+//    }
 
 
 

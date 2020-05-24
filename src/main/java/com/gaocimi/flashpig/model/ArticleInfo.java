@@ -22,4 +22,7 @@ public class ArticleInfo {
         if (imgList != null && imgList.size() > 0)
             this.imgUrl = imgList.get(0).getImageUrl();
     }
+    public ArticleInfo() {
+        super();
+    }
 }

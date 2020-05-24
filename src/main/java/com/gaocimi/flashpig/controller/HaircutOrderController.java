@@ -30,7 +30,7 @@ import java.util.*;
 @ResponseResult
 @Api(value = "订单操作服务", description = "订单的相关业务")
 public class HaircutOrderController {
-    protected static final Logger logger = LoggerFactory.getLogger(HairstylistController.class);
+    protected static final Logger logger = LoggerFactory.getLogger(HaircutOrderController.class);
 
     @Autowired
     HaircutOrderService haircutOrderService;
@@ -380,9 +380,11 @@ public class HaircutOrderController {
     /**
      * @param orderId 要通知的订单id
      * @param flag    通知用户前面还有几个人，当flag=-1时，通知订单已完成
+     * @describe   <该接口已停止使用！>
      * @return
+     * @
      */
-    @ApiOperation(value = "发模板信息通知用户前面还有flag个人（flag=0/1/2/-1），当flag=-1时，通知订单已完成，并且根据通知类型改变订单状态" +
+    @ApiOperation(value = "<该接口已停止使用！>发模板信息通知用户前面还有flag个人（flag=0/1/2/-1），当flag=-1时，通知订单已完成，并且根据通知类型改变订单状态" +
             "（...到时候记得关闭url访问）", notes = "当flag > 0 时，通知用户前面还有flag个人，" +
             "并将订单状态改为0（已通知）     当flag = 0 时，通知用户前往接受服务，并将订单状态改为1（进行中）     " +
             "当flag = -1 时，通知用户订单已完成，并将订单状态改为2（已完成）")
@@ -607,8 +609,8 @@ public class HaircutOrderController {
             }
 
             haircutOrderService.save(order);
-            logger.info("id为" + user.getId() + "的用户“" + user.getName() + "”提交了一个对发型师（id=" + hairstylist.getOpenid() + "）“" + hairstylist.getHairstylistName() + "”的订单");
-            messageController.pushSuccessMessage(order.getId());//给用户发送预约成功的模板消息通知
+            logger.info("id为" + user.getId() + "的用户“" + user.getName() + "”提交了一个对发型师（id=" + hairstylist.getId() + "）“" + hairstylist.getHairstylistName() + "”的订单");
+//            messageController.pushSuccessMessage(order.getId());//给用户发送预约成功的模板消息通知
             map.put("message", "订单提交成功！");
         } catch (Exception e) {
             logger.error(e.getMessage());
@@ -683,7 +685,7 @@ public class HaircutOrderController {
     }
 
     @ApiOperation(value = "普通用户获取预约单详情")
-    @PostMapping("/user/getHaircutOrder")
+    @GetMapping("/user/getHaircutOrder")
     public Map addHaircutOrder(@RequestParam String myOpenid, @RequestParam Integer orderId) {
         Map map = new HashMap();
         try {
@@ -791,7 +793,7 @@ public class HaircutOrderController {
 //    }
 
 
-    @ApiOperation(value = "分页获取所有订单列表", notes = "仅管理员有权限", produces = "application/json")
+    @ApiOperation(value = "分页获取所有订单列表", notes = "仅系统管理员有权限", produces = "application/json")
     @GetMapping("/haircutOrders/getAll")
     public Map getHaircutOrdersPage(@RequestParam String myOpenid,
                                     @RequestParam(name = "pageNum", defaultValue = "0") int pageNum,

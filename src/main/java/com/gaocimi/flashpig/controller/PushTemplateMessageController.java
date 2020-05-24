@@ -32,7 +32,7 @@ import me.chanjar.weixin.common.error.WxErrorException;
 @ResponseResult
 @Api(value = "模版消息的服务", description = "微信小程序获推送模版消息给用户")
 public class PushTemplateMessageController {
-    protected static final Logger logger = LoggerFactory.getLogger(WxLoginController.class);
+    protected static final Logger logger = LoggerFactory.getLogger(PushTemplateMessageController.class);
 
     @Autowired
     private WxMaService wxService;

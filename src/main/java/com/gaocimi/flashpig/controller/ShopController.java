@@ -5,6 +5,7 @@ import com.gaocimi.flashpig.entity.*;
 import com.gaocimi.flashpig.model.RankingData;
 import com.gaocimi.flashpig.result.ResponseResult;
 import com.gaocimi.flashpig.service.*;
+import com.gaocimi.flashpig.utils.xp.MyMD5Util;
 import com.gaocimi.flashpig.utils.xp.MyUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -18,6 +19,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.UnsupportedEncodingException;
+import java.security.NoSuchAlgorithmException;
 import java.util.*;
 
 /**
@@ -41,20 +44,29 @@ public class ShopController {
     ShopImageUrlService shopImageUrlService;
     @Autowired
     PushSubscribeMessageController pushWxMsg;
+    @Autowired
+    UserService userService;
 
     @ApiOperation(value = "门店登录")
     @PostMapping("/shop/login")
-    public Map shopLogin(@RequestParam String myOpenid, @RequestParam String phone, @RequestParam String password) {
+    public Map shopLogin(@RequestParam String myOpenid, @RequestParam String phone, @RequestParam String password) throws UnsupportedEncodingException, NoSuchAlgorithmException {
         Map map = new HashMap();
-
+        User user = userService.findUserByOpenid(myOpenid);
+        if(user==null){
+            logger.info("无效的用户！（门店登录）");
+            map.put("message","无效的用户！");
+            return map;
+        }
         Shop shop = shopService.findShopByPhone(phone);
         if (shop == null) {
             logger.info("账号（" + phone + "）不存在!");
             map.put("error", "账号不存在!");
             return map;
         }
-        if (!shop.getPassword().equals(password)) {
-            logger.info("门店“" + shop.getShopName() + "”（id=" + shop.getId() + "）登录密码错误!（phone：" + phone + " ，wrongPassword:" + password + ",rightpassword:" + shop.getPassword() + "）");
+
+
+        if (!MyMD5Util.validPassword(password, shop.getPassword())) {
+            logger.info("门店“" + shop.getShopName() + "”（id=" + shop.getId() + "）登录密码错误!（phone：" + phone + " ，wrongPassword:" + password );
             map.put("error", "密码错误！！");
             return map;
         }
@@ -94,6 +106,44 @@ public class ShopController {
     }
 
 
+//    @ApiOperation(value = "门店忘记密码，进行重设密码")
+//    @PostMapping("/shop/reSetPassword")
+//    public Map reSetPassword(@RequestParam String myOpenid, @RequestParam String phone, @RequestParam String password) throws UnsupportedEncodingException, NoSuchAlgorithmException {
+//        Map map = new HashMap();
+//
+//        Shop shop = shopService.findShopByPhone(phone);
+//        if (shop == null) {
+//            logger.info("账号（" + phone + "）不存在!");
+//            map.put("error", "账号不存在!");
+//            return map;
+//        }
+//
+//
+//        if (!MyMD5Util.validPassword(password, shop.getPassword())) {
+//            logger.info("门店“" + shop.getShopName() + "”（id=" + shop.getId() + "）登录密码错误!（phone：" + phone + " ，wrongPassword:" + password );
+//            map.put("error", "密码错误！！");
+//            return map;
+//        }
+//
+//        //去除该微信用户在其他门店的登录标记（一个微信仅允许登录一个门店账户）
+//        Shop shop1 = shopService.findShopByOpenid(myOpenid);
+//        while (shop1 != null) {
+//            shop1.setOpenid(null);
+//            shopService.edit(shop1);
+//            shop1 = shopService.findShopByOpenid(myOpenid);
+//        }
+//
+//        shop.setOpenid(myOpenid);
+//        shopService.edit(shop);
+//        logger.info("门店“" + shop.getShopName() + "”（id=" + shop.getId() + "）登录成功！");
+//
+//
+//        map.put("shop", shop);
+//        map.put("message", "登陆成功!");
+//        return map;
+//    }
+
+
     @ApiOperation(value = "门店退出登录")
     @GetMapping("/shop/exit")
     public Map exit(@RequestParam String myOpenid) {
@@ -111,7 +161,7 @@ public class ShopController {
                 return map;
             }
         } catch (Exception e) {
-            logger.info("获取个人的顾客预约数情况列表失败！！（后端发生某些错误）\n\n");
+            logger.info("门店退出登录失败！！（后端发生某些错误）\n\n");
             map.put("error", "操作失败！！（后端发生某些错误）");
             e.printStackTrace();
             return map;
@@ -176,11 +226,27 @@ public class ShopController {
                 shop1 = shopService.findShopByOpenid(myOpenid);
             }
 
+            //将密码加密存储
+            String encryptedPassword = null;
+            try {
+                encryptedPassword = MyMD5Util.getEncryptedPwd(password);
+                shop.setPassword(encryptedPassword);
+            } catch (NoSuchAlgorithmException e) {
+                map.put("error", "加密算法在当前环境中不可用，注册失败！");
+                logger.info("加密算法在当前环境中不可用，注册失败！");
+                e.printStackTrace();
+                return map;
+            } catch (UnsupportedEncodingException e) {
+                map.put("error", "密码包含不支持的字符编码，注册失败！");
+                logger.info("密码包含不支持的字符编码，注册失败！");
+                e.printStackTrace();
+                return map;
+            }
+
             shop.setOpenid(myOpenid);
 
             shop.setShopName(shopName);
             shop.setPhone(phone);
-            shop.setPassword(password);
             shop.setLogoUrl(logoUrl);
             shop.setOperatingLicensePictureUrl(operatingLicensePictureUrl);
             shop.setProvince(province);
@@ -360,8 +426,24 @@ public class ShopController {
                     }
                     shop.setPhone(phone);
                 }
-                if (password != null)
-                    shop.setPassword(password);
+                if (password != null){
+                    //将密码加密存储
+                    String encryptedPassword;
+                    try {
+                        encryptedPassword = MyMD5Util.getEncryptedPwd(password);
+                        shop.setPassword(encryptedPassword);
+                    } catch (NoSuchAlgorithmException e) {
+                        map.put("error", "加密算法在当前环境中不可用，修改密码失败！");
+                        logger.info("加密算法在当前环境中不可用，修改密码失败！");
+                        e.printStackTrace();
+                        return map;
+                    } catch (UnsupportedEncodingException e) {
+                        map.put("error", "密码包含不支持的字符编码，修改密码失败！");
+                        logger.info("密码包含不支持的字符编码！");
+                        e.printStackTrace();
+                        return map;
+                    }
+                }
                 if (iconUrl != null)
                     shop.setLogoUrl(iconUrl);
                 if (province != null)
@@ -407,11 +489,15 @@ public class ShopController {
         try {
             Shop shop = shopService.findShopByOpenid(myOpenid);
             if (shop == null) {
-                logger.info("还未登录(获取单个门店信息)");
+                logger.info("还未登录(根据openid获取单个门店信息)");
                 map.put("error", "请先登录！！");
                 return map;
             }
-            map = getOneById(shop.getId());
+
+            shop.regulateOrderSum();//根据所有订单进行数据校正
+            shopService.edit(shop);//更新到数据库
+
+            map.put("shop", shop);//总预约人数和今日预约人数已经在Shop的get方法里面，会直接被当做属性放进去
             return map;
         } catch (Exception e) {
             logger.error(e.getMessage());
@@ -433,9 +519,6 @@ public class ShopController {
                 map.put("error","该门店不存在！");
                 return map;
             }
-
-            shop.regulateOrderSum();//根据所有订单进行数据校正
-            shopService.edit(shop);//更新到数据库
 
             map.put("shop", shop);//总预约人数和今日预约人数已经在Shop的get方法里面，会直接被当做属性放进去
             return map;

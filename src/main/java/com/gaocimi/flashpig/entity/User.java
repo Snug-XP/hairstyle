@@ -17,7 +17,7 @@ import java.util.List;
  */
 @Entity
 @Table(name = "user")
-@JsonIgnoreProperties(value = {"sessionKey", "openid","userAddressList" , "userFormidList", "haircutOrderList", "hairstylistRecordList", "articleRecordList", "haircutOrderList", "handler", "hibernateLazyInitializer", "fieldHandler"})
+@JsonIgnoreProperties(value = {"productOrderList", "isVip", "sessionKey", "openid", "userAddressList", "userFormidList", "haircutOrderList", "hairstylistRecordList", "articleRecordList", "handler", "hibernateLazyInitializer", "fieldHandler"})
 @Data
 public class User {
 
@@ -81,6 +81,11 @@ public class User {
     private Date vipEndTime;
 
     /**
+     * 用户的最近一次登录时间
+     */
+    private Date lastLoginTime;
+
+    /**
      * 用户提交过的订单列表； 定义该User实体所有关联的HaircutOrder实体； 指定mappedBy属性表明该User实体不控制关联关系
      */
     @OneToMany(targetEntity = HaircutOrder.class, mappedBy = "user")
@@ -92,7 +97,7 @@ public class User {
      */
     @OneToMany(targetEntity = UserToArticle.class, mappedBy = "user")
     public List<UserToArticle> articleRecordList;
-    
+
     /**
      * 该用户对商品的收藏记录列表； 定义该User实体所有关联的UserToProduct实体； 指定mappedBy属性表明该User实体不控制关联关系
      */
@@ -117,6 +122,13 @@ public class User {
      */
     @OneToMany(targetEntity = UserAddress.class, mappedBy = "user")
     public List<UserAddress> userAddressList;
+
+    /**
+     * 该用户建立的商品订单列表； 定义该User实体所有关联的ProductOrder实体； 指定mappedBy属性表明该User实体不控制关联关系
+     */
+    @OneToMany(targetEntity = ProductOrder.class, mappedBy = "user")
+    public List<ProductOrder> productOrderList;
+
 
 /**************************************************************************************************************************/
     /**
@@ -146,17 +158,23 @@ public class User {
      * @param days 购买几天会员的天数
      */
     public boolean buyVip(int days) {
-        if ((isVip == 1 && vipEndTime != null)||(isVip == 0 && vipEndTime.after(new Date()))) {
-            System.out.println("\n\n》》》会员状态异常！！会员信息与会员到期时间不匹配《《《");
+
+        Date nowTime = new Date(System.currentTimeMillis());
+        if ((isVip == 1 && vipEndTime == null) || (isVip == 0 && vipEndTime != null && vipEndTime.after(nowTime))) {
+            System.out.println("\n\n》》》（用户id=" + id + "）会员状态异常！！会员信息与会员到期时间不匹配《《《");
             return false;
         }
-
+        if (isVip == 1 && vipEndTime.before(nowTime)) {
+            //如果会员已到期，但会员的标志暂未修改时,修改会员标志
+            setIsVip(0);
+        }
         if (isVip == 1) {
             setVipEndTime(MyUtils.getTimeFromDateAddDays(vipEndTime, days));
+            System.out.println("用户“" + name + "”购买了 " + days + " 天的会员");
             return true;
         } else if (isVip == 0) {
             setIsVip(1);
-            setVipEndTime(MyUtils.getTimeFromDateAddDays(new Date(), days));
+            setVipEndTime(MyUtils.getTimeFromDateAddDays(nowTime, days));
             return true;
         } else {
             System.out.println("\n\n》》》会员状态异常！！《《《");

@@ -29,6 +29,7 @@ public class Hairstylist {
     /**
      * 对应的微信openid
      */
+    @Column(unique = true)
     private String openid;
 
     /**

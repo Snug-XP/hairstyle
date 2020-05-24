@@ -28,7 +28,7 @@ import java.util.*;
 @ResponseResult
 @Api(value = "文章服务相关业务", description = "文章相关业务")
 public class ArticleController {
-    protected static final Logger logger = LoggerFactory.getLogger(HairstylistController.class);
+    protected static final Logger logger = LoggerFactory.getLogger(ArticleController.class);
 
     @Autowired
     ArticleService articleService;
@@ -301,7 +301,7 @@ public class ArticleController {
         }
     }
 
-    @ApiOperation(value = "获取所有文章列表（分页展示）")
+    @ApiOperation(value = "获取所有审核通过的发型文章列表（分页展示）")
     @GetMapping("/articles/getAll")
     public Page<Article> getAllByPage(@RequestParam(name = "pageNum", defaultValue = "0") int pageNum,
                                       @RequestParam(name = "pageSize", defaultValue = "10") int pageSize

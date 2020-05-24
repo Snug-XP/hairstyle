@@ -27,4 +27,7 @@ public interface ArticleRepository extends JpaRepository<Article, Integer>, JpaS
     public Page<Article> findAll(Pageable pageable);
 
     List<Article> findAllByStatus(int status);
+    List<Article> findAllByStatusIsNot(int status);
+
+    long countAllByStatus(int status);
 }

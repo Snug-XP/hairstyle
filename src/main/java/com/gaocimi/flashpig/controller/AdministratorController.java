@@ -4,17 +4,17 @@ package com.gaocimi.flashpig.controller;
 import com.gaocimi.flashpig.entity.*;
 import com.gaocimi.flashpig.result.ResponseResult;
 import com.gaocimi.flashpig.service.*;
+import com.gaocimi.flashpig.utils.xp.MyUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 
 /**
@@ -24,9 +24,9 @@ import java.util.Map;
  */
 @RestController
 @ResponseResult
-@Api(value = "管理端操作", description = "")
+@Api(value = "系统管理员业务操作")
 class AdministratorController {
-    protected static final Logger logger = LoggerFactory.getLogger(ShopController.class);
+    protected final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Autowired
     AdministratorService administratorService;
@@ -40,6 +40,8 @@ class AdministratorController {
     PushSubscribeMessageController pushWxMsg;
     @Autowired
     UserService userService;
+    @Autowired
+    ProductManagerService productManagerService;
 
     @ApiOperation(value = "获取管理端页面初始化所需数据")
     @GetMapping("/Administrator/getData")
@@ -54,7 +56,8 @@ class AdministratorController {
             map.put("userNum", userService.getCount());
             map.put("verifiedShopNum", shopService.countAllByStatus(1));
             map.put("verifiedHairstylistNum", hairstylistService.countAllByStatus(1));
-            map.put("pendingReviewNum", shopService.countAllByStatus(0));
+            map.put("shopPendingReviewNum", shopService.countAllByStatus(0));
+            map.put("articlePendingReviewNum", articleService.countAllByStatus(0));
 
             return map;
         } catch (Exception e) {
@@ -66,7 +69,7 @@ class AdministratorController {
         }
     }
 
-    @ApiOperation(value = "获取待审核或审核已通过的门店信息列表(分页展示)（status=0表示“待审核”status=1表示“审核通过”，status=-1表示“审核未通过”，可选定省、市、县以及门店名的范围）", notes = "仅管理员有权限")
+    @ApiOperation(value = "获取待审核或审核已通过的门店信息列表(分页展示)（status=0表示“待审核”status=1表示“审核通过”，status=-1表示“审核未通过”，可选定省、市、县以及门店名的范围）", notes = "仅系统管理员有权限")
     @GetMapping("/Administrator/getRegisterShopList")
     public Map getRegisterShopList(@RequestParam String myOpenid,
                                    @RequestParam Integer status,
@@ -97,7 +100,7 @@ class AdministratorController {
     }
 
 
-    @ApiOperation(value = "同意或拒绝门店的认证（decide=1表示同意，decide=-1表示不同意）", notes = "仅管理员有权限", produces = "application/json")
+    @ApiOperation(value = "同意或拒绝门店的认证（decide=1表示同意，decide=-1表示不同意）", notes = "仅系统管理员有权限", produces = "application/json")
     @PostMapping("/Administrator/shop/approveOrReject")
     public Map approveOrReject(@RequestParam String myOpenid, int shopId, int decide) {
         Map map = new HashMap();
@@ -149,18 +152,21 @@ class AdministratorController {
         return map;
     }
 
+    /******************************************下面是系统管理员对发型文章的相关操作*************************************************************************/
 
-    @ApiOperation(value = "获取待审核的文章列表(分页展示)", notes = "仅管理员有权限", produces = "application/json")
+    @ApiOperation(value = "获取待审核的文章列表(分页展示)", notes = "仅系统管理员有权限", produces = "application/json")
     @GetMapping("/Administrator/article/getPendingList")
-    public Map getairstylistsPage(@RequestParam String myOpenid,
-                                  @RequestParam(name = "pageNum", defaultValue = "0") int pageNum,
-                                  @RequestParam(name = "pageSize", defaultValue = "10") int pageSize) {
+    public Map getPendingListByPage(@RequestParam String myOpenid,
+                                    @RequestParam(name = "pageNum", defaultValue = "0") int pageNum,
+                                    @RequestParam(name = "pageSize", defaultValue = "10") int pageSize) {
         Map map = new HashMap();
         try {
             if (administratorService.isExist(myOpenid)) {
                 Page<Article> page = articleService.findAllByStatus(0, pageNum, pageSize);
                 map.put("page", page);
-                logger.info("获取待审核的文章列表信息成功！");
+                if (page.getTotalElements() == 0) {
+                    map.put("message", "无数据");
+                }
                 return map;
             } else {
                 logger.info("获取待审核的文章列表失败！！（没有权限！！）");
@@ -170,14 +176,41 @@ class AdministratorController {
         } catch (Exception e) {
             logger.error(e.getMessage());
             logger.info("获取待审核的文章列表失败！！（后端发生某些错误）");
-            map.put("error", "获取待审核的文章列表失败！！（后端发生某些错误）");
+            map.put("error", "操作失败！（后端发生某些错误）");
             e.printStackTrace();
             return map;
         }
     }
 
+    @ApiOperation(value = "获取所有已审核（被管理员看过的）的发型文章列表（分页展示）")
+    @GetMapping("/Administrator/article/getReviewedList")
+    public Map getReviewedByPage(@RequestParam String myOpenid,
+                                 @RequestParam(name = "pageNum", defaultValue = "0") int pageNum,
+                                 @RequestParam(name = "pageSize", defaultValue = "10") int pageSize) {
+        Map map = new HashMap();
+        try {
+            if (administratorService.isExist(myOpenid)) {
+                Page<Article> page = articleService.findAllByStatusIsNot(0, pageNum, pageSize);
+                map.put("page", page);
+                if (page.getTotalElements() == 0) {
+                    map.put("message", "无数据");
+                }
+                return map;
+            } else {
+                logger.info("获取已审核的文章列表失败！！（没有权限！！）");
+                map.put("error", "无权限！");
+                return map;
+            }
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            logger.info("获取待审核的文章列表失败！！（后端发生某些错误）");
+            map.put("error", "操作失败！（后端发生某些错误）");
+            e.printStackTrace();
+            return map;
+        }
+    }
 
-    @ApiOperation(value = "同意或拒绝发型文章的发表（decide=1表示同意，decide=-1表示不同意）", notes = "仅管理员有权限", produces = "application/json")
+    @ApiOperation(value = "同意或拒绝发型文章的发表（decide=1表示同意，decide=-1表示不同意）", notes = "仅系统管理员有权限", produces = "application/json")
     @PostMapping("/Administrator/article/approveOrReject")
     public Map approveOrRejectArticle(@RequestParam String myOpenid, @RequestParam Integer articleId, @RequestParam Integer decide) {
         Map map = new HashMap();
@@ -195,12 +228,14 @@ class AdministratorController {
                 switch (decide) {
                     case 1:
                         article.setStatus(1);
+                        article.setCheckTime(new Date());
                         articleService.edit(article);
                         logger.info("管理员“" + administrator.getName() + "”(id=" + administrator.getId() + ")同意发型id为" + article.getId() + "的文章“" + article.getTitle() + "”的发表操作成功！");
                         map.put("message", "同意发表，操作成功");
                         break;
                     case -1:
                         article.setStatus(-1);
+                        article.setCheckTime(new Date());
                         articleService.edit(article);
                         logger.info("管理员“" + administrator.getName() + "”(id=" + administrator.getId() + ")拒绝发型id为" + article.getId() + "的文章“" + article.getTitle() + "”的发表操作成功！");
                         map.put("message", "拒绝发表，操作成功");
@@ -214,7 +249,7 @@ class AdministratorController {
                 }
             } else {
                 logger.info("同意或拒绝发型文章发表操作失败！！（没有权限！！）");
-                map.put("error", "操作失败！！（没有权限！！）");
+                map.put("error", "操作失败！！（无权限！！）");
             }
         } catch (Exception e) {
             logger.error(e.getMessage());
@@ -225,5 +260,213 @@ class AdministratorController {
         }
         return map;
     }
+
+    @ApiOperation(value = "按标题获取发型文章列表（分页展示）")
+    @GetMapping("/Administrator/article/getAllByTitleLike")
+    public Map getAllByTitleLike(@RequestParam String myOpenid,
+                                 @RequestParam String title,
+                                 @RequestParam(name = "pageNum", defaultValue = "0") int pageNum,
+                                 @RequestParam(name = "pageSize", defaultValue = "10") int pageSize) {
+        Map map = new HashMap();
+        try {
+            if (!administratorService.isExist(myOpenid)) {
+                logger.info("按标题获取发型文章列表失败！！（没有权限！！）");
+                map.put("error", "无权限！");
+                return map;
+            }
+
+            List<Article> articleList = articleService.findAllByTitleLike(title);
+            if (articleList.isEmpty()) {
+                map.put("message", "无数据");
+                return map;
+            }
+            // 按时间倒序排序
+            Collections.sort(articleList, (o1, o2) -> {
+                if (o2.getCreateTime().after(o1.getCreateTime())) {
+                    return 1;
+                } else if (o1.getCreateTime().after(o2.getCreateTime())) {
+                    return -1;
+                }
+                return 0; //相等为0
+            });
+            Page<Article> page = MyUtils.getPage(articleList, pageNum, pageSize);
+            map.put("page", page);
+            return map;
+
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            logger.info("按标题获取发型文章列表失败！！（后端发生某些错误）");
+            map.put("error", "操作失败！（后端发生某些错误）");
+            e.printStackTrace();
+            return map;
+        }
+    }
+/*************************************************************************************************************/
+    /*********************下面是系统管理员对商品管理员的相关操作*************************************************************************/
+
+    @ApiOperation(value = "系统管理员创建商品管理员账号", notes = "仅系统管理员", produces = "application/json")
+    @PostMapping("/Administrator/creatProductManager")
+    public Map creatProductManager(@RequestParam String myOpenid,
+                                   @RequestParam String phone,
+                                   @RequestParam String password,
+                                   @RequestParam String name) {
+        Map map = new HashMap();
+        try {
+            Administrator administrator = administratorService.findAdministratorByOpenid(myOpenid);
+            if (administrator == null) {
+                logger.info("系统管理员创建商品管理员账号操作失败！！（没有权限！！）");
+                map.put("error", "操作失败！！（没有权限！！）");
+                return map;
+            }
+
+            ProductManager productManager = productManagerService.findProductManagerByPhone(phone);
+            if (productManager != null) {
+                logger.info("系统管理员创建商品管理员账号操作失败!(该商品管理员账号已存在：{})", phone);
+                map.put("error", "该商品管理员已存在！");
+                return map;
+            }
+
+            productManager = new ProductManager();
+            productManager.setPhone(phone);
+            productManager.setPassword(password);
+            productManager.setName(name);
+            productManagerService.save(productManager);
+            logger.info("系统管理员“{}”（id={}）创建了一个商品管理员账户：“{}”(id={},phone={})", administrator.getName(), administrator.getId(), name, productManager.getId(), phone);
+            map.put("message", "创建商品管理员账号成功");
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            logger.info("系统管理员创建商品管理员账号操作失败！！（后端发生某些错误）");
+            map.put("error", "操作失败！！（后端发生某些错误）");
+            e.printStackTrace();
+        }
+        return map;
+    }
+
+    @ApiOperation(value = "系统管理员修改商品管理员信息", notes = "权限：仅系统管理员")
+    @PutMapping("/Administrator/updateProductManagerInfo")
+    public Map updateNameOrPassword(@RequestParam String myOpenid,
+                                    @RequestParam Integer productManagerId,
+                                    @RequestParam(value = "phone", required = false) String phone,
+                                    @RequestParam(value = "name", required = false) String name,
+                                    @RequestParam(value = "password", required = false) String password) {
+        Map map = new HashMap();
+        try {
+            Administrator administrator = administratorService.findAdministratorByOpenid(myOpenid);
+            if (administrator == null) {
+                logger.info("用户(openid={})企图修改商品管理员（id={}）的信息,已阻止", myOpenid, productManagerId);
+                map.put("error", "无权限！");
+                return map;
+            }
+
+            ProductManager productManager = productManagerService.findProductManagerById(productManagerId);
+            if (productManager == null) {
+                map.put("error", "该商品管理员不存在！");
+                return map;
+            }
+
+            if (phone != null)
+                productManager.setPhone(phone);
+            if (name != null)
+                productManager.setName(name);
+            if (password != null) {
+                productManager.setPassword(password);
+            }
+            productManagerService.edit(productManager);
+            logger.info("系统管理员“{}”（id={}）修改了商品管理员(id={})的信息", administrator.getName(), administrator.getId(), productManagerId);
+            map.put("message", "修改成功！");
+            return map;
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            logger.info("系统管理员修改商品管理员信息！！（后端发生某些错误）");
+            map.put("error", "信息修改失败！！（后端发生某些错误）");
+            e.printStackTrace();
+            return map;
+        }
+    }
+
+    @ApiOperation(value = "根据商品管理员id(不是openid),获取单个商品管理员信息", notes = "权限：系统管理员", produces = "application/json")
+    @GetMapping("/Administrator/getProductManagerById")
+    public Map getById(@RequestParam String myOpenid,
+                       @RequestParam Integer productManagerId) {
+        Map map = new HashMap();
+        try {
+            if (!administratorService.isExist(myOpenid)) {
+                map.put("error", "无权限！");
+                return map;
+            }
+            ProductManager productManager = productManagerService.findProductManagerById(productManagerId);
+            if (productManager == null) {
+                logger.info("查看的商品管理员(id=" + productManagerId + ")不存在！");
+                map.put("error", "该商品管理员不存在！");
+                return map;
+            }
+            map.put("productManager", productManager);
+            return map;
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            logger.info("获取商品管理员信息失败！！（后端发生某些错误）");
+            map.put("error", "获取商品管理员信息失败！！（后端发生某些错误）");
+            e.printStackTrace();
+            return map;
+        }
+    }
+
+    @ApiOperation(value = "分页获取所有商品管理员列表", notes = "权限：仅系统管理员", produces = "application/json")
+    @GetMapping("/Administrator/getProductManagersByPage")
+    public Map getProductManagersPage(@RequestParam String myOpenid,
+                                      @RequestParam(name = "pageNum", defaultValue = "0") int pageNum,
+                                      @RequestParam(name = "pageSize", defaultValue = "10") int pageSize) {
+        Map map = new HashMap();
+        try {
+            if (!administratorService.isExist(myOpenid)) {
+                map.put("error", "无权限！");
+                return map;
+            }
+            Page<ProductManager> page = productManagerService.findAll(pageNum, pageSize);
+            map.put("page", page);
+            return map;
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            logger.info("获取商品管理员列表信息失败！！（后端发生某些错误）");
+            map.put("error", "获取商品管理员列表信息失败！！（后端发生某些错误）");
+            e.printStackTrace();
+            return map;
+        }
+    }
+
+    @ApiOperation(value = "转换商品管理员账户的状态（正常、异常）", notes = "权限：仅系统管理员", produces = "application/json")
+    @PostMapping("/Administrator/changeProductManagerStatus")
+    public Map changeProductManagerStatus(@RequestParam String myOpenid,
+                                          @RequestParam Integer productManagerId) {
+        Map map = new HashMap();
+        try {
+            Administrator administrator = administratorService.findAdministratorByOpenid(myOpenid);
+            if (administrator == null) {
+                map.put("error", "无权限！");
+                return map;
+            }
+            ProductManager productManager = productManagerService.findProductManagerById(productManagerId);
+            if (productManager == null) {
+                logger.info("商品管理员(id=" + productManagerId + ")不存在！（修改商品管理员账户的状态）");
+                map.put("error", "该商品管理员不存在！");
+                return map;
+            }
+
+            productManager.changeStatus();
+            productManagerService.edit(productManager);
+            logger.info("系统管理员“{}”（id={}）修改了商品管理员“{}”(id={})的状态为“{}”", administrator.getName(), administrator.getId(), productManager.getName(), productManagerId, (productManager.getStatus() == 1) ? "正常" : "异常");
+            map.put("message", "修改成功");
+            return map;
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            logger.info("转换商品管理员账户的状态失败！！（后端发生某些错误）");
+            map.put("error", "操作失败！！（后端发生某些错误）");
+            e.printStackTrace();
+            return map;
+        }
+    }
+
+
+/*************************************************************************************/
 
 }

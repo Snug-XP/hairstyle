@@ -41,6 +41,11 @@ public class Article {
     private Date createTime;
 
     /**
+     * 管理员审核的时间
+     */
+    private Date checkTime;
+
+    /**
      * 发型文章的状态（“0”表示审核中，“1”表示审核通过，“-1”表示审核失败）
      */
     private Integer status;

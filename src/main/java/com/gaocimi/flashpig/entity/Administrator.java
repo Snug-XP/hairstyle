@@ -25,6 +25,7 @@ public class Administrator {
 
     private String name;
 
+    @Column(unique = true)
     private String openid;
 
     /**
@@ -32,12 +33,4 @@ public class Administrator {
      */
     @OneToMany(targetEntity = Album.class, mappedBy = "administrator")
     public List<Album> albumList;
-
-    /**
-     * 该管理员发布的商品列表； 定义该Administrator实体所有关联的Product实体； 指定mappedBy属性表明该Administrator实体不控制关联关系
-     */
-    @OneToMany(targetEntity = Product.class, mappedBy = "administrator")
-    public List<Product> productList;
-
-
-}
+    }

@@ -84,7 +84,6 @@ public class MyUtils {
         return calendar.getTime();
     }
 
-
     /**
      * @return 获取传入日期所在周的星期一的日期Date(时间为00 : 00 : 00)
      */
@@ -98,13 +97,11 @@ public class MyUtils {
         if (calendar.get(Calendar.DAY_OF_WEEK) == 1) {
             flag = true;
         }
-
         calendar.setTime(date);
         calendar.set(Calendar.DAY_OF_WEEK, 2);//如果为1的话是星期日
         calendar.set(Calendar.HOUR_OF_DAY, 0);
         calendar.set(Calendar.MINUTE, 0);
         calendar.set(Calendar.SECOND, 0);
-
         if (flag)
             return stepWeek(calendar.getTime(), -1);
         else
@@ -137,7 +134,6 @@ public class MyUtils {
         Calendar c = Calendar.getInstance();
         c.setTime(sourceDate);
         c.add(Calendar.WEEK_OF_YEAR, week);
-
         return c.getTime();
     }
 
@@ -152,7 +148,6 @@ public class MyUtils {
         Calendar c = Calendar.getInstance();
         c.setTime(sourceDate);
         c.add(Calendar.DAY_OF_MONTH, day);
-
         return c.getTime();
     }
 
@@ -197,9 +192,7 @@ public class MyUtils {
     public static <T> Page<T> getPage(List<T> list, int pageNum, int pageSize) {
         int first = pageNum * pageSize;//该页第一个元素位置
         int last = pageNum * pageSize + pageSize - 1;//该页最后一个元素位置
-
         List<T> resultList = new ArrayList<>();
-
         for (int i = first; i <= last && i < list.size(); i++) {
             resultList.add(list.get(i));
         }
@@ -212,9 +205,9 @@ public class MyUtils {
     }
 
     /**
-     * 判断电话号码是否符合格式
+     * 判断手机号码是否符合格式
      *
-     * @param mobiles 11位电话号码
+     * @param mobiles 11位手机号码
      * @return
      */
     public static boolean isMobileNO(String mobiles) {
@@ -269,6 +262,15 @@ public class MyUtils {
      */
     public static String getTimeString(Date date) {
         SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.S");//精确到毫秒
+//        SimpleDateFormat df =new SimpleDateFormat("yyyy年MM月dd日 HH:mm:ss");
+
+        return df.format(date);
+    }
+    /**
+     * 获取时间字符串(纯数字)
+     */
+    public static String getTimeStringInteger(Date date) {
+        SimpleDateFormat df = new SimpleDateFormat("yyyyMMddHHmmss");//精确到秒
 //        SimpleDateFormat df =new SimpleDateFormat("yyyy年MM月dd日 HH:mm:ss");
 
         return df.format(date);
@@ -366,7 +368,6 @@ public class MyUtils {
         return timeStamp;
     }
 
-
     /**
      * 获取32位随机串
      */
@@ -379,6 +380,9 @@ public class MyUtils {
      * 获取距离某个日期（date）多少天（days）的时间
      */
     public static Date getTimeFromDateAddDays(Date date ,int days) {
-        return new Date(date.getTime()+days*24*60*60*1000);
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        calendar.add(Calendar.DATE,days);
+        return calendar.getTime();
     }
 }

@@ -26,7 +26,7 @@ public class Shop {
     /**
      * 记录本次登录的微信的openid
      */
-    @Column(name = "temp_openid")
+    @Column(name = "temp_openid",unique = true)
     private String openid;
 
     /**
@@ -37,6 +37,7 @@ public class Shop {
     /**
      * 门店联系电话（也是登录账号）
      */
+    @Column(unique = true)
     private String phone;
 
     /**

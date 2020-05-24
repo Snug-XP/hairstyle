@@ -27,7 +27,7 @@ import java.util.*;
 @ResponseResult
 @Api(value = "发型师对顾客的备注服务", description = "备注操作相关业务")
 public class RecordHairstylisToUserController {
-    protected static final Logger logger = LoggerFactory.getLogger(HairstylistController.class);
+    protected static final Logger logger = LoggerFactory.getLogger(RecordHairstylisToUserController.class);
 
     @Autowired
     RecordHairstylisToUserService recordHairstylisToUserService;

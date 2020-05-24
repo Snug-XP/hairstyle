@@ -27,7 +27,7 @@ import java.util.Map;
 @ResponseResult
 @Api(value = "小程序码生成相关操作", description = "微信小程序码相关业务")
 public class WxAppletCodeController {
-    protected static final Logger logger = LoggerFactory.getLogger(WxLoginController.class);
+    protected static final Logger logger = LoggerFactory.getLogger(WxAppletCodeController.class);
 
     @Autowired
     private HairstylistService hairstylistService;

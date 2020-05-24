@@ -62,9 +62,9 @@ public class Product {
     /**
      * 发布该商品的管理员； 定义名为administrator_id的外键列，该外键引用administrator表的主键(id)列,采用懒加载
      */
-    @ManyToOne(targetEntity = Administrator.class, fetch = FetchType.LAZY)
-    @JoinColumn(name = "administrator_id")
-    public Administrator administrator;
+    @ManyToOne(targetEntity = ProductManager.class, fetch = FetchType.LAZY)
+    @JoinColumn(name = "manager_id")
+    public ProductManager productManager;
     
     
     
@@ -112,4 +112,11 @@ public class Product {
         }
     }
 
+    /**
+     * 减少该商品的剩余数量
+     * @param number 要减少的数量
+     */
+    public void reduceRemainingQuantity(Integer number) {
+        remainingQuantity -=number;
+    }
 }

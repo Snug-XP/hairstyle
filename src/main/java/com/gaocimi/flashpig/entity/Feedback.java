@@ -36,8 +36,17 @@ public class Feedback {
     private String content;
 
     /**
+     * 标志管理员是否已阅读（0表示微阅读，1表示已阅读）
+     */
+    private Integer isRead;
+
+    /**
      * 创建时间
      */
     private Date createTime;
 
+    public Feedback() {
+        isRead = 0;
+        createTime = new Date(System.currentTimeMillis());
+    }
 }

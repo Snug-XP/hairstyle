@@ -1,11 +1,12 @@
 package com.gaocimi.flashpig.controller;
 
+import com.gaocimi.flashpig.entity.ProductOrder;
 import com.gaocimi.flashpig.entity.User;
 import com.gaocimi.flashpig.entity.WxPayOrder;
+import com.gaocimi.flashpig.service.ProductOrderService;
 import com.gaocimi.flashpig.service.UserService;
 import com.gaocimi.flashpig.service.WxPayOrderService;
 import com.gaocimi.flashpig.utils.xp.IpUtil;
-import com.gaocimi.flashpig.utils.xp.MyUtils;
 import com.github.binarywang.wxpay.bean.notify.WxPayNotifyResponse;
 import com.github.binarywang.wxpay.bean.notify.WxPayOrderNotifyResult;
 import com.github.binarywang.wxpay.bean.order.WxPayMpOrderResult;
@@ -15,7 +16,6 @@ import com.github.binarywang.wxpay.exception.WxPayException;
 import com.github.binarywang.wxpay.service.WxPayService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import net.bytebuddy.implementation.bytecode.Throw;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,6 +45,8 @@ public class WxPaymentController {
     @Autowired
     WxPayOrderService wxPayOrderService;
     @Autowired
+    ProductOrderService productOrderService;
+    @Autowired
     UserService userService;
 
     /**
@@ -56,35 +58,57 @@ public class WxPaymentController {
     public Map creatPayOrder(HttpServletRequest request,
                              @RequestParam String myOpenid,
                              @RequestParam Integer money,
-                             @RequestParam(value = "type",required = false) Integer type,
-                             @RequestParam(value = "body",required = false) String body) throws WxPayException {
+                             @RequestParam Integer type,
+                             @RequestParam String body,
+                             @RequestParam(value = "productOrderId", required = false) Integer productOrderId) throws WxPayException {
         Map map = new HashMap();
 
         User user = userService.findUserByOpenid(myOpenid);
         if (user == null) {
-            logger.info("openid为" + myOpenid + "的普通用户不存在！");
+            logger.info("openid为" + myOpenid + "的普通用户不存在！(调用统一下单接口)");
             map.put("error", "无效的用户！！");
             return map;
         }
+
+        ProductOrder productOrder = null;
+        if (productOrderId != null) {
+
+            if (type != -1) {
+                logger.info("调用商品订单的支付操作（type应该为-1），但是选择的支付类型错误：type=" + type);
+                map.put("error", "订单类型错误！（商品订单的支付订单类型应为-1）");
+                return map;
+            }
+
+            productOrder = productOrderService.findById(productOrderId);
+            if (productOrder == null) {
+                logger.info("id为" + productOrderId + "的商品订单不存在！（调用统一下单接口）");
+                map.put("error", "无效的商品订单！");
+                return map;
+            }
+//            productOrder.setWxPayOrder(w);
+        }
+
+
         WxPayOrder payOrder = new WxPayOrder();
 
         payOrder.setUser(user);
+        payOrder.setProductOrder(productOrder);
         payOrder.setMoney(money);//单位：分
-        payOrder.setStatus(0);
-        payOrder.setCreateTime(new Date());
-        payOrder.setBody("购买会员");
-        payOrder.setType(0);//设置支付类型为0（购买会员）
-        if(type!=null) payOrder.setType(type);
+        payOrder.setType(type);
+        payOrder.setBody(body);
+
         wxPayOrderService.save(payOrder);
+
+        if(productOrder!=null){
+            //商品订单和支付订单相互绑定
+            productOrder.setWxPayOrder(payOrder);
+            productOrderService.edit(productOrder);
+        }
 
 
         try {
             WxPayUnifiedOrderRequest orderRequest = new WxPayUnifiedOrderRequest();   //商户订单类
-            if(body!=null){
-                orderRequest.setBody(body);
-            }else{
-                orderRequest.setBody("购买会员");
-            }
+            orderRequest.setBody(body);
             orderRequest.setOpenid(myOpenid);
             //设置金额
             orderRequest.setTotalFee(payOrder.getMoney());   //注意：传入的金额参数单位为分
@@ -109,7 +133,7 @@ public class WxPaymentController {
             return map;
         } catch (Exception e) {
             logger.error("【微信支付】生成支付订单失败(订单号={}) 原因:“{}”", payOrder.getId(), e.getMessage());
-            map.put("error", "支付失败," + e.getMessage());
+            map.put("error", "生成支付订单失败：" + e.getMessage());
             e.printStackTrace();
             wxPayOrderService.delete(payOrder.getId());
             return map;
@@ -117,7 +141,6 @@ public class WxPaymentController {
     }
 
 
-    @SuppressWarnings("deprecation")
     @ApiOperation("微信支付回调地址")
     @PostMapping("/notify") // 返回订单号
     public String payNotify(HttpServletRequest request, HttpServletResponse response) {
@@ -144,41 +167,59 @@ public class WxPaymentController {
 
                     //支付订单有效，下面进行相关处理操作
 
-                    try{
+                    try {
                         User user = payOrder.getUser();
-                        switch (payOrder.getType()){
+                        switch (payOrder.getType()) {
                             case 0:
                                 //0表示普通用户购买会员(90天)的订单
-                                if( !user.buyVip(90) ){
+                                if (!user.buyVip(90)) {
                                     logger.info("购买会员失败！！");
-                                    throw new Exception();
-                                };
+                                    logger.info("》》》支付订单有效，但进行相关处理操作时（type=" + payOrder.getType() + "）发生异常,请管理员尽快查看《《《");
+                                } else {
+                                    userService.edit(user);
+                                }
                                 break;
                             case 1:
                                 //1表示普通用户购买会员(180天)的订单
-                                if( !user.buyVip(180) ){
+                                if (!user.buyVip(180)) {
                                     logger.info("购买会员失败！！");
-                                    throw new Exception();
-                                };
+                                    logger.info("》》》支付订单有效，但进行相关处理操作时（type=" + payOrder.getType() + "）发生异常,请管理员尽快查看《《《");
+                                } else {
+                                    userService.edit(user);
+                                }
                                 break;
                             case 2:
-                                //3表示普通用户购买会员(365天)的订单
-                                if( !user.buyVip(365) ){
+                                //2表示普通用户购买会员(365天)的订单
+                                if (!user.buyVip(365)) {
                                     logger.info("购买会员失败！！");
-                                    throw new Exception();
-                                };
+                                    logger.info("》》》支付订单有效，但进行相关处理操作时（type=" + payOrder.getType() + "）发生异常,请管理员尽快查看《《《");
+                                } else {
+                                    userService.edit(user);
+                                }
+                                break;
+                            case -1:
+                                //-1表示商品购物订单
+                                ProductOrder productOrder = payOrder.getProductOrder();
+                                if(payOrder==null){
+                                    logger.info("》》》未查找到对应商品订单，请管理员尽快查看！！！《《《）");
+                                    throw new Exception("未查找到对应商品订单");
+                                }
+                                productOrder.setStatus(1);
+                                productOrder.setWxPayOrder(payOrder);
+
+                                productOrderService.edit(productOrder);
                                 break;
 
                             default:
                                 logger.info("》》》支付订单类型错误！！（支付已完成，但是无法判断是何种支付服务，请管理员尽快查看！！！《《《）");
                         }
-                        userService.edit(user);
-                    }catch (Exception e){
+                    } catch (Exception e) {
                         //...微信支付相关操作信息出现错误，比较敏感，这边可以设置邮箱提醒之类的
+                        logger.info(e.getMessage());
+                        e.printStackTrace();
                         logger.info("》》》支付订单有效，但进行相关处理操作时发生异常,请管理员尽快查看《《《");
+
                     }
-
-
 
 
                     payOrder.setStatus(1);//订单已完成
@@ -188,11 +229,10 @@ public class WxPaymentController {
                 }
 
 
-
                 logger.info("微信订单号状态==>{}", "支付成功！");
                 logger.info("微信订单号   ==>{}", tradeNo);
                 logger.info("数据库订单号 ==>{}", orderId);
-                logger.info("商品名称     ==>{}",payOrder.getBody());
+                logger.info("商品名称     ==>{}", payOrder.getBody());
                 logger.info("付款总金额   ==>{}元", totalFee);
                 logger.info("付款人       ==>{}(id={})", payOrder.getUser().getName(), payOrder.getUser().getId());
                 logger.info("付款人电话   ==>{}", payOrder.getUser().getPhoneNum());
@@ -216,7 +256,7 @@ public class WxPaymentController {
                 String tradeNo = notifyResult.getTransactionId();
 
                 logger.warn("微信订单号状态==>支付失败！！！！！！！！！！！！！");
-                logger.warn("返回信息=======>{}",notifyResult.getReturnMsg());
+                logger.warn("返回信息=======>{}", notifyResult.getReturnMsg());
                 logger.info("微信订单号   ==>{}", tradeNo);
                 logger.info("数据库订单号 ==>{}", orderId);
                 logger.info("==========================================================\n\n");
@@ -249,14 +289,12 @@ public class WxPaymentController {
     }
 
 
-
 //    @SuppressWarnings("deprecation")
 //    @ApiOperation("微信支付回调地址测试")
 //    @PostMapping("/notifyTest") // 返回订单号
 //    public T payNotifyTest() {
 //
 //    }
-
 
 
 }

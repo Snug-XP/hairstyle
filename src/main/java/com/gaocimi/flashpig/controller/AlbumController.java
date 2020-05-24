@@ -27,7 +27,7 @@ import java.util.*;
 @ResponseResult
 @Api(value = "专辑操作的相关业务", description = "专辑相关业务")
 public class AlbumController {
-    protected static final Logger logger = LoggerFactory.getLogger(HairstylistController.class);
+    protected static final Logger logger = LoggerFactory.getLogger(AlbumController.class);
 
     @Autowired
     AlbumService albumService;
@@ -132,7 +132,7 @@ public class AlbumController {
                 return map;
             }
             map = ossAccessController.deleteObject(myOpenid, album.getImgUrl());
-            logger.info("oss操作结果：" + map + "\n");
+            logger.info("（删除专辑）oss操作结果：" + map + "\n");
             map.clear();
 
             albumService.delete(albumId);

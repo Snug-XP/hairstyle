@@ -12,15 +12,14 @@ import com.gaocimi.flashpig.entity.User;
 import com.gaocimi.flashpig.service.AdministratorService;
 import com.gaocimi.flashpig.service.HairstylistService;
 import com.gaocimi.flashpig.service.UserService;
-import com.gaocimi.flashpig.utils.JsonUtils;
 
+import com.gaocimi.flashpig.utils.JsonUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.io.*;
 import java.util.Date;
@@ -31,7 +30,7 @@ import java.util.Map;
 @RequestMapping
 @Api(value = "阿里云OSS服务", description = "阿里云OSS操作相关业务")
 public class OssAccessController {
-    private final Logger logger = LoggerFactory.getLogger(this.getClass());
+    private static final Logger logger = LoggerFactory.getLogger(OssAccessController.class);
 
     @Autowired
     private OSSClient client;
