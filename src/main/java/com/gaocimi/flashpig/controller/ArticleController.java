@@ -455,7 +455,7 @@ public class ArticleController {
 
     @ApiOperation(value = "用户获取相关标签的文章列表")
     @GetMapping("/article/getAtricleListByTaglist")
-    public Map getRecommendList(@RequestParam String myOpenid,
+    public Map getAtricleListByTaglist(@RequestParam String myOpenid,
                                      @RequestParam List<String> tagList,
                                      @RequestParam(name = "pageNum", defaultValue = "0") int pageNum,
                                      @RequestParam(name = "pageSize", defaultValue = "10") int pageSize) {

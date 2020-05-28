@@ -138,7 +138,7 @@ public class ProductOrderController {
 //
 //            User user = userService.findUserByOpenid(myOpenid);
 //            if (user == null||productOrder.getUser().getId()!=user.getId()) {
-//                logger.info("删除商品订单失败！！（没有权限！！）");
+//                logger.info("删除商品订单失败！！（无权限）");
 //                map.put("error", "无权限！");
 //                return map;
 //            }
@@ -178,7 +178,7 @@ public class ProductOrderController {
             }
             User user = userService.findUserByOpenid(myOpenid);
             if (user == null || productOrder.getUser().getId() != user.getId()) {
-                logger.info("修改商品订单失败！！（没有权限！！）");
+                logger.info("修改商品订单失败！！（无权限）");
                 map.put("error", "无权限！");
                 return map;
             }

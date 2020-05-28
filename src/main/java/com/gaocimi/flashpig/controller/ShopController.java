@@ -339,8 +339,8 @@ public class ShopController {
                 logger.info("门店“" + shop.getShopName() + "”(" + shop.getId() + ")取消认证成功！");
                 return map;
             } else {
-                logger.info("门店“" + shop.getShopName() + "”(" + shop.getId() + ")取消认证申请失败！（没有权限！！）");
-                map.put("error", "取消认证失败！！（没有权限！！）");
+                logger.info("门店“" + shop.getShopName() + "”(" + shop.getId() + ")取消认证申请失败！（无权限）");
+                map.put("error", "取消认证失败！！（无权限）");
                 return map;
             }
         } catch (Exception e) {
@@ -370,8 +370,8 @@ public class ShopController {
                 map.put("message", "注销门店“" + shop.getShopName() + "”成功！");
                 return map;
             } else {
-                logger.info("注销门店“" + shop.getShopName() + "”(" + shopId + ")失败！！（没有权限！！）");
-                map.put("error", "注销门店“" + shop.getShopName() + "”失败！！（没有权限！！）");
+                logger.info("注销门店“" + shop.getShopName() + "”(" + shopId + ")失败！！（无权限）");
+                map.put("error", "注销门店“" + shop.getShopName() + "”失败！！（无权限）");
                 return map;
             }
         } catch (Exception e) {
@@ -467,9 +467,9 @@ public class ShopController {
                 map.put("message", "门店信息修改成功！");
                 return map;
             } else {
-                logger.info("门店信息修改失败！！（没有权限！！）");
+                logger.info("门店信息修改失败！！（无权限）");
                 logger.info("传入的数据：" + JSONObject.toJSON(request.getParameterMap()) + "\n");
-                map.put("error", "门店信息修改失败！！（没有权限！！）");
+                map.put("error", "门店信息修改失败！！（无权限）");
                 return map;
             }
         } catch (Exception e) {

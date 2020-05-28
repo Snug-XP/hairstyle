@@ -806,8 +806,8 @@ public class HaircutOrderController {
                 logger.info("获取订单列表成功！");
                 return map;
             } else {
-                logger.info("获取订单列表失败！！（没有权限！！）");
-                map.put("error", "获取订单列表失败！！（没有权限！！）");
+                logger.info("获取订单列表失败！！（无权限）");
+                map.put("error", "获取订单列表失败！！（无权限）");
                 return map;
             }
         } catch (Exception e) {

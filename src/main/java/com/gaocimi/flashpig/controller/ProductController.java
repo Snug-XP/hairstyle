@@ -53,7 +53,7 @@ public class ProductController {
 
             ProductManager productManager = productManagerService.findProductManagerByOpenid(myOpenid);
             if (productManager == null) {
-                logger.info("添加商品失败！！（没有权限！！）");
+                logger.info("添加商品失败！！（无权限）");
                 map.put("error", "无权限！");
                 return map;
             }
@@ -105,7 +105,7 @@ public class ProductController {
 
             ProductManager productManager = productManagerService.findProductManagerByOpenid(myOpenid);
             if (productManager == null) {
-                logger.info("删除商品失败！！（没有权限！！）");
+                logger.info("删除商品失败！！（无权限）");
                 map.put("error", "无权限！");
                 return map;
             }

@@ -25,6 +25,8 @@ public interface ArticleService {
 
     public List<Article> findAllByTagLikeAndStatus(List<String> tagList, Integer status);
 
+    public List<Article> findAllByTagLike(List<String> tagList);
+
     public List<Article> findAllByTitleLike(String title);
 
     public List<Article> findAllByContentLike(String content);
