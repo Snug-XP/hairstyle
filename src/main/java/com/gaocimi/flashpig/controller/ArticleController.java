@@ -73,9 +73,10 @@ public class ArticleController {
             article.setTitle(title);
             article.setContent(content);
             article.setCreateTime(new Date(System.currentTimeMillis()));
-            if (administratorService.isExist(myOpenid))
+            if (administratorService.isExist(myOpenid)) {
                 article.setStatus(1);//设置发型文章状态为审核通过
-            else
+                article.setCheckTime(new Date());
+            } else
                 article.setStatus(0);//设置发型文章状态为审核中
 
             articleService.save(article);
