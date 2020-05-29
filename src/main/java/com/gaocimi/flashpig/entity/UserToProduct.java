@@ -24,6 +24,8 @@ public class UserToProduct {
 
     private Date createTime;
 
+    private Integer num;
+
     /**
      * 提交该收藏记录的用户； 定义名为user_id的外键列，该外键引用user表的主键(id)列,采用懒加载
      */
@@ -38,9 +40,10 @@ public class UserToProduct {
     @JoinColumn(name = "product_id", nullable = false)
     public Product product;
 
-    public UserToProduct(User user, Product product) {
+    public UserToProduct(User user, Product product,Integer num) {
         this.user = user;
         this.product = product;
+        this.num = num;
         this.createTime = new Date(System.currentTimeMillis());
     }
 

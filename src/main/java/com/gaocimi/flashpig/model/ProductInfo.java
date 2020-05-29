@@ -13,6 +13,7 @@ public class ProductInfo {
     private String introduction;
     private String imgUrl;
     private Double price;
+    private Integer num;//这个属性用于显示购物车中该商品的数量
     private String[] tag;
 
     public ProductInfo(Product product) {
