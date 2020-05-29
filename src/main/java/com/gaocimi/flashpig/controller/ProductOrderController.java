@@ -158,7 +158,7 @@ public class ProductOrderController {
 //        }
 //    }
 
-    @ApiOperation(value = "修改商品订单的电话号码或地址信息", notes = "没有相关属性将不修改其原有信息,并且用户只能修改未支付且未取消订单的信息")
+    @ApiOperation(value = "修改商品订单的电话号码或地址信息（若同时修改，地址信息中的电话号码失效）", notes = "没有相关属性将不修改其原有信息,并且用户只能修改未支付且未取消订单的信息")
     @PutMapping("/user/updateProductOrder")
     public Map updateProductOrder(@RequestParam String myOpenid, @RequestParam Integer productOrderId,
                                   @RequestParam(value = "userPhone", required = false) String userPhone,
@@ -189,14 +189,7 @@ public class ProductOrderController {
                 return map;
             }
 
-            if (userPhone != null) {
-                if (!MyUtils.isMobileNO(userPhone)) {
-                    logger.info("（userPhone=" + userPhone + "）手机号码不合法！(创建商品订单)");
-                    map.put("error", "手机号码不合法！");
-                    return map;
-                }
-                productOrder.setUserPhone(userPhone);
-            }
+
             if (addressId != null) {
                 UserAddress address = userAddressService.findUserAddressById(addressId);
                 if (address == null) {
@@ -211,7 +204,14 @@ public class ProductOrderController {
                 }
                 productOrder.setDeliveryAddress(address);
             }
-
+            if (userPhone != null) {
+                if (!MyUtils.isMobileNO(userPhone)) {
+                    logger.info("（userPhone=" + userPhone + "）手机号码不合法！(创建商品订单)");
+                    map.put("error", "手机号码不合法！");
+                    return map;
+                }
+                productOrder.setUserPhone(userPhone);
+            }
             productOrderService.edit(productOrder);
             logger.info("用户“" + user.getName() + "”（id=" + user.getId() + "）修改了商品订单“" + productOrder.getOrderNumber() + "”（id=" + productOrder.getId() + "）的信息：userPhone:" + userPhone + ",addressId=" + addressId);
             map.put("message", "修改成功");
@@ -307,6 +307,7 @@ public class ProductOrderController {
             return map;
         }
     }
+
 
 //    @ApiOperation(value = "获取所有商品订单列表（分页展示）")
 //    @GetMapping("/productOrders/getAll")
