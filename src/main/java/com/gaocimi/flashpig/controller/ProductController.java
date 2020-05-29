@@ -53,7 +53,7 @@ public class ProductController {
 
             ProductManager productManager = productManagerService.findProductManagerByOpenid(myOpenid);
             if (productManager == null) {
-                logger.info("添加商品失败！！（没有权限！！）");
+                logger.info("添加商品失败！（无权限）");
                 map.put("error", "无权限！");
                 return map;
             }
@@ -83,8 +83,8 @@ public class ProductController {
             return map;
         } catch (Exception e) {
             logger.error(e.getMessage());
-            logger.info("商品发布失败！！（后端发生某些错误）");
-            map.put("error", "商品发布失败！！（后端发生某些错误）");
+            logger.info("商品发布失败！（后端发生某些错误）");
+            map.put("error", "商品发布失败！（后端发生某些错误）");
             e.printStackTrace();
             return map;
         }
@@ -99,13 +99,13 @@ public class ProductController {
             Product product = productService.findProductById(productId);
             if (product == null) {
                 logger.info("id为" + productId + "的商品不存在（删除商品）！");
-                map.put("error", "该商品不存在！！");
+                map.put("error", "该商品不存在！");
                 return map;
             }
 
             ProductManager productManager = productManagerService.findProductManagerByOpenid(myOpenid);
             if (productManager == null) {
-                logger.info("删除商品失败！！（没有权限！！）");
+                logger.info("删除商品失败！（无权限）");
                 map.put("error", "无权限！");
                 return map;
             }
@@ -117,8 +117,8 @@ public class ProductController {
             return map;
         } catch (Exception e) {
             logger.error(e.getMessage());
-            logger.info("商品删除失败！！（后端发生某些错误）");
-            map.put("error", "商品删除失败！！（后端发生某些错误）");
+            logger.info("商品删除失败！（后端发生某些错误）");
+            map.put("error", "商品删除失败！（后端发生某些错误）");
             e.printStackTrace();
             return map;
         }
@@ -140,14 +140,14 @@ public class ProductController {
 
             if (product == null) {
                 logger.info("id为" + productId + "的商品不存在（修改商品信息）！");
-                map.put("error", "该商品不存在！！");
+                map.put("error", "该商品不存在！");
                 return map;
             }
 
             ProductManager productManager = productManagerService.findProductManagerByOpenid(myOpenid);
             if (productManager == null) {
-                logger.info("非管理员用户操作！！（修改商品信息:操作openid=" + myOpenid + "）");
-                map.put("error", "无权操作！！");
+                logger.info("非管理员用户操作！（修改商品信息:操作openid=" + myOpenid + "）");
+                map.put("error", "无权操作！");
                 return map;
             }
 
@@ -182,8 +182,8 @@ public class ProductController {
             return map;
         } catch (Exception e) {
             logger.error(e.getMessage());
-            logger.info("商品信息修改失败！！（后端发生某些错误）");
-            map.put("error", "商品信息修改失败！！（后端发生某些错误）");
+            logger.info("商品信息修改失败！（后端发生某些错误）");
+            map.put("error", "商品信息修改失败！（后端发生某些错误）");
             e.printStackTrace();
             return map;
         }
@@ -200,8 +200,8 @@ public class ProductController {
         try {
             ProductManager productManager = productManagerService.findProductManagerByOpenid(myOpenid);
             if (productManager == null) {
-                logger.info("非管理员用户操作！！（获取自己发布的的商品列表:操作openid=" + myOpenid + "）");
-                map.put("error", "无权操作！！");
+                logger.info("非管理员用户操作！（获取自己发布的的商品列表:操作openid=" + myOpenid + "）");
+                map.put("error", "无权操作！");
                 return map;
             }
 
@@ -226,8 +226,8 @@ public class ProductController {
             return map;
         } catch (Exception e) {
             logger.error(e.getMessage());
-            logger.info("获取自己发布的商品列表失败！！（后端发生某些错误）");
-            map.put("error", "获取自己发布的商品列表失败！！（后端发生某些错误）");
+            logger.info("获取自己发布的商品列表失败！（后端发生某些错误）");
+            map.put("error", "获取自己发布的商品列表失败！（后端发生某些错误）");
             e.printStackTrace();
             return map;
         }
@@ -243,7 +243,7 @@ public class ProductController {
             Product product = productService.findProductById(productId);
             if (user == null) {
                 logger.info("（" + myOpenid + "）该用户不存在！(获取单个商品信息)");
-                map.put("error", "无效的用户！！");
+                map.put("error", "无效的用户！");
                 return map;
             }
             if (product == null) {
@@ -277,46 +277,125 @@ public class ProductController {
         return page;
     }
 
-    @ApiOperation(value = "收藏或取消收藏该商品（转换用户对商品的收藏关系）")
-    @PostMapping("/product/addOrRemoveCollection")
-    public Map addOrRemoveCollection(@RequestParam String myOpenid, @RequestParam Integer productId) {
+    @ApiOperation(value = "将商品加入购物车")
+    @PostMapping("/product/addToMyCart")
+    public Map addOrRemoveCollection(@RequestParam String myOpenid, @RequestParam Integer productId,
+                                     @RequestParam Integer num) {
+        Map map = new HashMap();
+        try {
+            User user = userService.findUserByOpenid(myOpenid);
+            Product product = productService.findProductById(productId);
+            if (user == null) {
+                logger.info("（" + myOpenid + "）该用户不存在！(将商品加入购物车)");
+                map.put("error", "无效的用户！");
+                return map;
+            }
+            if (product == null) {
+                logger.info("id为" + productId + "的商品不存在！(将商品加入购物车)");
+                map.put("error", "该商品不存在！");
+                return map;
+            }
+            UserToProduct userToProduct = userToProductService.findByUserAndProduct(user.getId(), productId);
+            if (userToProduct != null) {
+                userToProduct.setNum(userToProduct.getNum() + num);
+                userToProductService.edit(userToProduct);
+                logger.info("id为" + user.getId() + "的用户“" + user.getName() + "”再次添加了添加了id为" + product.getId() + "的商品（name：" + product.getName() + ",num=" + num + "）进购物车");
+                map.put("message", "添加成功！");
+            }
+            userToProduct = new UserToProduct(user, product, num);
+            userToProductService.save(userToProduct);
+            logger.info("id为" + user.getId() + "的用户“" + user.getName() + "”添加了id为" + product.getId() + "的商品（name：" + product.getName() + ",num=" + num + "）进购物车");
+            map.put("message", "添加成功！");
+
+        } catch (Exception e) {
+            logger.info("(将商品加入购物车)后端发生异常：\n");
+            logger.error(e.getMessage());
+            map.put("error", "抱歉，后端发生异常!!");
+        }
+        return map;
+    }
+
+    @ApiOperation(value = "将商品从购物车移除")
+    @DeleteMapping("/product/removeFromMyCart")
+    public Map removeFromMyCart(@RequestParam String myOpenid, @RequestParam Integer productId) {
         Map map = new HashMap();
         try {
             User user = userService.findUserByOpenid(myOpenid);
             Product product = productService.findProductById(productId);
             if (user == null) {
                 logger.info("（" + myOpenid + "）该用户不存在！(收藏或取消收藏该商品)");
-                map.put("error", "无效的用户！！");
+                map.put("error", "无效的用户！");
                 return map;
             }
             if (product == null) {
                 logger.info("id为" + productId + "的商品不存在！(收藏或取消收藏该商品)");
-                map.put("error", "该商品不存在！！");
+                map.put("error", "该商品不存在！");
                 return map;
             }
             UserToProduct userToProduct = userToProductService.findByUserAndProduct(user.getId(), productId);
-            if (userToProduct != null) {
-                userToProductService.delete(userToProduct.getId());
-                logger.info("id为" + user.getId() + "的用户“" + user.getName() + "”取消收藏了id为" + product.getId() + "的商品（name：" + product.getName() + "）");
-                map.put("message", "取消收藏成功！");
+            if (userToProduct == null) {
+                map.put("error", "购物车内无该商品！");
                 return map;
             }
-            userToProduct = new UserToProduct(user, product);
-            userToProductService.save(userToProduct);
-            logger.info("id为" + user.getId() + "的用户“" + user.getName() + "”收藏了id为" + product.getId() + "的商品（name：" + product.getName() + "）");
-            map.put("message", "收藏成功！");
-
+            userToProductService.delete(userToProduct.getId());
+            logger.info("id为" + user.getId() + "的用户“" + user.getName() + "”从购物车中删除了id为" + product.getId() + "的商品（name：" + product.getName() + "）");
+            map.put("message", "删除成功！");
+            return map;
         } catch (Exception e) {
-            logger.info("后端发生异常：\n");
+            logger.info("(将商品从购物车移除)后端发生异常：\n");
             logger.error(e.getMessage());
             map.put("error", "抱歉，后端发生异常!!");
         }
+        return map;
+    }
 
+    @ApiOperation(value = "改变购物车中指定商品的数量")
+    @PostMapping("/product/myCart/ChangeNum")
+    public Map myCartChangeNum(@RequestParam String myOpenid, @RequestParam Integer productId,
+                               @RequestParam Integer addNum) {
+        Map map = new HashMap();
+        try {
+            User user = userService.findUserByOpenid(myOpenid);
+            Product product = productService.findProductById(productId);
+            if (user == null) {
+                logger.info("（" + myOpenid + "）该用户不存在！(将商品加入购物车)");
+                map.put("error", "无效的用户！");
+                return map;
+            }
+            if (product == null) {
+                logger.info("id为" + productId + "的商品不存在！(将商品加入购物车)");
+                map.put("error", "该商品不存在！");
+                return map;
+            }
+            UserToProduct userToProduct = userToProductService.findByUserAndProduct(user.getId(), productId);
+            if (userToProduct == null) {
+                map.put("error", "购物车中无该商品");
+                return map;
+            }
+            int resultNum = userToProduct.getNum() + addNum;
+            if(resultNum>userToProduct.getProduct().getRemainingQuantity()){
+                map.put("error", "商品余量不足");
+                return map;
+            }else if(resultNum<1){
+                map.put("error", "商品数量不允许少于1");
+                return map;
+            }
+            userToProduct.setNum(resultNum);
+            userToProductService.edit(userToProduct);
+            if(addNum>=0)
+                map.put("message", "数量+"+addNum);
+            else
+                map.put("message", "数量"+addNum);
+        } catch (Exception e) {
+            logger.info("(改变购物车中指定商品的数量)后端发生异常：\n");
+            logger.error(e.getMessage());
+            map.put("error", "抱歉，后端发生异常!!");
+        }
         return map;
     }
 
 
-    @ApiOperation(value = "普通用户分页获取自己收藏的商品列表")
+    @ApiOperation(value = "普通用户分页获取自己购物车中的商品列表")
     @GetMapping("/product/getMyCollection")
     public Map getMyCollectionByPage(@RequestParam String myOpenid,
                                      @RequestParam(name = "pageNum", defaultValue = "0") int pageNum,
@@ -327,11 +406,11 @@ public class ProductController {
             User user = userService.findUserByOpenid(myOpenid);
             if (user == null) {
                 logger.info("（" + myOpenid + "）该用户不存在！(获取自己收藏的商品列表)");
-                map.put("error", "无效的用户！！");
+                map.put("error", "无效的用户！");
                 return map;
             }
             List<UserToProduct> tempProductList = user.getProductRecordList();
-            List<Product> resultProductList = new ArrayList<>();
+            List<ProductInfo> resultProductList = new ArrayList<>();
 
             if (tempProductList == null || tempProductList.isEmpty()) {
                 map.put("message", "你还没有收藏商品哦~");
@@ -352,19 +431,21 @@ public class ProductController {
             int first = pageNum * pageSize;
             int last = pageNum * pageSize + pageSize - 1;
             for (int i = first; i <= last && i < tempProductList.size(); i++) {
-                resultProductList.add(tempProductList.get(i).product);
+                ProductInfo productInfo = new ProductInfo(tempProductList.get(i).product);
+                productInfo.setNum(tempProductList.get(i).getNum());
+                resultProductList.add(productInfo);
             }
 
             //包装分页数据
             Pageable pageable = PageRequest.of(pageNum, pageSize);
-            Page<Product> page = new PageImpl<>(resultProductList, pageable, tempProductList.size());
+            Page<ProductInfo> page = new PageImpl<>(resultProductList, pageable, tempProductList.size());
 
             map.put("page", page);
             return map;
         } catch (Exception e) {
             logger.error(e.getMessage());
-            logger.info("获取自己收藏的商品列表失败！！（后端发生某些错误）");
-            map.put("error", "获取收藏列表失败！！（后端发生某些错误）");
+            logger.info("获取自己收藏的商品列表失败！（后端发生某些错误）");
+            map.put("error", "获取收藏列表失败！（后端发生某些错误）");
             e.printStackTrace();
             return map;
         }
@@ -383,7 +464,7 @@ public class ProductController {
             User user = userService.findUserByOpenid(myOpenid);
             if (user == null) {
                 logger.info("（" + myOpenid + "）该用户不存在！(用户获取相关标签的商品列表`)");
-                map.put("error", "无效的用户！！");
+                map.put("error", "无效的用户！");
                 return map;
             }
 
@@ -423,8 +504,8 @@ public class ProductController {
             return map;
         } catch (Exception e) {
             logger.error(e.getMessage());
-            logger.info("用户获取相关标签的商品列表失败！！（后端发生某些错误）");
-            map.put("error", "获取相关标签的商品列表失败！！（后端发生某些错误）");
+            logger.info("用户获取相关标签的商品列表失败！（后端发生某些错误）");
+            map.put("error", "获取相关标签的商品列表失败！（后端发生某些错误）");
             e.printStackTrace();
             return map;
         }

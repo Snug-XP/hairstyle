@@ -12,12 +12,15 @@ public class ProductInfo {
     private String name;
     private String introduction;
     private String imgUrl;
+    private Double price;
+    private Integer num;//这个属性用于显示购物车中该商品的数量
     private String[] tag;
 
     public ProductInfo(Product product) {
         this.productId = product.getId();
         this.name = product.getName();
         this.introduction = product.getIntroduction();
+        this.price = product.getPrice();
         this.tag = product.getTag();
 
         List<ProductImageUrl> imgList = product.getProductImageUrlList();

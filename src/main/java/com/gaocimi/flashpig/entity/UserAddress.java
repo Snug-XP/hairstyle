@@ -31,6 +31,16 @@ public class UserAddress {
     public User user;
 
     /**
+     * 收件人姓名
+     */
+    private String name;
+
+    /**
+     * 收件人联系方式
+     */
+    private String phone;
+
+    /**
      * 配送省份
      */
     private String province;

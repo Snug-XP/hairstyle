@@ -86,14 +86,14 @@ class AdministratorController {
                 map.put("page", page);
                 return map;
             } else {
-                logger.info("获取正在注册的门店信息失败！！（没有权限！！）");
-                map.put("error", "获取正在注册的门店信息失败！！（没有权限！！）");
+                logger.info("获取正在注册的门店信息失败！！（无权限）"+myOpenid);
+                map.put("error", "操作失败！（无权限）");
                 return map;
             }
         } catch (Exception e) {
             logger.error(e.getMessage());
             logger.info("获取正在注册的门店列表信息失败！！（后端发生某些错误）");
-            map.put("error", "获取正在注册的门店列表信息失败！！（后端发生某些错误）");
+            map.put("error", "操作失败！！（后端发生某些错误）");
             e.printStackTrace();
             return map;
         }
@@ -139,8 +139,8 @@ class AdministratorController {
 
                 }
             } else {
-                logger.info("同意或拒绝门店认证操作失败！！（没有权限！！）");
-                map.put("error", "操作失败！！（没有权限！！）");
+                logger.info("同意或拒绝门店认证操作失败！（无权限）"+myOpenid);
+                map.put("error", "操作失败！（无权限）");
             }
         } catch (Exception e) {
             logger.error(e.getMessage());
@@ -169,8 +169,8 @@ class AdministratorController {
                 }
                 return map;
             } else {
-                logger.info("获取待审核的文章列表失败！！（没有权限！！）");
-                map.put("error", "获取待审核的文章列表失败！！（没有权限！！）");
+                logger.info("获取待审核的文章列表失败！！（无权限）"+myOpenid);
+                map.put("error", "操作失败！（无权限）");
                 return map;
             }
         } catch (Exception e) {
@@ -197,8 +197,8 @@ class AdministratorController {
                 }
                 return map;
             } else {
-                logger.info("获取已审核的文章列表失败！！（没有权限！！）");
-                map.put("error", "无权限！");
+                logger.info("获取已审核的文章列表失败！！（无权限）"+myOpenid);
+                map.put("error", "操作失败！（无权限）");
                 return map;
             }
         } catch (Exception e) {
@@ -248,7 +248,7 @@ class AdministratorController {
 
                 }
             } else {
-                logger.info("同意或拒绝发型文章发表操作失败！！（没有权限！！）");
+                logger.info("同意或拒绝发型文章发表操作失败！（无权限）"+myOpenid);
                 map.put("error", "操作失败！！（无权限！！）");
             }
         } catch (Exception e) {
@@ -270,7 +270,7 @@ class AdministratorController {
         Map map = new HashMap();
         try {
             if (!administratorService.isExist(myOpenid)) {
-                logger.info("按标题获取发型文章列表失败！！（没有权限！！）");
+                logger.info("按标题获取发型文章列表失败！！（无权限）"+myOpenid);
                 map.put("error", "无权限！");
                 return map;
             }
@@ -301,6 +301,50 @@ class AdministratorController {
             return map;
         }
     }
+
+    @ApiOperation(value = "按标签列表获取发型文章列表（分页展示）")
+    @GetMapping("/Administrator/article/getAllByTagListLike")
+    public Map getAllByTagListLike(@RequestParam String myOpenid,
+                                 @RequestParam List<String> tagList,
+                                 @RequestParam(name = "pageNum", defaultValue = "0") int pageNum,
+                                 @RequestParam(name = "pageSize", defaultValue = "10") int pageSize) {
+        Map map = new HashMap();
+        try {
+            if (!administratorService.isExist(myOpenid)) {
+                logger.info("按标题获取发型文章列表失败！！（没有权限！） "+myOpenid);
+                map.put("error", "无权限！");
+                return map;
+            }
+
+            List<Article> articleList = articleService.findAllByTagLike(tagList);
+            if (articleList.isEmpty()) {
+                map.put("message", "无数据");
+                return map;
+            }
+            // 按时间倒序排序
+            Collections.sort(articleList, (o1, o2) -> {
+                if (o2.getCreateTime().after(o1.getCreateTime())) {
+                    return 1;
+                } else if (o1.getCreateTime().after(o2.getCreateTime())) {
+                    return -1;
+                }
+                return 0; //相等为0
+            });
+            Page<Article> page = MyUtils.getPage(articleList, pageNum, pageSize);
+            map.put("page", page);
+            return map;
+
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            logger.info("按标签列表获取发型文章列表失败！！（后端发生某些错误）");
+            map.put("error", "操作失败！（后端发生某些错误）");
+            e.printStackTrace();
+            return map;
+        }
+    }
+
+
+
 /*************************************************************************************************************/
     /*********************下面是系统管理员对商品管理员的相关操作*************************************************************************/
 
@@ -314,8 +358,8 @@ class AdministratorController {
         try {
             Administrator administrator = administratorService.findAdministratorByOpenid(myOpenid);
             if (administrator == null) {
-                logger.info("系统管理员创建商品管理员账号操作失败！！（没有权限！！）");
-                map.put("error", "操作失败！！（没有权限！！）");
+                logger.info("系统管理员创建商品管理员账号操作失败！（无权限）"+myOpenid);
+                map.put("error", "操作失败！（无权限）");
                 return map;
             }
 
@@ -354,7 +398,7 @@ class AdministratorController {
             Administrator administrator = administratorService.findAdministratorByOpenid(myOpenid);
             if (administrator == null) {
                 logger.info("用户(openid={})企图修改商品管理员（id={}）的信息,已阻止", myOpenid, productManagerId);
-                map.put("error", "无权限！");
+                map.put("error", "操作失败！（无权限）");
                 return map;
             }
 

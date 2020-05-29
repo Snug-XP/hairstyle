@@ -188,9 +188,9 @@ public class HairstylistController {
 
                 return map;
             } else {
-                logger.info("发型师信息修改失败！！（没有权限！！）");
+                logger.info("发型师信息修改失败！！（无权限）");
                 logger.info("传入的数据：" + JSONObject.toJSON(request.getParameterMap()) + "\n");
-                map.put("error", "发型师信息修改失败！！（没有权限！！）");
+                map.put("error", "发型师信息修改失败！！（无权限）");
                 return map;
             }
         } catch (Exception e) {
@@ -219,8 +219,8 @@ public class HairstylistController {
                 map.put("message", "注销发型师“" + hairstylist.getHairstylistName() + "”成功！");
                 return map;
             } else {
-                logger.info("注销发型师“" + hairstylist.getHairstylistName() + "”(id=" + hairstylistId + ")失败！！（没有权限！！）");
-                map.put("error", "注销发型师“" + hairstylist.getHairstylistName() + "”失败！！（没有权限！！）");
+                logger.info("注销发型师“" + hairstylist.getHairstylistName() + "”(id=" + hairstylistId + ")失败！！（无权限）");
+                map.put("error", "注销发型师“" + hairstylist.getHairstylistName() + "”失败！！（无权限）");
                 return map;
             }
         } catch (Exception e) {
@@ -1422,7 +1422,7 @@ public class HairstylistController {
     public Map getLocalHairstylists(@RequestParam(required = false) String myOpenid,
                                     @RequestParam Double longitude,
                                     @RequestParam Double latitude, @RequestParam Integer flag,
-                                    @RequestParam(value = "distance", defaultValue = "5") Integer distance,
+                                    @RequestParam(value = "distance", defaultValue = "10000") Integer distance,
                                     @RequestParam(name = "pageNum", defaultValue = "0") int pageNum,
                                     @RequestParam(name = "pageSize", defaultValue = "10") int pageSize) {
         Map map = new HashMap();

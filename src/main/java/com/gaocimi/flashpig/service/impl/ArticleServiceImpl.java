@@ -72,12 +72,37 @@ public class ArticleServiceImpl implements ArticleService {
     }
 
     @Override
-    public List<Article> findAllByTagLikeAndStatus(List<String> tagList,Integer status) {
+    public List<Article> findAllByTagLikeAndStatus(List<String> tagList, Integer status) {
         Set<Article> set = new HashSet<>();//使用集合Set，自带去重功能
+        boolean flag = true;
 
         for (String tag : tagList) {
-            List<Article> tempList = articleRepository.findAllByTagLikeAndStatus("%" + tag + "%" , status);
-            set.addAll(tempList);
+            List<Article> tempList = articleRepository.findAllByTagLikeAndStatus("%" + tag + "%", status);
+            if (flag)
+                set.addAll(tempList);//第一次就添加所有找到的文章
+            else
+                set.retainAll(tempList);//求交集，即去除不重复元素
+            flag=false;
+        }
+        //这样合并去重需要重写对象的equals()方法,但是发现不重写也可以
+//            articleList.removeAll(tempList);
+//            articleList.addAll(tempList);
+
+        return new ArrayList<>(set);
+    }
+
+    @Override
+    public List<Article> findAllByTagLike(List<String> tagList) {
+        Set<Article> set = new HashSet<>();//使用集合Set，自带去重功能
+        boolean flag = true;
+
+        for (String tag : tagList) {
+            List<Article> tempList = articleRepository.findAllByTagLike("%" + tag + "%");
+            if (flag)
+                set.addAll(tempList);//第一次就添加所有找到的文章
+            else
+                set.retainAll(tempList);//求交集，即去除不重复元素
+            flag=false;
         }
         //这样合并去重需要重写对象的equals()方法,但是发现不重写也可以
 //            articleList.removeAll(tempList);
@@ -112,6 +137,18 @@ public class ArticleServiceImpl implements ArticleService {
         List<Article> articles = articleRepository.findAllByStatus(status);
         List<Article> resultList = new ArrayList<>();
 
+        //按管理员审核时间倒序排序
+        Collections.sort(articles, (o1, o2) -> {
+            if (o1.getCheckTime() == null || o2.getCheckTime() == null) return 0;
+            if (o2.getCheckTime().after(o1.getCheckTime())) {
+                return 1;
+            } else if (o1.getCheckTime().after(o2.getCheckTime())) {
+                return -1;
+            }
+            return 0; //相等为0
+        });
+
+
         for (int i = first; i <= last && i < articles.size(); i++) {
             resultList.add(articles.get(i));
         }
@@ -123,7 +160,7 @@ public class ArticleServiceImpl implements ArticleService {
         return page;
     }
 
-    public Page<Article> findAllByStatusIsNot(int status, int pageNum, int pageSize){
+    public Page<Article> findAllByStatusIsNot(int status, int pageNum, int pageSize) {
         int first = pageNum * pageSize;
         int last = pageNum * pageSize + pageSize - 1;
 
@@ -131,7 +168,7 @@ public class ArticleServiceImpl implements ArticleService {
 
         //按管理员审核时间倒序排序
         Collections.sort(articles, (o1, o2) -> {
-            if(o1.getCheckTime()==null||o2.getCheckTime()==null) return 0;
+            if (o1.getCheckTime() == null || o2.getCheckTime() == null) return 0;
             if (o2.getCheckTime().after(o1.getCheckTime())) {
                 return 1;
             } else if (o1.getCheckTime().after(o2.getCheckTime())) {
@@ -154,7 +191,7 @@ public class ArticleServiceImpl implements ArticleService {
     }
 
     @Override
-    public long countAllByStatus(int status){
+    public long countAllByStatus(int status) {
         return articleRepository.countAllByStatus(status);
     }
 }

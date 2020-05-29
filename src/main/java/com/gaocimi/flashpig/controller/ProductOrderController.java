@@ -34,11 +34,13 @@ public class ProductOrderController {
     ProductService productService;
     @Autowired
     UserAddressService userAddressService;
+    @Autowired
+    UserToProductService userToProductService;
 
     @ApiOperation(value = "用户创建商品订单")
     @PostMapping("/user/addProductOrder")
     public Map addProductOrder(@RequestParam String myOpenid, @RequestParam Integer productId,
-                               @RequestParam Integer productQuantity, @RequestParam String userPhone,
+                               @RequestParam Integer productQuantity,
                                @RequestParam(required = false) String remark,
                                @RequestParam(required = false) Integer addressId) {
         Map map = new HashMap();
@@ -55,12 +57,6 @@ public class ProductOrderController {
             if (product == null) {
                 logger.info("（productId=" + productId + "）该商品不存在！(创建商品订单)");
                 map.put("error", "该商品不存在！");
-                return map;
-            }
-
-            if (!MyUtils.isMobileNO(userPhone)) {
-                logger.info("（userPhone=" + userPhone + "）手机号码不合法！(创建商品订单)");
-                map.put("error", "手机号码不合法！");
                 return map;
             }
 
@@ -90,13 +86,18 @@ public class ProductOrderController {
             productOrder.setProduct(product);
             productOrder.setProductQuantity(productQuantity);
             productOrder.setTotalPrice(product.getPrice() * productQuantity);
-            productOrder.setUserPhone(userPhone);
             productOrder.setRemark(remark);
 
             productOrder.setDeliveryAddress(address);//填入配送地址
             productOrder.generateOrderNumber();//生成订单号
 
             product.reduceRemainingQuantity(productQuantity);//减少该商品的剩余数量
+
+            //当用户购买商品时，将其从购物车去除
+            UserToProduct record = userToProductService.findByUserAndProduct(user.getId(),productId);
+            if(record!=null){
+                userToProductService.delete(record.getId());
+            }
 
             //下面控制用户每个10秒中只能产生一次相同产品的订单
             String orderNumber = productOrder.getOrderNumber();
@@ -138,7 +139,7 @@ public class ProductOrderController {
 //
 //            User user = userService.findUserByOpenid(myOpenid);
 //            if (user == null||productOrder.getUser().getId()!=user.getId()) {
-//                logger.info("删除商品订单失败！！（没有权限！！）");
+//                logger.info("删除商品订单失败！！（无权限）");
 //                map.put("error", "无权限！");
 //                return map;
 //            }
@@ -157,7 +158,7 @@ public class ProductOrderController {
 //        }
 //    }
 
-    @ApiOperation(value = "修改商品订单的电话号码或地址信息", notes = "没有相关属性将不修改其原有信息,并且用户只能修改未支付且未取消订单的信息")
+    @ApiOperation(value = "修改商品订单的电话号码或地址信息（若同时修改，地址信息中的电话号码失效）", notes = "没有相关属性将不修改其原有信息,并且用户只能修改未支付且未取消订单的信息")
     @PutMapping("/user/updateProductOrder")
     public Map updateProductOrder(@RequestParam String myOpenid, @RequestParam Integer productOrderId,
                                   @RequestParam(value = "userPhone", required = false) String userPhone,
@@ -178,7 +179,7 @@ public class ProductOrderController {
             }
             User user = userService.findUserByOpenid(myOpenid);
             if (user == null || productOrder.getUser().getId() != user.getId()) {
-                logger.info("修改商品订单失败！！（没有权限！！）");
+                logger.info("修改商品订单失败！！（无权限）");
                 map.put("error", "无权限！");
                 return map;
             }
@@ -188,14 +189,7 @@ public class ProductOrderController {
                 return map;
             }
 
-            if (userPhone != null) {
-                if (!MyUtils.isMobileNO(userPhone)) {
-                    logger.info("（userPhone=" + userPhone + "）手机号码不合法！(创建商品订单)");
-                    map.put("error", "手机号码不合法！");
-                    return map;
-                }
-                productOrder.setUserPhone(userPhone);
-            }
+
             if (addressId != null) {
                 UserAddress address = userAddressService.findUserAddressById(addressId);
                 if (address == null) {
@@ -210,7 +204,14 @@ public class ProductOrderController {
                 }
                 productOrder.setDeliveryAddress(address);
             }
-
+            if (userPhone != null) {
+                if (!MyUtils.isMobileNO(userPhone)) {
+                    logger.info("（userPhone=" + userPhone + "）手机号码不合法！(创建商品订单)");
+                    map.put("error", "手机号码不合法！");
+                    return map;
+                }
+                productOrder.setUserPhone(userPhone);
+            }
             productOrderService.edit(productOrder);
             logger.info("用户“" + user.getName() + "”（id=" + user.getId() + "）修改了商品订单“" + productOrder.getOrderNumber() + "”（id=" + productOrder.getId() + "）的信息：userPhone:" + userPhone + ",addressId=" + addressId);
             map.put("message", "修改成功");
@@ -306,6 +307,7 @@ public class ProductOrderController {
             return map;
         }
     }
+
 
 //    @ApiOperation(value = "获取所有商品订单列表（分页展示）")
 //    @GetMapping("/productOrders/getAll")

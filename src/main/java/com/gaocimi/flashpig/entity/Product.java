@@ -15,7 +15,7 @@ import java.util.List;
  */
 @Entity
 @Table(name = "product")
-@JsonIgnoreProperties(value = { "administrator","handler", "hibernateLazyInitializer", "fieldHandler"})
+@JsonIgnoreProperties(value = { "productManager","handler", "hibernateLazyInitializer", "fieldHandler"})
 @Data
 public class Product {
 
