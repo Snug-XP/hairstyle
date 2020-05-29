@@ -7,6 +7,7 @@ import com.gaocimi.flashpig.service.HairstylistService;
 import com.gaocimi.flashpig.service.UserAddressService;
 import com.gaocimi.flashpig.service.UserService;
 import com.gaocimi.flashpig.service.UserToHairstylistService;
+import com.gaocimi.flashpig.utils.xp.MyUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.slf4j.Logger;
@@ -234,6 +235,11 @@ public class UserController {
                 map.put("error", "无效的用户！！");
                 return map;
             }
+            if (!MyUtils.isMobileNO(phone)) {
+                logger.info("（phone=" + phone + "）手机号码不合法！(普通用户添加配送地址)");
+                map.put("error", "手机号码不合法！");
+                return map;
+            }
             UserAddress userAddress = new UserAddress();
             userAddress.setUser(user);
             userAddress.setName(name);
@@ -281,10 +287,16 @@ public class UserController {
             }
 
             if (user.getId() != userAddress.getUser().getId()) {
-                logger.info("用户“" + user.getName() + "”（id=" + user.getId() + "）企图删除其他用户的配送地址(id=" + addressId + ")！");
+                logger.info("用户“" + user.getName() + "”（id=" + user.getId() + "）企图修改其他用户的配送地址(id=" + addressId + ")！");
                 map.put("error", "请检查参数addressId或者数据库，所选配送地址不是该用户的");
                 return map;
             }
+            if (!MyUtils.isMobileNO(phone)) {
+                logger.info("（phone=" + phone + "）手机号码不合法！(用户修改配送地址)");
+                map.put("error", "手机号码不合法！");
+                return map;
+            }
+
             userAddress.setName(name);
             userAddress.setPhone(phone);
             userAddress.setProvince(province);

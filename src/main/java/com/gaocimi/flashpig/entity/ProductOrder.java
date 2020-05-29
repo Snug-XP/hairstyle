@@ -58,6 +58,12 @@ public class ProductOrder {
     private Double totalPrice;
 
     /**
+     * 用户提交的收件人姓名
+     */
+    @Column(nullable = false)
+    private String name;
+
+    /**
      * 用户提交的联系电话（考虑到用户自身没有绑定手机号码）
      */
     @Column(nullable = false)
@@ -140,6 +146,8 @@ public class ProductOrder {
      * 填入配送地址
      */
     public void setDeliveryAddress(UserAddress address) {
+        this.name = address.getName();
+        this.userPhone = address.getPhone();
         this.province = address.getProvince();
         this.city = address.getCity();
         this.district = address.getDistrict();

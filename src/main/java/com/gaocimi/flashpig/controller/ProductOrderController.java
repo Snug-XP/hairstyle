@@ -40,7 +40,7 @@ public class ProductOrderController {
     @ApiOperation(value = "用户创建商品订单")
     @PostMapping("/user/addProductOrder")
     public Map addProductOrder(@RequestParam String myOpenid, @RequestParam Integer productId,
-                               @RequestParam Integer productQuantity, @RequestParam String userPhone,
+                               @RequestParam Integer productQuantity,
                                @RequestParam(required = false) String remark,
                                @RequestParam(required = false) Integer addressId) {
         Map map = new HashMap();
@@ -57,12 +57,6 @@ public class ProductOrderController {
             if (product == null) {
                 logger.info("（productId=" + productId + "）该商品不存在！(创建商品订单)");
                 map.put("error", "该商品不存在！");
-                return map;
-            }
-
-            if (!MyUtils.isMobileNO(userPhone)) {
-                logger.info("（userPhone=" + userPhone + "）手机号码不合法！(创建商品订单)");
-                map.put("error", "手机号码不合法！");
                 return map;
             }
 
@@ -92,7 +86,6 @@ public class ProductOrderController {
             productOrder.setProduct(product);
             productOrder.setProductQuantity(productQuantity);
             productOrder.setTotalPrice(product.getPrice() * productQuantity);
-            productOrder.setUserPhone(userPhone);
             productOrder.setRemark(remark);
 
             productOrder.setDeliveryAddress(address);//填入配送地址
