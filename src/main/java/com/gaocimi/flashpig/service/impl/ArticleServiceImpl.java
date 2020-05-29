@@ -137,6 +137,18 @@ public class ArticleServiceImpl implements ArticleService {
         List<Article> articles = articleRepository.findAllByStatus(status);
         List<Article> resultList = new ArrayList<>();
 
+        //按管理员审核时间倒序排序
+        Collections.sort(articles, (o1, o2) -> {
+            if (o1.getCheckTime() == null || o2.getCheckTime() == null) return 0;
+            if (o2.getCheckTime().after(o1.getCheckTime())) {
+                return 1;
+            } else if (o1.getCheckTime().after(o2.getCheckTime())) {
+                return -1;
+            }
+            return 0; //相等为0
+        });
+
+
         for (int i = first; i <= last && i < articles.size(); i++) {
             resultList.add(articles.get(i));
         }
