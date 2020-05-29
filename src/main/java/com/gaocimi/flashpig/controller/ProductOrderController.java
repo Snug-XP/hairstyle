@@ -34,6 +34,8 @@ public class ProductOrderController {
     ProductService productService;
     @Autowired
     UserAddressService userAddressService;
+    @Autowired
+    UserToProductService userToProductService;
 
     @ApiOperation(value = "用户创建商品订单")
     @PostMapping("/user/addProductOrder")
@@ -97,6 +99,12 @@ public class ProductOrderController {
             productOrder.generateOrderNumber();//生成订单号
 
             product.reduceRemainingQuantity(productQuantity);//减少该商品的剩余数量
+
+            //当用户购买商品时，将其从购物车去除
+            UserToProduct record = userToProductService.findByUserAndProduct(user.getId(),productId);
+            if(record!=null){
+                userToProductService.delete(record.getId());
+            }
 
             //下面控制用户每个10秒中只能产生一次相同产品的订单
             String orderNumber = productOrder.getOrderNumber();

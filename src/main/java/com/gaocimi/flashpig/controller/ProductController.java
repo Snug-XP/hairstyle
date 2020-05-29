@@ -297,14 +297,14 @@ public class ProductController {
             UserToProduct userToProduct = userToProductService.findByUserAndProduct(user.getId(), productId);
             if (userToProduct != null) {
                 userToProductService.delete(userToProduct.getId());
-                logger.info("id为" + user.getId() + "的用户“" + user.getName() + "”取消收藏了id为" + product.getId() + "的商品（name：" + product.getName() + "）");
-                map.put("message", "取消收藏成功！");
+                logger.info("id为" + user.getId() + "的用户“" + user.getName() + "”从购物车中删除了id为" + product.getId() + "的商品（name：" + product.getName() + "）");
+                map.put("message", "删除成功！");
                 return map;
             }
             userToProduct = new UserToProduct(user, product);
             userToProductService.save(userToProduct);
-            logger.info("id为" + user.getId() + "的用户“" + user.getName() + "”收藏了id为" + product.getId() + "的商品（name：" + product.getName() + "）");
-            map.put("message", "收藏成功！");
+            logger.info("id为" + user.getId() + "的用户“" + user.getName() + "”添加了id为" + product.getId() + "的商品（name：" + product.getName() + "）进购物车");
+            map.put("message", "添加成功！");
 
         } catch (Exception e) {
             logger.info("后端发生异常：\n");
