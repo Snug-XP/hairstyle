@@ -316,7 +316,7 @@ public class ProductController {
     }
 
     @ApiOperation(value = "将商品从购物车移除")
-    @PostMapping("/product/removeFromMyCart")
+    @DeleteMapping("/product/removeFromMyCart")
     public Map removeFromMyCart(@RequestParam String myOpenid, @RequestParam Integer productId) {
         Map map = new HashMap();
         try {
