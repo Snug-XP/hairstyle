@@ -129,7 +129,7 @@ public class ProductOrderController {
             productOrderService.edit(productOrder);
 
             //接下来减少订单中相应商品的剩余数量并且将商品从购物车中去除
-            for (ProductInOrder record : productOrder.productRecordList) {
+            for (ProductInOrder record : productOrder.getProductRecordList()) {
                 Product product = record.getProduct();
                 if (product != null) {
                     product.reduceRemainingQuantity(record.getProductQuantity());
@@ -156,39 +156,59 @@ public class ProductOrderController {
         }
     }
 
-//    @ApiOperation(value = "删除商品订单")
-//    @DeleteMapping("/user/deleteProductOrder")
-//    public Map deleteProductOrder(@RequestParam String myOpenid, @RequestParam Integer productOrderId) {
-//
-//        Map map = new HashMap();
-//        try {
-//            ProductOrder productOrder = productOrderService.findById(productOrderId);
-//            if (productOrder == null) {
-//                logger.info("id为" + productOrderId + "的商品订单不存在（删除商品订单）！");
-//                map.put("error", "该商品订单不存在！！");
-//                return map;
-//            }
-//
-//            User user = userService.findUserByOpenid(myOpenid);
-//            if (user == null||productOrder.getUser().getId()!=user.getId()) {
-//                logger.info("删除商品订单失败！！（无权限）");
-//                map.put("error", "无权限！");
-//                return map;
-//            }
-//
-//            logger.info("用户“" + user.getName() + "”（id=" + user.getId() + "）删除了商品订单“" + productOrder.getOrderNumber() + "”（id=" + productOrder.getId() + "）");
-//
-//            productOrderService.delete(productOrderId);
-//            map.put("message", "商品订单删除成功！");
-//            return map;
-//        } catch (Exception e) {
-//            logger.error(e.getMessage());
-//            logger.info("商品订单删除失败！！（后端发生某些错误）");
-//            map.put("error", "商品订单删除失败！！（后端发生某些错误）");
-//            e.printStackTrace();
-//            return map;
-//        }
-//    }
+    @ApiOperation(value = "用户取消商品订单")
+    @DeleteMapping("/user/cancelProductOrder")
+    public Map deleteProductOrder(@RequestParam String myOpenid, @RequestParam Integer productOrderId) {
+
+        Map map = new HashMap();
+        try {
+            ProductOrder productOrder = productOrderService.findById(productOrderId);
+            if (productOrder == null) {
+                logger.info("id为" + productOrderId + "的商品订单不存在（取消商品订单）！");
+                map.put("error", "该商品订单不存在！！");
+                return map;
+            }
+
+            User user = userService.findUserByOpenid(myOpenid);
+            if (user == null||productOrder.getUser().getId()!=user.getId()) {
+                logger.info("取消商品订单失败！！（无权限）");
+                map.put("error", "无权限！");
+                return map;
+            }
+            if (productOrder.getStatus() != 0) {
+                if(productOrder.getStatus() == -1){
+                    map.put("message", "该订单已被取消！");
+                    return map;
+                }
+                logger.info("用户“" + user.getName() + "”（id=" + user.getId() + "）企图取消商品订单（id=" + productOrderId + "，status=" + productOrder.getStatus() + "）");
+                map.put("error", "操作失败！（用户只能取消未支付且未取消的订单）");
+                return map;
+            }
+
+            productOrder.setStatus(-1);
+            logger.info("用户“" + user.getName() + "”（id=" + user.getId() + "）取消了商品订单“" + productOrder.getOrderNumber() + "”（id=" + productOrder.getId() + "）");
+            productOrderService.edit(productOrder);
+
+            //接下来增加订单中相应商品的库存剩余数量
+            for (ProductInOrder record : productOrder.getProductRecordList()) {
+                Product product = record.getProduct();
+                if (product != null) {
+                    product.setRemainingQuantity(product.getRemainingQuantity()+record.getProductQuantity());
+                    logger.info("商品“{}”的库存数量+{}",product.getName(),record.getProductQuantity());
+                    productService.edit(product);
+                }
+            }
+
+            map.put("message", "取消成功！");
+            return map;
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            logger.info("商品订单取消失败！！（后端发生某些错误）");
+            map.put("error", "商品订单取消失败！！（后端发生某些错误）");
+            e.printStackTrace();
+            return map;
+        }
+    }
 
     @ApiOperation(value = "修改商品订单的电话号码或地址信息（若同时修改，地址信息中的电话号码失效）", notes = "没有相关属性将不修改其原有信息,并且用户只能修改未支付且未取消订单的信息")
     @PutMapping("/user/updateProductOrder")
@@ -217,7 +237,7 @@ public class ProductOrderController {
             }
             if (productOrder.getStatus() != 0) {
                 logger.info("用户“" + user.getName() + "”（id=" + user.getId() + "）企图修改了商品订单（id=" + productOrderId + "，status=" + productOrder.getStatus() + "）的信息");
-                map.put("error", "订单无法修改！（用户只能修改未支付且未取消订单的信息）");
+                map.put("error", "操作失败！（用户只能修改未支付且未取消订单的信息）");
                 return map;
             }
 
