@@ -37,7 +37,7 @@ public class ProductOrderServiceImpl implements ProductOrderService {
     }
 
     @Override
-    public List<ProductOrder> findByOrderNumberLisk(String orderNumber) {
+    public List<ProductOrder> findByOrderNumberLike(String orderNumber) {
         return productOrderRepository.findAllByOrderNumberLike("%"+orderNumber+"%");
     }
 

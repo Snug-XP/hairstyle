@@ -51,7 +51,7 @@ public class ProductInOrder {
     /**
      * 该记录中的商品类； 定义名为product_id的外键列，该外键引用product表的主键(id)列,采用懒加载
      */
-    @OneToOne(targetEntity = Product.class, fetch = FetchType.LAZY)
+    @ManyToOne(targetEntity = Product.class, fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id")
     public Product product;
 

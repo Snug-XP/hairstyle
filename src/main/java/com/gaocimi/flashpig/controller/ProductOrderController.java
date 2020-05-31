@@ -43,7 +43,6 @@ public class ProductOrderController {
     @ApiOperation(value = "用户创建商品订单")
     @PostMapping("/user/addProductOrder")
     public Map addProductOrder(@RequestParam String myOpenid, @RequestParam List<Integer> shoppingCartIdList,
-                               @RequestParam Integer productQuantity,
                                @RequestParam(required = false) String remark,
                                @RequestParam(required = false) Integer addressId) {
         Map map = new HashMap();
@@ -82,10 +81,11 @@ public class ProductOrderController {
             productOrder.setRemark(remark);
             productOrder.setDeliveryAddress(address);//填入配送地址
             productOrder.generateOrderNumber();//生成订单号
+            productOrder.setTotalPrice(0.0);//先随便设置个总价
 
             //下面控制用户每个10秒中只能产生一次订单
             String orderNumber = productOrder.getOrderNumber();
-            List<ProductOrder> list = productOrderService.findByOrderNumberLisk(orderNumber.substring(0, orderNumber.length() - 1));
+            List<ProductOrder> list = productOrderService.findByOrderNumberLike(orderNumber.substring(0, orderNumber.length() - 1));
             if (!list.isEmpty()) {
                 logger.info("生成订单太频繁，请几秒钟后再试(用户“" + user.getName() + "”<id=" + user.getId() + ">创建商品订单)");
                 map.put("error", "生成订单太频繁，请几秒后再试");
@@ -95,7 +95,7 @@ public class ProductOrderController {
             productOrderService.save(productOrder);//先建立订单记录（使其有一个id，下面往订单中添加商品记录要用）
 
             //下面添加商品记录信息
-            List<ProductInOrder> productInOrders = new ArrayList<>();
+            List<ProductInOrder> productListInOrder = new ArrayList<>();
             for (Integer id : shoppingCartIdList) {
                 UserToProduct userToProduct = userToProductService.findUserToProductById(id);
                 if (userToProduct == null) {
@@ -117,14 +117,14 @@ public class ProductOrderController {
                     productOrderService.delete(productOrder.getId());//删除刚刚建立的订单记录，数据库中有设置级联，会同时删除该订单关联的商品记录表中的记录
                     return map;
                 }
-
                 //创建该订单的商品记录类
                 ProductInOrder productInOrder = new ProductInOrder(productOrder, userToProduct.getProduct(), userToProduct.getNum());
-                productInOrderService.save(productInOrder);
+                productListInOrder.add(productInOrder);
+                productInOrderService.save(productInOrder);//将订单的商品记录写入数据库
             }
 
             //商品订单的余下处理
-            productOrder = productOrderService.findById(productOrder.getId());//刷新数据
+            productOrder.setProductRecordList(productListInOrder);
             productOrder.calculateTotalPrice();//计算订单总价
             productOrderService.edit(productOrder);
 
@@ -144,7 +144,7 @@ public class ProductOrderController {
             }
 
             logger.info("用户“{}”（id={}）创建了一个订单（id={}):", user.getName(), user.getId(), productOrder.getId());
-            logger.info(JsonUtils.toJson(productOrder.getProductRecordList()));
+            logger.info(JsonUtils.toJson(productOrder.getProductRecordList())+"\n");
             map.put("message", "订单创建成功！");
             return map;
         } catch (Exception e) {
@@ -340,69 +340,5 @@ public class ProductOrderController {
         }
     }
 
-
-//    @ApiOperation(value = "获取所有商品订单列表（分页展示）")
-//    @GetMapping("/productOrders/getAll")
-//    public Page<ProductOrder> getAllByPage(@RequestParam(name = "pageNum", defaultValue = "0") int pageNum,
-//                                      @RequestParam(name = "pageSize", defaultValue = "10") int pageSize
-//    ) {
-//        Page<ProductOrder> page = productOrderService.findAll(pageNum, pageSize);
-//        return page;
-//    }
-
-//    
-//    @ApiOperation(value = "普通用户分页获取自己收藏的商品订单列表")
-//    @GetMapping("/productOrder/getMyCollection")
-//    public Map getMyCollectionByPage(@RequestParam String myOpenid,
-//                                     @RequestParam(name = "pageNum", defaultValue = "0") int pageNum,
-//                                     @RequestParam(name = "pageSize", defaultValue = "10") int pageSize) {
-//        Map map = new HashMap();
-//        try {
-//
-//            User user = userService.findUserByOpenid(myOpenid);
-//            if (user == null) {
-//                logger.info("（" + myOpenid + "）该用户不存在！(获取自己收藏的商品订单列表)");
-//                map.put("error", "无效的用户！！");
-//                return map;
-//            }
-//            List<UserToProductOrder> tempProductOrderList = user.getProductOrderRecordList();
-//            List<ProductOrder> resultProductOrderList = new ArrayList<>();
-//
-//            if (tempProductOrderList == null || tempProductOrderList.isEmpty()) {
-//                map.put("message", "你还没有收藏商品订单哦~");
-//                return map;
-//            }
-//
-//            // 按时间倒序排序
-//            Collections.sort(tempProductOrderList, (o1, o2) -> {
-//                if (o2.getCreateTime().after(o1.getCreateTime())) {
-//                    return 1;
-//                } else if (o1.getCreateTime().after(o2.getCreateTime())) {
-//                    return -1;
-//                }
-//                return 0; //相等为0
-//            });
-//
-//            //获取所求页数的商品订单数据
-//            int first = pageNum * pageSize;
-//            int last = pageNum * pageSize + pageSize - 1;
-//            for (int i = first; i <= last && i < tempProductOrderList.size(); i++) {
-//                resultProductOrderList.add(tempProductOrderList.get(i).productOrder);
-//            }
-//
-//            //包装分页数据
-//            Pageable pageable = PageRequest.of(pageNum, pageSize);
-//            Page<ProductOrder> page = new PageImpl<>(resultProductOrderList, pageable, tempProductOrderList.size());
-//
-//            map.put("page", page);
-//            return map;
-//        } catch (Exception e) {
-//            logger.error(e.getMessage());
-//            logger.info("获取自己收藏的商品订单列表失败！！（后端发生某些错误）");
-//            map.put("error", "获取收藏列表失败！！（后端发生某些错误）");
-//            e.printStackTrace();
-//            return map;
-//        }
-//    }
 
 }

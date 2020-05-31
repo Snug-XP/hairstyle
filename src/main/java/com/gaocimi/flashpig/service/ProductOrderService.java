@@ -16,7 +16,7 @@ public interface ProductOrderService {
 
     public ProductOrder findById(int id);
 
-    public List<ProductOrder> findByOrderNumberLisk(String orderNumber);
+    public List<ProductOrder> findByOrderNumberLike(String orderNumber);
 
     public void save(ProductOrder productOrder);
 
