@@ -7,6 +7,7 @@ import lombok.Data;
 
 import javax.persistence.*;
 import java.util.Date;
+import java.util.List;
 
 
 /**
@@ -16,7 +17,7 @@ import java.util.Date;
  * @date 2020-5-2 10:54:07
  */
 @Entity
-@JsonIgnoreProperties(value = {"user","product","wxPayOrder","handler", "hibernateLazyInitializer", "fieldHandler"})
+@JsonIgnoreProperties(value = {"user","wxPayOrder","handler", "hibernateLazyInitializer", "fieldHandler"})
 @Table(name = "product_order")
 @Data
 public class ProductOrder {
@@ -39,11 +40,11 @@ public class ProductOrder {
     public User user;
 
     /**
-     * 该订单的商品； 定义名为product_id的外键列，该外键引用product表的主键(id)列,采用懒加载
+     * 该订单中包含的商品记录列表； 定义该ProductOrder实体所有关联的ProductInOrder实体； 指定mappedBy属性表明该ProductOrder实体不控制关联关系
      */
-    @ManyToOne(targetEntity = Product.class, fetch = FetchType.LAZY)
-    @JoinColumn(name = "product_id")
-    public Product product;
+    @OneToMany(targetEntity = ProductInOrder.class, mappedBy = "productOrder")
+    public List<ProductInOrder> productRecordList;
+
 
     /**
      * 订购的商品数量
@@ -122,24 +123,16 @@ public class ProductOrder {
     @Column(nullable = false)
     private String address;
 
-
-
-
-
     public ProductOrder() {
         status = 0;
         createTime = new Date();
-    }
-
-    public ProductInfo getProductInfo(){
-        return new ProductInfo(product);
     }
 
     /**
      * 生成订单号：用户id+产品id+时间串
      */
     public void generateOrderNumber() {
-        orderNumber = user.getId()+"0"+product.getId()+MyUtils.getTimeStringInteger(new Date());
+        orderNumber = user.getId()+"0"+MyUtils.getTimeStringInteger(new Date());
     }
 
     /**
