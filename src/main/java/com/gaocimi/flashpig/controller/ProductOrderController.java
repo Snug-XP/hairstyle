@@ -3,6 +3,7 @@ package com.gaocimi.flashpig.controller;
 import com.gaocimi.flashpig.entity.*;
 import com.gaocimi.flashpig.result.ResponseResult;
 import com.gaocimi.flashpig.service.*;
+import com.gaocimi.flashpig.utils.JsonUtils;
 import com.gaocimi.flashpig.utils.xp.MyUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -33,13 +34,15 @@ public class ProductOrderController {
     @Autowired
     ProductService productService;
     @Autowired
+    ProductInOrderService productInOrderService;
+    @Autowired
     UserAddressService userAddressService;
     @Autowired
     UserToProductService userToProductService;
 
     @ApiOperation(value = "用户创建商品订单")
     @PostMapping("/user/addProductOrder")
-    public Map addProductOrder(@RequestParam String myOpenid, @RequestParam Integer productId,
+    public Map addProductOrder(@RequestParam String myOpenid, @RequestParam List<Integer> shoppingCartIdList,
                                @RequestParam Integer productQuantity,
                                @RequestParam(required = false) String remark,
                                @RequestParam(required = false) Integer addressId) {
@@ -53,16 +56,9 @@ public class ProductOrderController {
                 return map;
             }
 
-            Product product = productService.findProductById(productId);
-            if (product == null) {
-                logger.info("（productId=" + productId + "）该商品不存在！(创建商品订单)");
-                map.put("error", "该商品不存在！");
-                return map;
-            }
-
-            if(addressId==null){
-                if(user.getUserAddressList().isEmpty()){
-                    map.put("error","你还没有添加过配送地址,请前往添加配送地址");
+            if (addressId == null) {
+                if (user.getUserAddressList().isEmpty()) {
+                    map.put("error", "你还没有添加过配送地址,请前往添加配送地址");
                     return map;
                 }
                 map.put("error", "请选择配送地址！");
@@ -83,36 +79,72 @@ public class ProductOrderController {
 
             ProductOrder productOrder = new ProductOrder();
             productOrder.setUser(user);
-            productOrder.setProduct(product);
-            productOrder.setProductQuantity(productQuantity);
-            productOrder.setTotalPrice(product.getPrice() * productQuantity);
             productOrder.setRemark(remark);
-
             productOrder.setDeliveryAddress(address);//填入配送地址
             productOrder.generateOrderNumber();//生成订单号
 
-            product.reduceRemainingQuantity(productQuantity);//减少该商品的剩余数量
-
-            //当用户购买商品时，将其从购物车去除
-            UserToProduct record = userToProductService.findByUserAndProduct(user.getId(),productId);
-            if(record!=null){
-                userToProductService.delete(record.getId());
-            }
-
-            //下面控制用户每个10秒中只能产生一次相同产品的订单
+            //下面控制用户每个10秒中只能产生一次订单
             String orderNumber = productOrder.getOrderNumber();
             List<ProductOrder> list = productOrderService.findByOrderNumberLisk(orderNumber.substring(0, orderNumber.length() - 1));
             if (!list.isEmpty()) {
                 logger.info("生成订单太频繁，请几秒钟后再试(用户“" + user.getName() + "”<id=" + user.getId() + ">创建商品订单)");
-                map.put("error", "生成订单太频繁，请几秒钟后再试（建议前往“我的订单”查看是否已生成订单）");
+                map.put("error", "生成订单太频繁，请几秒后再试");
                 return map;
             }
 
+            productOrderService.save(productOrder);//先建立订单记录（使其有一个id，下面往订单中添加商品记录要用）
 
-            productService.edit(product);
-            productOrderService.save(productOrder);
+            //下面添加商品记录信息
+            List<ProductInOrder> productInOrders = new ArrayList<>();
+            for (Integer id : shoppingCartIdList) {
+                UserToProduct userToProduct = userToProductService.findUserToProductById(id);
+                if (userToProduct == null) {
+                    logger.info("购物车记录<id={}>不存在！(用户“{}”(id={})创建商品订单)", id, user.getName(), user.getId());
+                    map.put("error", "创建订单失败！(购物车记录<id=" + id + ">不存在)");
+                    productOrderService.delete(productOrder.getId());//删除刚刚建立的订单记录，数据库中有设置级联，会同时删除该订单关联的商品记录表中的记录
+                    return map;
+                }
+                if (userToProduct.getUser().getId() != user.getId()) {
+                    logger.info("购物车记录<id={}>不属于该用户！(用户“{}”(id={})创建商品订单)", id, user.getName(), user.getId());
+                    map.put("error", "创建订单失败！(购物车记录<id=" + id + ">不属于该用户！)");
+                    productOrderService.delete(productOrder.getId());//删除刚刚建立的订单记录，mysql数据库中有设置级联，会同时删除该订单关联的商品记录表中的记录
+                    return map;
+                }
+                if (userToProduct.getNum() > userToProduct.getProduct().getRemainingQuantity()) {
+                    Product product = userToProduct.getProduct();
+                    logger.info("“{}”的库存量不足(用户“{}”(id={})创建商品订单)", product.getName(), id, user.getName(), user.getId());
+                    map.put("error", "“" + product.getName() + "”的库存量不足！(余量：" + product.getRemainingQuantity() + ")");
+                    productOrderService.delete(productOrder.getId());//删除刚刚建立的订单记录，数据库中有设置级联，会同时删除该订单关联的商品记录表中的记录
+                    return map;
+                }
 
-            logger.info("用户“" + user.getName() + "”（id=" + user.getId() + "）创建了一个“" + product.getName() + "”（id=" + productOrder.getId() + "，number=" + productQuantity + "）的商品订单(id=" + productOrder.getId() + ")");
+                //创建该订单的商品记录类
+                ProductInOrder productInOrder = new ProductInOrder(productOrder, userToProduct.getProduct(), userToProduct.getNum());
+                productInOrderService.save(productInOrder);
+            }
+
+            //商品订单的余下处理
+            productOrder = productOrderService.findById(productOrder.getId());//刷新数据
+            productOrder.calculateTotalPrice();//计算订单总价
+            productOrderService.edit(productOrder);
+
+            //接下来减少订单中相应商品的剩余数量并且将商品从购物车中去除
+            for (ProductInOrder record : productOrder.productRecordList) {
+                Product product = record.getProduct();
+                if (product != null) {
+                    product.reduceRemainingQuantity(record.getProductQuantity());
+                    productService.edit(product);
+
+                    //将其从购物车去除
+                    UserToProduct userToProduct = userToProductService.findByUserAndProduct(user.getId(), product.getId());
+                    if (userToProduct != null) {
+                        userToProductService.delete(userToProduct.getId());
+                    }
+                }
+            }
+
+            logger.info("用户“{}”（id={}）创建了一个订单（id={}):", user.getName(), user.getId(), productOrder.getId());
+            logger.info(JsonUtils.toJson(productOrder.getProductRecordList()));
             map.put("message", "订单创建成功！");
             return map;
         } catch (Exception e) {

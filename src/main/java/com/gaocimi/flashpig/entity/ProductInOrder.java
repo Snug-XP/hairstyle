@@ -6,7 +6,7 @@ import lombok.Data;
 import javax.persistence.*;
 
 /**
- * ProductInOrder - 商品订单中对所购买商品的记录类
+ * ProductInOrder - 商品订单的商品记录类
  *
  * @author xp
  * @date 2020-5-31 09:23:03
@@ -54,6 +54,17 @@ public class ProductInOrder {
     @OneToOne(targetEntity = Product.class, fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id")
     public Product product;
+
+    public ProductInOrder() {
+        super();
+    }
+
+    public ProductInOrder(ProductOrder productOrder, Product product,Integer num) {
+        this.productOrder = productOrder;
+        this.product = product;
+        this.productQuantity = num;
+        setProductInfo(product);
+    }
 
     public void setProductInfo(Product p){
         this.name = p.getName();

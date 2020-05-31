@@ -146,4 +146,14 @@ public class ProductOrder {
         this.district = address.getDistrict();
         this.address = address.getAddress();
     }
+
+    /**
+     * 计算订单总价
+     */
+    public void calculateTotalPrice() {
+        totalPrice = 0.0;
+        for(ProductInOrder record : productRecordList){
+            totalPrice += record.getUnitPrice()*record.getProductQuantity();
+        }
+    }
 }
