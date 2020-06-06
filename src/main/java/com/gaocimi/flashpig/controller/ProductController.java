@@ -433,6 +433,7 @@ public class ProductController {
             for (int i = first; i <= last && i < tempProductList.size(); i++) {
                 ProductInfo productInfo = new ProductInfo(tempProductList.get(i).product);
                 productInfo.setNum(tempProductList.get(i).getNum());
+                productInfo.setUserToProductId(tempProductList.get(i).getId());
                 resultProductList.add(productInfo);
             }
 
