@@ -79,4 +79,8 @@ public class ProductInOrder {
         this.unitPrice = p.getPrice();
     }
 
+    public Integer getProductId(){
+        return product.getId();
+    }
+
 }

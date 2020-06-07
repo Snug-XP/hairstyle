@@ -250,7 +250,7 @@ public class ProductManagerController {
         }
     }
 
-    @ApiOperation(value = "商品管理员获取所有最近的商品订单列表(分页展示)")
+    @ApiOperation(value = "商品管理员获取最近的商品订单列表(分页展示)")
     @GetMapping("/productManager/productOrder/getRecentProductOrderList")
     public Map getRecentProductOrderList(@RequestParam String myOpenid,
                                      @RequestParam(name = "status", required = false) Integer status,
