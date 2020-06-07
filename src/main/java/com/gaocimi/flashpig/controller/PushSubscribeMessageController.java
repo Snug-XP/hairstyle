@@ -3,9 +3,7 @@ package com.gaocimi.flashpig.controller;
 import cn.binarywang.wx.miniapp.api.WxMaService;
 import cn.binarywang.wx.miniapp.bean.WxMaSubscribeData;
 import cn.binarywang.wx.miniapp.bean.WxMaSubscribeMessage;
-import com.gaocimi.flashpig.entity.HaircutOrder;
-import com.gaocimi.flashpig.entity.Hairstylist;
-import com.gaocimi.flashpig.entity.Shop;
+import com.gaocimi.flashpig.entity.*;
 import com.gaocimi.flashpig.result.ResponseResult;
 import com.gaocimi.flashpig.service.HaircutOrderService;
 import com.gaocimi.flashpig.service.HairstylistService;
@@ -79,7 +77,7 @@ public class PushSubscribeMessageController {
                 map.put("error", "推送失败：" + e.getMessage());
                 return map;
             }
-            logger.info("推送给用户"+order.user.getName()+"(id="+order.user.getId()+")的预约提醒消息发送成功："+ subscribeDataList);
+            logger.info("推送给用户" + order.user.getName() + "(id=" + order.user.getId() + ")的预约提醒消息发送成功：" + subscribeDataList);
             map.put("message", "推送预约提醒消息成功");
             return map;
         } catch (Exception e) {
@@ -102,7 +100,7 @@ public class PushSubscribeMessageController {
         HaircutOrder order = haircutOrderService.findHaircutOrderById(orderId);
         Hairstylist hairstylist = order.getHairstylist();
         Shop shop = hairstylist.getShop();
-        SimpleDateFormat df =new SimpleDateFormat("yyyy年MM月dd日 HH:mm:ss");
+        SimpleDateFormat df = new SimpleDateFormat("yyyy年MM月dd日 HH:mm:ss");
         String bookTimeString = df.format(order.getBookTime());
 
 //        logger.info("获取到的预约时间："+bookTimeString);
@@ -144,7 +142,7 @@ public class PushSubscribeMessageController {
                     .toUser(order.user.getOpenid())//要推送的用户openid
                     .templateId("NJQk-0J20gRSjIiklUocZMCaFmkC336gs8sZHrV_Kh4")//推送的模版id（在小程序后台设置）
                     .data(subscribeDataList)//订阅消息
-                    .page("pages/orderDetail/orderDetail?orderId="+orderId)//要跳转到小程序那个页面
+                    .page("pages/orderDetail/orderDetail?orderId=" + orderId)//要跳转到小程序那个页面
                     .build();
             //4，发起推送
             try {
@@ -154,7 +152,7 @@ public class PushSubscribeMessageController {
                 map.put("error", "推送失败：" + e.getMessage());
                 return map;
             }
-            logger.info("推送给用户"+order.user.getName()+"(id="+order.user.getId()+")服务评价提醒消息发送成功："+ subscribeDataList);
+            logger.info("推送给用户" + order.user.getName() + "(id=" + order.user.getId() + ")服务评价提醒消息发送成功：" + subscribeDataList);
             map.put("message", "推送服务评价提醒消息成功");
             return map;
         } catch (Exception e) {
@@ -210,12 +208,12 @@ public class PushSubscribeMessageController {
             }
             if (hairstylist.getShop() == null) {
                 logger.info("该发型师" + hairstylist.getHairstylistName() + "(id=" + hairstylistId + ")没有提交过入驻门店的申请，无法发送订阅消息！");
-                map.put("error","该发型师没有提交过入驻门店的申请，无法发送订阅消息！！");
+                map.put("error", "该发型师没有提交过入驻门店的申请，无法发送订阅消息！！");
                 return map;
             }
             if (hairstylist.getApplyTime() == null) {
                 logger.info("该发型师" + hairstylist.getHairstylistName() + "(id=" + hairstylistId + ")发送审核结果通知时发现没有提交申请的时间，无法发送订阅消息");
-                map.put("error","缺失该发型师提交入驻申请的时间！无法发送订阅消息");
+                map.put("error", "缺失该发型师提交入驻申请的时间！无法发送订阅消息");
                 return map;
             }
 
@@ -237,7 +235,7 @@ public class PushSubscribeMessageController {
                 map.put("error", "推送失败：" + e.getMessage());
                 return map;
             }
-            logger.info("推送该发型师" + hairstylist.getHairstylistName() + "(id=" + hairstylistId + ")的审核结果消息发送成功："+ subscribeDataList);
+            logger.info("推送该发型师" + hairstylist.getHairstylistName() + "(id=" + hairstylistId + ")的审核结果消息发送成功：" + subscribeDataList);
             map.put("message", "推送审核结果提醒消息成功");
             return map;
         } catch (Exception e) {
@@ -250,7 +248,7 @@ public class PushSubscribeMessageController {
     }
 
     /**
-     * 使推送该发型师的“审核结果”订阅消息数据列表
+     * 推送该发型师的“审核结果”订阅消息数据列表
      *
      * @param hairstylistId 发型师id
      * @return "审核结果"订阅消息模版数据列表
@@ -264,7 +262,7 @@ public class PushSubscribeMessageController {
         String resultString;
         String resultDescriptionString;
 
-        SimpleDateFormat df =new SimpleDateFormat("yyyy年MM月dd日 HH:mm:ss");
+        SimpleDateFormat df = new SimpleDateFormat("yyyy年MM月dd日 HH:mm:ss");
         applyTimeString = df.format(hairstylist.getApplyTime());
 
         switch (hairstylist.getApplyStatus()) {
@@ -287,8 +285,6 @@ public class PushSubscribeMessageController {
             resultDescriptionString = hairstylist.getApplyResultDescription();
 
 
-
-
 //        logger.info("获取到的预约时间："+bookTimeString);
         List<WxMaSubscribeData> subscribeDataList = new ArrayList<>();
         //设置订阅消息;
@@ -305,7 +301,6 @@ public class PushSubscribeMessageController {
 
         return subscribeDataList;
     }
-
 
 
     //----------------------------------------------------------------------------------------------------------
@@ -330,7 +325,7 @@ public class PushSubscribeMessageController {
 //            }
             if (shop.getApplyTime() == null) {
                 logger.info("该门店" + shop.getShopName() + "(id=" + shopId + ")发送审核结果通知时发现没有提交申请的时间，无法发送订阅消息");
-                map.put("error","缺失该门店提交经营认定申请的时间！无法发送订阅消息");
+                map.put("error", "缺失该门店提交经营认定申请的时间！无法发送订阅消息");
                 return map;
             }
 
@@ -352,7 +347,7 @@ public class PushSubscribeMessageController {
                 map.put("error", "推送失败：" + e.getMessage());
                 return map;
             }
-            logger.info("推送该门店" + shop.getShopName() + "(id=" + shopId + ")的审核结果消息发送成功："+subscribeDataList);
+            logger.info("推送该门店" + shop.getShopName() + "(id=" + shopId + ")的审核结果消息发送成功：" + subscribeDataList);
             map.put("message", "推送审核结果提醒消息成功");
             return map;
         } catch (Exception e) {
@@ -418,4 +413,75 @@ public class PushSubscribeMessageController {
 
         return subscribeDataList;
     }
+
+    //----------------------------------------------------------------------------------------------------------
+
+    @ApiOperation(value = "推送给相应用户“商品已发货”的订阅消息")
+    @PostMapping("/pushShippedMessage")
+    public Map pushShippedMessage(ProductOrder productOrder) {
+
+        Map map = new HashMap();
+        try {
+            //不同模板要换的地方，还有模版id哦
+            List<WxMaSubscribeData> subscribeDataList = getShippedSubscribeDataList(productOrder);
+
+            //设置推送消息
+            WxMaSubscribeMessage subscribeMessage = WxMaSubscribeMessage.builder()
+                    .toUser(productOrder.getUser().getOpenid())//要推送的用户openid
+                    .templateId("...")//推送的模版id（在小程序后台设置）
+                    .data(subscribeDataList)//订阅消息
+                    .page("pages/personalPage/personalPage")//要跳转到小程序那个页面
+                    .build();
+            //4，发起推送
+            try {
+                wxService.getMsgService().sendSubscribeMsg(subscribeMessage);
+            } catch (WxErrorException e) {
+                logger.info("推送失败：" + e.getMessage());
+                map.put("error", "推送失败：" + e.getMessage());
+                return map;
+            }
+            logger.info("推送给用户" + productOrder.getUser().getName() + "(id=" + productOrder.getUser().getId() + ")的“商品已发货”订阅消息发送成功：" + subscribeDataList);
+            map.put("message", "推送“商品已发货”订阅消息成功");
+            return map;
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.info("后台发生异常！！(推送预约提醒消息)");
+            map.put("error", "后台发生异常！！（推送“商品已发货”订阅消息）");
+            return map;
+        }
+
+    }
+
+    /**
+     * 使用商品订单获取"预约提醒"订阅消息数据列表
+     *
+     * @param productOrder 商品订单类
+     * @return "商品已发货"订阅消息数据列表
+     */
+    private List<WxMaSubscribeData> getShippedSubscribeDataList(ProductOrder productOrder) {
+
+        User user = productOrder.getUser();
+
+//        SimpleDateFormat df = new SimpleDateFormat("yyyy年MM月dd日 HH:mm:ss");
+//        String bookTimeString = df.format(order.getBookTime());
+
+//        logger.info("获取到的预约时间："+bookTimeString);
+        List<WxMaSubscribeData> subscribeDataList = new ArrayList<>();
+
+        //设置订阅消息;
+//        WxMaSubscribeData shopName = new WxMaSubscribeData("thing8", shop.getShopName());
+//        WxMaSubscribeData hairstylistName = new WxMaSubscribeData("name5", hairstylist.getHairstylistName());
+//        WxMaSubscribeData bookTime = new WxMaSubscribeData("time2", bookTimeString);
+//        WxMaSubscribeData service = new WxMaSubscribeData("thing7", order.getServiceName());
+//        WxMaSubscribeData tips = new WxMaSubscribeData("thing9", "亲，距离您的预约时间还有60分钟,请准备");
+//        subscribeDataList.add(shopName);
+//        subscribeDataList.add(hairstylistName);
+//        subscribeDataList.add(bookTime);
+//        subscribeDataList.add(service);
+//        subscribeDataList.add(tips);
+
+        return subscribeDataList;
+    }
+
+//----------------------------------------------------------------------------------------------------------
 }

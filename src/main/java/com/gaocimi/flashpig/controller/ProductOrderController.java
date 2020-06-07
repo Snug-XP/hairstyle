@@ -344,9 +344,11 @@ public class ProductOrderController {
 
 
             if (user != null && productOrder.getUser().getId() != user.getId()) {
-                logger.info("用户（openid=" + myOpenid + "）企图查看非自己的订单（id=" + productOrderId + "）！");
-                map.put("error", "无权查看该订单！");
-                return map;
+                if(administrator==null) {
+                    logger.info("用户（openid=" + myOpenid + "）企图查看非自己的订单（id=" + productOrderId + "）！");
+                    map.put("error", "无权查看该订单！");
+                    return map;
+                }
             }
 
             map.put("productOrder", productOrder);
