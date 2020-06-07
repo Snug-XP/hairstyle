@@ -12,6 +12,7 @@ import io.swagger.annotations.ApiOperation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
@@ -244,6 +245,38 @@ public class ProductManagerController {
             logger.error(e.getMessage());
             logger.info("商品管理员设置某个订单的物流运单号！（后端发生某些错误）");
             map.put("error", "操作失败！（后端发生某些错误）");
+            e.printStackTrace();
+            return map;
+        }
+    }
+
+    @ApiOperation(value = "商品管理员获取所有最近的商品订单列表(分页展示)")
+    @GetMapping("/productManager/getRecentProductOrderList")
+    public Map getRecentProductOrderList(@RequestParam String myOpenid,
+                                     @RequestParam(name = "status", required = false) Integer status,
+                                     @RequestParam(name = "pageNum", defaultValue = "0") int pageNum,
+                                     @RequestParam(name = "pageSize", defaultValue = "10") int pageSize) {
+
+        Map map = new HashMap();
+        try {
+            ProductManager productManager = productManagerService.findProductManagerByOpenid(myOpenid);
+            if (productManager == null) {
+                logger.info("还未登录(商品管理员获取所有最近的商品订单列表)");
+                map.put("error", "请先登录！");
+                return map;
+            }
+            Page<ProductOrder> page = null;
+            if (status != null)
+                page= productOrderService.findAllByStatus(status,pageNum,pageSize);//已按订单创建时间倒序排序
+            else
+                page = productOrderService.findAll(pageNum,pageSize);//已按订单创建时间倒序排序
+
+            map.put("page", page);
+            return map;
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            logger.info("获取所有最近的商品订单列表失败！！（后端发生某些错误）");
+            map.put("error", "获取所有最近的商品订单列表失败！！（后端发生某些错误）");
             e.printStackTrace();
             return map;
         }
