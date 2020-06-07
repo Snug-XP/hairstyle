@@ -13,13 +13,18 @@ import javax.persistence.*;
  */
 @Entity
 @Table(name = "product_in_order")
-@JsonIgnoreProperties(value = { "id","product","productOrder","handler", "hibernateLazyInitializer", "fieldHandler"})
+@JsonIgnoreProperties(value = {"id", "product", "productOrder", "handler", "hibernateLazyInitializer", "fieldHandler"})
 @Data
 public class ProductInOrder {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
+
+    /**
+     * 商品图片
+     */
+    private String imgUrl;
 
     /**
      * 商品名称
@@ -59,14 +64,16 @@ public class ProductInOrder {
         super();
     }
 
-    public ProductInOrder(ProductOrder productOrder, Product product,Integer num) {
+    public ProductInOrder(ProductOrder productOrder, Product product, Integer num) {
         this.productOrder = productOrder;
         this.product = product;
         this.productQuantity = num;
         setProductInfo(product);
     }
 
-    public void setProductInfo(Product p){
+    public void setProductInfo(Product p) {
+        if (p.productImageUrlList.size() > 0)
+            this.imgUrl = p.productImageUrlList.get(0).getImageUrl();
         this.name = p.getName();
         this.introduction = p.getIntroduction();
         this.unitPrice = p.getPrice();
