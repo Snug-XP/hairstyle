@@ -148,7 +148,6 @@ public class ProductOrderController {
             map.put("message", "订单创建成功！");
             return map;
         } catch (Exception e) {
-            logger.error(e.getMessage());
             logger.info("商品订单创建失败！！（后端发生某些错误）");
             map.put("error", "订单创建失败！！（后端发生某些错误）");
             e.printStackTrace();
