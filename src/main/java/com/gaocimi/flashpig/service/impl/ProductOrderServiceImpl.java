@@ -37,7 +37,7 @@ public class ProductOrderServiceImpl implements ProductOrderService {
     }
 
     @Override
-    public List<ProductOrder> findByOrderNumberLisk(String orderNumber) {
+    public List<ProductOrder> findByOrderNumberLike(String orderNumber) {
         return productOrderRepository.findAllByOrderNumberLike("%"+orderNumber+"%");
     }
 
@@ -79,7 +79,7 @@ public class ProductOrderServiceImpl implements ProductOrderService {
     }
 
     /**
-     * 分页获取待审核或者审核通过的文章的发型文章
+     * 按订单状态分页获取商品订单列表(按订单创建时间倒序)
      *
      * @param pageNum  页数（第几页）
      * @param pageSize 每页大小
@@ -87,21 +87,19 @@ public class ProductOrderServiceImpl implements ProductOrderService {
      */
     @Override
     public Page<ProductOrder> findAllByStatus(int status, int pageNum, int pageSize) {
-        int first = pageNum * pageSize;
-        int last = pageNum * pageSize + pageSize - 1;
 
-        List<ProductOrder> productOrders = productOrderRepository.findAllByStatus(status);
-        List<ProductOrder> resultList = new ArrayList<>();
+        Sort sort = new Sort(Sort.Direction.DESC, "createTime");  //按创建时间倒序
+        Pageable pageable = PageRequest.of(pageNum, pageSize, sort);
 
-        for (int i = first; i <= last && i < productOrders.size(); i++) {
-            resultList.add(productOrders.get(i));
+        Page<ProductOrder> productOrderPage = null;
+        try {
+            productOrderPage = productOrderRepository.findAllByStatus(status,pageable);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.info("查询记录出错(按订单状态分页获取商品订单列表)");
+            return null;
         }
-
-        //包装分页数据
-        Pageable pageable = PageRequest.of(pageNum, pageSize);
-        Page<ProductOrder> page = new PageImpl<>(resultList, pageable, productOrders.size());
-
-        return page;
+        return productOrderPage;
     }
 }
 

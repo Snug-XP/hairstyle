@@ -1,12 +1,12 @@
 package com.gaocimi.flashpig.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.gaocimi.flashpig.model.ProductInfo;
 import com.gaocimi.flashpig.utils.xp.MyUtils;
 import lombok.Data;
 
 import javax.persistence.*;
 import java.util.Date;
+import java.util.List;
 
 
 /**
@@ -16,7 +16,7 @@ import java.util.Date;
  * @date 2020-5-2 10:54:07
  */
 @Entity
-@JsonIgnoreProperties(value = {"user","product","wxPayOrder","handler", "hibernateLazyInitializer", "fieldHandler"})
+@JsonIgnoreProperties(value = {"user", "wxPayOrder", "handler", "hibernateLazyInitializer", "fieldHandler"})
 @Table(name = "product_order")
 @Data
 public class ProductOrder {
@@ -28,7 +28,7 @@ public class ProductOrder {
     /**
      * 根据一系列参数设计的订单号(用户id+产品id+时间串)
      */
-    @Column(nullable = false,unique = true)
+    @Column(nullable = false, unique = true)
     private String orderNumber;
 
     /**
@@ -39,17 +39,10 @@ public class ProductOrder {
     public User user;
 
     /**
-     * 该订单的商品； 定义名为product_id的外键列，该外键引用product表的主键(id)列,采用懒加载
+     * 该订单中包含的商品记录列表； 定义该ProductOrder实体所有关联的ProductInOrder实体； 指定mappedBy属性表明该ProductOrder实体不控制关联关系
      */
-    @ManyToOne(targetEntity = Product.class, fetch = FetchType.LAZY)
-    @JoinColumn(name = "product_id")
-    public Product product;
-
-    /**
-     * 订购的商品数量
-     */
-    @Column(nullable = false)
-    private Integer productQuantity;
+    @OneToMany(targetEntity = ProductInOrder.class, mappedBy = "productOrder", fetch = FetchType.EAGER)
+    public List<ProductInOrder> productRecordList;
 
     /**
      * 订单总价格
@@ -61,7 +54,7 @@ public class ProductOrder {
      * 用户提交的收件人姓名
      */
     @Column(nullable = false)
-    private String name;
+    private String userName;
 
     /**
      * 用户提交的联系电话（考虑到用户自身没有绑定手机号码）
@@ -122,35 +115,37 @@ public class ProductOrder {
     @Column(nullable = false)
     private String address;
 
-
-
-
-
     public ProductOrder() {
         status = 0;
         createTime = new Date();
-    }
-
-    public ProductInfo getProductInfo(){
-        return new ProductInfo(product);
     }
 
     /**
      * 生成订单号：用户id+产品id+时间串
      */
     public void generateOrderNumber() {
-        orderNumber = user.getId()+"0"+product.getId()+MyUtils.getTimeStringInteger(new Date());
+        orderNumber = user.getId() + "0" + MyUtils.getTimeStringInteger(new Date());
     }
 
     /**
      * 填入配送地址
      */
     public void setDeliveryAddress(UserAddress address) {
-        this.name = address.getName();
+        this.userName = address.getName();
         this.userPhone = address.getPhone();
         this.province = address.getProvince();
         this.city = address.getCity();
         this.district = address.getDistrict();
         this.address = address.getAddress();
+    }
+
+    /**
+     * 计算订单总价
+     */
+    public void calculateTotalPrice() {
+        totalPrice = 0.0;
+        for (ProductInOrder record : productRecordList) {
+            totalPrice += record.getUnitPrice() * record.getProductQuantity();
+        }
     }
 }

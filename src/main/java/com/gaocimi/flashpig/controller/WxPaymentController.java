@@ -92,7 +92,7 @@ public class WxPaymentController {
         WxPayOrder payOrder = new WxPayOrder();
 
         payOrder.setUser(user);
-        payOrder.setProductOrder(productOrder);
+        payOrder.setProductOrder(productOrder);//如果不是商品订单的支付就会设为NULL
         payOrder.setMoney(money);//单位：分
         payOrder.setType(type);
         payOrder.setBody(body);
@@ -100,6 +100,7 @@ public class WxPaymentController {
         wxPayOrderService.save(payOrder);
 
         if(productOrder!=null){
+            //不等于空说明该支付是对商品订单的支付
             //商品订单和支付订单相互绑定
             productOrder.setWxPayOrder(payOrder);
             productOrderService.edit(productOrder);

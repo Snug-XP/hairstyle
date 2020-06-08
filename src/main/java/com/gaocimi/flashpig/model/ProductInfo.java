@@ -9,6 +9,7 @@ import java.util.List;
 @Data
 public class ProductInfo {
     private Integer productId;
+    private Integer userToProductId;
     private String name;
     private String introduction;
     private String imgUrl;

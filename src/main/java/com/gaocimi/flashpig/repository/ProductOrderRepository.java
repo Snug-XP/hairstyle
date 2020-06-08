@@ -17,6 +17,8 @@ public interface ProductOrderRepository extends JpaRepository<ProductOrder, Inte
     //分页
     public Page<ProductOrder> findAll(Pageable pageable);
 
+    public Page<ProductOrder> findAllByStatus(int status, Pageable pageable);
+
     List<ProductOrder> findAllByStatus(int status);
 
     public List<ProductOrder> findAllByOrderNumberLike(String orderNumber);
