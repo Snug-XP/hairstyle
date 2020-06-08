@@ -301,6 +301,7 @@ public class ProductController {
                 userToProductService.edit(userToProduct);
                 logger.info("id为" + user.getId() + "的用户“" + user.getName() + "”再次添加了id为" + product.getId() + "的商品（name：" + product.getName() + ",num=" + num + "）进购物车");
                 map.put("message", "添加成功！");
+                return map;
             }
             userToProduct = new UserToProduct(user, product, num);
             userToProductService.save(userToProduct);
