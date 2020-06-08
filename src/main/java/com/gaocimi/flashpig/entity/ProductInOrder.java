@@ -72,8 +72,8 @@ public class ProductInOrder {
     }
 
     public void setProductInfo(Product p) {
-        if (p.productImageUrlList!=null&&p.productImageUrlList.size() > 0)
-            this.imgUrl = p.productImageUrlList.get(0).getImageUrl();
+        if (p.getProductImageUrlList()!=null&&p.getProductImageUrlList().size() > 0)
+            this.imgUrl = p.getProductImageUrlList().get(0).getImageUrl();
         this.name = p.getName();
         this.introduction = p.getIntroduction();
         this.unitPrice = p.getPrice();
