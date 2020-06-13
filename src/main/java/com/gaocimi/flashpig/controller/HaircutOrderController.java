@@ -604,14 +604,14 @@ public class HaircutOrderController {
 
             if (haircutOrderService.findByReservationNum(reservationNum) != null) {
                 logger.info("该用户当天已有同一发型师的预约，为避免刷单，禁止重复预约！");
-                map.put("error", "当天已有同一发型师的预约，不可重复预约！");
+                map.put("error", "请勿重复预约！");
                 return map;
             }
 
             haircutOrderService.save(order);
             logger.info("id为" + user.getId() + "的用户“" + user.getName() + "”提交了一个对发型师（id=" + hairstylist.getId() + "）“" + hairstylist.getHairstylistName() + "”的订单");
 //            messageController.pushSuccessMessage(order.getId());//给用户发送预约成功的模板消息通知
-            map.put("message", "订单提交成功！");
+            map.put("message", "预约成功！");
         } catch (Exception e) {
             logger.error(e.getMessage());
             logger.info("用户提交预约订单失败！！（后端发生某些错误）");
