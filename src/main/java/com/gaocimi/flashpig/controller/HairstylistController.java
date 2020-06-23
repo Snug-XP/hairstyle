@@ -1422,7 +1422,7 @@ public class HairstylistController {
     public Map getLocalHairstylists(@RequestParam(required = false) String myOpenid,
                                     @RequestParam Double longitude,
                                     @RequestParam Double latitude, @RequestParam Integer flag,
-                                    @RequestParam(value = "distance", defaultValue = "10000") Integer distance,
+                                    @RequestParam(value = "distance", defaultValue = "5") Integer distance,
                                     @RequestParam(name = "pageNum", defaultValue = "0") int pageNum,
                                     @RequestParam(name = "pageSize", defaultValue = "10") int pageSize) {
         Map map = new HashMap();
@@ -1498,6 +1498,7 @@ public class HairstylistController {
             return map;
         }
     }
+
 //    @ApiOperation(value = "获取店内排行")
 //    @GetMapping("/hairstylist/getInStoreRanking")
 //    public Map getInStoreRanking( @RequestParam String myOpenid) {

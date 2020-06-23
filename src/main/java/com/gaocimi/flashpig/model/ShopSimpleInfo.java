@@ -11,6 +11,7 @@ public class ShopSimpleInfo {
     private String address;
     private String logoUrl;
     private Integer applyStatus;
+    private Double distance;
 
     public ShopSimpleInfo(Shop shop) {
         if(shop!=null) {

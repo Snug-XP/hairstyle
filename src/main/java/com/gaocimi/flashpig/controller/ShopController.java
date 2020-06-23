@@ -2,7 +2,9 @@ package com.gaocimi.flashpig.controller;
 
 import com.alibaba.fastjson.JSONObject;
 import com.gaocimi.flashpig.entity.*;
+import com.gaocimi.flashpig.model.HairstylistInfo;
 import com.gaocimi.flashpig.model.RankingData;
+import com.gaocimi.flashpig.model.ShopSimpleInfo;
 import com.gaocimi.flashpig.result.ResponseResult;
 import com.gaocimi.flashpig.service.*;
 import com.gaocimi.flashpig.utils.xp.MyMD5Util;
@@ -52,9 +54,9 @@ public class ShopController {
     public Map shopLogin(@RequestParam String myOpenid, @RequestParam String phone, @RequestParam String password) throws UnsupportedEncodingException, NoSuchAlgorithmException {
         Map map = new HashMap();
         User user = userService.findUserByOpenid(myOpenid);
-        if(user==null){
+        if (user == null) {
             logger.info("无效的用户！（门店登录）");
-            map.put("message","无效的用户！");
+            map.put("message", "无效的用户！");
             return map;
         }
         Shop shop = shopService.findShopByPhone(phone);
@@ -66,7 +68,7 @@ public class ShopController {
 
 
         if (!MyMD5Util.validPassword(password, shop.getPassword())) {
-            logger.info("门店“" + shop.getShopName() + "”（id=" + shop.getId() + "）登录密码错误!（phone：" + phone + " ，wrongPassword:" + password );
+            logger.info("门店“" + shop.getShopName() + "”（id=" + shop.getId() + "）登录密码错误!（phone：" + phone + " ，wrongPassword:" + password);
             map.put("error", "密码错误！！");
             return map;
         }
@@ -426,7 +428,7 @@ public class ShopController {
                     }
                     shop.setPhone(phone);
                 }
-                if (password != null){
+                if (password != null) {
                     //将密码加密存储
                     String encryptedPassword;
                     try {
@@ -516,7 +518,7 @@ public class ShopController {
             Shop shop = shopService.findShopById(shopId);
             if (shop == null) {
                 logger.info("查看的门店(id=" + shopId + ")不存在！");
-                map.put("error","该门店不存在！");
+                map.put("error", "该门店不存在！");
                 return map;
             }
 
@@ -549,7 +551,7 @@ public class ShopController {
         }
     }
 
-    @ApiOperation(value = "管理员按状态分页获取所有门店列表",notes = "权限：仅管理员",produces = "application/json")
+    @ApiOperation(value = "管理员按状态分页获取所有门店列表", notes = "权限：仅管理员", produces = "application/json")
     @GetMapping("/shop/getAllByStatus")
     public Map getAllByStatus(@RequestParam String myOpenid,
                               @RequestParam Integer status,
@@ -1216,6 +1218,110 @@ public class ShopController {
         } catch (Exception e) {
             logger.info("获取个人的顾客预约数情况列表失败！！（后端发生某些错误）\n\n");
             map.put("error", "操作失败！！（后端发生某些错误）");
+            e.printStackTrace();
+            return map;
+        }
+    }
+
+    @ApiOperation(value = "根据经纬度获取周围的理发门店列表")
+    @GetMapping("/user/getLocalShops")
+    public Map getLocalShops(@RequestParam(required = false) String myOpenid,
+                             @RequestParam Double longitude,
+                             @RequestParam Double latitude,
+                             @RequestParam(value = "distance", defaultValue = "5") Integer distance,
+                             @RequestParam(name = "pageNum", defaultValue = "0") int pageNum,
+                             @RequestParam(name = "pageSize", defaultValue = "10") int pageSize) {
+        Map map = new HashMap();
+        try {
+
+            if (myOpenid != null) {
+                User user = userService.findUserByOpenid(myOpenid);
+                if (user != null) {
+                    user.setLongitude(longitude);
+                    user.setLatitude(latitude);
+                    userService.edit(user);
+                }
+            }
+
+            Double radius = 0.01 * distance;//范围表示为distance公里
+            List<Shop> shopList = shopService.getShopsByRadius(longitude, latitude, radius);
+            List<ShopSimpleInfo> resultList = new ArrayList<>();
+
+            if (shopList == null || shopList.isEmpty()) {
+                logger.info("附近没有门店~（经度：" + longitude + "  维度：" + latitude + "  ）");
+                map.put("message", "附近没有门店~");
+                return map;
+            }
+
+            for (Shop shop : shopList) {
+                if (shop.getApplyStatus() == 1) {
+                    ShopSimpleInfo shopInfo = new ShopSimpleInfo(shop);
+                    Double d = Math.sqrt(Math.pow((longitude - shop.getLongitude()) * 100, 2) + Math.pow((latitude - shop.getLatitude()) * 100, 2));//乘与100是将经纬度大约地换算成公里
+                    shopInfo.setDistance(d);
+
+                    resultList.add(shopInfo);
+                }
+            }
+            if (resultList.isEmpty()) {
+                logger.info("附近没有门店~（经度：" + longitude + "  维度：" + latitude + "  ）");
+                map.put("message", "附近没有门店~");
+                return map;
+            }
+
+            // 按距离升序排序
+            Collections.sort(resultList, (r1, r2) -> {
+                if (r1.getDistance() > r2.getDistance())
+                    return 1;
+                else
+                    return -1;
+            });
+
+
+            Page<ShopSimpleInfo> page = MyUtils.getPage(resultList, pageNum, pageSize);
+
+            map.put("page", page);
+            return map;
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            logger.info("获取附近门店列表失败！！（后端发生某些错误）");
+            map.put("error", "获取附近门店失败！！（后端发生某些错误）");
+            e.printStackTrace();
+            return map;
+        }
+    }
+
+    @ApiOperation(value = "根据门店名称模糊查询门店列表")
+    @GetMapping("/user/getShopsByName")
+    public Map getLocalHairstylists(@RequestParam String name,
+                                    @RequestParam(name = "pageNum", defaultValue = "0") int pageNum,
+                                    @RequestParam(name = "pageSize", defaultValue = "10") int pageSize) {
+        Map map = new HashMap();
+        try {
+            List<Shop> shopList = shopService.getShopsByShopNameLike(name);
+            if (shopList == null || shopList.isEmpty()) {
+                map.put("message", "未找到相关门店");
+                return map;
+            }
+
+            List<ShopSimpleInfo> resultList = new ArrayList<>();
+            for(Shop shop : shopList){
+                if (shop.getApplyStatus() == 1) {
+                    ShopSimpleInfo shopSimpleInfo = new ShopSimpleInfo(shop);
+                    resultList.add(shopSimpleInfo);
+                }
+            }
+
+            if (shopList.isEmpty()) {
+                map.put("message", "未找到相关门店");
+                return map;
+            }
+            Page<ShopSimpleInfo> page = MyUtils.getPage(resultList, pageNum, pageSize);
+            map.put("page", page);
+            return map;
+        } catch (Exception e) {
+            logger.error(e.getMessage());
+            logger.info("根据门店名字获取相关门店列表失败！！（后端发生某些错误）");
+            map.put("error", "操作失败!（后端发生某些错误）");
             e.printStackTrace();
             return map;
         }
