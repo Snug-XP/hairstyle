@@ -115,7 +115,7 @@ oss:
   fileHost: https://jianzhao.oss-cn-shanghai.aliyuncs.com
   endpoint: oss-cn-shanghai.aliyuncs.com
   accessId: LTAI4FfXJXtDuFsJnswQUDdm
-  accessKey: v0f4MbYCoovG0Nqlp1SHwME7tQnbqr
+  accessKey: v0f4MbYCoovG0Nqlp1SHwME7****
   bucket: jianzhao
   #  endpoint: oss-cn-shenzhen.aliyuncs.com
   #  accessId: LTAIbMjv8jqIdJdW
